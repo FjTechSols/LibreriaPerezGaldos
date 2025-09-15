@@ -3,6 +3,7 @@ import { Book } from '../types';
 export const mockBooks: Book[] = [
   {
     id: '1',
+    code: 'LIB-001',
     title: 'El Quijote de la Mancha',
     author: 'Miguel de Cervantes',
     publisher: 'Editorial Planeta',
@@ -31,6 +32,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '2',
+    code: 'LIB-002',
     title: 'Cien Años de Soledad',
     author: 'Gabriel García Márquez',
     publisher: 'Editorial Sudamericana',
@@ -49,6 +51,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '3',
+    code: 'LIB-003',
     title: '1984',
     author: 'George Orwell',
     publisher: 'Secker & Warburg',
@@ -65,6 +68,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '4',
+    code: 'LIB-004',
     title: 'Orgullo y Prejuicio',
     author: 'Jane Austen',
     publisher: 'T. Egerton',
@@ -81,6 +85,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '5',
+    code: 'LIB-005',
     title: 'El Hobbit',
     author: 'J.R.R. Tolkien',
     publisher: 'George Allen & Unwin',
@@ -98,6 +103,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '6',
+    code: 'LIB-006',
     title: 'Sapiens',
     author: 'Yuval Noah Harari',
     publisher: 'Debate',
@@ -115,6 +121,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '7',
+    code: 'LIB-007',
     title: 'El Código Da Vinci',
     author: 'Dan Brown',
     publisher: 'Doubleday',
@@ -133,6 +140,7 @@ export const mockBooks: Book[] = [
   },
   {
     id: '8',
+    code: 'LIB-008',
     title: 'Atomic Habits',
     author: 'James Clear',
     publisher: 'Avery',

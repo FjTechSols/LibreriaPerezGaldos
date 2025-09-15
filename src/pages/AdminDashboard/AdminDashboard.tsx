@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Edit, Trash2, Save, X, BarChart3, Book, Users, DollarSign } from 'lucide-react';
 import { Book as BookType } from '../../types';
 import { mockBooks, categories } from '../../data/mockBooks';
@@ -13,6 +13,7 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'books' | 'stats'>('books');
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
+    code: '',
     title: '',
     author: '',
     publisher: '',
@@ -42,9 +43,10 @@ export function AdminDashboard() {
   }
 
   const handleCreateBook = () => {
-    if (newBook.title && newBook.author && newBook.publisher && newBook.isbn && newBook.price) {
+    if (newBook.code && newBook.title && newBook.author && newBook.publisher && newBook.isbn && newBook.price) {
       const bookToAdd: BookType = {
         id: Date.now().toString(),
+        code: newBook.code,
         title: newBook.title,
         author: newBook.author,
         publisher: newBook.publisher,
@@ -62,6 +64,7 @@ export function AdminDashboard() {
 
       setBooks(prev => [...prev, bookToAdd]);
       setNewBook({
+        code: '',
         title: '',
         author: '',
         publisher: '',
@@ -223,6 +226,23 @@ export function AdminDashboard() {
 
                   <div className="form-grid">
                     <div className="form-group">
+                      <label>Código Interno</label>
+                      <input
+                        type="text"
+                        value={isCreating ? newBook.code : editingBook?.code}
+                        onChange={(e) => {
+                          if (isCreating) {
+                            setNewBook(prev => ({ ...prev, code: e.target.value }));
+                          } else {
+                            setEditingBook(prev => prev ? { ...prev, code: e.target.value } : null);
+                          }
+                        }}
+                        className="form-input"
+                        placeholder="LIB-001"
+                      />
+                    </div>
+
+                    <div className="form-group">
                       <label>Título</label>
                       <input
                         type="text"
@@ -325,7 +345,7 @@ export function AdminDashboard() {
                     </div>
 
                     <div className="form-group">
-                      <label>Precio (€)</label>
+                      <label>Precio ($)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -426,56 +446,54 @@ export function AdminDashboard() {
               </div>
             )}
 
-           <div className="books-table">
+            <div className="books-table">
               <div className="table-header">
-                <div>Portada</div>
-                <div>Título</div>
-                <div>Autor</div>
-                <div>Editorial</div>
-                <div>Categoría</div>
-                <div>Páginas</div>
-                <div>Precio</div>
-                <div>Stock</div>
-                <div>Acciones</div>
+                <span>Código</span>
+                <span>Portada</span>
+                <span>Título</span>
+                <span>Autor</span>
+                <span>Editorial</span>
+                <span>Categoría</span>
+                <span>Páginas</span>
+                <span>Precio</span>
+                <span>Stock</span>
+                <span>Acciones</span>
               </div>
 
-                {books.map((book) => (
-                  <div key={book.id} className="table-row">
-                    <div className="book-cover">
-                      <img src={book.coverImage} alt={book.title} />
-                    </div>
-                    <div className="book-title-cell">{book.title}</div>
-                    <div className="book-author-cell">{book.author}</div>
-                    <div className="book-publisher-cell">{book.publisher}</div>
-                    <div className="book-category-cell">{book.category}</div>
-                    <div className="book-pages-cell">{book.pages}</div>
-                    <div className="book-price-cell">{book.price}€</div>
-                    <div
-                      className={`book-stock-cell ${
-                        book.stock === 0 ? "out-of-stock" : ""
-                      }`}
-                    >
-                      {book.stock}
-                    </div>
-                    <div className="book-actions">
-                      <button
-                        onClick={() => handleEditBook(book)}
-                        className="edit-btn"
-                        aria-label="Editar libro"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBook(book.id)}
-                        className="delete-btn"
-                        aria-label="Eliminar libro"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+              {books.map(book => (
+                <div key={book.id} className="table-row">
+                  <span className="book-code-cell">{book.code}</span>
+                  <div className="book-cover">
+                    <img src={book.coverImage} alt={book.title} />
                   </div>
-                ))}
-              </div>
+                  <span className="book-title-cell">{book.title}</span>
+                  <span className="book-author-cell">{book.author}</span>
+                  <span className="book-publisher-cell">{book.publisher}</span>
+                  <span className="book-category-cell">{book.category}</span>
+                  <span className="book-pages-cell">{book.pages}</span>
+                  <span className="book-price-cell">${book.price}</span>
+                  <span className={`book-stock-cell ${book.stock === 0 ? 'out-of-stock' : ''}`}>
+                    {book.stock}
+                  </span>
+                  <div className="book-actions">
+                    <button 
+                      onClick={() => handleEditBook(book)}
+                      className="edit-btn"
+                      aria-label="Editar libro"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteBook(book.id)}
+                      className="delete-btn"
+                      aria-label="Eliminar libro"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

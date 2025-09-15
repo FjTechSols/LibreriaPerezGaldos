@@ -1,5 +1,6 @@
 export interface Book {
   id: string;
+  code?: string; // Internal code for admin/warehouse management
   title: string;
   author: string;
   publisher: string;
