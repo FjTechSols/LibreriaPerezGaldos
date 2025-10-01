@@ -44,7 +44,12 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         .select('*')
         .order('issue_date', { ascending: false });
 
-      if (invoicesError) throw invoicesError;
+      if (invoicesError) {
+        console.error('Error fetching invoices:', invoicesError);
+        setError(invoicesError.message);
+        setLoading(false);
+        return;
+      }
 
       const invoicesWithItems = await Promise.all(
         (invoicesData || []).map(async (invoice) => {
@@ -61,6 +66,7 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
       );
 
       setInvoices(invoicesWithItems);
+      localStorage.setItem('invoices', JSON.stringify(invoicesWithItems));
     } catch (err) {
       console.error('Error fetching invoices:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar facturas');
