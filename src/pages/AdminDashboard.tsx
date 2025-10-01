@@ -136,6 +136,11 @@ export function AdminDashboard() {
     book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredInvoices = invoices.filter(invoice =>
+    invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    invoice.customer_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleCreateInvoice = async (formData: InvoiceFormData) => {
     const result = await createInvoice(formData);
     if (result) {
