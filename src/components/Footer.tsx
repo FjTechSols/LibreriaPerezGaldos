@@ -71,7 +71,7 @@ export function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2025 LibreriaOnline. Todos los derechos reservados.</p>
+          <p>&copy; 2025 Perez Galdos. Todos los derechos reservados.</p>
           <div className="footer-legal">
             <a href="/privacidad">Política de Privacidad</a>
             <a href="/terminos">Términos de Servicio</a>
