@@ -1,5 +1,7 @@
 .pedidos-list-container {
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .pedidos-loading {
@@ -11,20 +13,22 @@
 
 .pedidos-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  max-width: 100%;
 }
 
 .pedidos-stats .stat-card {
   background: white;
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  min-width: 0;
 }
 
 .pedidos-stats .stat-card:hover {
@@ -66,31 +70,41 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .pedidos-stats .stat-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .pedidos-stats .stat-value {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pedidos-stats .stat-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pedidos-filters {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 1.5rem;
   align-items: center;
   flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .filter-group {
@@ -98,7 +112,8 @@
   align-items: center;
   gap: 0.5rem;
   flex: 1;
-  min-width: 250px;
+  min-width: 200px;
+  max-width: 100%;
 }
 
 .filter-input,
@@ -121,30 +136,33 @@
 .pedidos-table {
   background: white;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
 .pedidos-table .table-header {
   display: grid;
-  grid-template-columns: 120px 200px 120px 140px 120px 150px 150px 200px;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 100px 130px 120px 180px;
+  gap: 0.75rem;
+  padding: 1rem;
   background: #f8fafc;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #475569;
   border-bottom: 2px solid #e2e8f0;
+  min-width: 1000px;
 }
 
 .pedidos-table .table-row {
   display: grid;
-  grid-template-columns: 120px 200px 120px 140px 120px 150px 150px 200px;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 100px 130px 120px 180px;
+  gap: 0.75rem;
+  padding: 1rem;
   border-bottom: 1px solid #f1f5f9;
   align-items: center;
   transition: background 0.15s;
+  min-width: 1000px;
 }
 
 .pedidos-table .table-row:hover {
@@ -326,16 +344,38 @@
 }
 
 @media (max-width: 1400px) {
+  .pedidos-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .pedidos-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .pedidos-table .table-header,
   .pedidos-table .table-row {
-    grid-template-columns: 100px 180px 100px 120px 100px 130px 130px 180px;
-    font-size: 0.8125rem;
+    min-width: 900px;
   }
 }
 
 @media (max-width: 1024px) {
   .pedidos-stats {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .pedidos-stats .stat-card {
+    padding: 0.75rem;
+  }
+
+  .pedidos-stats .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .pedidos-stats .stat-label {
+    font-size: 0.6875rem;
   }
 
   .pedidos-table .table-header {
@@ -345,13 +385,15 @@
   .pedidos-table .table-row {
     grid-template-columns: 1fr;
     gap: 0.75rem;
-    padding: 1.25rem;
+    padding: 1rem;
+    min-width: auto;
   }
 
   .pedidos-table .table-row > * {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
   }
 
   .pedidos-table .table-row > *::before {
@@ -361,8 +403,77 @@
     font-size: 0.8125rem;
   }
 
+  .pedido-numero::before {
+    content: "Nº Pedido:";
+  }
+
+  .pedido-usuario::before {
+    content: "Usuario:";
+  }
+
+  .pedido-fecha::before {
+    content: "Fecha:";
+  }
+
+  .pedido-estado::before {
+    content: "Estado:";
+  }
+
+  .pedido-total::before {
+    content: "Total:";
+  }
+
+  .pedido-pago::before {
+    content: "Pago:";
+  }
+
+  .pedido-transportista::before {
+    content: "Transportista:";
+  }
+
   .pedido-acciones {
     justify-content: flex-end;
+  }
+
+  .pedido-acciones::before {
+    content: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .pedidos-list-container {
+    padding: 0 0.5rem;
+  }
+
+  .pedidos-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .pedidos-stats .stat-card {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .pedidos-filters {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-group,
+  .filter-select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .pedido-usuario .usuario-info {
+    overflow: hidden;
+  }
+
+  .usuario-nombre,
+  .usuario-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -371,12 +482,15 @@
     grid-template-columns: 1fr;
   }
 
-  .pedidos-filters {
-    flex-direction: column;
+  .pedidos-stats .stat-card {
+    padding: 1rem;
   }
 
-  .filter-group,
-  .filter-select {
-    width: 100%;
+  .pedidos-stats .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .pedidos-stats .stat-label {
+    font-size: 0.75rem;
   }
 }

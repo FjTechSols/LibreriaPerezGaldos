@@ -10,6 +10,15 @@
   gap: var(--spacing-4);
 }
 
+.pedidos-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .invoice-filters {
   display: flex;
   gap: var(--spacing-3);
@@ -87,6 +96,8 @@
   grid-template-columns: 280px 1fr;
   gap: var(--spacing-8);
   align-items: start;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .dashboard-sidebar {
@@ -138,6 +149,8 @@
 .dashboard-content {
   background: white;
   border-radius: var(--radius-xl);
+  min-width: 0;
+  overflow-x: hidden;
   padding: var(--spacing-8);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--secondary-200);
@@ -869,6 +882,14 @@
   }
 
   .table-row {
+    padding: var(--spacing-4);
+  }
+
+  .pedidos-section {
+    padding: 0;
+  }
+
+  .dashboard-content {
     padding: var(--spacing-4);
   }
 }
