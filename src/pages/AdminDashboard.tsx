@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
-import { Book as BookType, Invoice, Order, InvoiceFormData } from '../types';
+import { Book as BookType, Invoice, Order, InvoiceFormData, Factura } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
 import { mockInvoices, mockOrders, mockCompanyInfo } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,8 @@ import { useInvoice } from '../context/InvoiceContext';
 import InvoiceTable from '../components/InvoiceTable';
 import InvoiceModal from '../components/InvoiceModal';
 import InvoiceDetailModal from '../components/InvoiceDetailModal';
+import FacturaList from '../components/FacturaList';
+import GenerarFacturaModal from '../components/GenerarFacturaDesdeped';
 import '../styles/pages/AdminDashboard.css';
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders';
@@ -29,6 +31,9 @@ export function AdminDashboard() {
   const [invoiceFilterCustomer, setInvoiceFilterCustomer] = useState('');
   const [invoiceFilterDateFrom, setInvoiceFilterDateFrom] = useState('');
   const [invoiceFilterDateTo, setInvoiceFilterDateTo] = useState('');
+  const [isGenerarFacturaModalOpen, setIsGenerarFacturaModalOpen] = useState(false);
+  const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
+  const [refreshFacturas, setRefreshFacturas] = useState(0);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -375,49 +380,10 @@ export function AdminDashboard() {
 
   const renderInvoices = () => (
     <div className="invoices-section">
-      <div className="invoice-filters">
-        <input
-          type="text"
-          placeholder="Buscar por número o cliente..."
-          value={invoiceSearchTerm}
-          onChange={(e) => setInvoiceSearchTerm(e.target.value)}
-          className="filter-input"
-        />
-        <select
-          value={invoiceFilterStatus}
-          onChange={(e) => setInvoiceFilterStatus(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">Todos los estados</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Pagada">Pagada</option>
-          <option value="Anulada">Anulada</option>
-        </select>
-        <input
-          type="date"
-          value={invoiceFilterDateFrom}
-          onChange={(e) => setInvoiceFilterDateFrom(e.target.value)}
-          placeholder="Desde"
-          className="filter-input"
-        />
-        <input
-          type="date"
-          value={invoiceFilterDateTo}
-          onChange={(e) => setInvoiceFilterDateTo(e.target.value)}
-          placeholder="Hasta"
-          className="filter-input"
-        />
-      </div>
-      <InvoiceTable
-        invoices={invoices}
-        onViewDetails={handleViewInvoiceDetails}
-        onDownloadPDF={handleDownloadPDF}
-        onChangeStatus={handleChangeInvoiceStatus}
-        searchTerm={invoiceSearchTerm}
-        filterStatus={invoiceFilterStatus}
-        filterCustomer={invoiceFilterCustomer}
-        filterDateFrom={invoiceFilterDateFrom}
-        filterDateTo={invoiceFilterDateTo}
+      <FacturaList
+        key={refreshFacturas}
+        onSelectFactura={(factura) => setSelectedFactura(factura)}
+        onCrearFactura={() => setIsGenerarFacturaModalOpen(true)}
       />
     </div>
   );
@@ -813,6 +779,15 @@ export function AdminDashboard() {
             setSelectedInvoice(null);
           }}
           onDownloadPDF={handleDownloadPDF}
+        />
+
+        <GenerarFacturaModal
+          isOpen={isGenerarFacturaModalOpen}
+          onClose={() => setIsGenerarFacturaModalOpen(false)}
+          onSuccess={() => {
+            setRefreshFacturas(prev => prev + 1);
+            setIsGenerarFacturaModalOpen(false);
+          }}
         />
       </div>
     </div>
