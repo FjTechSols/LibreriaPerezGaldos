@@ -72,3 +72,64 @@ export interface FilterState {
   sortBy: 'title' | 'price' | 'rating' | 'newest';
   sortOrder: 'asc' | 'desc';
 }
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerEmail: string;
+  date: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  status: 'pending' | 'paid' | 'overdue' | 'cancelled';
+  paymentMethod?: string;
+}
+
+export interface InvoiceItem {
+  bookId: string;
+  bookTitle: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  orderDate: string;
+  expectedDelivery: string;
+  items: OrderItem[];
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  trackingNumber?: string;
+  notes?: string;
+}
+
+export interface OrderItem {
+  bookId: string;
+  bookTitle: string;
+  bookAuthor: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface CompanyInfo {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  taxId: string;
+  logo?: string;
+}

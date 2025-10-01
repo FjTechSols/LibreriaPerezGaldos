@@ -1,0 +1,248 @@
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.share-modal {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.share-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.book-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.book-cover {
+  width: 80px;
+  height: 100px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.book-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.book-author {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.book-price {
+  font-weight: 600;
+  color: #2563eb;
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+.share-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  background: white;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.share-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.share-option.facebook {
+  border-color: #1877f2;
+  color: #1877f2;
+}
+
+.share-option.facebook:hover {
+  background: #1877f2;
+  color: white;
+}
+
+.share-option.twitter {
+  border-color: #1da1f2;
+  color: #1da1f2;
+}
+
+.share-option.twitter:hover {
+  background: #1da1f2;
+  color: white;
+}
+
+.share-option.whatsapp {
+  border-color: #25d366;
+  color: #25d366;
+}
+
+.share-option.whatsapp:hover {
+  background: #25d366;
+  color: white;
+}
+
+.share-option.email {
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
+.share-option.email:hover {
+  background: #6b7280;
+  color: white;
+}
+
+.share-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: currentColor;
+  color: white;
+}
+
+.share-option:hover .share-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.copy-link {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.copy-link-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-link-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.copy-link-btn.copied {
+  background: #dcfce7;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+@media (max-width: 768px) {
+  .share-modal {
+    padding: 1.5rem;
+  }
+
+  .share-options {
+    grid-template-columns: 1fr;
+  }
+
+  .book-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .book-cover {
+    align-self: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .share-modal {
+    padding: 1rem;
+  }
+
+  .share-modal-title {
+    font-size: 1.25rem;
+  }
+}

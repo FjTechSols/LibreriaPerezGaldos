@@ -3,16 +3,17 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
-import { Navbar } from './components/Navbar/Navbar';
-import { Footer } from './components/Footer/Footer';
-import { Home } from './pages/Home/Home';
-import { Catalog } from './pages/Catalog/Catalog';
-import { BookDetail } from './pages/BookDetail/BookDetail';
-import { Cart } from './pages/Cart/Cart';
-import { Wishlist } from './pages/Wishlist/Wishlist';
-import { Login } from './pages/Login/Login';
-import { Register } from './pages/Register/Register';
-import { AdminDashboard } from './pages/AdminDashboard/AdminDashboard';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { ScrollToTop } from './components/ScrollToTop';
+import { Home } from './pages/Home';
+import { Catalog } from './pages/Catalog';
+import { BookDetail } from './pages/BookDetail';
+import { Cart } from './pages/Cart';
+import { Wishlist } from './pages/Wishlist';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { AdminDashboard } from './pages/AdminDashboard';
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { user, isAuthenticated } = useAuth();
@@ -31,6 +32,7 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
 function AppRoutes() {
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Navbar />
       <main className="flex-1">
         <Routes>
