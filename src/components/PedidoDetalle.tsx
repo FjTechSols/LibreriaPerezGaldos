@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, Edit, Trash2, Plus } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Trash2, Plus } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../types';
 import { actualizarEstadoPedido, eliminarDetallePedido } from '../services/pedidoService';
 import { crearFactura } from '../services/facturaService';
