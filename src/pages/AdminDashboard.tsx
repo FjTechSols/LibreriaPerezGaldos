@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
-import { Book as BookType, Invoice, Order, InvoiceFormData, Factura } from '../types';
+import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
 import { mockInvoices, mockOrders, mockCompanyInfo } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,9 @@ import InvoiceModal from '../components/InvoiceModal';
 import InvoiceDetailModal from '../components/InvoiceDetailModal';
 import FacturaList from '../components/FacturaList';
 import GenerarFacturaModal from '../components/GenerarFacturaDesdeped';
+import PedidosList from '../components/PedidosList';
+import PedidoDetalle from '../components/PedidoDetalle';
+import CrearPedido from '../components/CrearPedido';
 import '../styles/pages/AdminDashboard.css';
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders';
@@ -34,6 +37,10 @@ export function AdminDashboard() {
   const [isGenerarFacturaModalOpen, setIsGenerarFacturaModalOpen] = useState(false);
   const [selectedFactura, setSelectedFactura] = useState<Factura | null>(null);
   const [refreshFacturas, setRefreshFacturas] = useState(0);
+  const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
+  const [isPedidoDetalleOpen, setIsPedidoDetalleOpen] = useState(false);
+  const [isCrearPedidoOpen, setIsCrearPedidoOpen] = useState(false);
+  const [refreshPedidos, setRefreshPedidos] = useState(0);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -389,33 +396,15 @@ export function AdminDashboard() {
   );
 
   const renderOrders = () => (
-    <div className="data-table orders-table">
-      <div className="table-header">
-        <span>Número</span>
-        <span>Cliente</span>
-        <span>Email</span>
-        <span>Fecha</span>
-        <span>Entrega</span>
-        <span>Estado</span>
-        <span>Total</span>
-      </div>
-
-      {filteredOrders.map(order => (
-        <div key={order.id} className="table-row">
-          <span className="order-number">{order.orderNumber}</span>
-          <span>{order.customerName}</span>
-          <span>{order.customerEmail}</span>
-          <span>{order.orderDate}</span>
-          <span>{order.expectedDelivery}</span>
-          <span className={`status-badge ${order.status}`}>
-            {order.status === 'pending' ? 'Pendiente' :
-             order.status === 'processing' ? 'Procesando' :
-             order.status === 'shipped' ? 'Enviado' :
-             order.status === 'delivered' ? 'Entregado' : 'Cancelado'}
-          </span>
-          <span>${order.total.toFixed(2)}</span>
-        </div>
-      ))}
+    <div className="pedidos-section">
+      <PedidosList
+        key={refreshPedidos}
+        onVerDetalle={(pedido) => {
+          setSelectedPedido(pedido);
+          setIsPedidoDetalleOpen(true);
+        }}
+        refreshTrigger={refreshPedidos}
+      />
     </div>
   );
 
@@ -513,6 +502,16 @@ export function AdminDashboard() {
                   >
                     <Plus size={20} />
                     Nueva Factura
+                  </button>
+                )}
+
+                {activeSection === 'orders' && (
+                  <button
+                    onClick={() => setIsCrearPedidoOpen(true)}
+                    className="action-btn primary"
+                  >
+                    <Plus size={20} />
+                    Nuevo Pedido
                   </button>
                 )}
               </div>
@@ -787,6 +786,29 @@ export function AdminDashboard() {
           onSuccess={() => {
             setRefreshFacturas(prev => prev + 1);
             setIsGenerarFacturaModalOpen(false);
+          }}
+        />
+
+        <PedidoDetalle
+          pedido={selectedPedido}
+          isOpen={isPedidoDetalleOpen}
+          onClose={() => {
+            setIsPedidoDetalleOpen(false);
+            setSelectedPedido(null);
+          }}
+          onRefresh={() => {
+            setRefreshPedidos(prev => prev + 1);
+            setIsPedidoDetalleOpen(false);
+            setSelectedPedido(null);
+          }}
+        />
+
+        <CrearPedido
+          isOpen={isCrearPedidoOpen}
+          onClose={() => setIsCrearPedidoOpen(false)}
+          onSuccess={() => {
+            setRefreshPedidos(prev => prev + 1);
+            setIsCrearPedidoOpen(false);
           }}
         />
       </div>

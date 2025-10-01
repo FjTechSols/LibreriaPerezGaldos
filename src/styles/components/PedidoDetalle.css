@@ -1,0 +1,370 @@
+.modal-pedido-detalle {
+  background: white;
+  border-radius: 12px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-pedido-detalle .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modal-pedido-detalle .header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.modal-pedido-detalle .header-title h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modal-pedido-detalle .btn-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-pedido-detalle .btn-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.modal-pedido-detalle .modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.pedido-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.info-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s;
+}
+
+.info-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.info-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #667eea;
+}
+
+.info-card-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.info-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-principal {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.info-secundario {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.estado-selector-detalle {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.estado-selector-detalle:hover {
+  background: #f0f4ff;
+}
+
+.estado-selector-detalle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.detalles-section {
+  margin-top: 1.5rem;
+}
+
+.detalles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.detalles-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #1e293b;
+}
+
+.btn-editar-pedido {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-editar-pedido:hover {
+  background: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.detalles-table {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.detalles-table .table-header {
+  display: grid;
+  grid-template-columns: 2fr 100px 120px 120px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.detalles-table .table-row {
+  display: grid;
+  grid-template-columns: 2fr 100px 120px 120px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+}
+
+.detalles-table .table-row:last-child {
+  border-bottom: none;
+}
+
+.libro-titulo {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.cantidad {
+  text-align: center;
+  font-weight: 600;
+  color: #475569;
+}
+
+.precio,
+.subtotal {
+  text-align: right;
+  color: #475569;
+}
+
+.subtotal {
+  font-weight: 600;
+}
+
+.no-detalles {
+  padding: 2rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.totales-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.total-row.final {
+  padding-top: 0.75rem;
+  border-top: 2px solid #cbd5e1;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.total-valor {
+  font-weight: 600;
+  color: #059669;
+}
+
+.total-row.final .total-valor {
+  font-size: 1.25rem;
+  color: #059669;
+}
+
+.modal-pedido-detalle .modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.btn-cancelar,
+.btn-generar-factura {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancelar {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.btn-cancelar:hover {
+  background: #cbd5e1;
+}
+
+.btn-generar-factura {
+  background: #10b981;
+  color: white;
+}
+
+.btn-generar-factura:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-generar-factura:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.factura-generada {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .modal-pedido-detalle {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .pedido-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detalles-table .table-header {
+    display: none;
+  }
+
+  .detalles-table .table-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .detalles-table .table-row > span {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .detalles-table .table-row > span::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8125rem;
+  }
+
+  .modal-pedido-detalle .modal-footer {
+    flex-direction: column;
+  }
+
+  .btn-cancelar,
+  .btn-generar-factura {
+    width: 100%;
+    justify-content: center;
+  }
+}
