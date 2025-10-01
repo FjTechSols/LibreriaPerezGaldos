@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  Plus, Edit, Trash2, Save, X, BarChart3, Book, FileText,
-  ShoppingBag, Home, Search, DollarSign, Users, Package,
-  Calendar, Phone, Mail, MapPin, Globe, Building
-} from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
 import { mockInvoices, mockOrders, mockCompanyInfo } from '../data/mockData';

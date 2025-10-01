@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Invoice } from '../types';
-import { Download, Eye, Edit } from 'lucide-react';
+import { Download, Eye, CreditCard as Edit } from 'lucide-react';
 import '../styles/components/InvoiceTable.css';
 
 interface InvoiceTableProps {
