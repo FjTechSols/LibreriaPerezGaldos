@@ -1,0 +1,183 @@
+.invoice-table-container {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table thead {
+  background: var(--color-background);
+}
+
+.invoice-table th {
+  padding: var(--spacing-4) var(--spacing-3);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.invoice-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.2s ease;
+}
+
+.invoice-table tbody tr:hover {
+  background: var(--color-background);
+}
+
+.invoice-table td {
+  padding: var(--spacing-3);
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.invoice-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.status-badge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-badge.status-paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-actions {
+  position: relative;
+}
+
+.status-change-btn {
+  padding: var(--spacing-1);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.status-change-btn:hover {
+  background: var(--color-background);
+  border-color: var(--color-primary);
+}
+
+.status-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: var(--spacing-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  min-width: 180px;
+}
+
+.status-dropdown button {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  transition: background-color 0.2s ease;
+}
+
+.status-dropdown button:hover {
+  background: var(--color-background);
+}
+
+.status-dropdown button:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.total-amount {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.action-btn {
+  padding: var(--spacing-2);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.action-btn.view-btn {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.action-btn.view-btn:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.action-btn.download-btn {
+  color: #059669;
+  border-color: #059669;
+}
+
+.action-btn.download-btn:hover {
+  background: #059669;
+  color: white;
+}
+
+.no-invoices {
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--color-text-secondary);
+}

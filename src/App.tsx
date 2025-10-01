@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { InvoiceProvider } from './context/InvoiceContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -65,7 +66,9 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
-            <AppRoutes />
+            <InvoiceProvider>
+              <AppRoutes />
+            </InvoiceProvider>
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>

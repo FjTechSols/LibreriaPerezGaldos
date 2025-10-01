@@ -1,26 +1,38 @@
 import { useState } from 'react';
-import { 
-  Plus, Edit, Trash2, Save, X, BarChart3, Book, FileText, 
+import {
+  Plus, Edit, Trash2, Save, X, BarChart3, Book, FileText,
   ShoppingBag, Home, Search, DollarSign, Users, Package,
   Calendar, Phone, Mail, MapPin, Globe, Building
 } from 'lucide-react';
-import { Book as BookType, Invoice, Order } from '../types';
+import { Book as BookType, Invoice, Order, InvoiceFormData } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
 import { mockInvoices, mockOrders, mockCompanyInfo } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
+import { useInvoice } from '../context/InvoiceContext';
+import InvoiceTable from '../components/InvoiceTable';
+import InvoiceModal from '../components/InvoiceModal';
+import InvoiceDetailModal from '../components/InvoiceDetailModal';
 import '../styles/pages/AdminDashboard.css';
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders';
 
 export function AdminDashboard() {
   const { user } = useAuth();
+  const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [books, setBooks] = useState<BookType[]>(mockBooks);
-  const [invoices] = useState<Invoice[]>(mockInvoices);
   const [orders] = useState<Order[]>(mockOrders);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingBook, setEditingBook] = useState<BookType | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [invoiceSearchTerm, setInvoiceSearchTerm] = useState('');
+  const [invoiceFilterStatus, setInvoiceFilterStatus] = useState('');
+  const [invoiceFilterCustomer, setInvoiceFilterCustomer] = useState('');
+  const [invoiceFilterDateFrom, setInvoiceFilterDateFrom] = useState('');
+  const [invoiceFilterDateTo, setInvoiceFilterDateTo] = useState('');
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -128,11 +140,81 @@ export function AdminDashboard() {
     book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    invoice.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    invoice.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleCreateInvoice = async (formData: InvoiceFormData) => {
+    const result = await createInvoice(formData);
+    if (result) {
+      setIsInvoiceModalOpen(false);
+    }
+  };
+
+  const handleViewInvoiceDetails = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDownloadPDF = async (invoice: Invoice) => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+
+      doc.setFontSize(20);
+      doc.text('FACTURA', 105, 20, { align: 'center' });
+
+      doc.setFontSize(10);
+      doc.text(mockCompanyInfo.name, 20, 40);
+      doc.text(mockCompanyInfo.address, 20, 45);
+      doc.text(`NIF: ${mockCompanyInfo.taxId}`, 20, 50);
+      doc.text(`Tel: ${mockCompanyInfo.phone}`, 20, 55);
+      doc.text(`Email: ${mockCompanyInfo.email}`, 20, 60);
+
+      doc.setFontSize(12);
+      doc.text(`N° ${invoice.invoice_number}`, 150, 40);
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${new Date(invoice.issue_date).toLocaleDateString('es-ES')}`, 150, 45);
+      doc.text(`Estado: ${invoice.status}`, 150, 50);
+
+      doc.text('FACTURAR A:', 20, 75);
+      doc.text(invoice.customer_name, 20, 80);
+      doc.text(invoice.customer_address, 20, 85);
+      doc.text(`NIF: ${invoice.customer_nif}`, 20, 90);
+
+      let y = 105;
+      doc.setFontSize(10);
+      doc.text('Descripción', 20, y);
+      doc.text('Cant.', 100, y);
+      doc.text('Precio Unit.', 125, y);
+      doc.text('Total', 170, y);
+      doc.line(20, y + 2, 190, y + 2);
+
+      y += 8;
+      if (invoice.items) {
+        invoice.items.forEach(item => {
+          doc.text(item.book_title, 20, y);
+          doc.text(item.quantity.toString(), 100, y);
+          doc.text(`${item.unit_price.toFixed(2)} €`, 125, y);
+          doc.text(`${item.line_total.toFixed(2)} €`, 170, y);
+          y += 7;
+        });
+      }
+
+      y += 10;
+      doc.text(`Subtotal: ${invoice.subtotal.toFixed(2)} €`, 150, y);
+      y += 7;
+      doc.text(`IVA (${invoice.tax_rate}%): ${invoice.tax_amount.toFixed(2)} €`, 150, y);
+      y += 7;
+      doc.setFontSize(12);
+      doc.text(`TOTAL: ${invoice.total.toFixed(2)} €`, 150, y);
+
+      doc.save(`Factura-${invoice.invoice_number}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error al generar el PDF');
+    }
+  };
+
+  const handleChangeInvoiceStatus = async (id: string, status: Invoice['status']) => {
+    await updateInvoiceStatus(id, status);
+  };
 
   const filteredOrders = orders.filter(order =>
     order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -291,36 +373,51 @@ export function AdminDashboard() {
   );
 
   const renderInvoices = () => (
-    <div className="data-table invoices-table">
-      <div className="table-header">
-        <span>Número</span>
-        <span>Cliente</span>
-        <span>Email</span>
-        <span>Fecha</span>
-        <span>Estado</span>
-        <span>Total</span>
-        <span>Acciones</span>
+    <div className="invoices-section">
+      <div className="invoice-filters">
+        <input
+          type="text"
+          placeholder="Buscar por número o cliente..."
+          value={invoiceSearchTerm}
+          onChange={(e) => setInvoiceSearchTerm(e.target.value)}
+          className="filter-input"
+        />
+        <select
+          value={invoiceFilterStatus}
+          onChange={(e) => setInvoiceFilterStatus(e.target.value)}
+          className="filter-select"
+        >
+          <option value="">Todos los estados</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Pagada">Pagada</option>
+          <option value="Anulada">Anulada</option>
+        </select>
+        <input
+          type="date"
+          value={invoiceFilterDateFrom}
+          onChange={(e) => setInvoiceFilterDateFrom(e.target.value)}
+          placeholder="Desde"
+          className="filter-input"
+        />
+        <input
+          type="date"
+          value={invoiceFilterDateTo}
+          onChange={(e) => setInvoiceFilterDateTo(e.target.value)}
+          placeholder="Hasta"
+          className="filter-input"
+        />
       </div>
-
-      {filteredInvoices.map(invoice => (
-        <div key={invoice.id} className="table-row">
-          <span className="invoice-number">{invoice.invoiceNumber}</span>
-          <span>{invoice.customerName}</span>
-          <span>{invoice.customerEmail}</span>
-          <span>{invoice.date}</span>
-          <span className={`status-badge ${invoice.status}`}>
-            {invoice.status === 'paid' ? 'Pagada' : 
-             invoice.status === 'pending' ? 'Pendiente' :
-             invoice.status === 'overdue' ? 'Vencida' : 'Cancelada'}
-          </span>
-          <span>${invoice.total.toFixed(2)}</span>
-          <div className="book-actions">
-            <button className="edit-btn" aria-label="Ver factura">
-              <Edit size={16} />
-            </button>
-          </div>
-        </div>
-      ))}
+      <InvoiceTable
+        invoices={invoices}
+        onViewDetails={handleViewInvoiceDetails}
+        onDownloadPDF={handleDownloadPDF}
+        onChangeStatus={handleChangeInvoiceStatus}
+        searchTerm={invoiceSearchTerm}
+        filterStatus={invoiceFilterStatus}
+        filterCustomer={invoiceFilterCustomer}
+        filterDateFrom={invoiceFilterDateFrom}
+        filterDateTo={invoiceFilterDateTo}
+      />
     </div>
   );
 
@@ -439,6 +536,16 @@ export function AdminDashboard() {
                   >
                     <Plus size={20} />
                     Nuevo Libro
+                  </button>
+                )}
+
+                {activeSection === 'invoices' && (
+                  <button
+                    onClick={() => setIsInvoiceModalOpen(true)}
+                    className="action-btn primary"
+                  >
+                    <Plus size={20} />
+                    Nueva Factura
                   </button>
                 )}
               </div>
@@ -689,6 +796,23 @@ export function AdminDashboard() {
             </div>
           </div>
         )}
+
+        <InvoiceModal
+          isOpen={isInvoiceModalOpen}
+          onClose={() => setIsInvoiceModalOpen(false)}
+          onSubmit={handleCreateInvoice}
+          loading={loading}
+        />
+
+        <InvoiceDetailModal
+          invoice={selectedInvoice}
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedInvoice(null);
+          }}
+          onDownloadPDF={handleDownloadPDF}
+        />
       </div>
     </div>
   );

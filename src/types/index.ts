@@ -75,25 +75,53 @@ export interface FilterState {
 
 export interface Invoice {
   id: string;
-  invoiceNumber: string;
-  customerName: string;
-  customerEmail: string;
-  date: string;
-  dueDate: string;
-  items: InvoiceItem[];
+  invoice_number: string;
+  customer_name: string;
+  customer_address: string;
+  customer_nif: string;
+  issue_date: string;
+  status: 'Pendiente' | 'Pagada' | 'Anulada';
   subtotal: number;
-  tax: number;
+  tax_rate: number;
+  tax_amount: number;
   total: number;
-  status: 'pending' | 'paid' | 'overdue' | 'cancelled';
-  paymentMethod?: string;
+  payment_method?: string;
+  order_id?: string;
+  items?: InvoiceItem[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface InvoiceItem {
-  bookId: string;
-  bookTitle: string;
+  id?: string;
+  invoice_id?: string;
+  book_id: string;
+  book_title: string;
   quantity: number;
-  unitPrice: number;
-  total: number;
+  unit_price: number;
+  line_total: number;
+  created_at?: string;
+}
+
+export interface InvoiceFormData {
+  customer_name: string;
+  customer_address: string;
+  customer_nif: string;
+  tax_rate: number;
+  payment_method?: string;
+  order_id?: string;
+  items: InvoiceItem[];
+}
+
+export interface InvoiceContextType {
+  invoices: Invoice[];
+  loading: boolean;
+  error: string | null;
+  fetchInvoices: () => Promise<void>;
+  createInvoice: (data: InvoiceFormData) => Promise<Invoice | null>;
+  updateInvoiceStatus: (id: string, status: Invoice['status']) => Promise<void>;
+  deleteInvoice: (id: string) => Promise<void>;
+  getNextInvoiceNumber: () => Promise<string>;
 }
 
 export interface Order {
