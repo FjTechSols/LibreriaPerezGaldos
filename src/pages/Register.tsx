@@ -169,7 +169,7 @@ export function Register() {
           <div className="register-footer">
             <div className="login-prompt">
               <span>¿Ya tienes cuenta? </span>
-              <Link to="/login" className="login-link">Inicia sesión aquí</Link>
+              <Link to="/login" className="login-link-register">Inicia sesión aquí</Link>
             </div>
           </div>
 

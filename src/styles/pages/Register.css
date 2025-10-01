@@ -67,6 +67,7 @@
   background: #f8fafc;
   transition: all 0.3s ease;
   color: #1f2937;
+  width: 100%;
 }
 
 .form-input:focus {
@@ -153,10 +154,17 @@
 }
 
 .login-link {
-  color: #2563eb;
+  color: white;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
+}
+
+.login-link-register {
+  color: #2563eb;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .login-link:hover {

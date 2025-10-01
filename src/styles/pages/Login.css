@@ -67,6 +67,7 @@
   background: #f8fafc;
   transition: all 0.3s ease;
   color: #1f2937;
+  width: 100%;
 }
 
 .form-input:focus {
