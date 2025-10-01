@@ -64,7 +64,7 @@ export function Footer() {
               </div>
               <div className="contact-item">
                 <Mail size={16} />
-                <span>info@libreriaonline.com</span>
+                <span>librería @perezgaldos.com</span>
               </div>
             </div>
           </div>
