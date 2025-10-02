@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Error loading user data:', error);
+        await supabase.auth.signOut();
         return;
       }
 
@@ -58,9 +59,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: userData.username,
           role: userData.rol_id === 1 ? 'admin' : 'user'
         });
+      } else {
+        console.error('No user data found for auth user:', authUserId);
+        await supabase.auth.signOut();
       }
     } catch (error) {
       console.error('Error in loadUserData:', error);
+      await supabase.auth.signOut();
     }
   };
 
@@ -77,7 +82,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        await loadUserData(data.user.id);
+        const { data: userData, error: userError } = await supabase
+          .from('usuarios')
+          .select('id, username, email, rol_id')
+          .eq('auth_user_id', data.user.id)
+          .maybeSingle();
+
+        if (userError || !userData) {
+          console.error('Error loading user data:', userError);
+          await supabase.auth.signOut();
+          return false;
+        }
+
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          name: userData.username,
+          role: userData.rol_id === 1 ? 'admin' : 'user'
+        });
         return true;
       }
 

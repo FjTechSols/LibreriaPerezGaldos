@@ -59,6 +59,9 @@ export function Navbar() {
           {user ? (
             <div className="user-menu">
               <span className="user-greeting">Hola, {user.name}</span>
+              <Link to="/mi-cuenta" className="nav-link account-link">
+                <User size={20} />
+              </Link>
               {user.role === 'admin' && (
                 <Link to="/admin" className="nav-link admin-link">Admin</Link>
               )}
@@ -94,13 +97,16 @@ export function Navbar() {
           {user ? (
             <>
               <span className="mobile-user">Hola, {user.name}</span>
+              <Link to="/mi-cuenta" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+                Mi Cuenta
+              </Link>
               {user.role === 'admin' && (
                 <Link to="/admin" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
                   Panel Admin
                 </Link>
               )}
-              <button 
-                onClick={() => { logout(); setIsMenuOpen(false); }} 
+              <button
+                onClick={() => { logout(); setIsMenuOpen(false); }}
                 className="mobile-logout"
               >
                 Cerrar Sesión
