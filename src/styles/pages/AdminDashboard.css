@@ -771,6 +771,16 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .content-header {
+    flex-wrap: wrap;
+  }
+
+  .admin-search {
+    max-width: 100%;
+    order: 2;
+    width: 100%;
+  }
+
   .books-table .table-header,
   .books-table .table-row {
     grid-template-columns: 60px 60px 2fr 1fr 80px;
@@ -821,7 +831,14 @@
     flex-direction: column;
     gap: var(--spacing-4);
     align-items: stretch;
+  }
+
+  .content-header > div:first-child {
     text-align: center;
+  }
+
+  .admin-search {
+    max-width: 100%;
   }
 
   .modal {
@@ -863,8 +880,16 @@
     padding: 0 var(--spacing-3);
   }
 
+  .dashboard-header {
+    margin-bottom: var(--spacing-6);
+  }
+
   .dashboard-title {
     font-size: var(--font-size-2xl);
+  }
+
+  .dashboard-subtitle {
+    font-size: var(--font-size-base);
   }
 
   .stat-card {
@@ -873,12 +898,25 @@
     gap: var(--spacing-4);
   }
 
-  .modal {
+  .modal-overlay {
     padding: var(--spacing-4);
   }
 
-  .content-header {
+  .modal {
     padding: var(--spacing-4);
+    max-height: 85vh;
+  }
+
+  .modal-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .content-header {
+    padding: 0;
+  }
+
+  .content-title {
+    font-size: var(--font-size-xl);
   }
 
   .table-row {
@@ -891,5 +929,29 @@
 
   .dashboard-content {
     padding: var(--spacing-4);
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .company-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .company-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .save-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
