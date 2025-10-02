@@ -1,233 +1,135 @@
-# Instrucciones para Crear Usuario Administrador
+# ⚠️ PROBLEMA ACTUAL: Aplicación Se Queda Cargando
 
-## Cuenta de Administrador
-- **Usuario**: PerezGaldosAdmin
-- **Email**: admin@perezgaldos.es
-- **Contraseña**: Galdos12345
-- **Rol**: Administrador (rol_id: 1)
+## 🔍 Diagnóstico
 
-## Método 1: Usando el Dashboard de Supabase (Recomendado)
+La aplicación se queda cargando infinitamente debido a **políticas RLS circulares** en Supabase.
 
-### Paso 1: Crear usuario en Authentication
+**Causa:**
+- Las políticas RLS de la tabla `usuarios` hacen SELECT en la misma tabla `usuarios` para verificar roles
+- Esto crea un loop infinito que bloquea la carga de la aplicación
 
-1. Ir a [Supabase Dashboard](https://app.supabase.com)
-2. Seleccionar tu proyecto
-3. Navegar a: **Authentication** → **Users**
-4. Clic en **Add User** (botón verde superior derecha)
-5. Completar el formulario:
-   - **Email**: `admin@perezgaldos.es`
-   - **Password**: `Galdos12345`
-   - **Auto Confirm User**: ✅ Activar (importante)
-6. Clic en **Create User**
-7. **Copiar el User ID (UUID)** que aparece en la lista
+**Síntoma:**
+- Pantalla "Cargando..." que nunca termina
+- No se puede hacer login ni registro
+- La aplicación parece congelada
 
-### Paso 2: Crear registro en tabla usuarios
+---
 
-1. Navegar a: **SQL Editor**
-2. Clic en **New Query**
-3. Pegar el siguiente SQL (reemplaza `TU_UUID_AQUI` con el UUID copiado):
+## ✅ SOLUCIÓN: Aplicar Migración SQL
+
+He creado una migración que corrige este problema. Necesitas aplicarla en Supabase.
+
+### Archivo de Migración
+
+📄 `supabase/migrations/20251002000000_fix_rls_circular_policies.sql`
+
+### Cómo Aplicar la Migración
+
+Dado que el proyecto Supabase (`0ec90b57d6e95fcbda19832f`) es manejado por Bolt, **pídele al asistente de Bolt**:
+
+```
+"Aplica la migración supabase/migrations/20251002000000_fix_rls_circular_policies.sql en Supabase"
+```
+
+O:
+
+```
+"Ejecuta el contenido del archivo supabase/migrations/20251002000000_fix_rls_circular_policies.sql en el SQL Editor de Supabase"
+```
+
+---
+
+## 📝 Qué Hace la Migración
+
+### Problema que Soluciona
 
 ```sql
--- Reemplazar TU_UUID_AQUI con el UUID del usuario creado
-INSERT INTO usuarios (auth_user_id, username, email, rol_id, activo)
-VALUES (
-  'TU_UUID_AQUI',  -- UUID del usuario de auth.users
-  'PerezGaldosAdmin',
-  'admin@perezgaldos.es',
-  1,  -- rol_id 1 = admin
-  true
+-- ❌ ANTES (Circular - Causa loop infinito)
+CREATE POLICY "Users can view own profile" ON usuarios FOR SELECT
+USING (
+  auth_user_id = auth.uid() OR
+  (SELECT rol_id FROM usuarios WHERE auth_user_id = auth.uid()) = 1
 );
+-- Esto intenta SELECT en usuarios mientras se está aplicando la política de usuarios!
 ```
 
-4. Clic en **Run** para ejecutar
-5. Verificar mensaje: "Success. No rows returned"
-
-### Paso 3: Verificar
-
-Ejecutar esta query para verificar:
+### Solución Aplicada
 
 ```sql
-SELECT
-  u.id,
-  u.username,
-  u.email,
-  u.rol_id,
-  r.nombre as rol,
-  u.activo
-FROM usuarios u
-JOIN roles r ON r.id = u.rol_id
-WHERE u.email = 'admin@perezgaldos.es';
+-- ✅ DESPUÉS (No circular - Funciona correctamente)
+CREATE POLICY "Users can view own profile" ON usuarios FOR SELECT
+USING (auth_user_id = auth.uid());
+-- Simple, directo, sin subconsultas circulares
 ```
 
-Debe mostrar:
-- username: PerezGaldosAdmin
-- email: admin@perezgaldos.es
-- rol_id: 1
-- rol: admin
-- activo: true
+### Cambios Específicos
+
+1. **Elimina políticas circulares** de todas las tablas
+2. **Crea políticas simplificadas** basadas en `auth.uid()`
+3. **Permite autenticación correcta** sin loops infinitos
+4. **Mantiene la seguridad** usando RLS pero sin circularidad
 
 ---
 
-## Método 2: Usando SQL Editor Completo
+## 🚀 Después de Aplicar la Migración
 
-Si prefieres hacerlo todo desde SQL Editor:
+### Paso 1: Verificar que la App Carga
 
-### Paso 1: Ejecutar el script completo
+1. Recarga la aplicación en el navegador
+2. Deberías ver la página de inicio normalmente
+3. Ya no debe quedarse en "Cargando..."
 
-1. Navegar a: **SQL Editor**
-2. Clic en **New Query**
-3. Pegar este script:
+### Paso 2: Registrar Usuario WebMaster
 
-```sql
--- Verificar si el usuario ya existe en auth.users
-DO $$
-DECLARE
-  user_exists UUID;
-  new_user_id UUID;
-BEGIN
-  -- Buscar usuario existente
-  SELECT id INTO user_exists
-  FROM auth.users
-  WHERE email = 'admin@perezgaldos.es';
+Ahora puedes crear el usuario administrador:
 
-  IF user_exists IS NOT NULL THEN
-    -- Usuario ya existe en auth.users, usar ese ID
-    new_user_id := user_exists;
-    RAISE NOTICE 'Usuario encontrado en auth.users con ID: %', new_user_id;
-  ELSE
-    -- Usuario no existe, debe crearse manualmente desde Dashboard
-    RAISE EXCEPTION 'Usuario no encontrado. Por favor, créalo primero desde: Dashboard > Authentication > Users > Add User con email: admin@perezgaldos.es y password: Galdos12345';
-  END IF;
+**Credenciales:**
+- **Nombre**: `WebMaster`
+- **Email**: `fjtechsols@gmail.com`
+- **Contraseña**: `WebMaster2024!`
 
-  -- Crear o actualizar en tabla usuarios
-  INSERT INTO usuarios (auth_user_id, username, email, rol_id, activo)
-  VALUES (
-    new_user_id,
-    'PerezGaldosAdmin',
-    'admin@perezgaldos.es',
-    1,
-    true
-  )
-  ON CONFLICT (email)
-  DO UPDATE SET
-    username = 'PerezGaldosAdmin',
-    rol_id = 1,
-    activo = true,
-    auth_user_id = new_user_id;
+**Pasos:**
+1. Haz clic en "Registrarse"
+2. Completa el formulario con los datos anteriores
+3. Haz clic en "Registrarse"
+4. Deberías entrar automáticamente a la aplicación
 
-  RAISE NOTICE 'Usuario administrador creado/actualizado correctamente en tabla usuarios';
-END $$;
+### Paso 3: Actualizar a Rol Administrador
+
+El registro crea el usuario con rol normal (rol_id: 2). Para hacerlo administrador:
+
+Pídele al asistente de Bolt:
+
 ```
+"Ejecuta este SQL en Supabase:
 
-4. Clic en **Run**
-
----
-
-## Método 3: Usando la API de Supabase (Avanzado)
-
-Desde Node.js o terminal con Supabase CLI:
-
-```javascript
-import { createClient } from '@supabase/supabase-js'
-
-// Usar SERVICE_ROLE_KEY (no ANON_KEY)
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
-
-async function crearAdmin() {
-  // 1. Crear usuario en auth
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email: 'admin@perezgaldos.es',
-    password: 'Galdos12345',
-    email_confirm: true
-  })
-
-  if (authError) {
-    console.error('Error:', authError.message)
-    return
-  }
-
-  console.log('Usuario creado en auth:', authData.user.id)
-
-  // 2. Crear registro en tabla usuarios
-  const { error: userError } = await supabase
-    .from('usuarios')
-    .insert({
-      auth_user_id: authData.user.id,
-      username: 'PerezGaldosAdmin',
-      email: 'admin@perezgaldos.es',
-      rol_id: 1,
-      activo: true
-    })
-
-  if (userError) {
-    console.error('Error creando usuario:', userError)
-    return
-  }
-
-  console.log('✓ Usuario administrador creado correctamente')
-}
-
-crearAdmin()
-```
-
----
-
-## Solución de Problemas
-
-### Error: "duplicate key value violates unique constraint"
-
-El usuario ya existe. Ejecutar:
-
-```sql
--- Ver usuario existente
-SELECT * FROM usuarios WHERE email = 'admin@perezgaldos.es';
-
--- Actualizar a admin si existe
 UPDATE usuarios
-SET rol_id = 1, username = 'PerezGaldosAdmin', activo = true
-WHERE email = 'admin@perezgaldos.es';
+SET rol_id = 1
+WHERE email = 'fjtechsols@gmail.com';
+"
 ```
 
-### Error: "new row violates row-level security policy"
+### Paso 4: Verificar Acceso Admin
 
-Las políticas RLS están bloqueando. Ejecutar como superusuario o desactivar temporalmente:
-
-```sql
--- Desactivar RLS temporalmente (solo para esta operación)
-ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;
-
--- Insertar usuario
-INSERT INTO usuarios (auth_user_id, username, email, rol_id, activo)
-VALUES ('UUID_AQUI', 'PerezGaldosAdmin', 'admin@perezgaldos.es', 1, true);
-
--- Reactivar RLS
-ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
-```
-
-### No puedo crear usuario en auth.users desde SQL
-
-**Solución**: Debes usar el Dashboard de Supabase o el Admin API. La creación de usuarios en `auth.users` requiere permisos especiales que no están disponibles en queries SQL normales.
-
-1. Ve a Dashboard > Authentication > Users
-2. Clic en "Add User"
-3. Completa los datos
-4. Luego ejecuta el SQL para crear en tabla `usuarios`
+1. **Cierra sesión** (botón "Salir")
+2. **Inicia sesión** de nuevo con:
+   - Email: `fjtechsols@gmail.com`
+   - Contraseña: `WebMaster2024!`
+3. Deberías ver en la navbar:
+   - Icono de usuario (lleva a "Mi Cuenta")
+   - Botón **"Admin"** (lleva al Dashboard de Administrador)
+4. Haz clic en "Admin" para acceder al panel
 
 ---
 
-## Verificación Final
+## 🔍 Verificación en Base de Datos
 
-Una vez creado el usuario, verificar que todo funciona:
-
-### 1. Verificar en base de datos
+Para confirmar que todo está correcto:
 
 ```sql
+-- Ver usuario creado
 SELECT
   u.id,
-  u.auth_user_id,
   u.username,
   u.email,
   u.rol_id,
@@ -236,68 +138,145 @@ SELECT
   u.fecha_registro
 FROM usuarios u
 JOIN roles r ON r.id = u.rol_id
-WHERE u.email = 'admin@perezgaldos.es';
+WHERE u.email = 'fjtechsols@gmail.com';
 ```
 
-### 2. Verificar login en la aplicación
-
-1. Abrir la aplicación: http://localhost:5173 (o tu URL)
-2. Ir a página de Login
-3. Ingresar:
-   - Email: `admin@perezgaldos.es`
-   - Contraseña: `Galdos12345`
-4. Debe iniciar sesión correctamente
-5. Verificar que aparece botón "Admin" en la barra de navegación
-6. Clic en "Admin" debe llevar al Dashboard de Administrador
-
-### 3. Verificar permisos
-
-Una vez logueado como admin:
-
-1. Debe poder acceder a: `/admin`
-2. Debe ver el Panel de Administrador completo
-3. Debe tener acceso a:
-   - Inicio (estadísticas)
-   - Catálogo (gestión de libros)
-   - Facturas
-   - Pedidos
+**Resultado esperado:**
+- ✅ username: `WebMaster`
+- ✅ email: `fjtechsols@gmail.com`
+- ✅ rol_id: `1`
+- ✅ rol: `admin`
+- ✅ activo: `true`
 
 ---
 
-## Seguridad
+## 🛠️ Solución de Problemas
 
-### Cambiar contraseña después del primer login
+### Si la App Sigue Cargando Después de la Migración
 
-Es recomendable que el administrador cambie la contraseña después del primer login:
+1. **Limpia el caché del navegador:**
+   - Abre DevTools (F12)
+   - Ve a: Application → Storage → Clear site data
+   - Recarga la página (Ctrl + Shift + R)
 
-1. Desde la aplicación (implementar función de cambio de contraseña)
-2. O desde SQL:
+2. **Verifica que la migración se aplicó:**
+   ```sql
+   -- Ver políticas actuales de usuarios
+   SELECT policyname, cmd, qual, with_check
+   FROM pg_policies
+   WHERE tablename = 'usuarios';
+   ```
+
+   Deberías ver políticas simples sin subconsultas.
+
+3. **Verifica errores en la consola:**
+   - Abre DevTools (F12)
+   - Ve a la pestaña Console
+   - Busca errores de Supabase o autenticación
+
+### Error: "Email already registered"
+
+Si el email ya existe pero necesitas actualizar el rol:
 
 ```sql
--- Nota: Supabase maneja las contraseñas de forma segura
--- No se pueden actualizar directamente en SQL
--- Usar la funcionalidad de "Reset Password" del Dashboard
+-- Actualizar usuario existente a admin
+UPDATE usuarios
+SET rol_id = 1, username = 'WebMaster'
+WHERE email = 'fjtechsols@gmail.com';
 ```
 
-### Mejores prácticas
+### No Aparece el Botón "Admin"
 
-- ✅ Usa una contraseña fuerte y única
-- ✅ Cambia la contraseña periódicamente
-- ✅ No compartas las credenciales de admin
-- ✅ Considera implementar 2FA (autenticación de dos factores)
-- ✅ Revisa los logs de acceso regularmente
+1. Verifica que el rol_id sea 1:
+   ```sql
+   SELECT rol_id FROM usuarios WHERE email = 'fjtechsols@gmail.com';
+   ```
+
+2. Si no es 1, actualízalo:
+   ```sql
+   UPDATE usuarios SET rol_id = 1 WHERE email = 'fjtechsols@gmail.com';
+   ```
+
+3. Cierra sesión completamente
+4. Cierra el navegador
+5. Abre de nuevo e inicia sesión
 
 ---
 
-## Siguiente Paso
+## 📚 Funciones del Usuario Normal
 
-Una vez creado el usuario administrador, puedes:
+Antes de actualizar a admin, como usuario normal tendrás acceso a:
 
-1. **Crear más usuarios**: Desde el Dashboard de Admin
-2. **Importar datos**: Usar las migraciones y scripts de importación
-3. **Configurar la aplicación**: Ajustar configuraciones según necesites
+### Mi Cuenta (`/mi-cuenta`)
+- ✅ Ver estadísticas personales (pedidos, facturas, favoritos)
+- ✅ Editar nombre de usuario
+- ✅ Cambiar contraseña
+- ✅ Ver fecha de registro
+- ✅ Enlaces rápidos a: Favoritos, Carrito, Catálogo
 
-Para más información, consulta:
-- `DOCUMENTACION_FACTURACION.md`
-- `DOCUMENTACION_PEDIDOS.md`
-- `MIGRACION_DATOS.md`
+### Funciones Generales
+- ✅ Ver catálogo de libros
+- ✅ Agregar libros al carrito
+- ✅ Crear lista de deseos
+- ✅ Realizar pedidos
+- ✅ Ver mis pedidos y facturas
+
+---
+
+## 📚 Funciones del Administrador
+
+Una vez que tengas rol de administrador:
+
+### Dashboard Admin (`/admin`)
+- 📊 Estadísticas del sistema
+- 📚 Gestión completa de libros
+- 📦 Gestión de todos los pedidos
+- 🧾 Gestión de facturas
+- 👥 Gestión de usuarios
+
+### Gestión de Libros
+- Crear nuevos libros
+- Editar información
+- Gestionar stock y precios
+- Asignar categorías y editoriales
+
+### Gestión de Pedidos
+- Ver todos los pedidos
+- Actualizar estados
+- Generar facturas desde pedidos
+- Ver historial completo
+
+### Gestión de Facturas
+- Crear facturas manualmente
+- Generar desde pedidos
+- Crear rectificativas
+- Descargar PDF
+
+---
+
+## 💡 Consejos
+
+1. **Primero aplica la migración** - Sin esto, nada funcionará
+2. **Usa el formulario de registro** - No intentes crear el usuario directamente en SQL
+3. **Actualiza el rol DESPUÉS** del registro
+4. **Limpia el caché** si tienes problemas
+5. **Guarda las credenciales** en un lugar seguro
+6. **Cambia la contraseña** después del primer login
+
+---
+
+## 🆘 Ayuda Adicional
+
+Si necesitas más ayuda, pregúntale a tu asistente de Bolt:
+
+- `"Muéstrame el contenido de la migración 20251002000000"`
+- `"Aplica la migración de RLS"`
+- `"Verifica las políticas de la tabla usuarios"`
+- `"Muéstrame todos los usuarios en la base de datos"`
+- `"Actualiza fjtechsols@gmail.com a administrador"`
+
+---
+
+**Fecha**: 2025-10-02
+**Estado**: ⚠️ Pendiente - Aplicar migración primero
+**Prioridad**: 🔥 CRÍTICA - La app no funciona sin esto
