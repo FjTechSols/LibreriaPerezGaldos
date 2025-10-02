@@ -11,12 +11,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     checkUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        await loadUserData(session.user.id);
-      } else {
-        setUser(null);
-      }
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      (async () => {
+        if (session?.user) {
+          await loadUserData(session.user.id);
+        } else {
+          setUser(null);
+        }
+      })();
     });
 
     return () => {
@@ -26,25 +28,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkUser = async () => {
     try {
+      console.log('Checking user session...');
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Session:', session);
 
       if (session?.user) {
+        console.log('User found, loading data...');
         await loadUserData(session.user.id);
+      } else {
+        console.log('No session found');
       }
     } catch (error) {
       console.error('Error checking user:', error);
     } finally {
+      console.log('Auth check complete, setting loading to false');
       setLoading(false);
     }
   };
 
   const loadUserData = async (authUserId: string) => {
     try {
+      console.log('Loading user data for auth_user_id:', authUserId);
       const { data: userData, error } = await supabase
         .from('usuarios')
         .select('id, username, email, rol_id')
         .eq('auth_user_id', authUserId)
         .maybeSingle();
+
+      console.log('User data response:', { userData, error });
 
       if (error) {
         console.error('Error loading user data:', error);
@@ -53,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (userData) {
+        console.log('Setting user state:', userData);
         setUser({
           id: userData.id,
           email: userData.email,
