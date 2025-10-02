@@ -11,7 +11,7 @@
 
 .search-icon {
   position: absolute;
-  left: 1rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: #64748b;
@@ -21,7 +21,7 @@
 
 .search-input {
   width: 100%;
-  padding: 1rem 3rem 1rem 3rem;
+  padding: 1rem 3rem 1rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 2rem;
   font-size: 1rem;
@@ -38,7 +38,7 @@
 
 .clear-btn {
   position: absolute;
-  right: 1rem;
+  right: 3rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -127,16 +127,16 @@
 
 @media (max-width: 768px) {
   .search-input {
-    padding: 0.875rem 2.5rem 0.875rem 2.5rem;
+    padding: 0.875rem 2.5rem 0.875rem 0.75rem;
     font-size: 0.875rem;
   }
 
   .search-icon {
-    left: 0.75rem;
+    right: 0.75rem;
   }
 
   .clear-btn {
-    right: 0.75rem;
+    right: 2.5rem;
   }
 
   .suggestion-item {
