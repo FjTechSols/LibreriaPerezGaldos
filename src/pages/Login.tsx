@@ -109,18 +109,6 @@ export function Login() {
               <Link to="/register" className="signup-link">Regístrate aquí</Link>
             </div>
           </div>
-
-          <div className="demo-accounts">
-            <h3 className="demo-title">Cuentas de Prueba</h3>
-            <div className="demo-list">
-              <div className="demo-account">
-                <strong>Administrador:</strong> admin@libreria.com / admin123
-              </div>
-              <div className="demo-account">
-                <strong>Usuario:</strong> user@libreria.com / user123
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
