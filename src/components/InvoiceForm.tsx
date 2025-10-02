@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { InvoiceFormData, InvoiceItem } from '../types';
 import { mockBooks } from '../data/mockBooks';
-import { mockOrders } from '../data/mockData';
 import { Plus, Trash2, FileText } from 'lucide-react';
 import '../styles/components/InvoiceForm.css';
 
@@ -43,28 +42,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     }
   }, [selectedBookId]);
 
-  const handleLoadFromOrder = (orderId: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
-    if (order) {
-      const items: InvoiceItem[] = order.items.map(item => ({
-        book_id: item.bookId,
-        book_title: item.bookTitle,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        line_total: item.total
-      }));
-
-      setFormData({
-        customer_name: order.customerName,
-        customer_address: order.shippingAddress,
-        customer_nif: '',
-        tax_rate: 4,
-        payment_method: '',
-        order_id: orderId,
-        items
-      });
-    }
-  };
 
   const handleAddItem = () => {
     if (!selectedBookId) {
@@ -156,23 +133,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
   return (
     <form className="invoice-form" onSubmit={handleSubmit}>
-      <div className="form-section">
-        <h3>Cargar desde orden</h3>
-        <div className="order-selector">
-          <select
-            onChange={(e) => handleLoadFromOrder(e.target.value)}
-            className="form-select"
-          >
-            <option value="">Seleccionar orden...</option>
-            {mockOrders.map(order => (
-              <option key={order.id} value={order.id}>
-                {order.orderNumber} - {order.customerName}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <div className="form-section">
         <h3>Datos del cliente</h3>
         <div className="form-grid">

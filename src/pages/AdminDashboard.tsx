@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
-import { mockInvoices, mockOrders, mockCompanyInfo } from '../data/mockData';
+import { mockCompanyInfo } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import InvoiceTable from '../components/InvoiceTable';
@@ -22,7 +22,6 @@ export function AdminDashboard() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [books, setBooks] = useState<BookType[]>(mockBooks);
-  const [orders] = useState<Order[]>(mockOrders);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingBook, setEditingBook] = useState<BookType | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -148,10 +147,6 @@ export function AdminDashboard() {
     book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    invoice.customer_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleCreateInvoice = async (formData: InvoiceFormData) => {
     const result = await createInvoice(formData);
@@ -229,22 +224,15 @@ export function AdminDashboard() {
     await updateInvoiceStatus(id, status);
   };
 
-  const filteredOrders = orders.filter(order =>
-    order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Calculate stats
   const stats = {
     totalBooks: books.length,
     totalInvoices: invoices.length,
-    totalOrders: orders.length,
+    totalOrders: 0,
     totalRevenue: invoices.reduce((sum, invoice) => sum + invoice.total, 0),
     inStock: books.filter(book => book.stock > 0).length,
     outOfStock: books.filter(book => book.stock === 0).length,
     pendingInvoices: invoices.filter(invoice => invoice.status === 'pending').length,
-    processingOrders: orders.filter(order => order.status === 'processing').length
+    processingOrders: 0
   };
 
   const renderDashboard = () => (
@@ -462,8 +450,8 @@ export function AdminDashboard() {
                 <p className="content-subtitle">
                   {activeSection === 'dashboard' ? 'Resumen general y estadísticas' :
                    activeSection === 'books' ? `${filteredBooks.length} libros encontrados` :
-                   activeSection === 'invoices' ? `${filteredInvoices.length} facturas encontradas` :
-                   `${filteredOrders.length} pedidos encontrados`}
+                   activeSection === 'invoices' ? 'Gestión de facturas desde Supabase' :
+                   'Gestión de pedidos desde Supabase'}
                 </p>
               </div>
 
