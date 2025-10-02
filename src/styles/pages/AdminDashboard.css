@@ -429,8 +429,8 @@
   justify-content: center;
 }
 
-.edit-btn,
-.delete-btn {
+.book-actions .edit-btn,
+.book-actions .delete-btn {
   width: 32px;
   height: 32px;
   border: none;
@@ -440,24 +440,26 @@
   align-items: center;
   justify-content: center;
   transition: var(--transition-base);
+  padding: 0;
+  flex-shrink: 0;
 }
 
-.edit-btn {
+.book-actions .edit-btn {
   background: var(--primary-100);
   color: var(--primary-600);
 }
 
-.edit-btn:hover {
+.book-actions .edit-btn:hover {
   background: var(--primary-600);
   color: white;
 }
 
-.delete-btn {
+.book-actions .delete-btn {
   background: var(--error-100);
   color: var(--error-600);
 }
 
-.delete-btn:hover {
+.book-actions .delete-btn:hover {
   background: var(--error-600);
   color: white;
 }
