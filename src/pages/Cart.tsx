@@ -1,16 +1,63 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, CreditCard } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, CreditCard, AlertCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { crearPedido } from '../services/pedidoService';
+import { validateStock } from '../services/cartService';
 import '../styles/pages/Cart.css';
 
 export function Cart() {
   const { items, removeItem, updateQuantity, clearCart, total } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCheckout = () => {
-    // Simulated checkout process
-    alert('¡Compra realizada con éxito! Gracias por tu pedido.');
-    clearCart();
+  const handleCheckout = async () => {
+    if (!isAuthenticated || !user) {
+      navigate('/login', { state: { from: '/carrito' } });
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const stockValidation = await validateStock(items);
+
+      if (!stockValidation.valid) {
+        setError(stockValidation.errors.join('. '));
+        setIsProcessing(false);
+        return;
+      }
+
+      const detalles = items.map(item => ({
+        libro_id: parseInt(item.book.id),
+        cantidad: item.quantity,
+        precio_unitario: item.book.price
+      }));
+
+      const pedido = await crearPedido({
+        usuario_id: user.id,
+        tipo: 'interno',
+        metodo_pago: 'tarjeta',
+        detalles
+      });
+
+      if (pedido) {
+        clearCart();
+        alert('¡Pedido creado con éxito! Puede ver el estado en su panel de usuario.');
+        navigate('/mi-cuenta');
+      } else {
+        setError('Error al crear el pedido. Por favor, intente nuevamente.');
+      }
+    } catch (err) {
+      console.error('Error in checkout:', err);
+      setError('Error inesperado al procesar el pedido.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0) {
@@ -133,9 +180,46 @@ export function Cart() {
                 </div>
               )}
 
-              <button onClick={handleCheckout} className="checkout-btn">
+              {error && (
+                <div className="error-notice" style={{
+                  backgroundColor: '#fee',
+                  border: '1px solid #fcc',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px'
+                }}>
+                  <AlertCircle size={20} style={{ color: '#c33', flexShrink: 0, marginTop: '2px' }} />
+                  <p style={{ margin: 0, fontSize: '14px', color: '#c33' }}>{error}</p>
+                </div>
+              )}
+
+              {!isAuthenticated && (
+                <div className="auth-notice" style={{
+                  backgroundColor: '#fef3cd',
+                  border: '1px solid #f5c67f',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginBottom: '16px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#856404' }}>Inicia sesión para completar tu compra</p>
+                </div>
+              )}
+
+              <button
+                onClick={handleCheckout}
+                className="checkout-btn"
+                disabled={isProcessing}
+                style={{
+                  opacity: isProcessing ? 0.6 : 1,
+                  cursor: isProcessing ? 'not-allowed' : 'pointer'
+                }}
+              >
                 <CreditCard size={20} />
-                Proceder al Checkout
+                {isProcessing ? 'Procesando...' : isAuthenticated ? 'Proceder al Checkout' : 'Iniciar Sesión'}
               </button>
 
               <div className="security-badges">
