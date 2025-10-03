@@ -1,4 +1,5 @@
 
+import { Link } from 'react-router-dom';
 import { BookOpen, Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import '../styles/components/Footer.css';
 
@@ -73,9 +74,9 @@ export function Footer() {
         <div className="footer-bottom">
           <p>&copy; 2025 Perez Galdos. Todos los derechos reservados.</p>
           <div className="footer-legal">
-            <a href="/privacidad">Política de Privacidad</a>
-            <a href="/terminos">Términos de Servicio</a>
-            <a href="/cookies">Cookies</a>
+            <Link to="/privacy">Política de Privacidad</Link>
+            <Link to="/terms">Términos de Servicio</Link>
+            <Link to="/cookies">Cookies</Link>
           </div>
         </div>
       </div>

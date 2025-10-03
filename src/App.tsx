@@ -16,6 +16,9 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { UserDashboard } from './pages/UserDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import CookiesPolicy from './pages/CookiesPolicy';
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { user, isAuthenticated } = useAuth();
@@ -45,6 +48,9 @@ function AppRoutes() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/cookies" element={<CookiesPolicy />} />
           <Route
             path="/mi-cuenta"
             element={
