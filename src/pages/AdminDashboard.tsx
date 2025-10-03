@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
-import { mockCompanyInfo } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import InvoiceTable from '../components/InvoiceTable';
@@ -14,6 +13,16 @@ import PedidosList from '../components/PedidosList';
 import PedidoDetalle from '../components/PedidoDetalle';
 import CrearPedido from '../components/CrearPedido';
 import '../styles/pages/AdminDashboard.css';
+
+const COMPANY_INFO = {
+  name: 'Perez Galdos S.L.',
+  address: 'Calle Hortaleza 5, 28004 Madrid, España',
+  phone: '+34 91 531 26 40',
+  email: 'libreria@perezgaldos.com',
+  website: 'www.perezgaldos.es',
+  taxId: 'B12345678',
+  logo: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=200'
+};
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders';
 
@@ -169,11 +178,11 @@ export function AdminDashboard() {
       doc.text('FACTURA', 105, 20, { align: 'center' });
 
       doc.setFontSize(10);
-      doc.text(mockCompanyInfo.name, 20, 40);
-      doc.text(mockCompanyInfo.address, 20, 45);
-      doc.text(`NIF: ${mockCompanyInfo.taxId}`, 20, 50);
-      doc.text(`Tel: ${mockCompanyInfo.phone}`, 20, 55);
-      doc.text(`Email: ${mockCompanyInfo.email}`, 20, 60);
+      doc.text(COMPANY_INFO.name, 20, 40);
+      doc.text(COMPANY_INFO.address, 20, 45);
+      doc.text(`NIF: ${COMPANY_INFO.taxId}`, 20, 50);
+      doc.text(`Tel: ${COMPANY_INFO.phone}`, 20, 55);
+      doc.text(`Email: ${COMPANY_INFO.email}`, 20, 60);
 
       doc.setFontSize(12);
       doc.text(`N° ${invoice.invoice_number}`, 150, 40);
@@ -282,10 +291,10 @@ export function AdminDashboard() {
       <div className="company-info">
         <div className="company-header">
           <div className="company-logo">
-            <img src={mockCompanyInfo.logo} alt={mockCompanyInfo.name} />
+            <img src={COMPANY_INFO.logo} alt={COMPANY_INFO.name} />
           </div>
           <div className="company-details">
-            <h3 className="company-name">{mockCompanyInfo.name}</h3>
+            <h3 className="company-name">{COMPANY_INFO.name}</h3>
             <p className="company-tagline">Librería Online Especializada</p>
           </div>
         </div>
@@ -293,23 +302,23 @@ export function AdminDashboard() {
         <div className="company-info-grid">
           <div className="info-item">
             <span className="info-label">Dirección:</span>
-            <span className="info-value">{mockCompanyInfo.address}</span>
+            <span className="info-value">{COMPANY_INFO.address}</span>
           </div>
           <div className="info-item">
             <span className="info-label">Teléfono:</span>
-            <span className="info-value">{mockCompanyInfo.phone}</span>
+            <span className="info-value">{COMPANY_INFO.phone}</span>
           </div>
           <div className="info-item">
             <span className="info-label">Email:</span>
-            <span className="info-value">{mockCompanyInfo.email}</span>
+            <span className="info-value">{COMPANY_INFO.email}</span>
           </div>
           <div className="info-item">
             <span className="info-label">Sitio Web:</span>
-            <span className="info-value">{mockCompanyInfo.website}</span>
+            <span className="info-value">{COMPANY_INFO.website}</span>
           </div>
           <div className="info-item">
             <span className="info-label">NIF:</span>
-            <span className="info-value">{mockCompanyInfo.taxId}</span>
+            <span className="info-value">{COMPANY_INFO.taxId}</span>
           </div>
           <div className="info-item">
             <span className="info-label">Libros en Stock:</span>

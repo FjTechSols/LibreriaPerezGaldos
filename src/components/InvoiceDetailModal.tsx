@@ -1,8 +1,16 @@
 import React from 'react';
 import { Invoice } from '../types';
 import { X, Download } from 'lucide-react';
-import { mockCompanyInfo } from '../data/mockData';
 import '../styles/components/InvoiceDetailModal.css';
+
+const COMPANY_INFO = {
+  name: 'Perez Galdos S.L.',
+  address: 'Calle Hortaleza 5, 28004 Madrid, España',
+  phone: '+34 91 531 26 40',
+  email: 'libreria@perezgaldos.com',
+  taxId: 'B12345678',
+  logo: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=200'
+};
 
 interface InvoiceDetailModalProps {
   invoice: Invoice | null;
@@ -70,15 +78,15 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         <div className="invoice-detail-body">
           <div className="invoice-preview">
             <div className="company-header">
-              {mockCompanyInfo.logo && (
-                <img src={mockCompanyInfo.logo} alt="Logo" className="company-logo" />
+              {COMPANY_INFO.logo && (
+                <img src={COMPANY_INFO.logo} alt="Logo" className="company-logo" />
               )}
               <div className="company-info">
-                <h3>{mockCompanyInfo.name}</h3>
-                <p>{mockCompanyInfo.address}</p>
-                <p>NIF: {mockCompanyInfo.taxId}</p>
-                <p>Tel: {mockCompanyInfo.phone}</p>
-                <p>Email: {mockCompanyInfo.email}</p>
+                <h3>{COMPANY_INFO.name}</h3>
+                <p>{COMPANY_INFO.address}</p>
+                <p>NIF: {COMPANY_INFO.taxId}</p>
+                <p>Tel: {COMPANY_INFO.phone}</p>
+                <p>Email: {COMPANY_INFO.email}</p>
               </div>
             </div>
 
