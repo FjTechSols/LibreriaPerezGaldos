@@ -54,20 +54,20 @@ export function Footer() {
 
           <div className="footer-section">
             <h3 className="footer-title">Contacto</h3>
-            <div className="contact-info">
-              <div className="contact-item">
-                <MapPin size={16} />
-                <span>Calle Principal 123, Madrid, España</span>
-              </div>
-              <div className="contact-item">
-                <Phone size={16} />
-                <span>+34 91 123 45 67</span>
-              </div>
-              <div className="contact-item">
-                <Mail size={16} />
-                <span>librería @perezgaldos.com</span>
-              </div>
-            </div>
+            <ul className="footer-links">
+              <li>
+                <MapPin size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                Calle Hortaleza 5, 28004 Madrid
+              </li>
+              <li>
+                <Phone size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                +34 91 531 26 40
+              </li>
+              <li>
+                <Mail size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                libreria@perezgaldos.com
+              </li>
+            </ul>
           </div>
         </div>
 

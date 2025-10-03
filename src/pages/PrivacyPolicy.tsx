@@ -19,7 +19,7 @@ export default function PrivacyPolicy() {
               <h2>Información que Recopilamos</h2>
             </div>
             <p>
-              En LibrerIA-Clásicos recopilamos información necesaria para proporcionar nuestros servicios de manera efectiva:
+              En Pérez Galdós recopilamos información necesaria para proporcionar nuestros servicios de manera efectiva:
             </p>
             <ul>
               <li><strong>Información de cuenta:</strong> nombre, correo electrónico, dirección de envío</li>
@@ -90,7 +90,7 @@ export default function PrivacyPolicy() {
               <li><strong>Limitación:</strong> restringir el procesamiento en ciertas circunstancias</li>
             </ul>
             <p className="contact-info">
-              Para ejercer cualquiera de estos derechos, contáctanos en: <a href="mailto:privacidad@libreria-clasicos.com">privacidad@libreria-clasicos.com</a>
+              Para ejercer cualquiera de estos derechos, contáctanos en: <a href="mailto:libreria@perezgaldos.com">libreria@perezgaldos.com</a>
             </p>
           </section>
 
@@ -117,9 +117,9 @@ export default function PrivacyPolicy() {
               Si tienes preguntas sobre esta Política de Privacidad, contáctanos:
             </p>
             <ul className="contact-list">
-              <li>Email: <a href="mailto:privacidad@libreria-clasicos.com">privacidad@libreria-clasicos.com</a></li>
-              <li>Teléfono: +34 912 345 678</li>
-              <li>Dirección: Calle de los Libros 123, 28001 Madrid, España</li>
+              <li>Email: <a href="mailto:libreria@perezgaldos.com">libreria@perezgaldos.com</a></li>
+              <li>Teléfono: +34 91 531 26 40</li>
+              <li>Dirección: Calle Hortaleza 5, 28004 Madrid, España</li>
             </ul>
           </section>
         </div>

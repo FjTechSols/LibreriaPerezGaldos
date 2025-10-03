@@ -216,8 +216,8 @@ export default function CookiesPolicy() {
             </p>
             <p>Si tienes preguntas sobre nuestra política de cookies:</p>
             <ul className="contact-list">
-              <li>Email: <a href="mailto:cookies@libreria-clasicos.com">cookies@libreria-clasicos.com</a></li>
-              <li>Teléfono: +34 912 345 678</li>
+              <li>Email: <a href="mailto:libreria@perezgaldos.com">libreria@perezgaldos.com</a></li>
+              <li>Teléfono: +34 91 531 26 40</li>
             </ul>
           </section>
         </div>

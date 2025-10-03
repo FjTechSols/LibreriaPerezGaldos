@@ -19,7 +19,7 @@ export default function TermsOfService() {
               <h2>Aceptación de los Términos</h2>
             </div>
             <p>
-              Al acceder y utilizar LibrerIA-Clásicos, aceptas estar sujeto a estos Términos de Servicio
+              Al acceder y utilizar Pérez Galdós, aceptas estar sujeto a estos Términos de Servicio
               y todas las leyes y regulaciones aplicables. Si no estás de acuerdo con alguno de estos
               términos, no debes usar nuestro servicio.
             </p>
@@ -30,7 +30,7 @@ export default function TermsOfService() {
               <ShoppingCart size={24} />
               <h2>Uso del Servicio</h2>
             </div>
-            <p>LibrerIA-Clásicos es una plataforma de comercio electrónico para la venta de libros. Al utilizar nuestros servicios:</p>
+            <p>Pérez Galdós es una plataforma de comercio electrónico para la venta de libros. Al utilizar nuestros servicios:</p>
             <ul>
               <li>Debes tener al menos 18 años o contar con el consentimiento de un tutor legal</li>
               <li>Debes proporcionar información precisa y actualizada en tu registro</li>
@@ -83,8 +83,8 @@ export default function TermsOfService() {
           <section className="policy-section">
             <h2>Propiedad Intelectual</h2>
             <p>
-              Todo el contenido de LibrerIA-Clásicos, incluyendo textos, gráficos, logos, imágenes y software,
-              es propiedad de LibrerIA-Clásicos o sus proveedores de contenido y está protegido por leyes
+              Todo el contenido de Pérez Galdós, incluyendo textos, gráficos, logos, imágenes y software,
+              es propiedad de Pérez Galdós o sus proveedores de contenido y está protegido por leyes
               de propiedad intelectual.
             </p>
             <ul>
@@ -100,7 +100,7 @@ export default function TermsOfService() {
               <h2>Limitación de Responsabilidad</h2>
             </div>
             <p>
-              LibrerIA-Clásicos no será responsable de:
+              Pérez Galdós no será responsable de:
             </p>
             <ul>
               <li>Daños indirectos, incidentales o consecuentes derivados del uso del servicio</li>
@@ -149,9 +149,9 @@ export default function TermsOfService() {
               Para preguntas sobre estos Términos de Servicio:
             </p>
             <ul className="contact-list">
-              <li>Email: <a href="mailto:legal@libreria-clasicos.com">legal@libreria-clasicos.com</a></li>
-              <li>Teléfono: +34 912 345 678</li>
-              <li>Dirección: Calle de los Libros 123, 28001 Madrid, España</li>
+              <li>Email: <a href="mailto:libreria@perezgaldos.com">libreria@perezgaldos.com</a></li>
+              <li>Teléfono: +34 91 531 26 40</li>
+              <li>Dirección: Calle Hortaleza 5, 28004 Madrid, España</li>
             </ul>
           </section>
         </div>
