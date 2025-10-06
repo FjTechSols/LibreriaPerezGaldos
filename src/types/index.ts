@@ -303,6 +303,7 @@ export interface InvoiceFormData {
   payment_method?: string;
   order_id?: string;
   items: InvoiceItem[];
+  shipping_cost?: number;
 }
 
 export interface InvoiceContextType {

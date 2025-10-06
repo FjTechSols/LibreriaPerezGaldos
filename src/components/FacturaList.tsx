@@ -162,7 +162,7 @@ export default function FacturaList({ onSelectFactura, onCrearFactura }: Factura
         {onCrearFactura && (
           <button onClick={onCrearFactura} className="btn-crear-factura">
             <Plus size={20} />
-            Nueva Factura
+            Facturar Pedido
           </button>
         )}
       </div>
