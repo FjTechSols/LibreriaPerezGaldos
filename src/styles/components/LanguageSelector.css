@@ -1,0 +1,112 @@
+.language-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.language-selector-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.language-selector-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.language-flag {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.language-code {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.language-option:hover {
+  background: #f7fafc;
+}
+
+.language-option.active {
+  background: #edf2f7;
+}
+
+.language-option .language-flag {
+  font-size: 1.5rem;
+}
+
+.language-option .language-name {
+  flex: 1;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.language-check {
+  color: #48bb78;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .language-selector-button {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .language-code {
+    display: none;
+  }
+
+  .language-dropdown {
+    right: -1rem;
+  }
+}

@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { InvoiceProvider } from './context/InvoiceContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -78,15 +79,17 @@ function AppRoutes() {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <InvoiceProvider>
-              <AppRoutes />
-            </InvoiceProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <InvoiceProvider>
+                <AppRoutes />
+              </InvoiceProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </Router>
   );
 }

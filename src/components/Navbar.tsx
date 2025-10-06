@@ -4,6 +4,8 @@ import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen } from 'lucide-rea
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 import '../styles/components/Navbar.css';
 
 export function Navbar() {
@@ -12,6 +14,7 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -47,7 +50,7 @@ export function Navbar() {
         </form>
 
         <div className="navbar-links desktop-only">
-          <Link to="/catalogo" className="nav-link">Catálogo</Link>
+          <Link to="/catalogo" className="nav-link">{t('catalog')}</Link>
           <Link to="/carrito" className="nav-link cart-link">
             <ShoppingCart size={20} />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
@@ -56,6 +59,7 @@ export function Navbar() {
             <Heart size={20} />
             {wishlistItems.length > 0 && <span className="wishlist-badge">{wishlistItems.length}</span>}
           </Link>
+          <LanguageSelector />
           {user ? (
             <div className="user-menu">
               <span className="user-greeting">Hola, {user.name}</span>
@@ -65,12 +69,12 @@ export function Navbar() {
               {user.role === 'admin' && (
                 <Link to="/admin" className="nav-link admin-link">Admin</Link>
               )}
-              <button onClick={logout} className="logout-btn">Salir</button>
+              <button onClick={logout} className="logout-btn">{t('logout')}</button>
             </div>
           ) : (
             <Link to="/login" className="nav-link login-link">
               <User size={20} />
-              Iniciar Sesión
+              {t('login')}
             </Link>
           )}
         </div>
@@ -86,19 +90,22 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="mobile-menu">
           <Link to="/catalogo" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-            Catálogo
+            {t('catalog')}
           </Link>
           <Link to="/carrito" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-            Carrito ({cartCount})
+            {t('cart')} ({cartCount})
           </Link>
           <Link to="/wishlist" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-            Lista de Deseos ({wishlistItems.length})
+            {t('wishlist')} ({wishlistItems.length})
           </Link>
+          <div className="mobile-language-selector">
+            <LanguageSelector />
+          </div>
           {user ? (
             <>
               <span className="mobile-user">Hola, {user.name}</span>
               <Link to="/mi-cuenta" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-                Mi Cuenta
+                {t('dashboard')}
               </Link>
               {user.role === 'admin' && (
                 <Link to="/admin" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
@@ -109,12 +116,12 @@ export function Navbar() {
                 onClick={() => { logout(); setIsMenuOpen(false); }}
                 className="mobile-logout"
               >
-                Cerrar Sesión
+                {t('logout')}
               </button>
             </>
           ) : (
             <Link to="/login" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-              Iniciar Sesión
+              {t('login')}
             </Link>
           )}
         </div>
