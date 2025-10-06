@@ -346,6 +346,35 @@
   flex-wrap: wrap;
 }
 
+.agregar-producto-externo {
+  display: grid;
+  grid-template-columns: 2fr 2fr 120px 120px auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.badge-interno,
+.badge-externo {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.badge-interno {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-externo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .autocomplete-suggestions {
   position: absolute;
   top: 100%;
@@ -400,6 +429,14 @@
   }
 
   .agregar-producto-mejorado .form-group {
+    width: 100% !important;
+  }
+
+  .agregar-producto-externo {
+    grid-template-columns: 1fr;
+  }
+
+  .agregar-producto-externo .form-group {
     width: 100% !important;
   }
 

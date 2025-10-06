@@ -12,11 +12,16 @@ export interface CrearPedidoInput {
   transportista?: string;
   tracking?: string;
   observaciones?: string;
-  detalles: {
+  detalles: ({
     libro_id: number;
     cantidad: number;
     precio_unitario: number;
-  }[];
+  } | {
+    cantidad: number;
+    precio_unitario: number;
+    nombre_externo?: string;
+    url_externa?: string;
+  })[];
 }
 
 export interface CalculoPedido {

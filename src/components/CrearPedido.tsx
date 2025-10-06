@@ -13,10 +13,13 @@ interface CrearPedidoProps {
 
 interface LineaPedido {
   id: string;
-  libro_id: number;
+  libro_id?: number;
   libro?: Libro;
   cantidad: number;
   precio_unitario: number;
+  es_externo?: boolean;
+  nombre_externo?: string;
+  url_externa?: string;
 }
 
 export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoProps) {
@@ -46,6 +49,11 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
 
   const [lineas, setLineas] = useState<LineaPedido[]>([]);
   const [cantidadTemporal, setCantidadTemporal] = useState(1);
+  const [tipoProducto, setTipoProducto] = useState<'interno' | 'externo'>('interno');
+
+  const [nombreExterno, setNombreExterno] = useState('');
+  const [urlExterna, setUrlExterna] = useState('');
+  const [precioExterno, setPrecioExterno] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -132,27 +140,60 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   };
 
   const agregarLinea = () => {
-    if (!libroSeleccionado) {
-      alert('Seleccione un libro de las sugerencias');
-      return;
-    }
-
     if (cantidadTemporal <= 0) {
       alert('La cantidad debe ser mayor a 0');
       return;
     }
 
-    const nuevaLinea: LineaPedido = {
-      id: Date.now().toString(),
-      libro_id: libroSeleccionado.id,
-      libro: libroSeleccionado,
-      cantidad: cantidadTemporal,
-      precio_unitario: libroSeleccionado.precio
-    };
+    if (tipoProducto === 'interno') {
+      if (!libroSeleccionado) {
+        alert('Seleccione un libro de las sugerencias');
+        return;
+      }
 
-    setLineas([...lineas, nuevaLinea]);
-    setLibroSeleccionado(null);
-    setLibroSearch('');
+      const nuevaLinea: LineaPedido = {
+        id: Date.now().toString(),
+        libro_id: libroSeleccionado.id,
+        libro: libroSeleccionado,
+        cantidad: cantidadTemporal,
+        precio_unitario: libroSeleccionado.precio,
+        es_externo: false
+      };
+
+      setLineas([...lineas, nuevaLinea]);
+      setLibroSeleccionado(null);
+      setLibroSearch('');
+    } else {
+      if (!nombreExterno.trim()) {
+        alert('Ingrese el nombre del producto');
+        return;
+      }
+
+      if (!urlExterna.trim()) {
+        alert('Ingrese la URL de compra');
+        return;
+      }
+
+      if (precioExterno <= 0) {
+        alert('El precio debe ser mayor a 0');
+        return;
+      }
+
+      const nuevaLinea: LineaPedido = {
+        id: Date.now().toString(),
+        cantidad: cantidadTemporal,
+        precio_unitario: precioExterno,
+        es_externo: true,
+        nombre_externo: nombreExterno,
+        url_externa: urlExterna
+      };
+
+      setLineas([...lineas, nuevaLinea]);
+      setNombreExterno('');
+      setUrlExterna('');
+      setPrecioExterno(0);
+    }
+
     setCantidadTemporal(1);
   };
 
@@ -190,11 +231,22 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     setLoading(true);
 
     try {
-      const detalles = lineas.map(linea => ({
-        libro_id: linea.libro_id,
-        cantidad: linea.cantidad,
-        precio_unitario: linea.precio_unitario
-      }));
+      const detalles = lineas.map(linea => {
+        if (linea.es_externo) {
+          return {
+            cantidad: linea.cantidad,
+            precio_unitario: linea.precio_unitario,
+            nombre_externo: linea.nombre_externo,
+            url_externa: linea.url_externa
+          };
+        } else {
+          return {
+            libro_id: linea.libro_id!,
+            cantidad: linea.cantidad,
+            precio_unitario: linea.precio_unitario
+          };
+        }
+      });
 
       const usuarioId = usuarios.find(u => u.email === clienteSeleccionado.email)?.id || usuarios[0]?.id;
 
@@ -239,6 +291,10 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     setLibroSearch('');
     setLibroSeleccionado(null);
     setCantidadTemporal(1);
+    setTipoProducto('interno');
+    setNombreExterno('');
+    setUrlExterna('');
+    setPrecioExterno(0);
   };
 
   const { subtotal, iva, total } = calcularTotalesPedido(
@@ -409,11 +465,38 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
               <h3>Productos del Pedido</h3>
             </div>
 
-            <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
-              Escriba el título o ISBN del libro, seleccione de las sugerencias y haga clic en "Agregar".
-            </p>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>
+                Tipo de Producto
+              </label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    value="interno"
+                    checked={tipoProducto === 'interno'}
+                    onChange={(e) => setTipoProducto(e.target.value as 'interno' | 'externo')}
+                  />
+                  <span>Producto Interno (Base de Datos)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    value="externo"
+                    checked={tipoProducto === 'externo'}
+                    onChange={(e) => setTipoProducto(e.target.value as 'interno' | 'externo')}
+                  />
+                  <span>Producto Externo (A pedir)</span>
+                </label>
+              </div>
+            </div>
 
-            <div className="agregar-producto-mejorado">
+            {tipoProducto === 'interno' ? (
+              <>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                  Escriba el título o ISBN del libro, seleccione de las sugerencias y haga clic en "Agregar".
+                </p>
+                <div className="agregar-producto-mejorado">
               <div className="form-group" ref={libroAutocompleteRef} style={{ position: 'relative', flex: 1 }}>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -489,6 +572,74 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                 Agregar
               </button>
             </div>
+              </>
+            ) : (
+              <>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                  Ingrese los detalles del producto externo que necesita pedir.
+                </p>
+                <div className="agregar-producto-externo">
+                  <div className="form-group" style={{ flex: 2 }}>
+                    <label>Nombre del Producto *</label>
+                    <input
+                      type="text"
+                      value={nombreExterno}
+                      onChange={(e) => setNombreExterno(e.target.value)}
+                      className="form-input"
+                      placeholder="Nombre del libro o producto..."
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ flex: 2 }}>
+                    <label>URL de Compra *</label>
+                    <input
+                      type="url"
+                      value={urlExterna}
+                      onChange={(e) => setUrlExterna(e.target.value)}
+                      className="form-input"
+                      placeholder="https://ejemplo.com/producto"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ width: '120px' }}>
+                    <label>Cantidad *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={cantidadTemporal}
+                      onChange={(e) => setCantidadTemporal(Number(e.target.value))}
+                      className="form-input"
+                      placeholder="Cant."
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ width: '120px' }}>
+                    <label>Precio *</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={precioExterno}
+                      onChange={(e) => setPrecioExterno(Number(e.target.value))}
+                      className="form-input"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ alignSelf: 'flex-end' }}>
+                    <button
+                      type="button"
+                      onClick={agregarLinea}
+                      className="btn-agregar-linea"
+                      disabled={!nombreExterno || !urlExterna || precioExterno <= 0}
+                    >
+                      <Plus size={18} />
+                      Agregar
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             {lineas.length > 0 && (
               <>
@@ -497,7 +648,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                 </div>
                 <div className="lineas-table">
                   <div className="table-header">
-                    <span>Libro</span>
+                    <span>Producto</span>
                     <span>Cantidad</span>
                     <span>Precio Unit.</span>
                     <span>Subtotal</span>
@@ -506,7 +657,29 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
 
                   {lineas.map(linea => (
                     <div key={linea.id} className="table-row">
-                      <span className="libro-nombre">{linea.libro?.titulo}</span>
+                      <div className="libro-nombre">
+                        {linea.es_externo ? (
+                          <>
+                            <span className="badge-externo">EXTERNO</span>
+                            <div>{linea.nombre_externo}</div>
+                            {linea.url_externa && (
+                              <a
+                                href={linea.url_externa}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: '0.75rem', color: '#3b82f6', textDecoration: 'none' }}
+                              >
+                                Ver en tienda ↗
+                              </a>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span className="badge-interno">INTERNO</span>
+                            <div>{linea.libro?.titulo}</div>
+                          </>
+                        )}
+                      </div>
                       <input
                         type="number"
                         min="1"
