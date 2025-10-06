@@ -73,11 +73,15 @@ export interface Libro {
   codigo?: string;
   legacy_id?: string;
   precio: number;
+  precio_original?: number;
   ubicacion?: string;
   fecha_ingreso?: string;
   activo?: boolean;
   imagen_url?: string;
   stock?: number;
+  destacado?: boolean;
+  es_nuevo?: boolean;
+  en_oferta?: boolean;
   created_at?: string;
   updated_at?: string;
   categoria?: Categoria;

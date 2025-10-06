@@ -60,12 +60,16 @@ export function AdminDashboard() {
     publicationYear: new Date().getFullYear(),
     isbn: '',
     price: 0,
+    originalPrice: undefined,
     stock: 0,
     category: categories[1],
     description: '',
     coverImage: '',
     rating: 0,
-    reviews: []
+    reviews: [],
+    featured: false,
+    isNew: false,
+    isOnSale: false
   });
 
   if (user?.role !== 'admin') {
@@ -96,12 +100,16 @@ export function AdminDashboard() {
         publicationYear: newBook.publicationYear || new Date().getFullYear(),
         isbn: newBook.isbn,
         price: newBook.price,
+        originalPrice: newBook.isOnSale ? newBook.originalPrice : undefined,
         stock: newBook.stock || 0,
         category: newBook.category || categories[1],
         description: newBook.description || '',
         coverImage: newBook.coverImage || 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=400',
         rating: newBook.rating || 0,
-        reviews: []
+        reviews: [],
+        featured: newBook.featured || false,
+        isNew: newBook.isNew || false,
+        isOnSale: newBook.isOnSale || false
       };
 
       setBooks(prev => [...prev, bookToAdd]);
@@ -114,12 +122,16 @@ export function AdminDashboard() {
         publicationYear: new Date().getFullYear(),
         isbn: '',
         price: 0,
+        originalPrice: undefined,
         stock: 0,
         category: categories[1],
         description: '',
         coverImage: '',
         rating: 0,
-        reviews: []
+        reviews: [],
+        featured: false,
+        isNew: false,
+        isOnSale: false
       });
       setIsCreating(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -355,13 +367,36 @@ export function AdminDashboard() {
             <span className="book-code-cell">{book.code}</span>
             <div className="book-cover">
               <img src={book.coverImage} alt={book.title} />
+              {(book.featured || book.isNew || book.isOnSale) && (
+                <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.7rem' }}>
+                  {book.featured && <span title="Destacado">📌</span>}
+                  {book.isNew && <span title="Nuevo">✨</span>}
+                  {book.isOnSale && <span title="En Oferta">🏷️</span>}
+                </div>
+              )}
             </div>
-            <span className="book-title-cell">{book.title}</span>
+            <span className="book-title-cell">
+              {book.title}
+              {(book.featured || book.isNew || book.isOnSale) && (
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.75rem' }}>
+                  {book.featured && <span style={{ color: '#f59e0b' }} title="Destacado">📌</span>}
+                  {book.isNew && <span style={{ color: '#10b981' }} title="Nuevo">✨</span>}
+                  {book.isOnSale && <span style={{ color: '#ef4444' }} title="En Oferta">🏷️</span>}
+                </div>
+              )}
+            </span>
             <span className="book-author-cell">{book.author}</span>
             <span className="book-publisher-cell">{book.publisher}</span>
             <span className="book-category-cell">{book.category}</span>
             <span className="book-pages-cell">{book.pages}</span>
-            <span className="book-price-cell">${book.price}</span>
+            <span className="book-price-cell">
+              ${book.price}
+              {book.isOnSale && book.originalPrice && (
+                <span style={{ display: 'block', fontSize: '0.75rem', color: '#9ca3af', textDecoration: 'line-through', marginTop: '0.25rem' }}>
+                  ${book.originalPrice}
+                </span>
+              )}
+            </span>
             <span className={`book-stock-cell ${book.stock === 0 ? 'out-of-stock' : ''}`}>
               {book.stock}
             </span>
@@ -750,6 +785,83 @@ export function AdminDashboard() {
                   />
                 </div>
               </div>
+
+              <div className="form-group full-width">
+                <label style={{ marginBottom: '1rem', display: 'block', fontWeight: 600 }}>Opciones Especiales</label>
+                <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 400 }}>
+                    <input
+                      type="checkbox"
+                      checked={isCreating ? newBook.featured : editingBook?.featured}
+                      onChange={(e) => {
+                        if (isCreating) {
+                          setNewBook(prev => ({ ...prev, featured: e.target.checked }));
+                        } else {
+                          setEditingBook(prev => prev ? { ...prev, featured: e.target.checked } : null);
+                        }
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>📌 Libro Destacado</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 400 }}>
+                    <input
+                      type="checkbox"
+                      checked={isCreating ? newBook.isNew : editingBook?.isNew}
+                      onChange={(e) => {
+                        if (isCreating) {
+                          setNewBook(prev => ({ ...prev, isNew: e.target.checked }));
+                        } else {
+                          setEditingBook(prev => prev ? { ...prev, isNew: e.target.checked } : null);
+                        }
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>✨ Libro Nuevo</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 400 }}>
+                    <input
+                      type="checkbox"
+                      checked={isCreating ? newBook.isOnSale : editingBook?.isOnSale}
+                      onChange={(e) => {
+                        if (isCreating) {
+                          setNewBook(prev => ({ ...prev, isOnSale: e.target.checked }));
+                        } else {
+                          setEditingBook(prev => prev ? { ...prev, isOnSale: e.target.checked } : null);
+                        }
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>🏷️ En Oferta</span>
+                  </label>
+                </div>
+              </div>
+
+              {(isCreating ? newBook.isOnSale : editingBook?.isOnSale) && (
+                <div className="form-group full-width">
+                  <label>Precio Original (antes de la oferta)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={isCreating ? newBook.originalPrice || '' : editingBook?.originalPrice || ''}
+                    onChange={(e) => {
+                      if (isCreating) {
+                        setNewBook(prev => ({ ...prev, originalPrice: Number(e.target.value) }));
+                      } else {
+                        setEditingBook(prev => prev ? { ...prev, originalPrice: Number(e.target.value) } : null);
+                      }
+                    }}
+                    className="form-input"
+                    placeholder="0.00"
+                    style={{ maxWidth: '250px' }}
+                  />
+                  <small style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem', display: 'block' }}>
+                    El precio actual se mostrará como rebajado. Ej: Si precio actual es $15 y original $25, se mostrará con 40% de descuento
+                  </small>
+                </div>
+              )}
 
               <div className="form-group full-width">
                 <label>Descripción</label>

@@ -648,6 +648,17 @@
   min-height: 100px;
 }
 
+/* Checkboxes personalizados */
+.form-group input[type="checkbox"] {
+  accent-color: var(--primary-600);
+  cursor: pointer;
+}
+
+.form-group input[type="checkbox"]:focus {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
