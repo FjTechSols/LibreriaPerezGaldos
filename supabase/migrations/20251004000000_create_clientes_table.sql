@@ -102,7 +102,7 @@ CREATE POLICY "Only admins can create clients"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM usuarios
-      WHERE usuarios.id = get_current_user_id()
+      WHERE usuarios.auth_user_id = auth.uid()
       AND usuarios.rol_id = 1
     )
   );
@@ -114,14 +114,14 @@ CREATE POLICY "Only admins can update clients"
   USING (
     EXISTS (
       SELECT 1 FROM usuarios
-      WHERE usuarios.id = get_current_user_id()
+      WHERE usuarios.auth_user_id = auth.uid()
       AND usuarios.rol_id = 1
     )
   )
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM usuarios
-      WHERE usuarios.id = get_current_user_id()
+      WHERE usuarios.auth_user_id = auth.uid()
       AND usuarios.rol_id = 1
     )
   );
@@ -133,7 +133,7 @@ CREATE POLICY "Only admins can delete clients"
   USING (
     EXISTS (
       SELECT 1 FROM usuarios
-      WHERE usuarios.id = get_current_user_id()
+      WHERE usuarios.auth_user_id = auth.uid()
       AND usuarios.rol_id = 1
     )
   );
