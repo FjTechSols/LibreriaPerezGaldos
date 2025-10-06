@@ -156,6 +156,7 @@ export function AdminDashboard() {
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    book.publisher.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -482,8 +483,11 @@ export function AdminDashboard() {
                       <Search className="admin-search-icon" size={20} />
                       <input
                         type="text"
-                        placeholder={`Buscar ${activeSection === 'books' ? 'libros' :
-                                              activeSection === 'invoices' ? 'facturas' : 'pedidos'}...`}
+                        placeholder={
+                          activeSection === 'books' ? 'Buscar por código, título, autor, editorial o ISBN...' :
+                          activeSection === 'invoices' ? 'Buscar facturas...' :
+                          'Buscar pedidos...'
+                        }
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="admin-search-input"
