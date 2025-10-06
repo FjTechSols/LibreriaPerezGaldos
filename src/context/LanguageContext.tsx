@@ -20,6 +20,10 @@ const translations: Record<Language, Record<string, string>> = {
     dashboard: 'Panel',
     search: 'Buscar libros...',
     language: 'Idioma',
+    account: 'Cuenta',
+    settings: 'Ajustes',
+    myAccount: 'Mi Cuenta',
+    adminPanel: 'Panel Admin',
   },
   en: {
     home: 'Home',
@@ -32,6 +36,10 @@ const translations: Record<Language, Record<string, string>> = {
     dashboard: 'Dashboard',
     search: 'Search books...',
     language: 'Language',
+    account: 'Account',
+    settings: 'Settings',
+    myAccount: 'My Account',
+    adminPanel: 'Admin Panel',
   },
   fr: {
     home: 'Accueil',
@@ -44,6 +52,10 @@ const translations: Record<Language, Record<string, string>> = {
     dashboard: 'Tableau de Bord',
     search: 'Rechercher des livres...',
     language: 'Langue',
+    account: 'Compte',
+    settings: 'Paramètres',
+    myAccount: 'Mon Compte',
+    adminPanel: 'Panneau Admin',
   },
 };
 

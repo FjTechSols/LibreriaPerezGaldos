@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -11,11 +11,24 @@ import '../styles/components/Navbar.css';
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,25 +64,49 @@ export function Navbar() {
 
         <div className="navbar-links desktop-only">
           <Link to="/catalogo" className="nav-link">{t('catalog')}</Link>
-          <Link to="/carrito" className="nav-link cart-link">
-            <ShoppingCart size={20} />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </Link>
           <Link to="/wishlist" className="nav-link wishlist-link">
             <Heart size={20} />
             {wishlistItems.length > 0 && <span className="wishlist-badge">{wishlistItems.length}</span>}
           </Link>
           <LanguageSelector />
           {user ? (
-            <div className="user-menu">
-              <span className="user-greeting">Hola, {user.name}</span>
-              <Link to="/mi-cuenta" className="nav-link account-link">
+            <div className="account-dropdown" ref={accountMenuRef}>
+              <button
+                className="account-btn"
+                onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+              >
                 <User size={20} />
-              </Link>
-              {user.role === 'admin' && (
-                <Link to="/admin" className="nav-link admin-link">Admin</Link>
+                <span>{t('account')}</span>
+                <ChevronDown size={16} className={`chevron ${isAccountMenuOpen ? 'open' : ''}`} />
+              </button>
+              {isAccountMenuOpen && (
+                <div className="account-menu">
+                  <Link
+                    to={user.role === 'admin' ? '/admin' : '/mi-cuenta'}
+                    className="account-menu-item"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    <User size={18} />
+                    <span>{user.role === 'admin' ? t('adminPanel') : t('myAccount')}</span>
+                  </Link>
+                  <Link
+                    to="/ajustes"
+                    className="account-menu-item"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    <Settings size={18} />
+                    <span>{t('settings')}</span>
+                  </Link>
+                  <div className="account-menu-divider" />
+                  <button
+                    onClick={() => { logout(); setIsAccountMenuOpen(false); }}
+                    className="account-menu-item logout"
+                  >
+                    <LogOut size={18} />
+                    <span>{t('logout')}</span>
+                  </button>
+                </div>
               )}
-              <button onClick={logout} className="logout-btn">{t('logout')}</button>
             </div>
           ) : (
             <Link to="/login" className="nav-link login-link">
@@ -77,6 +114,10 @@ export function Navbar() {
               {t('login')}
             </Link>
           )}
+          <Link to="/carrito" className="nav-link cart-link">
+            <ShoppingCart size={20} />
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </Link>
         </div>
 
         <button 
