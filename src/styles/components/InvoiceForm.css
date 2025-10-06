@@ -89,20 +89,22 @@
 .btn-add-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-4);
-  background: var(--color-primary);
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: 0.5rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
 }
 
 .btn-add-item:hover {
-  opacity: 0.9;
+  background: #2563eb;
   transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
 }
 
 .items-list {
@@ -190,37 +192,41 @@
 }
 
 .btn-cancel {
-  padding: var(--spacing-3) var(--spacing-6);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1.5rem;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
   font-weight: 500;
-  color: var(--color-text);
+  color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
 }
 
 .btn-cancel:hover {
-  background: var(--color-background);
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .btn-submit {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-6);
-  background: var(--color-primary);
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: var(--border-radius-sm);
-  font-weight: 500;
+  border-radius: 0.5rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
 }
 
 .btn-submit:hover:not(:disabled) {
-  opacity: 0.9;
+  background: #2563eb;
   transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
 }
 
 .btn-submit:disabled {
