@@ -5,6 +5,7 @@ const IVA_RATE = 0.21;
 
 export interface CrearPedidoInput {
   usuario_id: string;
+  cliente_id?: string;
   tipo?: string;
   metodo_pago?: string;
   direccion_envio?: string;
@@ -50,6 +51,7 @@ export const obtenerPedidos = async (filtros?: {
     .select(`
       *,
       usuario:usuarios(*),
+      cliente:clientes(*),
       detalles:pedido_detalles(
         *,
         libro:libros(*)
@@ -89,6 +91,7 @@ export const obtenerPedidoPorId = async (id: number): Promise<Pedido | null> => 
     .select(`
       *,
       usuario:usuarios(*),
+      cliente:clientes(*),
       detalles:pedido_detalles(
         *,
         libro:libros(*)
@@ -117,6 +120,7 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
 
     const pedidoData = {
       usuario_id: input.usuario_id,
+      cliente_id: input.cliente_id || null,
       estado: 'pendiente' as EstadoPedido,
       tipo: input.tipo || 'interno',
       subtotal,

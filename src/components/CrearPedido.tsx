@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Search, ShoppingCart, User, MapPin, Truck, CreditCard } from 'lucide-react';
-import { Usuario, Libro } from '../types';
+import { X, Plus, Trash2, Search, ShoppingCart, User, MapPin, Truck, CreditCard, Users } from 'lucide-react';
+import { Usuario, Libro, Cliente } from '../types';
 import { obtenerUsuarios, obtenerLibros, crearPedido, calcularTotalesPedido } from '../services/pedidoService';
+import { getClientes } from '../services/clienteService';
 import '../styles/components/CrearPedido.css';
 
 interface CrearPedidoProps {
@@ -20,11 +21,13 @@ interface LineaPedido {
 
 export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoProps) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [libros, setLibros] = useState<Libro[]>([]);
   const [searchLibro, setSearchLibro] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState('');
+  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
   const [tipo, setTipo] = useState('interno');
   const [metodoPago, setMetodoPago] = useState('tarjeta');
   const [direccionEnvio, setDireccionEnvio] = useState('');
@@ -39,6 +42,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   useEffect(() => {
     if (isOpen) {
       cargarUsuarios();
+      cargarClientes();
       cargarLibros();
     }
   }, [isOpen]);
@@ -52,6 +56,15 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   const cargarUsuarios = async () => {
     const data = await obtenerUsuarios();
     setUsuarios(data);
+  };
+
+  const cargarClientes = async () => {
+    try {
+      const data = await getClientes();
+      setClientes(data);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+    }
   };
 
   const cargarLibros = async (filtro?: string) => {
@@ -129,6 +142,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
 
       const pedido = await crearPedido({
         usuario_id: usuarioSeleccionado,
+        cliente_id: clienteSeleccionado || undefined,
         tipo,
         metodo_pago: metodoPago,
         direccion_envio: direccionEnvio || undefined,
@@ -156,6 +170,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
 
   const resetForm = () => {
     setUsuarioSeleccionado('');
+    setClienteSeleccionado('');
     setTipo('interno');
     setMetodoPago('tarjeta');
     setDireccionEnvio('');
@@ -196,20 +211,42 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
 
             <div className="form-grid">
               <div className="form-group full-width">
-                <label>Cliente *</label>
+                <label>Usuario del Sistema *</label>
                 <select
                   value={usuarioSeleccionado}
                   onChange={(e) => setUsuarioSeleccionado(e.target.value)}
                   className="form-select"
                   required
                 >
-                  <option value="">Seleccione un cliente</option>
+                  <option value="">Seleccione un usuario</option>
                   {usuarios.map(usuario => (
                     <option key={usuario.id} value={usuario.id}>
                       {usuario.username} - {usuario.email}
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="form-group full-width">
+                <label>
+                  <Users size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                  Cliente de Gestión (Opcional)
+                </label>
+                <select
+                  value={clienteSeleccionado}
+                  onChange={(e) => setClienteSeleccionado(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="">Ninguno</option>
+                  {clientes.map(cliente => (
+                    <option key={cliente.id} value={cliente.id}>
+                      {cliente.nombre} {cliente.apellidos} - {cliente.email || 'Sin email'}
+                    </option>
+                  ))}
+                </select>
+                <small style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
+                  Seleccione un cliente de gestión interna para asociarlo al pedido
+                </small>
               </div>
 
               <div className="form-group">

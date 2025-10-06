@@ -22,6 +22,24 @@ export interface Usuario {
   activo?: boolean;
 }
 
+export interface Cliente {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  email?: string;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  codigo_postal?: string;
+  provincia?: string;
+  pais?: string;
+  nif?: string;
+  notas?: string;
+  activo?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Editorial {
   id: number;
   nombre: string;
@@ -68,6 +86,7 @@ export interface Libro {
 export interface Pedido {
   id: number;
   usuario_id: string;
+  cliente_id?: string;
   fecha_pedido?: string;
   estado?: EstadoPedido;
   tipo?: TipoPedido;
@@ -83,6 +102,7 @@ export interface Pedido {
   created_at?: string;
   updated_at?: string;
   usuario?: Usuario;
+  cliente?: Cliente;
   detalles?: PedidoDetalle[];
   factura?: Factura;
   envio?: Envio;
@@ -102,6 +122,7 @@ export interface PedidoDetalle {
 export interface Factura {
   id: number;
   pedido_id: number;
+  cliente_id?: string;
   numero_factura: string;
   fecha?: string;
   subtotal: number;
@@ -116,6 +137,7 @@ export interface Factura {
   created_at?: string;
   updated_at?: string;
   pedido?: Pedido;
+  cliente?: Cliente;
   factura_original?: Factura;
   reembolsos?: Reembolso[];
 }

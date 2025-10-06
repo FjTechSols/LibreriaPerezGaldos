@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,7 @@ import GenerarFacturaModal from '../components/GenerarFacturaDesdeped';
 import PedidosList from '../components/PedidosList';
 import PedidoDetalle from '../components/PedidoDetalle';
 import CrearPedido from '../components/CrearPedido';
+import { GestionClientes } from '../components/GestionClientes';
 import '../styles/pages/AdminDashboard.css';
 
 const COMPANY_INFO = {
@@ -24,7 +25,7 @@ const COMPANY_INFO = {
   logo: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=200'
 };
 
-type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders';
+type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients';
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -444,6 +445,13 @@ export function AdminDashboard() {
                 <ShoppingBag size={20} />
                 Pedidos
               </button>
+              <button
+                onClick={() => handleSectionChange('clients')}
+                className={`nav-item ${activeSection === 'clients' ? 'active' : ''}`}
+              >
+                <UsersIcon size={20} />
+                Clientes
+              </button>
             </nav>
           </div>
 
@@ -454,13 +462,15 @@ export function AdminDashboard() {
                   {activeSection === 'dashboard' ? 'Panel Principal' :
                    activeSection === 'books' ? 'Gestión de Libros' :
                    activeSection === 'invoices' ? 'Gestión de Facturas' :
-                   'Gestión de Pedidos'}
+                   activeSection === 'orders' ? 'Gestión de Pedidos' :
+                   'Gestión de Clientes'}
                 </h2>
                 <p className="content-subtitle">
                   {activeSection === 'dashboard' ? 'Resumen general y estadísticas' :
                    activeSection === 'books' ? `${filteredBooks.length} libros encontrados` :
                    activeSection === 'invoices' ? 'Gestión de facturas desde Supabase' :
-                   'Gestión de pedidos desde Supabase'}
+                   activeSection === 'orders' ? 'Gestión de pedidos desde Supabase' :
+                   'Gestión de clientes para pedidos y facturas'}
                 </p>
               </div>
 
@@ -518,6 +528,7 @@ export function AdminDashboard() {
             {activeSection === 'books' && renderBooks()}
             {activeSection === 'invoices' && renderInvoices()}
             {activeSection === 'orders' && renderOrders()}
+            {activeSection === 'clients' && <GestionClientes />}
           </div>
         </div>
 
