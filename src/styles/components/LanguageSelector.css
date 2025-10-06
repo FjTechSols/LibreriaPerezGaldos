@@ -10,9 +10,9 @@
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  color: white;
+  color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
@@ -20,8 +20,9 @@
 }
 
 .language-selector-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: #f9fafb;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
 .language-flag {
