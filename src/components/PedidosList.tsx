@@ -86,51 +86,33 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
       {estadisticas && (
         <div className="pedidos-stats">
           <div className="stat-card total">
-            <div className="stat-icon">
-              <Package size={24} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-value">{estadisticas.total}</span>
-              <span className="stat-label">Total Pedidos</span>
-            </div>
+            <span className="stat-label">Total Pedidos</span>
+            <span className="stat-value">{estadisticas.total}</span>
           </div>
 
           <div className="stat-card pendiente">
-            <div className="stat-info">
-              <span className="stat-value">{estadisticas.pendientes}</span>
-              <span className="stat-label">Pendientes</span>
-            </div>
+            <span className="stat-label">Pendientes</span>
+            <span className="stat-value">{estadisticas.pendientes}</span>
           </div>
 
           <div className="stat-card procesando">
-            <div className="stat-info">
-              <span className="stat-value">{estadisticas.procesando}</span>
-              <span className="stat-label">Procesando</span>
-            </div>
+            <span className="stat-label">Procesando</span>
+            <span className="stat-value">{estadisticas.procesando}</span>
           </div>
 
           <div className="stat-card enviado">
-            <div className="stat-info">
-              <span className="stat-value">{estadisticas.enviados}</span>
-              <span className="stat-label">Enviados</span>
-            </div>
+            <span className="stat-label">Enviados</span>
+            <span className="stat-value">{estadisticas.enviados}</span>
           </div>
 
           <div className="stat-card completado">
-            <div className="stat-info">
-              <span className="stat-value">{estadisticas.completados}</span>
-              <span className="stat-label">Completados</span>
-            </div>
+            <span className="stat-label">Completados</span>
+            <span className="stat-value">{estadisticas.completados}</span>
           </div>
 
           <div className="stat-card ventas">
-            <div className="stat-icon">
-              <TrendingUp size={24} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-value">{estadisticas.totalVentas.toFixed(2)} €</span>
-              <span className="stat-label">Ventas Totales</span>
-            </div>
+            <span className="stat-label">Ventas Totales</span>
+            <span className="stat-value">{estadisticas.totalVentas.toFixed(2)} €</span>
           </div>
         </div>
       )}

@@ -21,81 +21,90 @@
 
 .pedidos-stats .stat-card {
   background: white;
-  padding: 1rem;
+  padding: 1.25rem;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.5rem;
   transition: transform 0.2s, box-shadow 0.2s;
   min-width: 0;
 }
 
 .pedidos-stats .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .pedidos-stats .stat-card.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 
 .pedidos-stats .stat-card.pendiente {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
+  background: #fef9f3;
+  border: 1px solid #fed7aa;
+}
+
+.pedidos-stats .stat-card.pendiente .stat-value {
+  color: #ea580c;
 }
 
 .pedidos-stats .stat-card.procesando {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+}
+
+.pedidos-stats .stat-card.procesando .stat-value {
+  color: #0284c7;
 }
 
 .pedidos-stats .stat-card.enviado {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: white;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+}
+
+.pedidos-stats .stat-card.enviado .stat-value {
+  color: #9333ea;
 }
 
 .pedidos-stats .stat-card.completado {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.pedidos-stats .stat-card.completado .stat-value {
+  color: #16a34a;
 }
 
 .pedidos-stats .stat-card.ventas {
-  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-  color: white;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
 }
 
-.pedidos-stats .stat-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.pedidos-stats .stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.pedidos-stats .stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.pedidos-stats .stat-card.ventas .stat-value {
+  color: #0d9488;
 }
 
 .pedidos-stats .stat-label {
-  font-size: 0.75rem;
-  opacity: 0.9;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  order: 1;
+}
+
+.pedidos-stats .stat-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1;
+  order: 2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pedidos-stats .stat-card.total .stat-value {
+  color: #1e293b;
 }
 
 .pedidos-filters {
