@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Search, ShoppingCart, User, MapPin, Truck, CreditCard, Users } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Plus, Trash2, Search, ShoppingCart, User, MapPin, Truck, CreditCard } from 'lucide-react';
 import { Usuario, Libro, Cliente } from '../types';
 import { obtenerUsuarios, obtenerLibros, crearPedido, calcularTotalesPedido } from '../services/pedidoService';
 import { getClientes } from '../services/clienteService';
@@ -23,11 +23,20 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [libros, setLibros] = useState<Libro[]>([]);
-  const [searchLibro, setSearchLibro] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState('');
-  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
+  const [clienteSearch, setClienteSearch] = useState('');
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
+  const [showClienteSuggestions, setShowClienteSuggestions] = useState(false);
+  const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
+  const clienteAutocompleteRef = useRef<HTMLDivElement>(null);
+
+  const [libroSearch, setLibroSearch] = useState('');
+  const [libroSeleccionado, setLibroSeleccionado] = useState<Libro | null>(null);
+  const [showLibroSuggestions, setShowLibroSuggestions] = useState(false);
+  const [filteredLibros, setFilteredLibros] = useState<Libro[]>([]);
+  const libroAutocompleteRef = useRef<HTMLDivElement>(null);
+
   const [tipo, setTipo] = useState('interno');
   const [metodoPago, setMetodoPago] = useState('tarjeta');
   const [direccionEnvio, setDireccionEnvio] = useState('');
@@ -36,7 +45,6 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   const [observaciones, setObservaciones] = useState('');
 
   const [lineas, setLineas] = useState<LineaPedido[]>([]);
-  const [libroTemporal, setLibroTemporal] = useState<number | ''>('');
   const [cantidadTemporal, setCantidadTemporal] = useState(1);
 
   useEffect(() => {
@@ -48,10 +56,48 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   }, [isOpen]);
 
   useEffect(() => {
-    if (searchLibro.length >= 2) {
-      cargarLibros(searchLibro);
+    if (clienteSearch.trim()) {
+      const filtered = clientes.filter(cliente => {
+        const fullName = `${cliente.nombre} ${cliente.apellidos}`.toLowerCase();
+        const search = clienteSearch.toLowerCase();
+        return (
+          fullName.includes(search) ||
+          cliente.email?.toLowerCase().includes(search) ||
+          cliente.nif?.toLowerCase().includes(search)
+        );
+      }).filter(c => c.activo);
+      setFilteredClientes(filtered);
+    } else {
+      setFilteredClientes(clientes.filter(c => c.activo));
     }
-  }, [searchLibro]);
+  }, [clienteSearch, clientes]);
+
+  useEffect(() => {
+    if (libroSearch.trim()) {
+      const filtered = libros.filter(libro =>
+        libro.titulo.toLowerCase().includes(libroSearch.toLowerCase()) ||
+        libro.isbn.toLowerCase().includes(libroSearch.toLowerCase()) ||
+        libro.autor?.toLowerCase().includes(libroSearch.toLowerCase())
+      );
+      setFilteredLibros(filtered);
+    } else {
+      setFilteredLibros(libros);
+    }
+  }, [libroSearch, libros]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clienteAutocompleteRef.current && !clienteAutocompleteRef.current.contains(event.target as Node)) {
+        setShowClienteSuggestions(false);
+      }
+      if (libroAutocompleteRef.current && !libroAutocompleteRef.current.contains(event.target as Node)) {
+        setShowLibroSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const cargarUsuarios = async () => {
     const data = await obtenerUsuarios();
@@ -67,14 +113,27 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     }
   };
 
-  const cargarLibros = async (filtro?: string) => {
-    const data = await obtenerLibros(filtro);
+  const cargarLibros = async () => {
+    const data = await obtenerLibros();
     setLibros(data);
   };
 
+  const handleSelectCliente = (cliente: Cliente) => {
+    setClienteSeleccionado(cliente);
+    setClienteSearch(`${cliente.nombre} ${cliente.apellidos}`);
+    setDireccionEnvio(cliente.direccion || '');
+    setShowClienteSuggestions(false);
+  };
+
+  const handleSelectLibro = (libro: Libro) => {
+    setLibroSeleccionado(libro);
+    setLibroSearch(libro.titulo);
+    setShowLibroSuggestions(false);
+  };
+
   const agregarLinea = () => {
-    if (!libroTemporal) {
-      alert('Seleccione un libro');
+    if (!libroSeleccionado) {
+      alert('Seleccione un libro de las sugerencias');
       return;
     }
 
@@ -83,21 +142,18 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
       return;
     }
 
-    const libro = libros.find(l => l.id === libroTemporal);
-    if (!libro) return;
-
     const nuevaLinea: LineaPedido = {
       id: Date.now().toString(),
-      libro_id: libro.id,
-      libro,
+      libro_id: libroSeleccionado.id,
+      libro: libroSeleccionado,
       cantidad: cantidadTemporal,
-      precio_unitario: libro.precio
+      precio_unitario: libroSeleccionado.precio
     };
 
     setLineas([...lineas, nuevaLinea]);
-    setLibroTemporal('');
+    setLibroSeleccionado(null);
+    setLibroSearch('');
     setCantidadTemporal(1);
-    setSearchLibro('');
   };
 
   const eliminarLinea = (lineaId: string) => {
@@ -121,8 +177,8 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!usuarioSeleccionado) {
-      alert('Seleccione un usuario');
+    if (!clienteSeleccionado) {
+      alert('Debe seleccionar un cliente');
       return;
     }
 
@@ -140,9 +196,11 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
         precio_unitario: linea.precio_unitario
       }));
 
+      const usuarioId = usuarios.find(u => u.email === clienteSeleccionado.email)?.id || usuarios[0]?.id;
+
       const pedido = await crearPedido({
-        usuario_id: usuarioSeleccionado,
-        cliente_id: clienteSeleccionado || undefined,
+        usuario_id: usuarioId,
+        cliente_id: clienteSeleccionado.id,
         tipo,
         metodo_pago: metodoPago,
         direccion_envio: direccionEnvio || undefined,
@@ -169,8 +227,8 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   };
 
   const resetForm = () => {
-    setUsuarioSeleccionado('');
-    setClienteSeleccionado('');
+    setClienteSearch('');
+    setClienteSeleccionado(null);
     setTipo('interno');
     setMetodoPago('tarjeta');
     setDireccionEnvio('');
@@ -178,9 +236,9 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     setTracking('');
     setObservaciones('');
     setLineas([]);
-    setLibroTemporal('');
+    setLibroSearch('');
+    setLibroSeleccionado(null);
     setCantidadTemporal(1);
-    setSearchLibro('');
   };
 
   const { subtotal, iva, total } = calcularTotalesPedido(
@@ -210,43 +268,63 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
             </div>
 
             <div className="form-grid">
-              <div className="form-group full-width">
-                <label>Usuario del Sistema *</label>
-                <select
-                  value={usuarioSeleccionado}
-                  onChange={(e) => setUsuarioSeleccionado(e.target.value)}
-                  className="form-select"
-                  required
-                >
-                  <option value="">Seleccione un usuario</option>
-                  {usuarios.map(usuario => (
-                    <option key={usuario.id} value={usuario.id}>
-                      {usuario.username} - {usuario.email}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <div className="form-group full-width" ref={clienteAutocompleteRef} style={{ position: 'relative' }}>
+                <label>Buscar Cliente *</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={clienteSearch}
+                    onChange={(e) => {
+                      setClienteSearch(e.target.value);
+                      setShowClienteSuggestions(true);
+                      if (!e.target.value.trim()) {
+                        setClienteSeleccionado(null);
+                        setDireccionEnvio('');
+                      }
+                    }}
+                    onFocus={() => setShowClienteSuggestions(true)}
+                    placeholder="Buscar por nombre, email o NIF..."
+                    className="form-input"
+                    style={{ paddingLeft: '2.5rem' }}
+                    required
+                  />
+                  <Search
+                    size={18}
+                    style={{
+                      position: 'absolute',
+                      left: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#9ca3af',
+                      pointerEvents: 'none'
+                    }}
+                  />
+                </div>
 
-              <div className="form-group full-width">
-                <label>
-                  <Users size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.5rem' }} />
-                  Cliente de Gestión (Opcional)
-                </label>
-                <select
-                  value={clienteSeleccionado}
-                  onChange={(e) => setClienteSeleccionado(e.target.value)}
-                  className="form-select"
-                >
-                  <option value="">Ninguno</option>
-                  {clientes.map(cliente => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nombre} {cliente.apellidos} - {cliente.email || 'Sin email'}
-                    </option>
-                  ))}
-                </select>
-                <small style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
-                  Seleccione un cliente de gestión interna para asociarlo al pedido
-                </small>
+                {showClienteSuggestions && clienteSearch.trim() && (
+                  <div className="autocomplete-suggestions">
+                    {filteredClientes.length > 0 ? (
+                      filteredClientes.slice(0, 8).map(cliente => (
+                        <div
+                          key={cliente.id}
+                          className="suggestion-item"
+                          onClick={() => handleSelectCliente(cliente)}
+                        >
+                          <div style={{ fontWeight: 500, color: '#1e293b' }}>
+                            {cliente.nombre} {cliente.apellidos}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.125rem' }}>
+                            {cliente.email || 'Sin email'} {cliente.nif && `• NIF: ${cliente.nif}`}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: '0.75rem', color: '#64748b', fontSize: '0.875rem' }}>
+                        No se encontraron clientes
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -307,10 +385,9 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                   className="form-select"
                 >
                   <option value="">Seleccione...</option>
-                  <option value="ASM">ASM</option>
+                  <option value="MRW">MRW</option>
                   <option value="GLS">GLS</option>
-                  <option value="Envialia">Envialia</option>
-                  <option value="otro">Otro</option>
+                  <option value="Otro">Otro</option>
                 </select>
               </div>
 
@@ -333,44 +410,81 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
               <h3>Productos del Pedido</h3>
             </div>
 
-            <div className="agregar-producto">
-              <div className="buscar-libro">
-                <Search size={18} />
-                <input
-                  type="text"
-                  value={searchLibro}
-                  onChange={(e) => setSearchLibro(e.target.value)}
-                  placeholder="Buscar libro por título o ISBN..."
-                  className="form-input"
-                />
+            <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
+              Escriba el título o ISBN del libro, seleccione de las sugerencias y haga clic en "Agregar".
+            </p>
+
+            <div className="agregar-producto-mejorado">
+              <div className="form-group" ref={libroAutocompleteRef} style={{ position: 'relative', flex: 1 }}>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={libroSearch}
+                    onChange={(e) => {
+                      setLibroSearch(e.target.value);
+                      setShowLibroSuggestions(true);
+                      if (!e.target.value.trim()) {
+                        setLibroSeleccionado(null);
+                      }
+                    }}
+                    onFocus={() => setShowLibroSuggestions(true)}
+                    placeholder="Buscar libro por título, autor o ISBN..."
+                    className="form-input"
+                    style={{ paddingLeft: '2.5rem' }}
+                  />
+                  <Search
+                    size={18}
+                    style={{
+                      position: 'absolute',
+                      left: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#9ca3af',
+                      pointerEvents: 'none'
+                    }}
+                  />
+                </div>
+
+                {showLibroSuggestions && libroSearch.trim() && (
+                  <div className="autocomplete-suggestions">
+                    {filteredLibros.length > 0 ? (
+                      filteredLibros.slice(0, 10).map(libro => (
+                        <div
+                          key={libro.id}
+                          className="suggestion-item"
+                          onClick={() => handleSelectLibro(libro)}
+                        >
+                          <div style={{ fontWeight: 500, color: '#1e293b' }}>{libro.titulo}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.125rem' }}>
+                            {libro.autor} • ISBN: {libro.isbn} • {libro.precio.toFixed(2)} € • Stock: {libro.stock || 0}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: '0.75rem', color: '#64748b', fontSize: '0.875rem' }}>
+                        No se encontraron libros
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <select
-                value={libroTemporal}
-                onChange={(e) => setLibroTemporal(Number(e.target.value))}
-                className="form-select"
-              >
-                <option value="">Seleccione un libro</option>
-                {libros.map(libro => (
-                  <option key={libro.id} value={libro.id}>
-                    {libro.titulo} - {libro.precio.toFixed(2)} € (Stock: {libro.stock || 0})
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="number"
-                min="1"
-                value={cantidadTemporal}
-                onChange={(e) => setCantidadTemporal(Number(e.target.value))}
-                className="form-input cantidad-input"
-                placeholder="Cant."
-              />
+              <div className="form-group" style={{ width: '120px' }}>
+                <input
+                  type="number"
+                  min="1"
+                  value={cantidadTemporal}
+                  onChange={(e) => setCantidadTemporal(Number(e.target.value))}
+                  className="form-input"
+                  placeholder="Cant."
+                />
+              </div>
 
               <button
                 type="button"
                 onClick={agregarLinea}
                 className="btn-agregar-linea"
+                disabled={!libroSeleccionado}
               >
                 <Plus size={18} />
                 Agregar
@@ -378,47 +492,52 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
             </div>
 
             {lineas.length > 0 && (
-              <div className="lineas-table">
-                <div className="table-header">
-                  <span>Libro</span>
-                  <span>Cantidad</span>
-                  <span>Precio Unit.</span>
-                  <span>Subtotal</span>
-                  <span></span>
+              <>
+                <div style={{ marginTop: '1.5rem', marginBottom: '0.75rem', fontWeight: 600, color: '#1e293b' }}>
+                  Productos agregados ({lineas.length})
                 </div>
-
-                {lineas.map(linea => (
-                  <div key={linea.id} className="table-row">
-                    <span className="libro-nombre">{linea.libro?.titulo}</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={linea.cantidad}
-                      onChange={(e) => actualizarCantidad(linea.id, Number(e.target.value))}
-                      className="input-cantidad"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={linea.precio_unitario}
-                      onChange={(e) => actualizarPrecio(linea.id, Number(e.target.value))}
-                      className="input-precio"
-                    />
-                    <span className="subtotal-linea">
-                      {(linea.cantidad * linea.precio_unitario).toFixed(2)} €
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => eliminarLinea(linea.id)}
-                      className="btn-eliminar-linea"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                <div className="lineas-table">
+                  <div className="table-header">
+                    <span>Libro</span>
+                    <span>Cantidad</span>
+                    <span>Precio Unit.</span>
+                    <span>Subtotal</span>
+                    <span></span>
                   </div>
-                ))}
-              </div>
+
+                  {lineas.map(linea => (
+                    <div key={linea.id} className="table-row">
+                      <span className="libro-nombre">{linea.libro?.titulo}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={linea.cantidad}
+                        onChange={(e) => actualizarCantidad(linea.id, Number(e.target.value))}
+                        className="input-cantidad"
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={linea.precio_unitario}
+                        onChange={(e) => actualizarPrecio(linea.id, Number(e.target.value))}
+                        className="input-precio"
+                      />
+                      <span className="subtotal-linea">
+                        {(linea.cantidad * linea.precio_unitario).toFixed(2)} €
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => eliminarLinea(linea.id)}
+                        className="btn-eliminar-linea"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
 
             {lineas.length > 0 && (
@@ -470,7 +589,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
             <button
               type="submit"
               className="btn-guardar"
-              disabled={loading || !usuarioSeleccionado || lineas.length === 0}
+              disabled={loading || !clienteSeleccionado || lineas.length === 0}
             >
               {loading ? 'Guardando...' : 'Guardar Pedido'}
             </button>
