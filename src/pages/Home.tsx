@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Sparkles, Tag } from 'lucide-react';
 import { BookCard } from '../components/BookCard';
 import { mockBooks } from '../data/mockBooks';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/Home.css';
 
 export function Home() {
+  const { t } = useLanguage();
   const featuredBooks = mockBooks.filter(book => book.featured);
   const newBooks = mockBooks.filter(book => book.isNew);
   const saleBooks = mockBooks.filter(book => book.isOnSale);
@@ -15,20 +17,19 @@ export function Home() {
         <div className="hero-container">
           <div className="hero-content">
             <h1 className="hero-title">
-              Descubre tu próxima
-              <span className="hero-highlight"> gran lectura</span>
+              {t('heroTitle')}
+              <span className="hero-highlight"> {t('heroHighlight')}</span>
             </h1>
             <p className="hero-subtitle">
-              Miles de libros esperándote. Desde clásicos atemporales hasta las últimas novedades.
-              Encuentra historias que transformarán tu mundo.
+              {t('heroSubtitle')}
             </p>
             <div className="hero-actions">
               <Link to="/catalogo" className="hero-btn primary">
-                Explorar Catálogo
+                {t('exploreCatalog')}
                 <ArrowRight size={20} />
               </Link>
               <Link to="/catalogo?featured=true" className="hero-btn secondary">
-                Ver Destacados
+                {t('viewFeatured')}
               </Link>
             </div>
           </div>
@@ -47,10 +48,10 @@ export function Home() {
           <div className="section-header">
             <div className="section-title-group">
               <Sparkles className="section-icon" size={24} />
-              <h2 className="section-title">Libros Destacados</h2>
+              <h2 className="section-title">{t('featuredBooks')}</h2>
             </div>
             <Link to="/catalogo?featured=true" className="section-link">
-              Ver todos <ArrowRight size={16} />
+              {t('viewAll')} <ArrowRight size={16} />
             </Link>
           </div>
           <div className="books-grid">
@@ -66,10 +67,10 @@ export function Home() {
           <div className="section-header">
             <div className="section-title-group">
               <TrendingUp className="section-icon" size={24} />
-              <h2 className="section-title">Últimas Novedades</h2>
+              <h2 className="section-title">{t('latestReleases')}</h2>
             </div>
             <Link to="/catalogo?new=true" className="section-link">
-              Ver todas <ArrowRight size={16} />
+              {t('viewAllReleases')} <ArrowRight size={16} />
             </Link>
           </div>
           <div className="books-grid">
@@ -85,10 +86,10 @@ export function Home() {
           <div className="section-header">
             <div className="section-title-group">
               <Tag className="section-icon" size={24} />
-              <h2 className="section-title">Ofertas Especiales</h2>
+              <h2 className="section-title">{t('specialOffers')}</h2>
             </div>
             <Link to="/catalogo?sale=true" className="section-link">
-              Ver ofertas <ArrowRight size={16} />
+              {t('viewOffers')} <ArrowRight size={16} />
             </Link>
           </div>
           <div className="books-grid">
@@ -102,13 +103,12 @@ export function Home() {
       <section className="cta-section">
         <div className="cta-container">
           <div className="cta-content">
-            <h2 className="cta-title">¿Nuevo en nuestra librería?</h2>
+            <h2 className="cta-title">{t('newToLibrary')}</h2>
             <p className="cta-subtitle">
-              Únete a nuestra comunidad de lectores y disfruta de beneficios exclusivos, 
-              descuentos especiales y recomendaciones personalizadas.
+              {t('joinCommunity')}
             </p>
             <Link to="/register" className="cta-btn">
-              Registrarse Gratis
+              {t('registerFree')}
               <ArrowRight size={20} />
             </Link>
           </div>

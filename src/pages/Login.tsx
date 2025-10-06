@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/Login.css';
 
 export function Login() {
@@ -11,6 +12,7 @@ export function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,7 +27,7 @@ export function Login() {
     if (success) {
       navigate(from, { replace: true });
     } else {
-      setError('Email o contraseña incorrectos');
+      setError(t('incorrectCredentials'));
     }
     setIsLoading(false);
   };
@@ -35,9 +37,9 @@ export function Login() {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <h1 className="login-title">Iniciar Sesión</h1>
+            <h1 className="login-title">{t('loginTitle')}</h1>
             <p className="login-subtitle">
-              Accede a tu cuenta para continuar con tu experiencia de lectura
+              {t('loginSubtitle')}
             </p>
           </div>
 
@@ -45,7 +47,7 @@ export function Login() {
             <div className="form-group">
               <label htmlFor="email" className="form-label">
                 <Mail size={16} />
-                Email
+                {t('email')}
               </label>
               <input
                 id="email"
@@ -61,7 +63,7 @@ export function Login() {
             <div className="form-group">
               <label htmlFor="password" className="form-label">
                 <Lock size={16} />
-                Contraseña
+                {t('password')}
               </label>
               <div className="password-input-container">
                 <input
@@ -77,7 +79,7 @@ export function Login() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="password-toggle"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -90,23 +92,23 @@ export function Login() {
               </div>
             )}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isLoading}
               className="login-btn"
             >
-              {isLoading ? 'Iniciando...' : 'Iniciar Sesión'}
+              {isLoading ? t('loggingIn') : t('loginTitle')}
               <ArrowRight size={16} />
             </button>
           </form>
 
           <div className="login-footer">
             <Link to="/recuperar" className="forgot-link">
-              ¿Olvidaste tu contraseña?
+              {t('forgotPassword')}
             </Link>
             <div className="signup-prompt">
-              <span>¿No tienes cuenta? </span>
-              <Link to="/register" className="signup-link">Regístrate aquí</Link>
+              <span>{t('noAccount')} </span>
+              <Link to="/register" className="signup-link">{t('registerHere')}</Link>
             </div>
           </div>
         </div>

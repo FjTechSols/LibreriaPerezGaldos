@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/Register.css';
 
 export function Register() {
@@ -16,6 +17,7 @@ export function Register() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +25,7 @@ export function Register() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('passwordsDontMatch'));
       return;
     }
 
@@ -54,9 +56,9 @@ export function Register() {
       <div className="register-container">
         <div className="register-card">
           <div className="register-header">
-            <h1 className="register-title">Crear Cuenta</h1>
+            <h1 className="register-title">{t('registerTitle')}</h1>
             <p className="register-subtitle">
-              Únete a nuestra comunidad de lectores y descubre un mundo de libros
+              {t('registerSubtitle')}
             </p>
           </div>
 
@@ -64,7 +66,7 @@ export function Register() {
             <div className="form-group">
               <label htmlFor="name" className="form-label">
                 <User size={16} />
-                Nombre completo
+                {t('fullName')}
               </label>
               <input
                 id="name"
@@ -81,7 +83,7 @@ export function Register() {
             <div className="form-group">
               <label htmlFor="email" className="form-label">
                 <Mail size={16} />
-                Email
+                {t('email')}
               </label>
               <input
                 id="email"
@@ -98,7 +100,7 @@ export function Register() {
             <div className="form-group">
               <label htmlFor="password" className="form-label">
                 <Lock size={16} />
-                Contraseña
+                {t('password')}
               </label>
               <div className="password-input-container">
                 <input
@@ -115,7 +117,7 @@ export function Register() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="password-toggle"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -126,7 +128,7 @@ export function Register() {
             <div className="form-group">
               <label htmlFor="confirmPassword" className="form-label">
                 <Lock size={16} />
-                Confirmar contraseña
+                {t('confirmPassword')}
               </label>
               <div className="password-input-container">
                 <input
@@ -143,7 +145,7 @@ export function Register() {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="password-toggle"
-                  aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showConfirmPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -156,20 +158,20 @@ export function Register() {
               </div>
             )}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isLoading}
               className="register-btn"
             >
-              {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+              {isLoading ? t('creating') : t('registerTitle')}
               <ArrowRight size={16} />
             </button>
           </form>
 
           <div className="register-footer">
             <div className="login-prompt">
-              <span>¿Ya tienes cuenta? </span>
-              <Link to="/login" className="login-link-register">Inicia sesión aquí</Link>
+              <span>{t('alreadyHaveAccount')} </span>
+              <Link to="/login" className="login-link-register">{t('loginHere')}</Link>
             </div>
           </div>
 
