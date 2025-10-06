@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, SlidersHorizontal, Grid, List } from 'lucide-react';
+import { Filter, SlidersHorizontal, Grid2x2 as Grid, List } from 'lucide-react';
 import { FilterState } from '../types';
 import { categories, getTranslatedCategory } from '../data/mockBooks';
 import { useLanguage } from '../context/LanguageContext';
