@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { InvoiceFormData, InvoiceItem } from '../types';
 import { mockBooks } from '../data/mockBooks';
-import { Plus, Trash2, FileText } from 'lucide-react';
+import { Plus, Trash2, FileText, Search } from 'lucide-react';
 import { getClientes } from '../services/clienteService';
 import type { Cliente } from '../types';
 import '../styles/components/InvoiceForm.css';
@@ -31,6 +31,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     shipping_cost: 0
   });
 
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedBookId, setSelectedBookId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [unitPrice, setUnitPrice] = useState(0);
@@ -39,6 +40,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   const [selectedClienteId, setSelectedClienteId] = useState<string>('');
   const [isManualEntry, setIsManualEntry] = useState(false);
   const [loadingClientes, setLoadingClientes] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredBooks, setFilteredBooks] = useState(mockBooks);
+  const autocompleteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchClientes = async () => {
@@ -56,15 +60,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   }, []);
 
   useEffect(() => {
-    if (selectedBookId) {
-      const book = mockBooks.find(b => b.id === selectedBookId);
-      if (book) {
-        setUnitPrice(book.price);
-      }
-    }
-  }, [selectedBookId]);
-
-  useEffect(() => {
     if (selectedClienteId && !isManualEntry) {
       const cliente = clientes.find(c => c.id === selectedClienteId);
       if (cliente) {
@@ -78,9 +73,43 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     }
   }, [selectedClienteId, clientes, isManualEntry]);
 
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      const filtered = mockBooks.filter(book => 
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredBooks(filtered);
+    } else {
+      setFilteredBooks(mockBooks);
+    }
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectBook = (bookId: string) => {
+    const book = mockBooks.find(b => b.id === bookId);
+    if (book) {
+      setSelectedBookId(bookId);
+      setSearchTerm(book.title);
+      setUnitPrice(book.price);
+      setShowSuggestions(false);
+    }
+  };
+
   const handleAddItem = () => {
     if (!selectedBookId) {
-      setErrors({ ...errors, item: 'Selecciona un libro' });
+      setErrors({ ...errors, item: 'Debe seleccionar un libro de la lista' });
       return;
     }
 
@@ -101,6 +130,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       items: [...formData.items, newItem]
     });
 
+    setSearchTerm('');
     setSelectedBookId('');
     setQuantity(1);
     setUnitPrice(0);
@@ -255,24 +285,64 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       <div className="form-section">
         <h3>Agregar libros a la factura</h3>
         <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
-          Seleccione un libro, ajuste la cantidad y precio, luego haga clic en "Agregar a la lista". Puede agregar múltiples libros.
+          Escriba el título, autor o ISBN del libro. Seleccione de las sugerencias, ajuste cantidad y precio, luego haga clic en "Agregar a la lista".
         </p>
+        
         <div className="add-item-form">
           <div className="form-grid">
-            <div className="form-group">
-              <label>Libro *</label>
-              <select
-                value={selectedBookId}
-                onChange={(e) => setSelectedBookId(e.target.value)}
-                className="form-select"
-              >
-                <option value="">Seleccionar libro...</option>
-                {mockBooks.map(book => (
-                  <option key={book.id} value={book.id}>
-                    {book.title} - {formatCurrency(book.price)}
-                  </option>
-                ))}
-              </select>
+            <div className="form-group" ref={autocompleteRef} style={{ position: 'relative' }}>
+              <label>Buscar libro *</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setShowSuggestions(true);
+                    if (!e.target.value.trim()) {
+                      setSelectedBookId('');
+                      setUnitPrice(0);
+                    }
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Buscar por título, autor o ISBN..."
+                  style={{ paddingLeft: '2.5rem' }}
+                />
+                <Search 
+                  size={18} 
+                  style={{ 
+                    position: 'absolute', 
+                    left: '0.75rem', 
+                    top: '50%', 
+                    transform: 'translateY(-50%)', 
+                    color: '#9ca3af',
+                    pointerEvents: 'none'
+                  }} 
+                />
+              </div>
+              
+              {showSuggestions && searchTerm.trim() && (
+                <div className="autocomplete-suggestions">
+                  {filteredBooks.length > 0 ? (
+                    filteredBooks.slice(0, 10).map(book => (
+                      <div
+                        key={book.id}
+                        className="suggestion-item"
+                        onClick={() => handleSelectBook(book.id)}
+                      >
+                        <div style={{ fontWeight: 500, color: '#1e293b' }}>{book.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.125rem' }}>
+                          {book.author} • ISBN: {book.isbn} • {formatCurrency(book.price)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ padding: '0.75rem', color: '#64748b', fontSize: '0.875rem' }}>
+                      No se encontraron libros
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -302,7 +372,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                 type="button"
                 onClick={handleAddItem}
                 className="btn-add-item"
-                style={{ width: '100%' }}
+                disabled={!selectedBookId}
               >
                 <Plus size={18} />
                 Agregar a la lista
@@ -313,10 +383,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
         </div>
 
         {formData.items.length > 0 && (
-          <div className="items-list">
-            <h4 style={{ marginBottom: '1rem', color: '#1e293b', fontSize: '1rem' }}>
+          <div className="items-list" style={{ marginTop: '1.5rem' }}>
+            <div style={{ marginBottom: '0.75rem', fontWeight: 600, color: '#1e293b' }}>
               Libros agregados ({formData.items.length})
-            </h4>
+            </div>
             <table className="items-table">
               <thead>
                 <tr>
@@ -395,9 +465,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       </div>
 
       <div className="invoice-summary">
-        <h4 style={{ marginBottom: '1rem', color: '#1e293b', fontSize: '1rem' }}>
-          Resumen de la factura
-        </h4>
         <div className="summary-row">
           <span>Subtotal:</span>
           <span className="summary-amount">{formatCurrency(calculateSubtotal())}</span>
@@ -413,7 +480,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
           <span className="summary-amount">{formatCurrency(calculateTax())}</span>
         </div>
         <div className="summary-row total">
-          <span>Total a facturar:</span>
+          <span>Total:</span>
           <span className="summary-amount">{formatCurrency(calculateTotal())}</span>
         </div>
       </div>
@@ -424,7 +491,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
         </button>
         <button type="submit" className="btn-submit" disabled={loading}>
           <FileText size={18} />
-          {loading ? 'Creando...' : 'Crear factura'}
+          {loading ? 'Creando factura...' : 'Crear factura'}
         </button>
       </div>
     </form>
