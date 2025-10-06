@@ -70,6 +70,7 @@ export interface Libro {
   notas?: string;
   categoria_id?: number;
   editorial_id?: number;
+  codigo?: string;
   legacy_id?: string;
   precio: number;
   ubicacion?: string;

@@ -82,10 +82,13 @@ export function AdminDashboard() {
   }
 
   const handleCreateBook = () => {
-    if (newBook.code && newBook.title && newBook.author && newBook.publisher && newBook.isbn && newBook.price) {
+    if (newBook.title && newBook.author && newBook.publisher && newBook.isbn && newBook.price) {
+      const bookId = Date.now().toString();
+      const autoCode = newBook.code || `LIB${bookId.slice(-6)}`;
+
       const bookToAdd: BookType = {
-        id: Date.now().toString(),
-        code: newBook.code,
+        id: bookId,
+        code: autoCode,
         title: newBook.title,
         author: newBook.author,
         publisher: newBook.publisher,
@@ -551,7 +554,7 @@ export function AdminDashboard() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Código Interno</label>
+                  <label>Código Interno <span style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 400 }}>(Opcional)</span></label>
                   <input
                     type="text"
                     value={isCreating ? newBook.code : editingBook?.code}
@@ -563,8 +566,11 @@ export function AdminDashboard() {
                       }
                     }}
                     className="form-input"
-                    placeholder="LIB-001"
+                    placeholder="Se generará automáticamente si se deja vacío"
                   />
+                  <small style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem', display: 'block' }}>
+                    Si no se proporciona, se generará automáticamente (ej: LIB000123)
+                  </small>
                 </div>
 
                 <div className="form-group">
