@@ -253,11 +253,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       </div>
 
       <div className="form-section">
-        <h3>Agregar libros</h3>
+        <h3>Agregar libros a la factura</h3>
+        <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
+          Seleccione un libro, ajuste la cantidad y precio, luego haga clic en "Agregar a la lista". Puede agregar múltiples libros.
+        </p>
         <div className="add-item-form">
           <div className="form-grid">
             <div className="form-group">
-              <label>Libro</label>
+              <label>Libro *</label>
               <select
                 value={selectedBookId}
                 onChange={(e) => setSelectedBookId(e.target.value)}
@@ -273,7 +276,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
             </div>
 
             <div className="form-group">
-              <label>Cantidad</label>
+              <label>Cantidad *</label>
               <input
                 type="number"
                 min="1"
@@ -283,7 +286,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
             </div>
 
             <div className="form-group">
-              <label>Precio unitario</label>
+              <label>Precio unitario *</label>
               <input
                 type="number"
                 step="0.01"
@@ -299,9 +302,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                 type="button"
                 onClick={handleAddItem}
                 className="btn-add-item"
+                style={{ width: '100%' }}
               >
                 <Plus size={18} />
-                Agregar
+                Agregar a la lista
               </button>
             </div>
           </div>
@@ -310,6 +314,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
         {formData.items.length > 0 && (
           <div className="items-list">
+            <h4 style={{ marginBottom: '1rem', color: '#1e293b', fontSize: '1rem' }}>
+              Libros agregados ({formData.items.length})
+            </h4>
             <table className="items-table">
               <thead>
                 <tr>
@@ -388,6 +395,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       </div>
 
       <div className="invoice-summary">
+        <h4 style={{ marginBottom: '1rem', color: '#1e293b', fontSize: '1rem' }}>
+          Resumen de la factura
+        </h4>
         <div className="summary-row">
           <span>Subtotal:</span>
           <span className="summary-amount">{formatCurrency(calculateSubtotal())}</span>
@@ -403,7 +413,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
           <span className="summary-amount">{formatCurrency(calculateTax())}</span>
         </div>
         <div className="summary-row total">
-          <span>Total:</span>
+          <span>Total a facturar:</span>
           <span className="summary-amount">{formatCurrency(calculateTotal())}</span>
         </div>
       </div>
