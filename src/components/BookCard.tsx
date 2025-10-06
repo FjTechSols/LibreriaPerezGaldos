@@ -59,7 +59,7 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
           aria-label={isInWishlist(book.id) ? "Eliminar de favoritos" : "Agregar a favoritos"}
           title={isInWishlist(book.id) ? "Eliminar de favoritos" : "Agregar a favoritos"}
         >
-          <Heart size={20} fill={isInWishlist(book.id) ? 'currentColor' : 'none'} />
+          <Heart size={24} fill={isInWishlist(book.id) ? 'currentColor' : 'none'} strokeWidth={2} />
         </button>
 
         <div className="book-overlay">
