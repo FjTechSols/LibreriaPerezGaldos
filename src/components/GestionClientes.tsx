@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit2, Trash2, Search, X, Mail, Phone, MapPin, CreditCard } from 'lucide-react';
+import { Users, Plus, CreditCard as Edit2, Trash2, Search, X, Mail, Phone, MapPin, CreditCard } from 'lucide-react';
 import { Cliente } from '../types';
 import { getClientes, crearCliente, actualizarCliente, eliminarCliente, buscarClientes } from '../services/clienteService';
 import '../styles/components/GestionClientes.css';
