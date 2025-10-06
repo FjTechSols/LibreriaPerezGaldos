@@ -456,32 +456,31 @@ export function AdminDashboard() {
           </div>
 
           <div className="dashboard-content">
-            <div className="content-header">
-              <div>
-                <h2 className="content-title">
-                  {activeSection === 'dashboard' ? 'Panel Principal' :
-                   activeSection === 'books' ? 'Gestión de Libros' :
-                   activeSection === 'invoices' ? 'Gestión de Facturas' :
-                   activeSection === 'orders' ? 'Gestión de Pedidos' :
-                   'Gestión de Clientes'}
-                </h2>
-                <p className="content-subtitle">
-                  {activeSection === 'dashboard' ? 'Resumen general y estadísticas' :
-                   activeSection === 'books' ? `${filteredBooks.length} libros encontrados` :
-                   activeSection === 'invoices' ? 'Gestión de facturas desde Supabase' :
-                   activeSection === 'orders' ? 'Gestión de pedidos desde Supabase' :
-                   'Gestión de clientes para pedidos y facturas'}
-                </p>
-              </div>
+            {activeSection !== 'clients' && (
+              <div className="content-header">
+                <div>
+                  <h2 className="content-title">
+                    {activeSection === 'dashboard' ? 'Panel Principal' :
+                     activeSection === 'books' ? 'Gestión de Libros' :
+                     activeSection === 'invoices' ? 'Gestión de Facturas' :
+                     'Gestión de Pedidos'}
+                  </h2>
+                  <p className="content-subtitle">
+                    {activeSection === 'dashboard' ? 'Resumen general y estadísticas' :
+                     activeSection === 'books' ? `${filteredBooks.length} libros encontrados` :
+                     activeSection === 'invoices' ? 'Gestión de facturas desde Supabase' :
+                     'Gestión de pedidos desde Supabase'}
+                  </p>
+                </div>
 
-              <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center' }}>
-                {activeSection !== 'dashboard' && (
-                  <div className="admin-search">
-                    <Search className="admin-search-icon" size={20} />
-                    <input
-                      type="text"
-                      placeholder={`Buscar ${activeSection === 'books' ? 'libros' : 
-                                            activeSection === 'invoices' ? 'facturas' : 'pedidos'}...`}
+                <div style={{ display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center' }}>
+                  {activeSection !== 'dashboard' && (
+                    <div className="admin-search">
+                      <Search className="admin-search-icon" size={20} />
+                      <input
+                        type="text"
+                        placeholder={`Buscar ${activeSection === 'books' ? 'libros' :
+                                              activeSection === 'invoices' ? 'facturas' : 'pedidos'}...`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="admin-search-input"
@@ -523,6 +522,7 @@ export function AdminDashboard() {
                 )}
               </div>
             </div>
+            )}
 
             {activeSection === 'dashboard' && renderDashboard()}
             {activeSection === 'books' && renderBooks()}
