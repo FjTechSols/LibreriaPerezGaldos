@@ -53,12 +53,13 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
         {book.isOnSale && <span className="badge sale-badge">Oferta</span>}
         {book.stock === 0 && <span className="badge stock-badge">Agotado</span>}
 
-        <button 
+        <button
           onClick={handleWishlistToggle}
           className={`wishlist-btn ${isInWishlist(book.id) ? 'active' : ''}`}
-          aria-label="Agregar a lista de deseos"
+          aria-label={isInWishlist(book.id) ? "Eliminar de favoritos" : "Agregar a favoritos"}
+          title={isInWishlist(book.id) ? "Eliminar de favoritos" : "Agregar a favoritos"}
         >
-          <Heart size={20} />
+          <Heart size={20} fill={isInWishlist(book.id) ? 'currentColor' : 'none'} />
         </button>
 
         <div className="book-overlay">
