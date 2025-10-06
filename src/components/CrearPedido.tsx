@@ -335,10 +335,8 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                   className="form-select"
                 >
                   <option value="interno">Interno</option>
-                  <option value="iberlibro">Iberlibro</option>
-                  <option value="conecta">Conecta</option>
+                  <option value="iberlibro">IberLibro</option>
                   <option value="uniliber">Uniliber</option>
-                  <option value="libreros_de_viejo">Libreros de Viejo</option>
                 </select>
               </div>
 
@@ -354,6 +352,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                   <option value="paypal">PayPal</option>
                   <option value="transferencia">Transferencia</option>
                   <option value="reembolso">Reembolso</option>
+                  <option value="señal">Señal</option>
                 </select>
               </div>
             </div>
