@@ -45,8 +45,7 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         .order('issue_date', { ascending: false });
 
       if (invoicesError) {
-        console.error('Error fetching invoices:', invoicesError);
-        setError(invoicesError.message);
+        console.warn('Supabase not available, using local storage only:', invoicesError);
         setLoading(false);
         return;
       }
