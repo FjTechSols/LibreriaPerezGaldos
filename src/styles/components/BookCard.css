@@ -315,3 +315,63 @@
     gap: 0.5rem;
   }
 }
+/* Dark Mode */
+.dark-mode .book-card {
+  background: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .book-card:hover {
+  background: #334155;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+.dark-mode .book-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .book-author,
+.dark-mode .book-publisher {
+  color: #cbd5e1;
+}
+
+.dark-mode .book-category {
+  color: #94a3b8;
+  background: #334155;
+}
+
+.dark-mode .book-price {
+  color: #60a5fa;
+}
+
+.dark-mode .original-price {
+  color: #94a3b8;
+}
+
+.dark-mode .discount-badge {
+  background: #dc2626;
+  color: white;
+}
+
+.dark-mode .book-rating {
+  color: #cbd5e1;
+}
+
+.dark-mode .add-to-cart-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.dark-mode .add-to-cart-btn:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+.dark-mode .wishlist-btn {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f1f5f9;
+}
+
+.dark-mode .wishlist-btn:hover {
+  background: rgba(51, 65, 85, 1);
+  color: #60a5fa;
+}

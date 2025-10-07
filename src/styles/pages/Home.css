@@ -344,3 +344,64 @@
     font-size: 1rem;
   }
 }
+/* Dark Mode Overrides */
+.dark-mode .hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.dark-mode .hero-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .hero-subtitle {
+  color: #cbd5e1;
+}
+
+.dark-mode .hero-btn.secondary {
+  background: transparent;
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+.dark-mode .hero-btn.secondary:hover {
+  background: #60a5fa;
+  color: #0f172a;
+}
+
+.dark-mode .featured-section,
+.dark-mode .new-section,
+.dark-mode .sale-section {
+  background: #0f172a;
+}
+
+.dark-mode .new-section {
+  background: #1e293b;
+}
+
+.dark-mode .section-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .section-icon {
+  color: #60a5fa;
+}
+
+.dark-mode .section-link {
+  color: #60a5fa;
+}
+
+.dark-mode .section-link:hover {
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.dark-mode .cta-section {
+  background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+
+.dark-mode .cta-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .cta-description {
+  color: #cbd5e1;
+}

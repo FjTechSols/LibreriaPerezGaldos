@@ -447,3 +447,41 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Scrollbar Dark Mode - aplicado globalmente */
+.dark-mode *::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.dark-mode *::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark-mode *::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 6px;
+}
+
+.dark-mode *::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Botones globales */
+.dark-mode button {
+  color: inherit;
+}
+
+/* Select boxes */
+.dark-mode select option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+/* Bordes de cards y contenedores */
+.dark-mode [class*="card"],
+.dark-mode [class*="container"],
+.dark-mode [class*="wrapper"],
+.dark-mode [class*="box"] {
+  border-color: var(--border-color);
+}
