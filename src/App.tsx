@@ -17,6 +17,8 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { UserDashboard } from './pages/UserDashboard';
+import { UserSettings } from './pages/UserSettings';
+import { AdminSettings } from './pages/AdminSettings';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookiesPolicy from './pages/CookiesPolicy';
@@ -65,6 +67,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ajustes"
+            element={
+              <ProtectedRoute>
+                <UserSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/ajustes"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminSettings />
               </ProtectedRoute>
             }
           />
