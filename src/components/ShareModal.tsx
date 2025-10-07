@@ -55,27 +55,27 @@ export function ShareModal({ book, isOpen, onClose }: ShareModalProps) {
   ];
 
   return (
-    <div className="share-modal-overlay" onClick={onClose}>
-      <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="share-modal-header">
-          <h3 className="share-modal-title">Compartir Libro</h3>
-          <button onClick={onClose} className="close-btn">
+    <div className="sharemodal-overlay" onClick={onClose}>
+      <div className="sharemodal" onClick={(e) => e.stopPropagation()}>
+        <div className="sharemodal__header">
+          <h3 className="sharemodal__title">Compartir Libro</h3>
+          <button onClick={onClose} className="sharemodal__close-btn">
             <X size={20} />
           </button>
         </div>
 
-        <div className="book-info">
-          <div className="book-cover">
+        <div className="sharemodal__book-info">
+          <div className="sharemodal__book-cover">
             <img src={book.coverImage} alt={book.title} />
           </div>
-          <div className="book-details">
-            <h4 className="book-title">{book.title}</h4>
-            <p className="book-author">por {book.author}</p>
-            <p className="book-price">${book.price}</p>
+          <div className="sharemodal__book-details">
+            <h4 className="sharemodal__book-title">{book.title}</h4>
+            <p className="sharemodal__book-author">por {book.author}</p>
+            <p className="sharemodal__book-price">${book.price}</p>
           </div>
         </div>
 
-        <div className="share-options">
+        <div className="sharemodal__options">
           {shareOptions.map((option) => {
             const Icon = option.icon;
             return (
@@ -84,9 +84,9 @@ export function ShareModal({ book, isOpen, onClose }: ShareModalProps) {
                 href={option.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`share-option ${option.className}`}
+                className={`sharemodal__option sharemodal__option--${option.className}`}
               >
-                <div className="share-icon">
+                <div className="sharemodal__share-icon">
                   <Icon size={20} />
                 </div>
                 <span>{option.name}</span>
@@ -95,10 +95,10 @@ export function ShareModal({ book, isOpen, onClose }: ShareModalProps) {
           })}
         </div>
 
-        <div className="copy-link">
-          <button 
+        <div className="sharemodal__copy-link">
+          <button
             onClick={handleCopyLink}
-            className={`copy-link-btn ${copied ? 'copied' : ''}`}
+            className={`sharemodal__copy-link-btn ${copied ? 'sharemodal__copy-link-btn--copied' : ''}`}
           >
             {copied ? <Check size={16} /> : <Copy size={16} />}
             {copied ? 'Enlace copiado' : 'Copiar enlace'}

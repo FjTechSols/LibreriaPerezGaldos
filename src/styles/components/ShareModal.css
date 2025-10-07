@@ -1,4 +1,4 @@
-.share-modal-overlay {
+.sharemodal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   padding: 1rem;
 }
 
-.share-modal {
+.sharemodal {
   background: white;
   border-radius: 1.5rem;
   padding: 2rem;
@@ -22,7 +22,7 @@
   position: relative;
 }
 
-.share-modal-header {
+.sharemodal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,14 +31,14 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
-.share-modal-title {
+.sharemodal__title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
 
-.close-btn {
+.sharemodal__close-btn {
   background: none;
   border: none;
   color: #6b7280;
@@ -48,12 +48,12 @@
   transition: all 0.2s ease;
 }
 
-.close-btn:hover {
+.sharemodal__close-btn:hover {
   background: #f3f4f6;
   color: #374151;
 }
 
-.book-info {
+.sharemodal__book-info {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
@@ -63,7 +63,7 @@
   border: 1px solid #e2e8f0;
 }
 
-.book-cover {
+.sharemodal__book-cover {
   width: 80px;
   height: 100px;
   border-radius: 0.5rem;
@@ -71,46 +71,46 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.book-cover img {
+.sharemodal__book-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.book-details {
+.sharemodal__book-details {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.book-title {
+.sharemodal__book-title {
   font-weight: 600;
   color: #1f2937;
   font-size: 1rem;
   margin: 0;
 }
 
-.book-author {
+.sharemodal__book-author {
   color: #6b7280;
   font-size: 0.875rem;
   margin: 0;
 }
 
-.book-price {
+.sharemodal__book-price {
   font-weight: 600;
   color: #2563eb;
   font-size: 1.125rem;
   margin: 0;
 }
 
-.share-options {
+.sharemodal__options {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
-.share-option {
+.sharemodal__option {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -125,52 +125,52 @@
   cursor: pointer;
 }
 
-.share-option:hover {
+.sharemodal__option:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.share-option.facebook {
+.sharemodal__option--facebook {
   border-color: #1877f2;
   color: #1877f2;
 }
 
-.share-option.facebook:hover {
+.sharemodal__option--facebook:hover {
   background: #1877f2;
   color: white;
 }
 
-.share-option.twitter {
+.sharemodal__option--twitter {
   border-color: #1da1f2;
   color: #1da1f2;
 }
 
-.share-option.twitter:hover {
+.sharemodal__option--twitter:hover {
   background: #1da1f2;
   color: white;
 }
 
-.share-option.whatsapp {
+.sharemodal__option--whatsapp {
   border-color: #25d366;
   color: #25d366;
 }
 
-.share-option.whatsapp:hover {
+.sharemodal__option--whatsapp:hover {
   background: #25d366;
   color: white;
 }
 
-.share-option.email {
+.sharemodal__option--email {
   border-color: #6b7280;
   color: #6b7280;
 }
 
-.share-option.email:hover {
+.sharemodal__option--email:hover {
   background: #6b7280;
   color: white;
 }
 
-.share-icon {
+.sharemodal__share-icon {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -181,17 +181,17 @@
   color: white;
 }
 
-.share-option:hover .share-icon {
+.sharemodal__option:hover .sharemodal__share-icon {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.copy-link {
+.sharemodal__copy-link {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #f1f5f9;
 }
 
-.copy-link-btn {
+.sharemodal__copy-link-btn {
   width: 100%;
   display: flex;
   align-items: center;
@@ -207,42 +207,42 @@
   transition: all 0.2s ease;
 }
 
-.copy-link-btn:hover {
+.sharemodal__copy-link-btn:hover {
   background: #e2e8f0;
   border-color: #cbd5e1;
 }
 
-.copy-link-btn.copied {
+.sharemodal__copy-link-btn--copied {
   background: #dcfce7;
   border-color: #bbf7d0;
   color: #166534;
 }
 
 @media (max-width: 768px) {
-  .share-modal {
+  .sharemodal {
     padding: 1.5rem;
   }
 
-  .share-options {
+  .sharemodal__options {
     grid-template-columns: 1fr;
   }
 
-  .book-info {
+  .sharemodal__book-info {
     flex-direction: column;
     text-align: center;
   }
 
-  .book-cover {
+  .sharemodal__book-cover {
     align-self: center;
   }
 }
 
 @media (max-width: 480px) {
-  .share-modal {
+  .sharemodal {
     padding: 1rem;
   }
 
-  .share-modal-title {
+  .sharemodal__title {
     font-size: 1.25rem;
   }
 }
