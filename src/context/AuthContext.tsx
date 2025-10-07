@@ -82,6 +82,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('Login attempt:', email);
+
+    const demoUsers = [
+      { email: 'admin@admin.com', password: 'admin', id: 1, name: 'Admin Demo', role: 'admin' as const },
+      { email: 'user@user.com', password: 'user', id: 2, name: 'Usuario Demo', role: 'user' as const }
+    ];
+
+    const demoUser = demoUsers.find(u => u.email === email && u.password === password);
+
+    if (demoUser) {
+      console.log('Demo user login successful');
+      setUser({
+        id: demoUser.id,
+        email: demoUser.email,
+        name: demoUser.name,
+        role: demoUser.role
+      });
+      localStorage.setItem('demo_user', JSON.stringify(demoUser));
+      return true;
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -89,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('Login error:', error.message);
+        console.warn('Supabase login failed:', error.message);
         return false;
       }
 
