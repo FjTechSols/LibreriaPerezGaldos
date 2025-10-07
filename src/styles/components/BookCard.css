@@ -8,6 +8,8 @@
   color: inherit;
   display: flex;
   flex-direction: column;
+  position: relative;
+  height: 100%;
 }
 
 .book-card:hover {
@@ -23,10 +25,14 @@
 .book-image-container {
   position: relative;
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .book-card.grid .book-image-container {
-  height: 320px;
+  min-height: 450px;
   background: #f8fafc;
 }
 
@@ -164,17 +170,22 @@
 }
 
 .book-info {
-  padding: 1.25rem;
-  flex: 1;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 70%, transparent 100%);
+  z-index: 10;
 }
 
 .book-title {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #ffffff;
   margin: 0;
   line-height: 1.4;
   display: -webkit-box;
@@ -185,7 +196,7 @@
 }
 
 .book-author {
-  color: #6b7280;
+  color: #cbd5e1;
   font-size: 0.875rem;
   margin: 0;
   font-weight: 500;
@@ -216,7 +227,7 @@
 
 .rating-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #94a3b8;
 }
 
 .book-pricing {
@@ -230,19 +241,19 @@
 .current-price {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #2563eb;
+  color: #60a5fa;
 }
 
 .original-price {
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: #94a3b8;
   text-decoration: line-through;
 }
 
 .sale-price {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #dc2626;
+  color: #f87171;
 }
 
 .discount {
@@ -267,10 +278,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: white;
+  border-radius: 0.5rem;
   font-size: 0.8125rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .book-category {
@@ -347,56 +360,47 @@
 }
 
 .dark-mode .book-info {
-  background: #1e293b !important;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 70%, transparent 100%) !important;
 }
 
 .dark-mode .book-title {
-  color: #f1f5f9 !important;
+  color: #ffffff !important;
 }
 
 .dark-mode .book-author {
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
+}
+
+/* book-meta siempre blanco en ambos modos */
+.dark-mode .book-meta {
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .dark-mode .book-category {
-  color: #60a5fa !important;
-  background: rgba(59, 130, 246, 0.1) !important;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.dark-mode .current-price,
-.dark-mode .sale-price {
-  color: #60a5fa !important;
-}
-
-.dark-mode .original-price {
-  color: #64748b !important;
+  color: #2563eb !important;
+  background: #eff6ff !important;
 }
 
 .dark-mode .book-stock {
-  color: #34d399 !important;
-}
-
-.dark-mode .book-meta {
-  border-top-color: #334155 !important;
+  color: #059669 !important;
 }
 
 .dark-mode .rating-text {
   color: #94a3b8 !important;
 }
 
-.dark-mode .add-to-cart-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
+/* Precios siempre con los colores definidos en light mode */
+.dark-mode .current-price {
+  color: #60a5fa !important;
 }
 
-.dark-mode .add-to-cart-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+.dark-mode .sale-price {
+  color: #f87171 !important;
 }
 
-.dark-mode .add-to-cart-btn:disabled {
-  background: #475569;
+.dark-mode .original-price {
+  color: #94a3b8 !important;
 }
 
 .dark-mode .wishlist-btn {
