@@ -135,30 +135,7 @@
 
 /* ===== COMPONENTES ===== */
 
-/* BookCard */
-.dark-mode .book-card {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-  box-shadow: var(--shadow-md);
-}
-
-.dark-mode .book-card:hover {
-  background: var(--bg-tertiary);
-  box-shadow: var(--shadow-lg);
-}
-
-.dark-mode .book-card-title {
-  color: var(--text-primary);
-}
-
-.dark-mode .book-card-author,
-.dark-mode .book-card-publisher {
-  color: var(--text-secondary);
-}
-
-.dark-mode .book-card-price {
-  color: var(--primary-color);
-}
+/* BookCard - Los estilos específicos están en BookCard.css */
 
 /* Modals */
 .dark-mode .modal-overlay {
