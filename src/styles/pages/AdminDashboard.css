@@ -1056,3 +1056,181 @@
 .dark-mode .access-denied p {
   color: #cbd5e1;
 }
+
+.dark-mode .content-header {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .content-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .content-subtitle {
+  color: #94a3b8;
+}
+
+.dark-mode .data-table {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .table-header {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+.dark-mode .table-row {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .table-row:hover {
+  background: #334155;
+}
+
+.dark-mode .book-code-cell {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dark-mode .book-title-cell {
+  color: #f1f5f9;
+}
+
+.dark-mode .book-author-cell,
+.dark-mode .book-publisher-cell,
+.dark-mode .book-category-cell {
+  color: #94a3b8;
+}
+
+.dark-mode .book-pages-cell,
+.dark-mode .book-price-cell {
+  color: #f1f5f9;
+}
+
+.dark-mode .book-stock-cell {
+  color: #34d399;
+}
+
+.dark-mode .invoice-number,
+.dark-mode .order-number {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dark-mode .modal {
+  background: #1e293b;
+}
+
+.dark-mode .modal-header {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .modal-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .close-btn {
+  color: #94a3b8;
+}
+
+.dark-mode .close-btn:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .form-group label {
+  color: #cbd5e1;
+}
+
+.dark-mode .form-input,
+.dark-mode .form-select,
+.dark-mode .form-textarea {
+  background: #0f172a;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+.dark-mode .form-input:focus,
+.dark-mode .form-select:focus,
+.dark-mode .form-textarea:focus {
+  border-color: #3b82f6;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.dark-mode .form-actions {
+  border-top-color: #334155;
+}
+
+.dark-mode .admin-search-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .admin-search-input:focus {
+  background: #1e293b;
+  border-color: #3b82f6;
+}
+
+.dark-mode .admin-search-icon {
+  color: #64748b;
+}
+
+.dark-mode .company-info {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .company-name {
+  color: #f1f5f9;
+}
+
+.dark-mode .company-tagline {
+  color: #94a3b8;
+}
+
+.dark-mode .info-item {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .info-label {
+  color: #94a3b8;
+}
+
+.dark-mode .info-value {
+  color: #f1f5f9;
+}
+
+.dark-mode .action-btn.secondary {
+  background: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+.dark-mode .action-btn.secondary:hover {
+  background: #475569;
+  border-color: #64748b;
+}
+
+.dark-mode .book-actions .edit-btn {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dark-mode .book-actions .edit-btn:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.dark-mode .book-actions .delete-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.dark-mode .book-actions .delete-btn:hover {
+  background: #ef4444;
+  color: white;
+}
