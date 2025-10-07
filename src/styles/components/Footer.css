@@ -2,6 +2,11 @@
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #e2e8f0;
   margin-top: auto;
+  transition: background 0.3s ease;
+}
+
+.dark-mode .footer {
+  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
 }
 
 .footer-container {
