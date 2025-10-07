@@ -1,6 +1,6 @@
 .book-card {
   background: white;
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
@@ -25,10 +25,12 @@
   position: relative;
   overflow: hidden;
   background: #f1f5f9;
+  border-radius: 1rem 1rem 0 0;
 }
 
 .book-card.grid .book-image-container {
-  height: 280px;
+  aspect-ratio: 3 / 4;
+  width: 100%;
 }
 
 .book-card.list .book-image-container {
@@ -163,6 +165,8 @@
   flex-direction: column;
   gap: 0.75rem;
   flex: 1;
+  border-radius: 0 0 1rem 1rem;
+  background: white;
 }
 
 .book-title {
@@ -268,6 +272,7 @@
   margin-top: auto;
   border-top: 1px solid #e5e7eb;
   gap: 0.75rem;
+  background: inherit;
 }
 
 .book-category {
@@ -329,6 +334,10 @@
   background: #0f172a;
 }
 
+.dark-mode .book-info {
+  background: #1e293b;
+}
+
 .dark-mode .book-title {
   color: #f1f5f9;
 }
@@ -359,6 +368,7 @@
 
 .dark-mode .book-meta {
   border-top-color: #334155;
+  background: #1e293b;
 }
 
 .dark-mode .book-category {
