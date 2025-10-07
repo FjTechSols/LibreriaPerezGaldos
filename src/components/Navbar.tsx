@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { LanguageSelector } from './LanguageSelector';
 import '../styles/components/Navbar.css';
 
@@ -16,6 +17,7 @@ export function Navbar() {
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const { t } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +100,33 @@ export function Navbar() {
                     <span>{t('settings')}</span>
                   </Link>
                   <div className="account-menu-divider" />
+                  <div className="theme-selector">
+                    <span className="theme-label">Tema:</span>
+                    <div className="theme-buttons">
+                      <button
+                        onClick={() => setTheme('light')}
+                        className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
+                        title="Modo claro"
+                      >
+                        <Sun size={16} />
+                      </button>
+                      <button
+                        onClick={() => setTheme('dark')}
+                        className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
+                        title="Modo oscuro"
+                      >
+                        <Moon size={16} />
+                      </button>
+                      <button
+                        onClick={() => setTheme('auto')}
+                        className={`theme-btn ${theme === 'auto' ? 'active' : ''}`}
+                        title="Automático"
+                      >
+                        <Monitor size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="account-menu-divider" />
                   <button
                     onClick={() => { logout(); setIsAccountMenuOpen(false); }}
                     className="account-menu-item logout"
@@ -141,6 +170,32 @@ export function Navbar() {
           </Link>
           <div className="mobile-language-selector">
             <LanguageSelector />
+          </div>
+          <div className="mobile-theme-selector">
+            <span className="mobile-theme-label">Tema:</span>
+            <div className="mobile-theme-buttons">
+              <button
+                onClick={() => setTheme('light')}
+                className={`mobile-theme-btn ${theme === 'light' ? 'active' : ''}`}
+              >
+                <Sun size={18} />
+                <span>Claro</span>
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`mobile-theme-btn ${theme === 'dark' ? 'active' : ''}`}
+              >
+                <Moon size={18} />
+                <span>Oscuro</span>
+              </button>
+              <button
+                onClick={() => setTheme('auto')}
+                className={`mobile-theme-btn ${theme === 'auto' ? 'active' : ''}`}
+              >
+                <Monitor size={18} />
+                <span>Auto</span>
+              </button>
+            </div>
           </div>
           {user ? (
             <>

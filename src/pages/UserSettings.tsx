@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield } from 'lucide-react';
 import '../styles/pages/UserSettings.css';
 
 export function UserSettings() {
   const { user } = useAuth();
   const { language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'notifications'>('profile');
 
   const [formData, setFormData] = useState({
@@ -19,7 +21,7 @@ export function UserSettings() {
 
   const [preferences, setPreferences] = useState({
     language: language,
-    theme: 'light',
+    theme: theme,
     emailNotifications: true,
     orderUpdates: true,
     promotions: false,
@@ -43,6 +45,7 @@ export function UserSettings() {
   const handlePreferencesUpdate = () => {
     console.log('Actualizar preferencias:', preferences);
     setLanguage(preferences.language as 'es' | 'en');
+    setTheme(preferences.theme as 'light' | 'dark' | 'auto');
   };
 
   const tabs = [
