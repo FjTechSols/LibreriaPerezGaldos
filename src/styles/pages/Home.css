@@ -369,13 +369,12 @@
 }
 
 .dark-mode .featured-section,
-.dark-mode .new-section,
 .dark-mode .sale-section {
-  background: #0f172a;
+  background: #0f172a !important;
 }
 
 .dark-mode .new-section {
-  background: #1e293b;
+  background: #1e293b !important;
 }
 
 .dark-mode .section-title {
