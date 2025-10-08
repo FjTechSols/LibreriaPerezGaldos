@@ -92,7 +92,7 @@ export function Navbar() {
                     <span>{user.role === 'admin' ? t('adminPanel') : t('myAccount')}</span>
                   </Link>
                   <Link
-                    to="/ajustes"
+                    to={user.role === 'admin' ? '/admin/ajustes' : '/ajustes'}
                     className="account-menu-item"
                     onClick={() => setIsAccountMenuOpen(false)}
                   >
@@ -208,6 +208,13 @@ export function Navbar() {
                   Panel Admin
                 </Link>
               )}
+              <Link
+                to={user.role === 'admin' ? '/admin/ajustes' : '/ajustes'}
+                className="mobile-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('settings')}
+              </Link>
               <button
                 onClick={() => { logout(); setIsMenuOpen(false); }}
                 className="mobile-logout"
