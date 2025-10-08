@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { BookCard } from '../components/BookCard';
 import { SearchBar } from '../components/SearchBar';
 import { BookFilter } from '../components/BookFilter';
+import { Pagination } from '../components/Pagination';
 import { Book, FilterState } from '../types';
 import { mockBooks } from '../data/mockBooks';
 import '../styles/pages/Catalog.css';
@@ -12,6 +13,8 @@ export function Catalog() {
   const [books, setBooks] = useState<Book[]>(mockBooks);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(mockBooks);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
   const [filters, setFilters] = useState<FilterState>({
     category: searchParams.get('category') || 'Todos',
     priceRange: [0, 1000],
@@ -82,15 +85,17 @@ export function Catalog() {
     });
 
     setFilteredBooks(filtered);
+    setCurrentPage(1);
   }, [books, filters, searchParams]);
 
   const handleSearchResults = (results: Book[]) => {
     setBooks(results);
+    setCurrentPage(1);
   };
 
   const handleFiltersChange = (newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    // Scroll to results when filters change
+    setCurrentPage(1);
     setTimeout(() => {
       const resultsElement = document.querySelector('.catalog-results');
       if (resultsElement) {
@@ -98,6 +103,21 @@ export function Catalog() {
       }
     }, 100);
   };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentBooks = filteredBooks.slice(startIndex, endIndex);
 
   return (
     <div className="catalog">
@@ -132,10 +152,23 @@ export function Catalog() {
           </div>
 
           <div className={`books-container ${viewMode}`}>
-            {filteredBooks.map(book => (
+            {currentBooks.map(book => (
               <BookCard key={book.id} book={book} viewMode={viewMode} />
             ))}
           </div>
+
+          {filteredBooks.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredBooks.length}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              showItemsPerPageSelector={true}
+              itemsPerPageOptions={[10, 25, 50]}
+            />
+          )}
 
           {filteredBooks.length === 0 && (
             <div className="no-results">

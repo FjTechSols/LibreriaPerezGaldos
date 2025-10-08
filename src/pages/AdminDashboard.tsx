@@ -13,6 +13,7 @@ import PedidosList from '../components/PedidosList';
 import PedidoDetalle from '../components/PedidoDetalle';
 import CrearPedido from '../components/CrearPedido';
 import { GestionClientes } from '../components/GestionClientes';
+import { Pagination } from '../components/Pagination';
 import '../styles/pages/AdminDashboard.css';
 
 const COMPANY_INFO = {
@@ -50,6 +51,8 @@ export function AdminDashboard() {
   const [isPedidoDetalleOpen, setIsPedidoDetalleOpen] = useState(false);
   const [isCrearPedidoOpen, setIsCrearPedidoOpen] = useState(false);
   const [refreshPedidos, setRefreshPedidos] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -173,6 +176,21 @@ export function AdminDashboard() {
     book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Pagination
+  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentBooks = filteredBooks.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
 
   const handleCreateInvoice = async (formData: InvoiceFormData) => {
     const result = await createInvoice(formData);
@@ -362,7 +380,7 @@ export function AdminDashboard() {
           <span>Acciones</span>
         </div>
 
-        {filteredBooks.map(book => (
+        {currentBooks.map(book => (
           <div key={book.id} className="table-row">
             <span className="book-code-cell">{book.code}</span>
             <div className="book-cover">
@@ -419,6 +437,17 @@ export function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        itemsPerPage={itemsPerPage}
+        totalItems={filteredBooks.length}
+        onPageChange={handlePageChange}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        showItemsPerPageSelector={true}
+        itemsPerPageOptions={[10, 20, 50]}
+      />
     </div>
   );
 
@@ -524,7 +553,10 @@ export function AdminDashboard() {
                           'Buscar pedidos...'
                         }
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="admin-search-input"
                     />
                   </div>
