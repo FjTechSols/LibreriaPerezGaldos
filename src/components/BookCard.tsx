@@ -5,6 +5,7 @@ import { Book } from '../types';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useSettings } from '../context/SettingsContext';
 import { getTranslatedBook, getTranslatedCategory } from '../data/mockBooks';
 import '../styles/components/BookCard.css';
 
@@ -17,6 +18,7 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
   const { language, t } = useLanguage();
+  const { formatPrice } = useSettings();
 
   const translatedBook = getTranslatedBook(book, language);
 
@@ -91,15 +93,15 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
         <div className="bookcard__pricing">
           {translatedBook.isOnSale && translatedBook.originalPrice ? (
             <>
-              <span className="bookcard__original-price">${translatedBook.originalPrice}</span>
-              <span className="bookcard__sale-price">${translatedBook.price}</span>
+              <span className="bookcard__original-price">{formatPrice(translatedBook.originalPrice)}</span>
+              <span className="bookcard__sale-price">{formatPrice(translatedBook.price)}</span>
               <span className="bookcard__discount">
                 <Tag size={14} />
                 {Math.round(((translatedBook.originalPrice - translatedBook.price) / translatedBook.originalPrice) * 100)}% OFF
               </span>
             </>
           ) : (
-            <span className="bookcard__current-price">${translatedBook.price}</span>
+            <span className="bookcard__current-price">{formatPrice(translatedBook.price)}</span>
           )}
         </div>
 

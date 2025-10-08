@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import {
   Building2, Mail, Phone, Globe, FileText, DollarSign,
   Truck, Bell, Database, Shield, Settings as SettingsIcon,
-  Package, CreditCard, Download, HardDrive
+  Package, CreditCard, Download, HardDrive, Check
 } from 'lucide-react';
 import {
   exportLibrosToCSV,
@@ -18,66 +19,139 @@ import '../styles/pages/AdminSettings.css';
 
 export function AdminSettings() {
   const { user } = useAuth();
+  const {
+    settings,
+    loading,
+    updateCompanySettings,
+    updateBillingSettings,
+    updateShippingSettings,
+    updateSystemSettings,
+    updateSecuritySettings
+  } = useSettings();
+
   const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup'>('company');
   const [isExporting, setIsExporting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const [companyData, setCompanyData] = useState({
-    name: 'Librería Online',
-    nif: 'B12345678',
-    address: 'Calle Principal 123',
-    city: 'Madrid',
-    postalCode: '28001',
-    country: 'España',
-    phone: '+34 912 345 678',
-    email: 'info@libreria.com',
-    website: 'www.libreria.com'
+    name: '',
+    address: '',
+    phone: '',
+    email: '',
+    website: '',
+    taxId: '',
+    logo: ''
   });
 
-  const [billingSettings, setBillingSettings] = useState({
-    currency: 'EUR',
+  const [billingData, setBillingData] = useState({
+    currency: 'EUR' as 'EUR' | 'USD' | 'GBP',
+    currencySymbol: '€',
     taxRate: 21,
     invoicePrefix: 'FAC',
-    invoiceStartNumber: 1000,
-    paymentMethods: ['Tarjeta', 'PayPal', 'Transferencia'],
-    paymentTerms: 30
+    invoiceTerms: '',
+    invoiceFooter: ''
   });
 
-  const [shippingSettings, setShippingSettings] = useState({
-    carriers: ['ASM', 'GLS', 'Envialia'],
-    defaultCarrier: 'ASM',
+  const [shippingData, setShippingData] = useState({
     freeShippingThreshold: 50,
     standardShippingCost: 5.99,
-    expressShippingCost: 9.99,
-    estimatedDeliveryDays: 3
+    expressShippingCost: 12.99,
+    shippingZones: [] as string[],
+    estimatedDeliveryDays: {
+      standard: 5,
+      express: 2
+    }
   });
 
-  const [systemSettings, setSystemSettings] = useState({
+  const [systemData, setSystemData] = useState({
+    itemsPerPageCatalog: 25,
+    itemsPerPageAdmin: 20,
     maintenanceMode: false,
-    allowRegistrations: true,
-    requireEmailVerification: true,
-    sessionTimeout: 60,
-    maxLoginAttempts: 5,
-    backupFrequency: 'daily'
+    allowRegistration: true,
+    defaultLanguage: 'es',
+    enableWishlist: true,
+    enableReviews: true
   });
 
-  const handleCompanyUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Actualizar datos de empresa:', companyData);
+  const [securityData, setSecurityData] = useState({
+    sessionTimeout: 3600,
+    maxLoginAttempts: 5,
+    passwordMinLength: 8,
+    requireEmailVerification: false,
+    enable2FA: false
+  });
+
+  useEffect(() => {
+    if (!loading && settings) {
+      setCompanyData(settings.company);
+      setBillingData(settings.billing);
+      setShippingData(settings.shipping);
+      setSystemData(settings.system);
+      setSecurityData(settings.security);
+    }
+  }, [loading, settings]);
+
+  const showSuccessMessage = (message: string) => {
+    setSaveSuccess(message);
+    setSaveError(null);
+    setTimeout(() => setSaveSuccess(null), 3000);
   };
 
-  const handleBillingUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Actualizar configuración de facturación:', billingSettings);
+  const showErrorMessage = (message: string) => {
+    setSaveError(message);
+    setSaveSuccess(null);
+    setTimeout(() => setSaveError(null), 3000);
   };
 
-  const handleShippingUpdate = (e: React.FormEvent) => {
+  const handleCompanyUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Actualizar configuración de envíos:', shippingSettings);
+    const success = await updateCompanySettings(companyData);
+    if (success) {
+      showSuccessMessage('Datos de empresa actualizados correctamente');
+    } else {
+      showErrorMessage('Error al actualizar los datos de empresa');
+    }
   };
 
-  const handleSystemUpdate = (e: React.FormEvent) => {
+  const handleBillingUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Actualizar configuración del sistema:', systemSettings);
+    const success = await updateBillingSettings(billingData);
+    if (success) {
+      showSuccessMessage('Configuración de facturación actualizada correctamente');
+    } else {
+      showErrorMessage('Error al actualizar la configuración de facturación');
+    }
+  };
+
+  const handleShippingUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await updateShippingSettings(shippingData);
+    if (success) {
+      showSuccessMessage('Configuración de envíos actualizada correctamente');
+    } else {
+      showErrorMessage('Error al actualizar la configuración de envíos');
+    }
+  };
+
+  const handleSystemUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await updateSystemSettings(systemData);
+    if (success) {
+      showSuccessMessage('Configuración del sistema actualizada correctamente');
+    } else {
+      showErrorMessage('Error al actualizar la configuración del sistema');
+    }
+  };
+
+  const handleSecurityUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await updateSecuritySettings(securityData);
+    if (success) {
+      showSuccessMessage('Configuración de seguridad actualizada correctamente');
+    } else {
+      showErrorMessage('Error al actualizar la configuración de seguridad');
+    }
   };
 
   const handleExport = async (exportFunction: () => Promise<void>, name: string) => {
@@ -108,6 +182,20 @@ export function AdminSettings() {
           <h1>Configuración del Sistema</h1>
           <p>Administración general de la librería</p>
         </div>
+
+        {saveSuccess && (
+          <div className="alert alert-success">
+            <Check size={20} />
+            <span>{saveSuccess}</span>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="alert alert-error">
+            <X size={20} />
+            <span>{saveError}</span>
+          </div>
+        )}
 
         <div className="settings-layout">
           <nav className="settings-nav">
@@ -146,15 +234,15 @@ export function AdminSettings() {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="nif">
+                      <label htmlFor="taxId">
                         <FileText size={16} />
                         NIF/CIF
                       </label>
                       <input
-                        id="nif"
+                        id="taxId"
                         type="text"
-                        value={companyData.nif}
-                        onChange={(e) => setCompanyData({ ...companyData, nif: e.target.value })}
+                        value={companyData.taxId}
+                        onChange={(e) => setCompanyData({ ...companyData, taxId: e.target.value })}
                       />
                     </div>
                   </div>
@@ -162,46 +250,29 @@ export function AdminSettings() {
                   <div className="form-group">
                     <label htmlFor="address">
                       <Building2 size={16} />
-                      Dirección
+                      Dirección Completa
                     </label>
-                    <input
+                    <textarea
                       id="address"
-                      type="text"
+                      rows={2}
                       value={companyData.address}
                       onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
+                      placeholder="Calle, número, ciudad, código postal, país"
                     />
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="city">Ciudad</label>
-                      <input
-                        id="city"
-                        type="text"
-                        value={companyData.city}
-                        onChange={(e) => setCompanyData({ ...companyData, city: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="postalCode">Código Postal</label>
-                      <input
-                        id="postalCode"
-                        type="text"
-                        value={companyData.postalCode}
-                        onChange={(e) => setCompanyData({ ...companyData, postalCode: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="country">País</label>
-                      <input
-                        id="country"
-                        type="text"
-                        value={companyData.country}
-                        onChange={(e) => setCompanyData({ ...companyData, country: e.target.value })}
-                      />
-                    </div>
+                  <div className="form-group">
+                    <label htmlFor="logo">
+                      <Building2 size={16} />
+                      URL del Logo
+                    </label>
+                    <input
+                      id="logo"
+                      type="text"
+                      value={companyData.logo}
+                      onChange={(e) => setCompanyData({ ...companyData, logo: e.target.value })}
+                      placeholder="https://ejemplo.com/logo.png"
+                    />
                   </div>
 
                   <div className="form-row">
@@ -264,12 +335,20 @@ export function AdminSettings() {
                       </label>
                       <select
                         id="currency"
-                        value={billingSettings.currency}
-                        onChange={(e) => setBillingSettings({ ...billingSettings, currency: e.target.value })}
+                        value={billingData.currency}
+                        onChange={(e) => {
+                          const currency = e.target.value as 'EUR' | 'USD' | 'GBP';
+                          const symbols = { EUR: '€', USD: '$', GBP: '£' };
+                          setBillingData({
+                            ...billingData,
+                            currency,
+                            currencySymbol: symbols[currency]
+                          });
+                        }}
                       >
-                        <option value="EUR">Euro (EUR)</option>
-                        <option value="USD">Dólar (USD)</option>
-                        <option value="GBP">Libra (GBP)</option>
+                        <option value="EUR">Euro (EUR) - €</option>
+                        <option value="USD">Dólar (USD) - $</option>
+                        <option value="GBP">Libra (GBP) - £</option>
                       </select>
                     </div>
 
@@ -283,73 +362,48 @@ export function AdminSettings() {
                         type="number"
                         min="0"
                         max="100"
-                        value={billingSettings.taxRate}
-                        onChange={(e) => setBillingSettings({ ...billingSettings, taxRate: Number(e.target.value) })}
+                        value={billingData.taxRate}
+                        onChange={(e) => setBillingData({ ...billingData, taxRate: Number(e.target.value) })}
                       />
                     </div>
-                  </div>
 
-                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="invoicePrefix">Prefijo de factura</label>
                       <input
                         id="invoicePrefix"
                         type="text"
-                        value={billingSettings.invoicePrefix}
-                        onChange={(e) => setBillingSettings({ ...billingSettings, invoicePrefix: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="invoiceStartNumber">Número inicial</label>
-                      <input
-                        id="invoiceStartNumber"
-                        type="number"
-                        value={billingSettings.invoiceStartNumber}
-                        onChange={(e) => setBillingSettings({ ...billingSettings, invoiceStartNumber: Number(e.target.value) })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="paymentTerms">Plazo de pago (días)</label>
-                      <input
-                        id="paymentTerms"
-                        type="number"
-                        value={billingSettings.paymentTerms}
-                        onChange={(e) => setBillingSettings({ ...billingSettings, paymentTerms: Number(e.target.value) })}
+                        value={billingData.invoicePrefix}
+                        onChange={(e) => setBillingData({ ...billingData, invoicePrefix: e.target.value })}
                       />
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label>
-                      <CreditCard size={16} />
-                      Métodos de pago activos
+                    <label htmlFor="invoiceTerms">
+                      <FileText size={16} />
+                      Condiciones de Pago
                     </label>
-                    <div className="checkbox-grid">
-                      {['Tarjeta', 'PayPal', 'Transferencia', 'Reembolso'].map(method => (
-                        <label key={method} className="checkbox-label-inline">
-                          <input
-                            type="checkbox"
-                            checked={billingSettings.paymentMethods.includes(method)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setBillingSettings({
-                                  ...billingSettings,
-                                  paymentMethods: [...billingSettings.paymentMethods, method]
-                                });
-                              } else {
-                                setBillingSettings({
-                                  ...billingSettings,
-                                  paymentMethods: billingSettings.paymentMethods.filter(m => m !== method)
-                                });
-                              }
-                            }}
-                          />
-                          <span>{method}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <textarea
+                      id="invoiceTerms"
+                      rows={2}
+                      value={billingData.invoiceTerms}
+                      onChange={(e) => setBillingData({ ...billingData, invoiceTerms: e.target.value })}
+                      placeholder="Ej: Pago a 30 días. Transferencia bancaria."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="invoiceFooter">
+                      <FileText size={16} />
+                      Texto al Pie de Factura
+                    </label>
+                    <textarea
+                      id="invoiceFooter"
+                      rows={2}
+                      value={billingData.invoiceFooter}
+                      onChange={(e) => setBillingData({ ...billingData, invoiceFooter: e.target.value })}
+                      placeholder="Ej: Gracias por su compra. Para cualquier consulta contacte con nosotros."
+                    />
                   </div>
 
                   <button type="submit" className="btn-primary">
@@ -363,68 +417,77 @@ export function AdminSettings() {
               <div className="settings-section">
                 <h2>Configuración de Envíos</h2>
                 <form onSubmit={handleShippingUpdate} className="settings-form">
-                  <div className="form-group">
-                    <label htmlFor="defaultCarrier">
-                      <Truck size={16} />
-                      Transportista predeterminado
-                    </label>
-                    <select
-                      id="defaultCarrier"
-                      value={shippingSettings.defaultCarrier}
-                      onChange={(e) => setShippingSettings({ ...shippingSettings, defaultCarrier: e.target.value })}
-                    >
-                      {shippingSettings.carriers.map(carrier => (
-                        <option key={carrier} value={carrier}>{carrier}</option>
-                      ))}
-                    </select>
-                  </div>
-
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="standardShipping">
                         <Package size={16} />
-                        Envío estándar (€)
+                        Envío estándar
                       </label>
                       <input
                         id="standardShipping"
                         type="number"
                         step="0.01"
-                        value={shippingSettings.standardShippingCost}
-                        onChange={(e) => setShippingSettings({ ...shippingSettings, standardShippingCost: Number(e.target.value) })}
+                        value={shippingData.standardShippingCost}
+                        onChange={(e) => setShippingData({ ...shippingData, standardShippingCost: Number(e.target.value) })}
                       />
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="expressShipping">Envío express (€)</label>
+                      <label htmlFor="expressShipping">
+                        <Truck size={16} />
+                        Envío express
+                      </label>
                       <input
                         id="expressShipping"
                         type="number"
                         step="0.01"
-                        value={shippingSettings.expressShippingCost}
-                        onChange={(e) => setShippingSettings({ ...shippingSettings, expressShippingCost: Number(e.target.value) })}
+                        value={shippingData.expressShippingCost}
+                        onChange={(e) => setShippingData({ ...shippingData, expressShippingCost: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="freeShipping">Envío gratis desde</label>
+                      <input
+                        id="freeShipping"
+                        type="number"
+                        step="0.01"
+                        value={shippingData.freeShippingThreshold}
+                        onChange={(e) => setShippingData({ ...shippingData, freeShippingThreshold: Number(e.target.value) })}
                       />
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label htmlFor="freeShipping">Envío gratis desde (€)</label>
+                      <label htmlFor="standardDelivery">Días entrega estándar</label>
                       <input
-                        id="freeShipping"
+                        id="standardDelivery"
                         type="number"
-                        step="0.01"
-                        value={shippingSettings.freeShippingThreshold}
-                        onChange={(e) => setShippingSettings({ ...shippingSettings, freeShippingThreshold: Number(e.target.value) })}
+                        value={shippingData.estimatedDeliveryDays.standard}
+                        onChange={(e) => setShippingData({
+                          ...shippingData,
+                          estimatedDeliveryDays: {
+                            ...shippingData.estimatedDeliveryDays,
+                            standard: Number(e.target.value)
+                          }
+                        })}
                       />
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="deliveryDays">Días estimados de entrega</label>
+                      <label htmlFor="expressDelivery">Días entrega express</label>
                       <input
-                        id="deliveryDays"
+                        id="expressDelivery"
                         type="number"
-                        value={shippingSettings.estimatedDeliveryDays}
-                        onChange={(e) => setShippingSettings({ ...shippingSettings, estimatedDeliveryDays: Number(e.target.value) })}
+                        value={shippingData.estimatedDeliveryDays.express}
+                        onChange={(e) => setShippingData({
+                          ...shippingData,
+                          estimatedDeliveryDays: {
+                            ...shippingData.estimatedDeliveryDays,
+                            express: Number(e.target.value)
+                          }
+                        })}
                       />
                     </div>
                   </div>
@@ -440,12 +503,38 @@ export function AdminSettings() {
               <div className="settings-section">
                 <h2>Configuración del Sistema</h2>
                 <form onSubmit={handleSystemUpdate} className="settings-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="itemsPerPageCatalog">Items por página (Catálogo)</label>
+                      <input
+                        id="itemsPerPageCatalog"
+                        type="number"
+                        min="10"
+                        max="100"
+                        value={systemData.itemsPerPageCatalog}
+                        onChange={(e) => setSystemData({ ...systemData, itemsPerPageCatalog: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="itemsPerPageAdmin">Items por página (Admin)</label>
+                      <input
+                        id="itemsPerPageAdmin"
+                        type="number"
+                        min="10"
+                        max="100"
+                        value={systemData.itemsPerPageAdmin}
+                        onChange={(e) => setSystemData({ ...systemData, itemsPerPageAdmin: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+
                   <div className="checkbox-group">
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={systemSettings.maintenanceMode}
-                        onChange={(e) => setSystemSettings({ ...systemSettings, maintenanceMode: e.target.checked })}
+                        checked={systemData.maintenanceMode}
+                        onChange={(e) => setSystemData({ ...systemData, maintenanceMode: e.target.checked })}
                       />
                       <div>
                         <strong>Modo mantenimiento</strong>
@@ -458,8 +547,8 @@ export function AdminSettings() {
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={systemSettings.allowRegistrations}
-                        onChange={(e) => setSystemSettings({ ...systemSettings, allowRegistrations: e.target.checked })}
+                        checked={systemData.allowRegistration}
+                        onChange={(e) => setSystemData({ ...systemData, allowRegistration: e.target.checked })}
                       />
                       <div>
                         <strong>Permitir registros</strong>
@@ -472,53 +561,28 @@ export function AdminSettings() {
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={systemSettings.requireEmailVerification}
-                        onChange={(e) => setSystemSettings({ ...systemSettings, requireEmailVerification: e.target.checked })}
+                        checked={systemData.enableWishlist}
+                        onChange={(e) => setSystemData({ ...systemData, enableWishlist: e.target.checked })}
                       />
                       <div>
-                        <strong>Verificación de email</strong>
-                        <p>Requerir verificación de email para nuevos usuarios</p>
+                        <strong>Habilitar lista de deseos</strong>
+                        <p>Los usuarios pueden agregar libros a su lista de deseos</p>
                       </div>
                     </label>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="sessionTimeout">Tiempo de sesión (min)</label>
+                  <div className="checkbox-group">
+                    <label className="checkbox-label">
                       <input
-                        id="sessionTimeout"
-                        type="number"
-                        value={systemSettings.sessionTimeout}
-                        onChange={(e) => setSystemSettings({ ...systemSettings, sessionTimeout: Number(e.target.value) })}
+                        type="checkbox"
+                        checked={systemData.enableReviews}
+                        onChange={(e) => setSystemData({ ...systemData, enableReviews: e.target.checked })}
                       />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="maxLoginAttempts">Intentos de login máximos</label>
-                      <input
-                        id="maxLoginAttempts"
-                        type="number"
-                        value={systemSettings.maxLoginAttempts}
-                        onChange={(e) => setSystemSettings({ ...systemSettings, maxLoginAttempts: Number(e.target.value) })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="backupFrequency">
-                      <Database size={16} />
-                      Frecuencia de respaldo
+                      <div>
+                        <strong>Habilitar reseñas</strong>
+                        <p>Los usuarios pueden dejar reseñas en los productos</p>
+                      </div>
                     </label>
-                    <select
-                      id="backupFrequency"
-                      value={systemSettings.backupFrequency}
-                      onChange={(e) => setSystemSettings({ ...systemSettings, backupFrequency: e.target.value })}
-                    >
-                      <option value="hourly">Cada hora</option>
-                      <option value="daily">Diario</option>
-                      <option value="weekly">Semanal</option>
-                      <option value="monthly">Mensual</option>
-                    </select>
                   </div>
 
                   <button type="submit" className="btn-primary">
@@ -531,35 +595,76 @@ export function AdminSettings() {
             {activeTab === 'security' && (
               <div className="settings-section">
                 <h2>Seguridad y Privacidad</h2>
-                <div className="settings-form">
-                  <div className="info-box">
-                    <Shield size={24} />
-                    <div>
-                      <h3>Seguridad de la cuenta</h3>
-                      <p>Las políticas de seguridad (RLS) están activas en la base de datos</p>
+                <form onSubmit={handleSecurityUpdate} className="settings-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="sessionTimeout">
+                        <Shield size={16} />
+                        Tiempo de sesión (segundos)
+                      </label>
+                      <input
+                        id="sessionTimeout"
+                        type="number"
+                        value={securityData.sessionTimeout}
+                        onChange={(e) => setSecurityData({ ...securityData, sessionTimeout: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="maxLoginAttempts">Intentos máximos de login</label>
+                      <input
+                        id="maxLoginAttempts"
+                        type="number"
+                        value={securityData.maxLoginAttempts}
+                        onChange={(e) => setSecurityData({ ...securityData, maxLoginAttempts: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="passwordMinLength">Longitud mínima de contraseña</label>
+                      <input
+                        id="passwordMinLength"
+                        type="number"
+                        min="6"
+                        max="20"
+                        value={securityData.passwordMinLength}
+                        onChange={(e) => setSecurityData({ ...securityData, passwordMinLength: Number(e.target.value) })}
+                      />
                     </div>
                   </div>
 
-                  <div className="info-box">
-                    <Database size={24} />
-                    <div>
-                      <h3>Backup de datos</h3>
-                      <p>Los respaldos se realizan automáticamente según la configuración del sistema</p>
-                    </div>
+                  <div className="checkbox-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={securityData.requireEmailVerification}
+                        onChange={(e) => setSecurityData({ ...securityData, requireEmailVerification: e.target.checked })}
+                      />
+                      <div>
+                        <strong>Requiere verificación de email</strong>
+                        <p>Los nuevos usuarios deben verificar su correo electrónico</p>
+                      </div>
+                    </label>
                   </div>
 
-                  <div className="info-box">
-                    <Bell size={24} />
-                    <div>
-                      <h3>Logs de actividad</h3>
-                      <p>Todas las acciones administrativas quedan registradas</p>
-                    </div>
+                  <div className="checkbox-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={securityData.enable2FA}
+                        onChange={(e) => setSecurityData({ ...securityData, enable2FA: e.target.checked })}
+                      />
+                      <div>
+                        <strong>Autenticación de dos factores (2FA)</strong>
+                        <p>Habilitar 2FA para mayor seguridad</p>
+                      </div>
+                    </label>
                   </div>
 
-                  <button className="btn-secondary">
-                    Ver logs de seguridad
+                  <button type="submit" className="btn-primary">
+                    Guardar configuración de seguridad
                   </button>
-                </div>
+                </form>
               </div>
             )}
 

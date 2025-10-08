@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, CreditCard, AlertCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import { crearPedido } from '../services/pedidoService';
 import { validateStock } from '../services/cartService';
 import '../styles/pages/Cart.css';
@@ -10,6 +11,7 @@ import '../styles/pages/Cart.css';
 export function Cart() {
   const { items, removeItem, updateQuantity, clearCart, total } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const { formatPrice } = useSettings();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,7 +114,7 @@ export function Cart() {
                 </div>
 
                 <div className="item-price">
-                  <span className="unit-price">${item.book.price}</span>
+                  <span className="unit-price">{formatPrice(item.book.price)}</span>
                 </div>
 
                 <div className="quantity-controls">
@@ -134,7 +136,7 @@ export function Cart() {
                 </div>
 
                 <div className="item-total">
-                  <span className="total-price">${(item.book.price * item.quantity).toFixed(2)}</span>
+                  <span className="total-price">{formatPrice(item.book.price * item.quantity)}</span>
                 </div>
 
                 <button 
@@ -155,28 +157,28 @@ export function Cart() {
               <div className="summary-details">
                 <div className="summary-row">
                   <span>Subtotal ({items.reduce((sum, item) => sum + item.quantity, 0)} libro{items.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 's' : ''})</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
                 <div className="summary-row">
                   <span>Envío</span>
-                  <span>{total >= 50 ? 'Gratis' : '$5.99'}</span>
+                  <span>{total >= 50 ? 'Gratis' : formatPrice(5.99)}</span>
                 </div>
                 <div className="summary-row">
                   <span>Impuestos</span>
-                  <span>${(total * 0.1).toFixed(2)}</span>
+                  <span>{formatPrice(total * 0.1)}</span>
                 </div>
                 
                 <hr className="summary-divider" />
                 
                 <div className="summary-row total-row">
                   <span>Total</span>
-                  <span>${(total + (total >= 50 ? 0 : 5.99) + total * 0.1).toFixed(2)}</span>
+                  <span>{formatPrice(total + (total >= 50 ? 0 : 5.99) + total * 0.1)}</span>
                 </div>
               </div>
 
               {total < 50 && (
                 <div className="shipping-notice">
-                  <p>Añade ${(50 - total).toFixed(2)} más para envío gratuito</p>
+                  <p>Añade {formatPrice(50 - total)} más para envío gratuito</p>
                 </div>
               )}
 
