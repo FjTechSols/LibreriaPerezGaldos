@@ -257,12 +257,13 @@
 
 /* Dark Mode Styles */
 .dark-mode .admin-settings {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
 }
 
 .dark-mode .admin-settings .settings-layout {
   background: #1e293b;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  border: 1px solid #334155;
 }
 
 .dark-mode .admin-settings .settings-nav {
