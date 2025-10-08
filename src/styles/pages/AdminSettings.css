@@ -255,6 +255,94 @@
   font-size: 0.9375rem;
 }
 
+.backup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.backup-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.backup-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.backup-card.iberlibro {
+  border-color: #f59e0b;
+}
+
+.backup-card.iberlibro:hover {
+  border-color: #d97706;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.backup-card.uniliber {
+  border-color: #10b981;
+}
+
+.backup-card.uniliber:hover {
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.backup-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.backup-card-header svg {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.backup-card.iberlibro .backup-card-header svg {
+  color: #f59e0b;
+}
+
+.backup-card.uniliber .backup-card-header svg {
+  color: #10b981;
+}
+
+.backup-card-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.backup-card p {
+  color: #64748b;
+  font-size: 0.9375rem;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.backup-card .btn-primary {
+  width: 100%;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.backup-card .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Dark Mode Styles */
 .dark-mode .admin-settings {
   background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
@@ -370,6 +458,54 @@
   color: #94a3b8;
 }
 
+.dark-mode .backup-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .backup-card:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+}
+
+.dark-mode .backup-card.iberlibro {
+  border-color: #f59e0b;
+}
+
+.dark-mode .backup-card.iberlibro:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.dark-mode .backup-card.uniliber {
+  border-color: #10b981;
+}
+
+.dark-mode .backup-card.uniliber:hover {
+  border-color: #34d399;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+.dark-mode .backup-card-header h3 {
+  color: #f1f5f9;
+}
+
+.dark-mode .backup-card p {
+  color: #94a3b8;
+}
+
+.dark-mode .backup-card-header svg {
+  color: #60a5fa;
+}
+
+.dark-mode .backup-card.iberlibro .backup-card-header svg {
+  color: #fbbf24;
+}
+
+.dark-mode .backup-card.uniliber .backup-card-header svg {
+  color: #34d399;
+}
+
 @media (max-width: 768px) {
   .admin-settings .settings-layout {
     grid-template-columns: 1fr;
@@ -414,5 +550,9 @@
 
   .dark-mode .admin-settings .settings-nav-item.active {
     border-bottom-color: #60a5fa;
+  }
+
+  .backup-grid {
+    grid-template-columns: 1fr;
   }
 }
