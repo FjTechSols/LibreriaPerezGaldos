@@ -302,7 +302,7 @@
 .dark-mode .admin-settings .form-group select {
   background: #0f172a;
   border-color: #334155;
-  color: #e2e8f0;
+  color: #f1f5f9;
 }
 
 .dark-mode .admin-settings .form-group input:focus,
@@ -312,7 +312,7 @@
 }
 
 .dark-mode .admin-settings .form-group input::placeholder {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .dark-mode .admin-settings .checkbox-group {
