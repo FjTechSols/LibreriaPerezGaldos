@@ -35,7 +35,7 @@ export function Home() {
           </div>
           <div className="hero-image">
             <img 
-              src="https://drive.google.com/file/d/1AJttb20H4LafyP59tR4gQ_KYyFhj0NeD/view?usp=drive_link" 
+              src="https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqlMhjjZBuPwDEYpS20tNOXU1UnOKwetbRkAFCo5sWJCjGblUqfCCvE7a1LmaOLP4Hj4j2QDqZZgMEJh6UpLmfrNslvNkzjtmB3SYCNfcowL4EKC2XzgmA8mFUUZYsk6upINu4mpB60-QA=s1360-w1360-h1020-rw" 
               alt="Biblioteca con libros"
               className="hero-img"
             />
