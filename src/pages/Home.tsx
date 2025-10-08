@@ -35,7 +35,7 @@ export function Home() {
           </div>
           <div className="hero-image">
             <img 
-              src="https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=600" 
+              src="https://drive.google.com/file/d/1AJttb20H4LafyP59tR4gQ_KYyFhj0NeD/view?usp=drive_link" 
               alt="Biblioteca con libros"
               className="hero-img"
             />
