@@ -34,8 +34,7 @@ export function Home() {
             </div>
           </div>
           <div className="hero-image">
-            <img 
-              src="https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqlMhjjZBuPwDEYpS20tNOXU1UnOKwetbRkAFCo5sWJCjGblUqfCCvE7a1LmaOLP4Hj4j2QDqZZgMEJh6UpLmfrNslvNkzjtmB3SYCNfcowL4EKC2XzgmA8mFUUZYsk6upINu4mpB60-QA=s1360-w1360-h1020-rw" 
+            <img src="https://estaticos.esmadrid.com/cdn/farfuture/AZP1rWLWrwssQvRGRV5dqaObIyWEN3Lazwu5vH8TyjE/mtime:1646732851/sites/default/files/styles/content_type_full/public/recursosturisticos/compras/perez_galdos.jpg?itok=ZR2_WSL4" 
               alt="Biblioteca con libros"
               className="hero-img"
             />
