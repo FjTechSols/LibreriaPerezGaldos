@@ -125,7 +125,6 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
 
     const pedidoData = {
       usuario_id: input.usuario_id,
-      cliente_id: input.cliente_id || null,
       estado: 'pendiente' as EstadoPedido,
       tipo: input.tipo || 'interno',
       subtotal,
@@ -161,14 +160,15 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       .insert(detallesConPedidoId);
 
     if (detallesError) {
-      console.error('Error al crear detalles:', detallesError);
+      console.error('❌ Error al crear detalles:', detallesError);
       await supabase.from('pedidos').delete().eq('id', pedido.id);
       throw detallesError;
     }
 
+    console.log('✅ Pedido creado exitosamente:', pedido.id);
     return await obtenerPedidoPorId(pedido.id);
   } catch (error) {
-    console.error('Error en crearPedido:', error);
+    console.error('❌ Error en crearPedido:', error);
     return null;
   }
 };

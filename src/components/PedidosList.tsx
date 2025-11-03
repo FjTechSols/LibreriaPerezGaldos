@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Eye, Package, Filter, TrendingUp } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../services/pedidoService';
+import { useSettings } from '../context/SettingsContext';
 import '../styles/components/PedidosList.css';
 
 interface PedidosListProps {
@@ -28,6 +29,7 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
 };
 
 export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosListProps) {
+  const { formatPrice } = useSettings();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | ''>('');
@@ -48,12 +50,14 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
     }
 
     const data = await obtenerPedidos(filtros);
+    console.log('📦 Pedidos cargados:', data.length, 'pedidos');
     setPedidos(data);
     setLoading(false);
   };
 
   const cargarEstadisticas = async () => {
     const stats = await obtenerEstadisticasPedidos();
+    console.log('📊 Estadísticas pedidos:', stats);
     setEstadisticas(stats);
   };
 
@@ -112,7 +116,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
 
           <div className="stat-card ventas">
             <span className="stat-label">Ventas Totales</span>
-            <span className="stat-value">{estadisticas.totalVentas.toFixed(2)} €</span>
+            <span className="stat-value">{formatPrice(estadisticas.totalVentas)}</span>
           </div>
         </div>
       )}
@@ -182,7 +186,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
               </span>
             </span>
             <span className="pedido-total">
-              {pedido.total?.toFixed(2) || '0.00'} €
+              {formatPrice(pedido.total || 0)}
             </span>
             <span className="pedido-pago">
               {pedido.metodo_pago || '-'}

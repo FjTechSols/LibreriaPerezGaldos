@@ -3,6 +3,8 @@ import { X, Plus, Trash2, Search, ShoppingCart, User, MapPin, Truck, CreditCard 
 import { Usuario, Libro, Cliente } from '../types';
 import { obtenerUsuarios, obtenerLibros, crearPedido, calcularTotalesPedido } from '../services/pedidoService';
 import { getClientes } from '../services/clienteService';
+import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import '../styles/components/CrearPedido.css';
 
 interface CrearPedidoProps {
@@ -23,6 +25,8 @@ interface LineaPedido {
 }
 
 export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoProps) {
+  const { user } = useAuth();
+  const { formatPrice } = useSettings();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [libros, setLibros] = useState<Libro[]>([]);
@@ -248,11 +252,14 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
         }
       });
 
-      const usuarioId = usuarios.find(u => u.email === clienteSeleccionado.email)?.id || usuarios[0]?.id;
+      if (!user) {
+        alert('Error: Usuario no autenticado');
+        setLoading(false);
+        return;
+      }
 
       const pedido = await crearPedido({
-        usuario_id: usuarioId,
-        cliente_id: clienteSeleccionado.id,
+        usuario_id: user.id,
         tipo,
         metodo_pago: metodoPago,
         direccion_envio: direccionEnvio || undefined,
@@ -538,7 +545,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                         >
                           <div style={{ fontWeight: 500, color: '#1e293b' }}>{libro.titulo}</div>
                           <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.125rem' }}>
-                            {libro.autor} • ISBN: {libro.isbn} • {libro.precio.toFixed(2)} € • Stock: {libro.stock || 0}
+                            {libro.autor} • ISBN: {libro.isbn} • {formatPrice(libro.precio)} • Stock: {libro.stock || 0}
                           </div>
                         </div>
                       ))
@@ -696,7 +703,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
                         className="input-precio"
                       />
                       <span className="subtotal-linea">
-                        {(linea.cantidad * linea.precio_unitario).toFixed(2)} €
+                        {formatPrice(linea.cantidad * linea.precio_unitario)}
                       </span>
                       <button
                         type="button"
@@ -716,15 +723,15 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
               <div className="totales-preview">
                 <div className="total-row">
                   <span>Subtotal:</span>
-                  <span>{subtotal.toFixed(2)} €</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="total-row">
                   <span>IVA (21%):</span>
-                  <span>{iva.toFixed(2)} €</span>
+                  <span>{formatPrice(iva)}</span>
                 </div>
                 <div className="total-row final">
                   <span>TOTAL:</span>
-                  <span>{total.toFixed(2)} €</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
             )}
