@@ -109,33 +109,55 @@
   top: 100%;
   left: 0;
   margin-top: var(--spacing-1);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: white;
+  border: 2px solid #e5e7eb;
   border-radius: var(--border-radius-sm);
-  box-shadow: var(--shadow-md);
-  z-index: 10;
-  min-width: 180px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 200px;
+  overflow: hidden;
 }
 
 .status-dropdown button {
   display: block;
   width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
   text-align: left;
-  background: transparent;
+  background: white;
   border: none;
   cursor: pointer;
   font-size: 0.875rem;
-  color: var(--color-text);
-  transition: background-color 0.2s ease;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
 }
 
 .status-dropdown button:hover {
-  background: var(--color-background);
+  background: #f3f4f6;
+  color: #1f2937;
+  padding-left: calc(var(--spacing-4) + 4px);
 }
 
 .status-dropdown button:not(:last-child) {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-dropdown button:first-child {
+  color: #059669;
+}
+
+.status-dropdown button:first-child:hover {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-dropdown button:last-child {
+  color: #dc2626;
+}
+
+.status-dropdown button:last-child:hover {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .total-amount {
@@ -189,4 +211,11 @@
   padding: var(--spacing-8);
   text-align: center;
   color: var(--color-text-secondary);
+}
+
+.loading-state {
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
 }

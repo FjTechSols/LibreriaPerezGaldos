@@ -4,6 +4,7 @@ import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } fr
 import { mockBooks, categories } from '../data/mockBooks';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
+import { useSettings } from '../context/SettingsContext';
 import InvoiceTable from '../components/InvoiceTable';
 import InvoiceModal from '../components/InvoiceModal';
 import InvoiceDetailModal from '../components/InvoiceDetailModal';
@@ -31,6 +32,7 @@ type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients';
 export function AdminDashboard() {
   const { user } = useAuth();
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
+  const { formatPrice } = useSettings();
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [books, setBooks] = useState<BookType[]>(mockBooks);
   const [searchQuery, setSearchQuery] = useState('');
@@ -275,9 +277,15 @@ export function AdminDashboard() {
     totalRevenue: invoices.reduce((sum, invoice) => sum + invoice.total, 0),
     inStock: books.filter(book => book.stock > 0).length,
     outOfStock: books.filter(book => book.stock === 0).length,
-    pendingInvoices: invoices.filter(invoice => invoice.status === 'pending').length,
+    pendingInvoices: invoices.filter(invoice => invoice.status === 'Pendiente').length,
     processingOrders: 0
   };
+
+  console.log('📊 Estadísticas Dashboard:', {
+    invoices: invoices.length,
+    totalRevenue: stats.totalRevenue,
+    pendingInvoices: stats.pendingInvoices
+  });
 
   const renderDashboard = () => (
     <div className="stats-section">
@@ -317,7 +325,7 @@ export function AdminDashboard() {
             <DollarSign size={24} />
           </div>
           <div className="stat-info">
-            <span className="stat-value">${stats.totalRevenue.toFixed(0)}</span>
+            <span className="stat-value">{formatPrice(stats.totalRevenue)}</span>
             <span className="stat-label">Ingresos</span>
           </div>
         </div>
