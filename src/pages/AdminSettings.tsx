@@ -4,8 +4,9 @@ import { useSettings } from '../context/SettingsContext';
 import {
   Building2, Mail, Phone, Globe, FileText, DollarSign,
   Truck, Bell, Database, Shield, Settings as SettingsIcon,
-  Package, CreditCard, Download, HardDrive, Check
+  Package, CreditCard, Download, HardDrive, Check, MapPin
 } from 'lucide-react';
+import { GestionUbicaciones } from '../components/GestionUbicaciones';
 import {
   exportLibrosToCSV,
   exportCategoriasToCSV,
@@ -29,7 +30,7 @@ export function AdminSettings() {
     updateSecuritySettings
   } = useSettings();
 
-  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup' | 'ubicaciones'>('company');
   const [isExporting, setIsExporting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -172,6 +173,7 @@ export function AdminSettings() {
     { id: 'shipping', label: 'Envíos', icon: Truck },
     { id: 'system', label: 'Sistema', icon: SettingsIcon },
     { id: 'security', label: 'Seguridad', icon: Shield },
+    { id: 'ubicaciones', label: 'Ubicaciones', icon: MapPin },
     { id: 'backup', label: 'Copias de Seguridad', icon: HardDrive }
   ];
 
@@ -665,6 +667,12 @@ export function AdminSettings() {
                     Guardar configuración de seguridad
                   </button>
                 </form>
+              </div>
+            )}
+
+            {activeTab === 'ubicaciones' && (
+              <div className="settings-section">
+                <GestionUbicaciones />
               </div>
             )}
 
