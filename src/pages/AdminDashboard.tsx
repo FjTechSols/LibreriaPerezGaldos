@@ -453,10 +453,37 @@ export function AdminDashboard() {
 
   const renderInvoices = () => (
     <div className="invoices-section">
-      <FacturaList
-        key={refreshFacturas}
-        onSelectFactura={(factura) => setSelectedFactura(factura)}
-        onCrearFactura={() => setIsGenerarFacturaModalOpen(true)}
+      <div className="section-header" style={{ marginBottom: '2rem' }}>
+        <h2>Gestión de Facturas</h2>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button
+            onClick={() => setIsInvoiceModalOpen(true)}
+            className="action-btn primary"
+          >
+            <Plus size={20} />
+            Nueva Factura
+          </button>
+          <button
+            onClick={() => setIsGenerarFacturaModalOpen(true)}
+            className="action-btn secondary"
+          >
+            <FileText size={20} />
+            Generar desde Pedido
+          </button>
+        </div>
+      </div>
+
+      <InvoiceTable
+        invoices={invoices}
+        loading={loading}
+        onViewDetails={handleViewInvoiceDetails}
+        onDownloadPDF={handleDownloadPDF}
+        onChangeStatus={handleChangeInvoiceStatus}
+        searchTerm={invoiceSearchTerm}
+        filterStatus={invoiceFilterStatus}
+        filterCustomer={invoiceFilterCustomer}
+        filterDateFrom={invoiceFilterDateFrom}
+        filterDateTo={invoiceFilterDateTo}
       />
     </div>
   );
@@ -575,15 +602,6 @@ export function AdminDashboard() {
                   </button>
                 )}
 
-                {activeSection === 'invoices' && (
-                  <button
-                    onClick={() => setIsInvoiceModalOpen(true)}
-                    className="action-btn primary"
-                  >
-                    <Plus size={20} />
-                    Nueva Factura
-                  </button>
-                )}
 
                 {activeSection === 'orders' && (
                   <button

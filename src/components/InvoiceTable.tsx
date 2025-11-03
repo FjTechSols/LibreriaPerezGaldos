@@ -5,6 +5,7 @@ import '../styles/components/InvoiceTable.css';
 
 interface InvoiceTableProps {
   invoices: Invoice[];
+  loading?: boolean;
   onViewDetails: (invoice: Invoice) => void;
   onDownloadPDF: (invoice: Invoice) => void;
   onChangeStatus: (id: string, status: Invoice['status']) => void;
@@ -17,6 +18,7 @@ interface InvoiceTableProps {
 
 const InvoiceTable: React.FC<InvoiceTableProps> = ({
   invoices,
+  loading = false,
   onViewDetails,
   onDownloadPDF,
   onChangeStatus,
@@ -75,9 +77,13 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   return (
     <div className="invoice-table-container">
-      {filteredInvoices.length === 0 ? (
+      {loading ? (
+        <div className="loading-state">
+          <p>Cargando facturas...</p>
+        </div>
+      ) : filteredInvoices.length === 0 ? (
         <div className="no-invoices">
-          <p>No se encontraron facturas con los filtros aplicados</p>
+          <p>No se encontraron facturas{invoices.length === 0 ? '' : ' con los filtros aplicados'}</p>
         </div>
       ) : (
         <table className="invoice-table">
