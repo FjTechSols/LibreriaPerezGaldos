@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
-import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } from '../types';
+import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
@@ -15,6 +15,7 @@ import PedidoDetalle from '../components/PedidoDetalle';
 import CrearPedido from '../components/CrearPedido';
 import { GestionClientes } from '../components/GestionClientes';
 import { Pagination } from '../components/Pagination';
+import { obtenerUbicacionesActivas } from '../services/ubicacionService';
 import '../styles/pages/AdminDashboard.css';
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients';
@@ -45,12 +46,21 @@ export function AdminDashboard() {
   const [refreshPedidos, setRefreshPedidos] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
 
   useEffect(() => {
     if (settings?.system?.itemsPerPageAdmin) {
       setItemsPerPage(settings.system.itemsPerPageAdmin);
     }
   }, [settings]);
+
+  useEffect(() => {
+    const cargarUbicaciones = async () => {
+      const data = await obtenerUbicacionesActivas();
+      setUbicaciones(data);
+    };
+    cargarUbicaciones();
+  }, []);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -859,8 +869,7 @@ export function AdminDashboard() {
 
                 <div className="form-group">
                   <label>Ubicación</label>
-                  <input
-                    type="text"
+                  <select
                     value={isCreating ? newBook.ubicacion : editingBook?.ubicacion}
                     onChange={(e) => {
                       if (isCreating) {
@@ -869,9 +878,15 @@ export function AdminDashboard() {
                         setEditingBook(prev => prev ? { ...prev, ubicacion: e.target.value } : null);
                       }
                     }}
-                    className="form-input"
-                    placeholder="Ej: H20006547, A123456789"
-                  />
+                    className="form-select"
+                  >
+                    <option value="">Seleccionar ubicación</option>
+                    {ubicaciones.map((ubicacion) => (
+                      <option key={ubicacion.id} value={ubicacion.nombre}>
+                        {ubicacion.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">

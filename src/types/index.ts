@@ -60,6 +60,14 @@ export interface Categoria {
   created_at?: string;
 }
 
+export interface Ubicacion {
+  id: number;
+  nombre: string;
+  descripcion?: string;
+  activa: boolean;
+  created_at?: string;
+}
+
 export interface Autor {
   id: number;
   nombre: string;
