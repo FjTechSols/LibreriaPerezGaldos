@@ -1,438 +1,201 @@
-# 📋 Instrucciones para Aplicar Migraciones de Supabase
+# 🔧 APLICAR MIGRACIONES CORREGIDAS
 
-## ⚠️ Problemas Actuales
+## 📋 Contexto
 
-### **1. Tabla Settings Faltante**
-La aplicación está intentando acceder a la tabla `settings` que **no existe** en tu base de datos de Supabase.
-
-**Error:** `Could not find the table 'public.settings' in the schema cache`
-
-### **2. Problemas de Seguridad en Funciones (✅ RESUELTO) 🔒**
-~~Supabase reporta **5 funciones** con vulnerabilidad de seguridad~~
-
-**Estado:** ✅ **CORREGIDO** - Las funciones ahora tienen `SECURITY DEFINER` y `SET search_path`
-
-### **3. Problemas de Performance (13 issues) ⚡**
-Supabase reporta **13 problemas de performance** relacionados con:
-
-```
-⚠️  Índices faltantes en columnas frecuentemente consultadas
-⚠️  Índices compuestos faltantes para queries multi-columna
-⚠️  Índices en timestamps (created_at, updated_at) faltantes
-⚠️  Índices de texto para búsquedas (GIN) faltantes
-⚠️  Estadísticas de tabla desactualizadas
-```
-
-**Impacto:**
-- ⏱️ Queries lentas en catálogo de libros
-- ⏱️ Dashboard de usuario lento
-- ⏱️ Búsquedas de texto ineficientes
-- ⏱️ Reportes y listados lentos
+La tabla `usuarios` tiene la columna `auth_user_id` (no `user_id`) y usa `rol_id` para los roles.
 
 ---
 
-## ✅ Solución: Aplicar las Migraciones Manualmente
+## ✅ PASO 1: Crear tabla SETTINGS
 
-**IMPORTANTE:** Debes aplicar **CUATRO migraciones** en este orden:
-
-### **Paso 1: Acceder al SQL Editor de Supabase**
-
-1. Ve a tu dashboard de Supabase: https://weaihscsaqxadxjgsfbt.supabase.co
-2. Inicia sesión con tus credenciales
-3. En el menú lateral izquierdo, haz clic en **"SQL Editor"**
-
-### **Paso 2: Corregir Funciones de Seguridad (✅ YA APLICADO) 🔒**
-
-~~1. Abre el archivo: `supabase/migrations/20251010000000_fix_function_security.sql`~~
-
-**✅ Ya has aplicado esta migración - Las 5 vulnerabilidades están corregidas**
-
-### **Paso 3: Crear Tabla Settings**
-
-1. Abre el archivo: `supabase/migrations/20251008000000_create_settings_table.sql`
-2. **Copia TODO el contenido** del archivo
-3. En el SQL Editor de Supabase:
-   - Pega el contenido completo en el editor
-   - Haz clic en el botón **"RUN"** (o presiona `Ctrl+Enter`)
-4. Verifica que no haya errores
-5. Deberías ver: `Success. No rows returned`
-
-### **Paso 4: Optimizar Performance ⚡**
-
-1. Abre el archivo: `supabase/migrations/20251011000000_optimize_performance.sql`
-2. **Copia TODO el contenido** del archivo
-3. En el SQL Editor de Supabase:
-   - Pega el contenido completo en el editor
-   - Haz clic en el botón **"RUN"** (o presiona `Ctrl+Enter`)
-4. Verifica que no haya errores
-5. Deberías ver: `Success. No rows returned`
-
-**✅ Esto crea más de 40 índices estratégicos y optimiza el plan de consultas**
-
-### **Paso 5: Crear Tabla de Autores (NUEVO) 📚**
-
-1. Abre el archivo: `supabase/migrations/20251012000000_create_autores_table.sql`
-2. **Copia TODO el contenido** del archivo
-3. En el SQL Editor de Supabase:
-   - Pega el contenido completo en el editor
-   - Haz clic en el botón **"RUN"** (o presiona `Ctrl+Enter`)
-4. Verifica que no haya errores
-5. Deberías ver: `Success. No rows returned`
-
-**✅ Esto crea la tabla autores, la relación muchos-a-muchos con libros, y 11 autores de ejemplo**
-
-### **Paso 6: Verificar Todas las Correcciones**
-
-#### **A. Verificar funciones corregidas (✅ YA VERIFICADO):**
-
-~~Las funciones de seguridad ya están corregidas~~
-
-#### **B. Verificar tabla settings:**
+Copia y pega este SQL en: https://supabase.com/dashboard/project/weaihscsaqxadxjgsfbt/sql
 
 ```sql
-SELECT * FROM settings;
-```
-
-Deberías ver aproximadamente 30 filas con configuraciones por defecto.
-
-#### **C. Verificar índices de performance:**
-
-```sql
--- Ver todos los índices creados en libros
-SELECT
-    indexname,
-    indexdef
-FROM pg_indexes
-WHERE tablename = 'libros'
-ORDER BY indexname;
-```
-
-Deberías ver índices nuevos como:
-- `idx_libros_activo_categoria_fecha`
-- `idx_libros_titulo_gin`
-- `idx_libros_autor_gin`
-- `idx_libros_created_at`
-- Y muchos más...
-
-#### **D. Verificar estadísticas actualizadas:**
-
-```sql
--- Verificar última vez que se analizó la tabla libros
-SELECT
-    schemaname,
-    tablename,
-    last_analyze,
-    last_autoanalyze
-FROM pg_stat_user_tables
-WHERE tablename IN ('libros', 'pedidos', 'facturas')
-ORDER BY tablename;
-```
-
-La columna `last_analyze` debería mostrar la fecha/hora reciente.
-
-#### **E. Verificar tabla autores:**
-
-```sql
--- Ver autores creados
-SELECT id, nombre, pais, activo FROM autores ORDER BY nombre;
-```
-
-Deberías ver 11 autores incluyendo:
-- Benito Pérez Galdós
-- Miguel de Cervantes
-- Gabriel García Márquez
-- Jorge Luis Borges
-- Y otros...
-
-```sql
--- Ver estructura de libro_autores
-SELECT * FROM libro_autores LIMIT 5;
-```
-
-Esta tabla estará vacía inicialmente (se llena cuando asignas autores a libros).
-
----
-
-## 📊 ¿Qué Hacen Estas Migraciones?
-
-### **1. Migración de Settings (`20251008000000_create_settings_table.sql`):**
-
-Crea la tabla `settings` para configuraciones globales:
-- Datos de la empresa (nombre, dirección, teléfono, etc.)
-- Configuración de facturación (moneda, IVA, prefijos)
-- Configuración de envíos (costes, zonas, tiempos)
-- Configuración del sistema (paginación, modo mantenimiento)
-- Configuración de seguridad (timeouts, intentos de login)
-
-**Implementa Seguridad (RLS):**
-- ✅ Usuarios autenticados pueden **leer** configuraciones
-- ✅ Solo administradores pueden **actualizar** configuraciones
-- ✅ Solo administradores pueden **insertar** configuraciones
-
-**Inserta Datos Por Defecto:**
-```
-Empresa: Perez Galdos S.L.
-Moneda: EUR (€)
-IVA: 21%
-Envío estándar: 5.99€
-Envío gratis desde: 50€
-```
-
-### **2. Migración de Performance (`20251011000000_optimize_performance.sql`):**
-
-Crea **más de 40 índices estratégicos** para optimizar:
-
-#### **📚 Libros (Catálogo):**
-- ✅ Índice compuesto: `(activo, categoria_id, created_at)` - Lista de libros por categoría
-- ✅ Índice GIN: búsqueda de texto completo en **títulos**
-- ✅ Índice GIN: búsqueda de texto completo en **autores**
-- ✅ Índice en **precio** para filtros y ordenamiento
-- ✅ Índice en **timestamps** (created_at, updated_at)
-- ✅ Índice en **código** de libros
-
-**Mejora:** Catálogo de libros 10-20x más rápido
-
-#### **📦 Pedidos:**
-- ✅ Índice compuesto: `(usuario_id, estado, fecha_pedido)` - Dashboard de usuario
-- ✅ Índice compuesto: `(cliente_id, estado, fecha_pedido)` - Queries administrativas
-- ✅ Índice parcial: solo pedidos **pendientes** (queries admin frecuentes)
-- ✅ Índices en timestamps
-
-**Mejora:** Dashboard de usuario 15-30x más rápido
-
-#### **🧾 Facturas:**
-- ✅ Índice compuesto: `(cliente_id, fecha)` - Historial de cliente
-- ✅ Índice compuesto: `(usuario_id, fecha)` - Historial de usuario
-- ✅ Índice parcial: solo facturas **pendientes**
-- ✅ Índices en timestamps
-
-**Mejora:** Reportes de facturación 10-20x más rápidos
-
-#### **👥 Usuarios y Clientes:**
-- ✅ Índice **único** en `auth_user_id` (crítico para RLS)
-- ✅ Índice GIN: búsqueda de texto en nombre completo de clientes
-- ✅ Índices en timestamps
-
-**Mejora:** Autenticación y búsquedas más rápidas
-
-#### **🛒 Carritos y Wishlist:**
-- ✅ Índices compuestos para queries de usuario
-- ✅ Índices en timestamps para limpieza automática
-
-**Mejora:** Carrito y wishlist instantáneos
-
-#### **🚚 Envíos y Reembolsos:**
-- ✅ Índices compuestos por pedido y estado
-- ✅ Índices en timestamps
-
-#### **📊 Optimización Adicional:**
-- ✅ Ejecuta `ANALYZE` en todas las tablas
-- ✅ Actualiza estadísticas del query planner
-- ✅ Mejora planes de ejecución de PostgreSQL
-
-**Resultado Final:**
-- ⚡ **Queries 10-30x más rápidas**
-- ⚡ **Búsquedas de texto eficientes**
-- ⚡ **Dashboard responsive**
-- ⚡ **Mejor experiencia de usuario**
-
-### **3. Migración de Autores (`20251012000000_create_autores_table.sql`):**
-
-Crea un sistema completo de gestión de autores con relación muchos-a-muchos.
-
-#### **📚 Tabla: autores**
-Almacena información detallada de autores:
-- ✅ **id** - Identificador único
-- ✅ **nombre** - Nombre completo (único)
-- ✅ **biografía** - Descripción del autor
-- ✅ **país** - País de origen
-- ✅ **fecha_nacimiento** - Fecha de nacimiento
-- ✅ **fecha_fallecimiento** - Fecha de fallecimiento (opcional)
-- ✅ **sitio_web** - URL del sitio web oficial
-- ✅ **foto_url** - URL de la foto del autor
-- ✅ **activo** - Estado (activo/inactivo)
-
-#### **🔗 Tabla: libro_autores**
-Relaciona libros con autores (muchos-a-muchos):
-- ✅ Un libro puede tener **múltiples autores**
-- ✅ Un autor puede tener **múltiples libros**
-- ✅ Campo **orden** para co-autores (1 = principal, 2 = secundario, etc.)
-- ✅ Relación con **CASCADE DELETE** (si se borra un libro, se borran sus relaciones)
-
-#### **🔐 Seguridad (RLS):**
-- ✅ Usuarios autenticados y anónimos pueden **leer** autores activos
-- ✅ Solo administradores pueden **crear/editar/eliminar** autores
-- ✅ Políticas restrictivas en libro_autores
-
-#### **⚡ Índices de Performance:**
-- ✅ Índice en nombre de autor
-- ✅ Índice GIN para búsqueda de texto completo
-- ✅ Índices en timestamps
-- ✅ Índice compuesto (autor_id, orden) para queries optimizadas
-
-#### **🛠️ Funciones Helper:**
-
-**`get_libro_autores(libro_id)`**
-```sql
--- Obtiene lista de autores de un libro como texto
-SELECT get_libro_autores(123);
--- Retorna: "Gabriel García Márquez, Mario Vargas Llosa"
-```
-
-**`get_autor_libros(autor_id)`**
-```sql
--- Obtiene todos los libros de un autor
-SELECT * FROM get_autor_libros(5);
--- Retorna: tabla con libro_id, titulo, isbn, precio
-```
-
-#### **📝 Datos Iniciales:**
-Se insertan **11 autores de ejemplo**:
-- Benito Pérez Galdós
-- Miguel de Cervantes
-- Gabriel García Márquez
-- Jorge Luis Borges
-- Isabel Allende
-- Mario Vargas Llosa
-- Federico García Lorca
-- Pablo Neruda
-- Octavio Paz
-- Carlos Ruiz Zafón
-- Autor Desconocido
-
-#### **🔄 Migración Gradual:**
-- ✅ Se agrega campo temporal **`autor`** (texto) en tabla `libros`
-- ✅ Permite migración gradual desde texto a relación
-- ✅ Nuevos libros deberían usar `libro_autores`
-- ✅ Libros existentes pueden mantener campo texto temporalmente
-
-**Ejemplo de uso:**
-```sql
--- Insertar un nuevo autor
-INSERT INTO autores (nombre, pais)
-VALUES ('Nuevo Autor', 'España');
-
--- Relacionar libro con autor
-INSERT INTO libro_autores (libro_id, autor_id, orden)
-VALUES (123, 1, 1);  -- Libro 123, Autor 1, Primer autor
-
--- Buscar libros por autor
-SELECT l.*
-FROM libros l
-JOIN libro_autores la ON la.libro_id = l.id
-WHERE la.autor_id = 1;
-
--- Buscar autores de un libro
-SELECT a.*
-FROM autores a
-JOIN libro_autores la ON la.autor_id = a.id
-WHERE la.libro_id = 123
-ORDER BY la.orden;
-```
-
-**Beneficios:**
-- ✅ **Normalización** - No duplicar nombres de autores
-- ✅ **Flexibilidad** - Soporta múltiples autores por libro
-- ✅ **Búsquedas eficientes** - Índices optimizados
-- ✅ **Información rica** - Biografía, país, fechas, etc.
-- ✅ **Escalabilidad** - Fácil agregar más autores
-
----
-
-## 🔍 Verificar Otras Tablas
-
-Ejecuta esta consulta para ver todas las tablas en tu base de datos:
-
-```sql
-SELECT table_name
-FROM information_schema.tables
-WHERE table_schema = 'public'
-ORDER BY table_name;
-```
-
-### **Tablas Requeridas:**
-
-- ✅ `auditoria` - Registro de cambios
-- ✅ `autores` - Autores de libros
-- ✅ `cart` - Carritos de compra
-- ✅ `clientes` - Clientes de la librería
-- ✅ `editoriales` - Editoriales
-- ✅ `envios` - Información de envíos
-- ✅ `facturas` - Facturas emitidas
-- ✅ `factura_items` - Líneas de facturas
-- ✅ `invoices` - Sistema de invoices (alternativo)
-- ✅ `invoice_items` - Items de invoices
-- ✅ `libros` - Catálogo de libros
-- ✅ `pedidos` - Pedidos de clientes
-- ✅ `pedido_detalles` - Líneas de pedidos
-- ⚠️  `settings` - **FALTA: Aplicar migración**
-- ✅ `usuarios` - Usuarios del sistema
-- ✅ `wishlist` - Lista de deseos
-
----
-
-## 🚀 Después de Aplicar la Migración
-
-1. **Recarga la aplicación** en el navegador (`Ctrl+F5` o `Cmd+Shift+R`)
-2. Verifica en la consola del navegador:
-   - ✅ Ya no deberías ver el error de `settings`
-   - ✅ Deberías ver: `✅ Configuraciones cargadas desde Supabase: 30 settings`
-
-3. **Ve a Admin Settings** para personalizar:
-   - Datos de tu empresa
-   - Configuración de moneda
-   - Configuración de envíos
-   - Configuración del sistema
-
----
-
-## 💡 Mientras Tanto: La App Funciona
-
-**NOTA IMPORTANTE:** La aplicación ya está preparada para funcionar **sin la tabla settings**.
-
-Si no aplicas la migración inmediatamente:
-- ✅ La app usará configuraciones por defecto
-- ✅ Todas las funciones funcionarán normalmente
-- ⚠️  No podrás guardar cambios en configuraciones desde Admin Settings
-- ⚠️  Verás un warning en consola indicando que la tabla no existe
-
----
-
-## 🐛 Si Hay Problemas
-
-### **Error: "relation already exists"**
-La tabla ya existe. No hagas nada.
-
-### **Error: "permission denied"**
-Verifica que tu usuario tenga permisos de administrador en Supabase.
-
-### **Error: "usuarios table not found"**
-Necesitas aplicar primero las migraciones anteriores:
-```
-20251001191609_create_complete_bookstore_schema.sql
+-- =====================================================
+-- MIGRACIÓN: Tabla de Configuración (settings)
+-- CORREGIDA para usar auth_user_id
+-- =====================================================
+
+-- Crear tabla de configuraciones
+CREATE TABLE IF NOT EXISTS settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  key text UNIQUE NOT NULL,
+  value jsonb NOT NULL DEFAULT '{}'::jsonb,
+  category text NOT NULL,
+  description text,
+  updated_at timestamptz DEFAULT now(),
+  updated_by uuid
+);
+
+-- Habilitar RLS
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+
+-- Política: Usuarios autenticados pueden leer configuraciones
+DROP POLICY IF EXISTS "Authenticated users can read settings" ON settings;
+CREATE POLICY "Authenticated users can read settings"
+  ON settings
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Política: Solo administradores pueden actualizar configuraciones
+DROP POLICY IF EXISTS "Admins can update settings" ON settings;
+CREATE POLICY "Admins can update settings"
+  ON settings
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM usuarios
+      WHERE usuarios.auth_user_id = auth.uid()
+      AND usuarios.rol_id = 1  -- 1 = admin
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM usuarios
+      WHERE usuarios.auth_user_id = auth.uid()
+      AND usuarios.rol_id = 1
+    )
+  );
+
+-- Política: Solo administradores pueden insertar configuraciones
+DROP POLICY IF EXISTS "Admins can insert settings" ON settings;
+CREATE POLICY "Admins can insert settings"
+  ON settings
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM usuarios
+      WHERE usuarios.auth_user_id = auth.uid()
+      AND usuarios.rol_id = 1
+    )
+  );
+
+-- Crear índices
+CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);
+CREATE INDEX IF NOT EXISTS idx_settings_category ON settings(category);
+
+-- Función para actualizar updated_at
+CREATE OR REPLACE FUNCTION update_settings_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  NEW.updated_by = auth.uid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+DROP TRIGGER IF EXISTS settings_updated_at_trigger ON settings;
+CREATE TRIGGER settings_updated_at_trigger
+  BEFORE UPDATE ON settings
+  FOR EACH ROW
+  EXECUTE FUNCTION update_settings_updated_at();
+
+-- Insertar configuraciones por defecto
+INSERT INTO settings (key, value, category, description) VALUES
+  -- Configuración de Empresa
+  ('company_name', '"Perez Galdos S.L."', 'company', 'Nombre de la empresa'),
+  ('company_address', '"Calle Hortaleza 5, 28004 Madrid, España"', 'company', 'Dirección de la empresa'),
+  ('company_phone', '"+34 91 531 26 40"', 'company', 'Teléfono de contacto'),
+  ('company_email', '"libreria@perezgaldos.com"', 'company', 'Email de contacto'),
+  ('company_website', '"www.perezgaldos.es"', 'company', 'Sitio web'),
+  ('company_tax_id', '"B12345678"', 'company', 'NIF/CIF de la empresa'),
+  ('company_logo', '"https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=200"', 'company', 'URL del logo'),
+
+  -- Configuración de Facturación
+  ('currency', '"EUR"', 'billing', 'Moneda por defecto'),
+  ('currency_symbol', '"€"', 'billing', 'Símbolo de la moneda'),
+  ('tax_rate', '21', 'billing', 'Porcentaje de IVA'),
+  ('invoice_prefix', '"FAC"', 'billing', 'Prefijo de facturas'),
+  ('invoice_terms', '"Pago a 30 días. Transferencia bancaria."', 'billing', 'Términos de pago'),
+  ('invoice_footer', '"Gracias por su compra. Para cualquier consulta contacte con nosotros."', 'billing', 'Footer de facturas'),
+
+  -- Configuración de Envíos
+  ('free_shipping_threshold', '50', 'shipping', 'Umbral para envío gratis'),
+  ('standard_shipping_cost', '5.99', 'shipping', 'Costo de envío estándar'),
+  ('express_shipping_cost', '12.99', 'shipping', 'Costo de envío express'),
+  ('shipping_zones', '["España", "Portugal", "Francia", "Italia"]', 'shipping', 'Zonas de envío disponibles'),
+  ('estimated_delivery_days', '{"standard": 5, "express": 2}', 'shipping', 'Días estimados de entrega'),
+
+  -- Configuración de Sistema
+  ('items_per_page_catalog', '25', 'system', 'Items por página en catálogo'),
+  ('items_per_page_admin', '20', 'system', 'Items por página en admin'),
+  ('maintenance_mode', 'false', 'system', 'Modo mantenimiento'),
+  ('allow_registration', 'true', 'system', 'Permitir registro de usuarios'),
+  ('default_language', '"es"', 'system', 'Idioma por defecto'),
+  ('enable_wishlist', 'true', 'system', 'Habilitar lista de deseos'),
+  ('enable_reviews', 'true', 'system', 'Habilitar reseñas'),
+
+  -- Configuración de Seguridad
+  ('session_timeout', '3600', 'security', 'Timeout de sesión en segundos'),
+  ('max_login_attempts', '5', 'security', 'Máximo de intentos de login'),
+  ('password_min_length', '8', 'security', 'Longitud mínima de contraseña'),
+  ('require_email_verification', 'false', 'security', 'Requerir verificación de email'),
+  ('enable_2fa', 'false', 'security', 'Habilitar autenticación de dos factores')
+ON CONFLICT (key) DO NOTHING;
+
+SELECT '✅ Tabla settings creada exitosamente' AS resultado;
 ```
 
 ---
 
-## 📞 Necesitas Ayuda?
+## ✅ PASO 2: Crear tabla CARRITO
 
-Si encuentras algún problema:
-1. Copia el error completo
-2. Verifica que hayas copiado **TODO** el contenido del archivo SQL
-3. Asegúrate de estar conectado a la base de datos correcta
-4. Revisa los logs del SQL Editor de Supabase
+```sql
+-- =====================================================
+-- MIGRACIÓN: Tabla de Carrito de Compras
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS carrito (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  libro_id integer NOT NULL REFERENCES libros(id) ON DELETE CASCADE,
+  cantidad integer NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(user_id, libro_id)
+);
+
+ALTER TABLE carrito ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own cart" ON carrito;
+CREATE POLICY "Users can view own cart"
+  ON carrito FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can insert to own cart" ON carrito;
+CREATE POLICY "Users can insert to own cart"
+  ON carrito FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can update own cart" ON carrito;
+CREATE POLICY "Users can update own cart"
+  ON carrito FOR UPDATE TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can delete from own cart" ON carrito;
+CREATE POLICY "Users can delete from own cart"
+  ON carrito FOR DELETE TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_carrito_user_id ON carrito(user_id);
+CREATE INDEX IF NOT EXISTS idx_carrito_libro_id ON carrito(libro_id);
+
+SELECT '✅ Tabla carrito creada exitosamente' AS resultado;
+```
 
 ---
 
-## ✨ Resumen Rápido
+## 🔄 Después de aplicar
 
 ```bash
-1. Abre Supabase → SQL Editor
-2. Copia: supabase/migrations/20251008000000_create_settings_table.sql
-3. Pega en el editor
-4. Click "RUN"
-5. Verifica: SELECT * FROM settings;
-6. Recarga la app
+node check-database-status.mjs
 ```
 
-¡Listo! 🎉
+Deberías ver: ✅ Tablas existentes: 12/12
+
+Recarga la aplicación y el panel admin funcionará correctamente.
