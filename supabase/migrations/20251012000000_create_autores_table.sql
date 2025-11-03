@@ -303,6 +303,7 @@ USING (
 -- FUNCIÓN HELPER: get_libro_autores
 -- Obtiene lista de autores de un libro como texto concatenado
 -- =====================================================
+DROP FUNCTION IF EXISTS get_libro_autores(INT);
 CREATE OR REPLACE FUNCTION get_libro_autores(libro_id_param INT)
 RETURNS TEXT
 SECURITY DEFINER
@@ -327,6 +328,7 @@ $$;
 -- FUNCIÓN HELPER: get_autor_libros
 -- Obtiene todos los libros activos de un autor
 -- =====================================================
+DROP FUNCTION IF EXISTS get_autor_libros(INT);
 CREATE OR REPLACE FUNCTION get_autor_libros(autor_id_param INT)
 RETURNS TABLE(
     libro_id INT,
@@ -361,6 +363,7 @@ $$;
 -- FUNCIÓN HELPER: count_autor_libros
 -- Cuenta cuántos libros tiene un autor
 -- =====================================================
+DROP FUNCTION IF EXISTS count_autor_libros(INT);
 CREATE OR REPLACE FUNCTION count_autor_libros(autor_id_param INT)
 RETURNS INT
 SECURITY DEFINER
