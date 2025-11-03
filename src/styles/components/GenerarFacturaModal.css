@@ -2,8 +2,8 @@
   background: white;
   border-radius: 12px;
   padding: 0;
-  max-width: 800px;
-  width: 90%;
+  max-width: 1200px;
+  width: 95%;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
@@ -330,8 +330,14 @@
 
 .factura-types {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .factura-types {
+    grid-template-columns: 1fr;
+  }
 }
 
 .factura-type-card {
@@ -368,6 +374,10 @@
 
 .type-icon.electronic {
   background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+}
+
+.type-icon.manual {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 .factura-type-card h3 {

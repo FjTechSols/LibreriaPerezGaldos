@@ -1024,6 +1024,10 @@ export function AdminDashboard() {
             setRefreshFacturas(prev => prev + 1);
             setIsGenerarFacturaModalOpen(false);
           }}
+          onOpenManualInvoice={() => {
+            setIsGenerarFacturaModalOpen(false);
+            setIsInvoiceModalOpen(true);
+          }}
         />
 
         <PedidoDetalle

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, X, AlertCircle, Check, Receipt, Zap } from 'lucide-react';
+import { FileText, X, AlertCircle, Check, Receipt, Zap, Edit3 } from 'lucide-react';
 import { Pedido } from '../types';
 import { crearFactura, calcularTotalesFactura } from '../services/facturaService';
 import { supabase } from '../lib/supabase';
@@ -9,15 +9,17 @@ interface GenerarFacturaModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  onOpenManualInvoice?: () => void;
 }
 
 export default function GenerarFacturaModal({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
+  onOpenManualInvoice
 }: GenerarFacturaModalProps) {
   const [step, setStep] = useState<'select-type' | 'select-order' | 'form-electronic'>('select-type');
-  const [tipoFactura, setTipoFactura] = useState<'normal' | 'electronica' | null>(null);
+  const [tipoFactura, setTipoFactura] = useState<'manual' | 'pedido' | 'electronica' | null>(null);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -135,15 +137,36 @@ export default function GenerarFacturaModal({
         <div
           className="factura-type-card"
           onClick={() => {
-            setTipoFactura('normal');
+            setTipoFactura('manual');
+            onClose();
+            onOpenManualInvoice?.();
+          }}
+        >
+          <div className="type-icon manual">
+            <Edit3 size={48} />
+          </div>
+          <h3>Factura Manual</h3>
+          <p>Crear factura personalizada desde cero</p>
+          <ul className="type-features">
+            <li>Formulario completo editable</li>
+            <li>Agregar productos manualmente</li>
+            <li>Control total de los datos</li>
+            <li>Ideal para casos especiales</li>
+          </ul>
+        </div>
+
+        <div
+          className="factura-type-card"
+          onClick={() => {
+            setTipoFactura('pedido');
             setStep('select-order');
           }}
         >
           <div className="type-icon">
             <Receipt size={48} />
           </div>
-          <h3>Factura Normal</h3>
-          <p>Factura tradicional en PDF con todos los detalles del pedido</p>
+          <h3>Desde Pedido</h3>
+          <p>Generar factura automáticamente desde un pedido existente</p>
           <ul className="type-features">
             <li>Generación automática desde pedido</li>
             <li>Descarga en formato PDF</li>
