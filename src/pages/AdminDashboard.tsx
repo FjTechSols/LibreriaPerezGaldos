@@ -63,6 +63,7 @@ export function AdminDashboard() {
     price: 0,
     originalPrice: undefined,
     stock: 0,
+    ubicacion: '',
     category: categories[1],
     description: '',
     coverImage: '',
@@ -853,6 +854,23 @@ export function AdminDashboard() {
                     }}
                     className="form-input"
                     placeholder="0"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Ubicación</label>
+                  <input
+                    type="text"
+                    value={isCreating ? newBook.ubicacion : editingBook?.ubicacion}
+                    onChange={(e) => {
+                      if (isCreating) {
+                        setNewBook(prev => ({ ...prev, ubicacion: e.target.value }));
+                      } else {
+                        setEditingBook(prev => prev ? { ...prev, ubicacion: e.target.value } : null);
+                      }
+                    }}
+                    className="form-input"
+                    placeholder="Ej: H20006547, A123456789"
                   />
                 </div>
 

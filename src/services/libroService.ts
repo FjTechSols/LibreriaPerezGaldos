@@ -11,6 +11,7 @@ export interface LibroSupabase {
   precio: number;
   precio_original?: number;
   stock: number;
+  ubicacion?: string;
   categoria: string;
   descripcion?: string;
   imagen_portada?: string;
@@ -38,6 +39,7 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   price: Number(libro.precio),
   originalPrice: libro.precio_original ? Number(libro.precio_original) : undefined,
   stock: libro.stock,
+  ubicacion: libro.ubicacion || '',
   category: libro.categoria,
   description: libro.descripcion || '',
   coverImage: libro.imagen_portada || 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=300',
@@ -101,6 +103,7 @@ export const crearLibro = async (libro: Partial<LibroSupabase>): Promise<Book | 
         precio: libro.precio,
         precio_original: libro.precio_original || null,
         stock: libro.stock || 0,
+        ubicacion: libro.ubicacion || null,
         categoria: libro.categoria,
         descripcion: libro.descripcion || null,
         imagen_portada: libro.imagen_portada || null,
@@ -140,6 +143,7 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
     if (libro.precio !== undefined) updateData.precio = libro.precio;
     if (libro.precio_original !== undefined) updateData.precio_original = libro.precio_original;
     if (libro.stock !== undefined) updateData.stock = libro.stock;
+    if (libro.ubicacion !== undefined) updateData.ubicacion = libro.ubicacion;
     if (libro.categoria !== undefined) updateData.categoria = libro.categoria;
     if (libro.descripcion !== undefined) updateData.descripcion = libro.descripcion;
     if (libro.imagen_portada !== undefined) updateData.imagen_portada = libro.imagen_portada;
