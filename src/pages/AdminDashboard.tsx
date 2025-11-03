@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido } from '../types';
 import { mockBooks, categories } from '../data/mockBooks';
@@ -22,7 +22,7 @@ type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients';
 export function AdminDashboard() {
   const { user } = useAuth();
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
-  const { formatPrice } = useSettings();
+  const { formatPrice, settings } = useSettings();
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [books, setBooks] = useState<BookType[]>(mockBooks);
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,7 +44,13 @@ export function AdminDashboard() {
   const [isCrearPedidoOpen, setIsCrearPedidoOpen] = useState(false);
   const [refreshPedidos, setRefreshPedidos] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(settings.system.itemsPerPageAdmin);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+
+  useEffect(() => {
+    if (settings?.system?.itemsPerPageAdmin) {
+      setItemsPerPage(settings.system.itemsPerPageAdmin);
+    }
+  }, [settings]);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
