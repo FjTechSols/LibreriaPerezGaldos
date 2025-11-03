@@ -35,24 +35,18 @@ CREATE TABLE IF NOT EXISTS settings (
   category text NOT NULL,
   description text,
   updated_at timestamptz DEFAULT now(),
-  updated_by uuid REFERENCES auth.users(id)
+  updated_by uuid
 );
 
 -- Habilitar RLS
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 
--- Política: Solo administradores pueden leer configuraciones
-CREATE POLICY "Admins can read settings"
+-- Política: Usuarios autenticados pueden leer configuraciones
+CREATE POLICY "Authenticated users can read settings"
   ON settings
   FOR SELECT
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM usuarios
-      WHERE usuarios.user_id = auth.uid()
-      AND usuarios.rol = 'admin'
-    )
-  );
+  USING (true);
 
 -- Política: Solo administradores pueden actualizar configuraciones
 CREATE POLICY "Admins can update settings"

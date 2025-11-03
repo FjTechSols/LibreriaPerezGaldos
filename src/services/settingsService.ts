@@ -73,15 +73,26 @@ class SettingsService {
         .from('settings')
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        // Si la tabla no existe (error PGRST205), usar valores por defecto silenciosamente
+        if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
+          console.warn('⚠️  Tabla settings no encontrada en Supabase. Usando configuración por defecto.');
+          console.log('📝 Para aplicar la migración, ve al SQL Editor de Supabase y ejecuta:');
+          console.log('   supabase/migrations/20251008000000_create_settings_table.sql');
+          return this.getDefaultSettings();
+        }
+        throw error;
+      }
 
       if (!data || data.length === 0) {
+        console.log('ℹ️  No hay configuraciones en la base de datos. Usando valores por defecto.');
         return this.getDefaultSettings();
       }
 
+      console.log('✅ Configuraciones cargadas desde Supabase:', data.length, 'settings');
       return this.parseSettings(data);
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('❌ Error fetching settings:', error);
       return this.getDefaultSettings();
     }
   }
@@ -133,12 +144,19 @@ class SettingsService {
       const hasErrors = results.some(result => result.error);
 
       if (hasErrors) {
+        const firstError = results.find(r => r.error)?.error;
+        if (firstError?.code === 'PGRST205' || firstError?.message?.includes('Could not find the table')) {
+          console.warn('⚠️  No se pueden guardar configuraciones: tabla settings no existe en Supabase');
+          console.log('📝 Las configuraciones se aplicarán temporalmente pero no se guardarán');
+          return false;
+        }
         throw new Error('Some settings failed to update');
       }
 
+      console.log('✅ Configuraciones actualizadas exitosamente');
       return true;
     } catch (error) {
-      console.error('Error updating multiple settings:', error);
+      console.error('❌ Error updating multiple settings:', error);
       return false;
     }
   }
