@@ -1,8 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Factura, Pedido, PedidoDetalle } from '../types';
 import { generarPDFFactura } from '../utils/pdfGenerator';
-
-const IVA_RATE = 0.21;
+import { settingsService } from './settingsService';
 
 export interface CrearFacturaInput {
   pedido_id: number;
@@ -17,12 +16,14 @@ export interface CalculoFactura {
   total: number;
 }
 
-export const calcularTotalesFactura = (detalles: PedidoDetalle[]): CalculoFactura => {
+export const calcularTotalesFactura = async (detalles: PedidoDetalle[]): Promise<CalculoFactura> => {
   const subtotal = detalles.reduce((sum, detalle) => {
     return sum + (detalle.cantidad * detalle.precio_unitario);
   }, 0);
 
-  const iva = subtotal * IVA_RATE;
+  const settings = await settingsService.getAllSettings();
+  const ivaRate = settings ? settings.billing.taxRate / 100 : 0.21;
+  const iva = subtotal * ivaRate;
   const total = subtotal + iva;
 
   return {
@@ -62,7 +63,7 @@ export const crearFactura = async (input: CrearFacturaInput): Promise<Factura | 
       throw new Error('Pedido no encontrado o sin detalles');
     }
 
-    const { subtotal, iva, total } = calcularTotalesFactura(pedido.detalles);
+    const { subtotal, iva, total } = await calcularTotalesFactura(pedido.detalles);
 
     const facturaData: Partial<Factura> = {
       pedido_id: input.pedido_id,
@@ -216,7 +217,8 @@ export const generarFacturaPDF = async (facturaId: number): Promise<string | nul
       throw new Error('Factura no encontrada');
     }
 
-    const pdfBlob = await generarPDFFactura(factura);
+    const settings = await settingsService.getAllSettings();
+    const pdfBlob = await generarPDFFactura(factura, settings || undefined);
     const pdfUrl = URL.createObjectURL(pdfBlob);
 
     return pdfUrl;

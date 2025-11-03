@@ -6,15 +6,17 @@ import { BookFilter } from '../components/BookFilter';
 import { Pagination } from '../components/Pagination';
 import { Book, FilterState } from '../types';
 import { mockBooks } from '../data/mockBooks';
+import { useSettings } from '../context/SettingsContext';
 import '../styles/pages/Catalog.css';
 
 export function Catalog() {
   const [searchParams] = useSearchParams();
+  const { settings } = useSettings();
   const [books, setBooks] = useState<Book[]>(mockBooks);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(mockBooks);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(settings.system.itemsPerPageCatalog);
   const [filters, setFilters] = useState<FilterState>({
     category: searchParams.get('category') || 'Todos',
     priceRange: [0, 1000],

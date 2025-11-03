@@ -2,10 +2,12 @@
 import { Link } from 'react-router-dom';
 import { BookOpen, Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useSettings } from '../context/SettingsContext';
 import '../styles/components/Footer.css';
 
 export function Footer() {
   const { t } = useLanguage();
+  const { settings } = useSettings();
 
   return (
     <footer className="footer">
@@ -14,7 +16,7 @@ export function Footer() {
           <div className="footer-section">
             <div className="footer-logo">
               <BookOpen size={28} />
-              <span>Perez Galdos</span>
+              <span>{settings.company.name}</span>
             </div>
             <p className="footer-description">
               {t('footerDescription')}
@@ -59,22 +61,22 @@ export function Footer() {
             <ul className="footer-links">
               <li>
                 <MapPin size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
-                Calle Hortaleza 5, 28004 Madrid
+                {settings.company.address}
               </li>
               <li>
                 <Phone size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
-                +34 91 531 26 40
+                {settings.company.phone}
               </li>
               <li>
                 <Mail size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
-                libreria@perezgaldos.com
+                {settings.company.email}
               </li>
             </ul>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2025 Perez Galdos. {t('allRightsReserved')}.</p>
+          <p>&copy; {new Date().getFullYear()} {settings.company.name}. {t('allRightsReserved')}.</p>
           <div className="footer-legal">
             <Link to="/privacy">{t('privacyPolicy')}</Link>
             <Link to="/terms">{t('termsOfService')}</Link>

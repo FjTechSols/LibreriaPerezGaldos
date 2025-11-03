@@ -11,7 +11,7 @@ import '../styles/pages/Cart.css';
 export function Cart() {
   const { items, removeItem, updateQuantity, clearCart, total } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const { formatPrice } = useSettings();
+  const { formatPrice, settings } = useSettings();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -161,24 +161,24 @@ export function Cart() {
                 </div>
                 <div className="summary-row">
                   <span>Envío</span>
-                  <span>{total >= 50 ? 'Gratis' : formatPrice(5.99)}</span>
+                  <span>{total >= settings.shipping.freeShippingThreshold ? 'Gratis' : formatPrice(settings.shipping.standardShippingCost)}</span>
                 </div>
                 <div className="summary-row">
-                  <span>Impuestos</span>
-                  <span>{formatPrice(total * 0.1)}</span>
+                  <span>Impuestos ({settings.billing.taxRate}%)</span>
+                  <span>{formatPrice(total * (settings.billing.taxRate / 100))}</span>
                 </div>
-                
+
                 <hr className="summary-divider" />
-                
+
                 <div className="summary-row total-row">
                   <span>Total</span>
-                  <span>{formatPrice(total + (total >= 50 ? 0 : 5.99) + total * 0.1)}</span>
+                  <span>{formatPrice(total + (total >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.standardShippingCost) + total * (settings.billing.taxRate / 100))}</span>
                 </div>
               </div>
 
-              {total < 50 && (
+              {total < settings.shipping.freeShippingThreshold && (
                 <div className="shipping-notice">
-                  <p>Añade {formatPrice(50 - total)} más para envío gratuito</p>
+                  <p>Añade {formatPrice(settings.shipping.freeShippingThreshold - total)} más para envío gratuito</p>
                 </div>
               )}
 

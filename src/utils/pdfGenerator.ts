@@ -1,16 +1,23 @@
 import jsPDF from 'jspdf';
 import { Factura } from '../types';
+import { AllSettings } from '../services/settingsService';
 
-const COMPANY_INFO = {
-  nombre: 'Librería Pérez Galdós',
-  direccion: 'Calle Benito Pérez Galdós, 28001 Madrid',
-  telefono: '+34 910 123 456',
-  email: 'info@libreriaperezgaldos.es',
-  cif: 'B-12345678',
-  web: 'www.libreriaperezgaldos.es'
-};
-
-export const generarPDFFactura = async (factura: Factura): Promise<Blob> => {
+export const generarPDFFactura = async (factura: Factura, settings?: AllSettings): Promise<Blob> => {
+  const COMPANY_INFO = settings ? {
+    nombre: settings.company.name,
+    direccion: settings.company.address,
+    telefono: settings.company.phone,
+    email: settings.company.email,
+    cif: settings.company.taxId,
+    web: settings.company.website
+  } : {
+    nombre: 'Librería Pérez Galdós',
+    direccion: 'Calle Benito Pérez Galdós, 28001 Madrid',
+    telefono: '+34 910 123 456',
+    email: 'info@libreriaperezgaldos.es',
+    cif: 'B-12345678',
+    web: 'www.libreriaperezgaldos.es'
+  };
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -132,11 +139,12 @@ export const generarPDFFactura = async (factura: Factura): Promise<Blob> => {
       doc.text(detalle.cantidad.toString(), xPos, yPos);
       xPos += colWidths[1];
 
-      doc.text(`${detalle.precio_unitario.toFixed(2)} €`, xPos, yPos);
+      const currencySymbol = settings?.billing.currencySymbol || '€';
+      doc.text(`${detalle.precio_unitario.toFixed(2)} ${currencySymbol}`, xPos, yPos);
       xPos += colWidths[2];
 
       const subtotal = detalle.cantidad * detalle.precio_unitario;
-      doc.text(`${subtotal.toFixed(2)} €`, xPos, yPos);
+      doc.text(`${subtotal.toFixed(2)} ${currencySymbol}`, xPos, yPos);
 
       yPos += 6;
     });
@@ -148,21 +156,24 @@ export const generarPDFFactura = async (factura: Factura): Promise<Blob> => {
   yPos += 10;
 
   const totalsX = pageWidth - margin - 60;
+  const currencySymbol = settings?.billing.currencySymbol || '€';
+  const taxRate = settings?.billing.taxRate || 21;
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
 
   doc.text('Subtotal:', totalsX, yPos);
-  doc.text(`${factura.subtotal.toFixed(2)} €`, totalsX + 30, yPos, { align: 'right' });
+  doc.text(`${factura.subtotal.toFixed(2)} ${currencySymbol}`, totalsX + 30, yPos, { align: 'right' });
   yPos += 6;
 
-  doc.text('IVA (21%):', totalsX, yPos);
-  doc.text(`${factura.iva.toFixed(2)} €`, totalsX + 30, yPos, { align: 'right' });
+  doc.text(`IVA (${taxRate}%):`, totalsX, yPos);
+  doc.text(`${factura.iva.toFixed(2)} ${currencySymbol}`, totalsX + 30, yPos, { align: 'right' });
   yPos += 8;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('TOTAL:', totalsX, yPos);
-  doc.text(`${factura.total.toFixed(2)} €`, totalsX + 30, yPos, { align: 'right' });
+  doc.text(`${factura.total.toFixed(2)} ${currencySymbol}`, totalsX + 30, yPos, { align: 'right' });
 
   if (factura.tipo === 'rectificativa' && factura.motivo_anulacion) {
     yPos += 15;
@@ -177,10 +188,32 @@ export const generarPDFFactura = async (factura: Factura): Promise<Blob> => {
     doc.text(motivoLines, margin, yPos);
   }
 
-  const footerY = doc.internal.pageSize.getHeight() - 20;
+  yPos += 15;
+
+  if (settings?.billing.invoiceTerms) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    doc.text('TÉRMINOS DE PAGO:', margin, yPos);
+    yPos += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    const termsLines = doc.splitTextToSize(settings.billing.invoiceTerms, pageWidth - 2 * margin);
+    doc.text(termsLines, margin, yPos);
+    yPos += termsLines.length * 4;
+  }
+
+  const footerY = doc.internal.pageSize.getHeight() - 25;
   doc.setTextColor(100, 100, 100);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
+
+  if (settings?.billing.invoiceFooter) {
+    const footerLines = doc.splitTextToSize(settings.billing.invoiceFooter, pageWidth - 2 * margin);
+    let footerYPos = footerY - (footerLines.length * 4);
+    doc.text(footerLines, pageWidth / 2, footerYPos, { align: 'center' });
+  }
+
   doc.text(COMPANY_INFO.web, pageWidth / 2, footerY, { align: 'center' });
 
   return doc.output('blob');

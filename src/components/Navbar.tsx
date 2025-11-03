@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import { useSettings } from '../context/SettingsContext';
 import { LanguageSelector } from './LanguageSelector';
 import '../styles/components/Navbar.css';
 
@@ -18,6 +19,7 @@ export function Navbar() {
   const { items: wishlistItems } = useWishlist();
   const { t } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +50,7 @@ export function Navbar() {
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
           <BookOpen size={32} />
-          <span>Perez Galdos</span>
+          <span>{settings.company.name}</span>
         </Link>
 
         <form onSubmit={handleSearch} className="navbar-search">

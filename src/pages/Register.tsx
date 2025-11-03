@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useSettings } from '../context/SettingsContext';
 import '../styles/pages/Register.css';
 
 export function Register() {
@@ -18,7 +19,14 @@ export function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const { t } = useLanguage();
+  const { settings } = useSettings();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!settings.system.allowRegistration) {
+      navigate('/');
+    }
+  }, [settings.system.allowRegistration, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +37,8 @@ export function Register() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    if (formData.password.length < settings.security.passwordMinLength) {
+      setError(`La contraseña debe tener al menos ${settings.security.passwordMinLength} caracteres`);
       return;
     }
 
