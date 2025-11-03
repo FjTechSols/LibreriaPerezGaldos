@@ -10,6 +10,23 @@
   gap: var(--spacing-4);
 }
 
+.invoices-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-6);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.invoices-section .section-header h2 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--secondary-800);
+}
+
 .pedidos-section {
   display: flex;
   flex-direction: column;
@@ -305,6 +322,16 @@
 .action-btn.primary:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
+}
+
+.invoices-section .action-btn.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.invoices-section .action-btn.primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
 }
 
 .action-btn.secondary {

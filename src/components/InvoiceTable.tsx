@@ -111,7 +111,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                     {invoice.status === 'Pendiente' && (
                       <div className="status-actions">
                         <button
-                          className="status-change-btn"
+                          className={`status-change-btn ${selectedInvoice === invoice.id ? 'active' : ''}`}
                           onClick={() => setSelectedInvoice(
                             selectedInvoice === invoice.id ? null : invoice.id
                           )}

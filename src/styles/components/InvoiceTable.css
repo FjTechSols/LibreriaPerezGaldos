@@ -80,7 +80,7 @@
 
 .status-change-btn {
   padding: var(--spacing-1);
-  background: transparent;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
@@ -88,11 +88,20 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  color: var(--color-text);
 }
 
 .status-change-btn:hover {
   background: var(--color-background);
   border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.status-change-btn:active,
+.status-change-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
 }
 
 .status-dropdown {
