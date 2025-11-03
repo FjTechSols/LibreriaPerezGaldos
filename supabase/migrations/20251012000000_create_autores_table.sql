@@ -163,6 +163,7 @@ ON libro_autores(libro_id, orden);
 -- =====================================================
 -- TRIGGER: update_updated_at para autores
 -- =====================================================
+DROP TRIGGER IF EXISTS update_autores_updated_at ON autores;
 CREATE TRIGGER update_autores_updated_at
 BEFORE UPDATE ON autores
 FOR EACH ROW
