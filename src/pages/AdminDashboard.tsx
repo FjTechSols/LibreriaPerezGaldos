@@ -521,18 +521,11 @@ export function AdminDashboard() {
         <h2>Gestión de Facturas</h2>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button
-            onClick={() => setIsInvoiceModalOpen(true)}
+            onClick={() => setIsGenerarFacturaModalOpen(true)}
             className="action-btn primary"
           >
             <Plus size={20} />
             Nueva Factura
-          </button>
-          <button
-            onClick={() => setIsGenerarFacturaModalOpen(true)}
-            className="action-btn secondary"
-          >
-            <FileText size={20} />
-            Generar desde Pedido
           </button>
         </div>
       </div>
