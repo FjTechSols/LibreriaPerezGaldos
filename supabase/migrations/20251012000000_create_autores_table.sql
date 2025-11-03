@@ -104,9 +104,6 @@ COMMENT ON COLUMN autores.nombre IS
 COMMENT ON COLUMN autores.biografia IS
 'Biografía o descripción del autor';
 
-COMMENT ON COLUMN autores.orden IS
-'Orden del autor cuando hay múltiples autores (1 = principal)';
-
 COMMENT ON TABLE libro_autores IS
 'Tabla intermedia para relación muchos-a-muchos entre libros y autores';
 
