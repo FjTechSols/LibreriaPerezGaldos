@@ -284,11 +284,57 @@ export function AdminDashboard() {
   console.log('📊 Estadísticas Dashboard:', {
     invoices: invoices.length,
     totalRevenue: stats.totalRevenue,
-    pendingInvoices: stats.pendingInvoices
+    pendingInvoices: stats.pendingInvoices,
+    loading: loading
   });
 
   const renderDashboard = () => (
     <div className="stats-section">
+      {loading && (
+        <div style={{
+          padding: '1rem',
+          background: '#eff6ff',
+          borderRadius: '8px',
+          marginBottom: '1rem',
+          textAlign: 'center',
+          color: '#1e40af'
+        }}>
+          ⏳ Cargando estadísticas...
+        </div>
+      )}
+
+      {!loading && invoices.length === 0 && (
+        <div style={{
+          padding: '1.5rem',
+          background: '#fef3c7',
+          borderRadius: '8px',
+          marginBottom: '1rem',
+          textAlign: 'center',
+          color: '#92400e',
+          border: '2px solid #fbbf24'
+        }}>
+          <strong>ℹ️ No hay facturas todavía</strong>
+          <br />
+          <span style={{ fontSize: '0.875rem' }}>
+            Ve a la sección "Facturas" y crea tu primera factura para ver las estadísticas aquí.
+          </span>
+        </div>
+      )}
+
+      {!loading && invoices.length > 0 && (
+        <div style={{
+          padding: '1rem',
+          background: '#d1fae5',
+          borderRadius: '8px',
+          marginBottom: '1rem',
+          textAlign: 'center',
+          color: '#065f46',
+          border: '2px solid #10b981'
+        }}>
+          ✅ Tienes {invoices.length} {invoices.length === 1 ? 'factura' : 'facturas'} con ingresos de {formatPrice(stats.totalRevenue)}
+        </div>
+      )}
+
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon books">
@@ -305,8 +351,15 @@ export function AdminDashboard() {
             <FileText size={24} />
           </div>
           <div className="stat-info">
-            <span className="stat-value">{stats.totalInvoices}</span>
+            <span className="stat-value" style={{ color: stats.totalInvoices === 0 ? '#94a3b8' : 'inherit' }}>
+              {stats.totalInvoices}
+            </span>
             <span className="stat-label">Facturas</span>
+            {stats.totalInvoices === 0 && (
+              <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                Sin facturas aún
+              </span>
+            )}
           </div>
         </div>
 
@@ -325,8 +378,15 @@ export function AdminDashboard() {
             <DollarSign size={24} />
           </div>
           <div className="stat-info">
-            <span className="stat-value">{formatPrice(stats.totalRevenue)}</span>
+            <span className="stat-value" style={{ color: stats.totalRevenue === 0 ? '#94a3b8' : 'inherit' }}>
+              {formatPrice(stats.totalRevenue)}
+            </span>
             <span className="stat-label">Ingresos</span>
+            {stats.totalRevenue === 0 && (
+              <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                Sin ingresos aún
+              </span>
+            )}
           </div>
         </div>
       </div>
