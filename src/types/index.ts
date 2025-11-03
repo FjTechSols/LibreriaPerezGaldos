@@ -60,10 +60,34 @@ export interface Categoria {
   created_at?: string;
 }
 
+export interface Autor {
+  id: number;
+  nombre: string;
+  biografia?: string;
+  pais?: string;
+  fecha_nacimiento?: string;
+  fecha_fallecimiento?: string;
+  sitio_web?: string;
+  foto_url?: string;
+  activo?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface LibroAutor {
+  id: number;
+  libro_id: number;
+  autor_id: number;
+  orden?: number;
+  created_at?: string;
+  autor?: Autor;
+}
+
 export interface Libro {
   id: number;
   isbn?: string;
   titulo: string;
+  autor?: string;
   anio?: number;
   paginas?: number;
   descripcion?: string;
@@ -86,6 +110,7 @@ export interface Libro {
   updated_at?: string;
   categoria?: Categoria;
   editorial?: Editorial;
+  autores?: Autor[];
 }
 
 export interface Pedido {

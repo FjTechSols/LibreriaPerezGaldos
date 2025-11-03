@@ -33,7 +33,7 @@ Supabase reporta **13 problemas de performance** relacionados con:
 
 ## ✅ Solución: Aplicar las Migraciones Manualmente
 
-**IMPORTANTE:** Debes aplicar **TRES migraciones** en este orden:
+**IMPORTANTE:** Debes aplicar **CUATRO migraciones** en este orden:
 
 ### **Paso 1: Acceder al SQL Editor de Supabase**
 
@@ -57,7 +57,7 @@ Supabase reporta **13 problemas de performance** relacionados con:
 4. Verifica que no haya errores
 5. Deberías ver: `Success. No rows returned`
 
-### **Paso 4: Optimizar Performance (NUEVO) ⚡**
+### **Paso 4: Optimizar Performance ⚡**
 
 1. Abre el archivo: `supabase/migrations/20251011000000_optimize_performance.sql`
 2. **Copia TODO el contenido** del archivo
@@ -69,7 +69,19 @@ Supabase reporta **13 problemas de performance** relacionados con:
 
 **✅ Esto crea más de 40 índices estratégicos y optimiza el plan de consultas**
 
-### **Paso 5: Verificar Todas las Correcciones**
+### **Paso 5: Crear Tabla de Autores (NUEVO) 📚**
+
+1. Abre el archivo: `supabase/migrations/20251012000000_create_autores_table.sql`
+2. **Copia TODO el contenido** del archivo
+3. En el SQL Editor de Supabase:
+   - Pega el contenido completo en el editor
+   - Haz clic en el botón **"RUN"** (o presiona `Ctrl+Enter`)
+4. Verifica que no haya errores
+5. Deberías ver: `Success. No rows returned`
+
+**✅ Esto crea la tabla autores, la relación muchos-a-muchos con libros, y 11 autores de ejemplo**
+
+### **Paso 6: Verificar Todas las Correcciones**
 
 #### **A. Verificar funciones corregidas (✅ YA VERIFICADO):**
 
@@ -117,6 +129,27 @@ ORDER BY tablename;
 ```
 
 La columna `last_analyze` debería mostrar la fecha/hora reciente.
+
+#### **E. Verificar tabla autores:**
+
+```sql
+-- Ver autores creados
+SELECT id, nombre, pais, activo FROM autores ORDER BY nombre;
+```
+
+Deberías ver 11 autores incluyendo:
+- Benito Pérez Galdós
+- Miguel de Cervantes
+- Gabriel García Márquez
+- Jorge Luis Borges
+- Y otros...
+
+```sql
+-- Ver estructura de libro_autores
+SELECT * FROM libro_autores LIMIT 5;
+```
+
+Esta tabla estará vacía inicialmente (se llena cuando asignas autores a libros).
 
 ---
 
@@ -202,6 +235,107 @@ Crea **más de 40 índices estratégicos** para optimizar:
 - ⚡ **Búsquedas de texto eficientes**
 - ⚡ **Dashboard responsive**
 - ⚡ **Mejor experiencia de usuario**
+
+### **3. Migración de Autores (`20251012000000_create_autores_table.sql`):**
+
+Crea un sistema completo de gestión de autores con relación muchos-a-muchos.
+
+#### **📚 Tabla: autores**
+Almacena información detallada de autores:
+- ✅ **id** - Identificador único
+- ✅ **nombre** - Nombre completo (único)
+- ✅ **biografía** - Descripción del autor
+- ✅ **país** - País de origen
+- ✅ **fecha_nacimiento** - Fecha de nacimiento
+- ✅ **fecha_fallecimiento** - Fecha de fallecimiento (opcional)
+- ✅ **sitio_web** - URL del sitio web oficial
+- ✅ **foto_url** - URL de la foto del autor
+- ✅ **activo** - Estado (activo/inactivo)
+
+#### **🔗 Tabla: libro_autores**
+Relaciona libros con autores (muchos-a-muchos):
+- ✅ Un libro puede tener **múltiples autores**
+- ✅ Un autor puede tener **múltiples libros**
+- ✅ Campo **orden** para co-autores (1 = principal, 2 = secundario, etc.)
+- ✅ Relación con **CASCADE DELETE** (si se borra un libro, se borran sus relaciones)
+
+#### **🔐 Seguridad (RLS):**
+- ✅ Usuarios autenticados y anónimos pueden **leer** autores activos
+- ✅ Solo administradores pueden **crear/editar/eliminar** autores
+- ✅ Políticas restrictivas en libro_autores
+
+#### **⚡ Índices de Performance:**
+- ✅ Índice en nombre de autor
+- ✅ Índice GIN para búsqueda de texto completo
+- ✅ Índices en timestamps
+- ✅ Índice compuesto (autor_id, orden) para queries optimizadas
+
+#### **🛠️ Funciones Helper:**
+
+**`get_libro_autores(libro_id)`**
+```sql
+-- Obtiene lista de autores de un libro como texto
+SELECT get_libro_autores(123);
+-- Retorna: "Gabriel García Márquez, Mario Vargas Llosa"
+```
+
+**`get_autor_libros(autor_id)`**
+```sql
+-- Obtiene todos los libros de un autor
+SELECT * FROM get_autor_libros(5);
+-- Retorna: tabla con libro_id, titulo, isbn, precio
+```
+
+#### **📝 Datos Iniciales:**
+Se insertan **11 autores de ejemplo**:
+- Benito Pérez Galdós
+- Miguel de Cervantes
+- Gabriel García Márquez
+- Jorge Luis Borges
+- Isabel Allende
+- Mario Vargas Llosa
+- Federico García Lorca
+- Pablo Neruda
+- Octavio Paz
+- Carlos Ruiz Zafón
+- Autor Desconocido
+
+#### **🔄 Migración Gradual:**
+- ✅ Se agrega campo temporal **`autor`** (texto) en tabla `libros`
+- ✅ Permite migración gradual desde texto a relación
+- ✅ Nuevos libros deberían usar `libro_autores`
+- ✅ Libros existentes pueden mantener campo texto temporalmente
+
+**Ejemplo de uso:**
+```sql
+-- Insertar un nuevo autor
+INSERT INTO autores (nombre, pais)
+VALUES ('Nuevo Autor', 'España');
+
+-- Relacionar libro con autor
+INSERT INTO libro_autores (libro_id, autor_id, orden)
+VALUES (123, 1, 1);  -- Libro 123, Autor 1, Primer autor
+
+-- Buscar libros por autor
+SELECT l.*
+FROM libros l
+JOIN libro_autores la ON la.libro_id = l.id
+WHERE la.autor_id = 1;
+
+-- Buscar autores de un libro
+SELECT a.*
+FROM autores a
+JOIN libro_autores la ON la.autor_id = a.id
+WHERE la.libro_id = 123
+ORDER BY la.orden;
+```
+
+**Beneficios:**
+- ✅ **Normalización** - No duplicar nombres de autores
+- ✅ **Flexibilidad** - Soporta múltiples autores por libro
+- ✅ **Búsquedas eficientes** - Índices optimizados
+- ✅ **Información rica** - Biografía, país, fechas, etc.
+- ✅ **Escalabilidad** - Fácil agregar más autores
 
 ---
 
