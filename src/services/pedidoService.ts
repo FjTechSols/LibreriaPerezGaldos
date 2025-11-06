@@ -125,6 +125,7 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
 
     const pedidoData = {
       usuario_id: input.usuario_id,
+      cliente_id: input.cliente_id,
       estado: 'pendiente' as EstadoPedido,
       tipo: input.tipo || 'interno',
       subtotal,

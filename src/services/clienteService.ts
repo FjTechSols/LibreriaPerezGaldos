@@ -187,3 +187,32 @@ export const buscarClientes = async (query: string): Promise<Cliente[]> => {
     throw error;
   }
 };
+
+export const findOrCreateCliente = async (clienteData: ClienteFormData): Promise<Cliente> => {
+  try {
+    if (clienteData.email) {
+      const { data: existingCliente } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('email', clienteData.email)
+        .maybeSingle();
+
+      if (existingCliente) {
+        console.log('Cliente existente encontrado:', existingCliente.id);
+        return existingCliente;
+      }
+    }
+
+    const nuevoCliente = await crearCliente(clienteData);
+
+    if (!nuevoCliente) {
+      throw new Error('No se pudo crear el cliente');
+    }
+
+    console.log('Nuevo cliente creado:', nuevoCliente.id);
+    return nuevoCliente;
+  } catch (error) {
+    console.error('Error in findOrCreateCliente:', error);
+    throw error;
+  }
+};

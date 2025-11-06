@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { crearPedido } from '../services/pedidoService';
 import { validateStock } from '../services/cartService';
+import { findOrCreateCliente } from '../services/clienteService';
+import CheckoutForm, { CheckoutData } from '../components/CheckoutForm';
 import '../styles/pages/Cart.css';
 
 export function Cart() {
@@ -15,8 +17,9 @@ export function Cart() {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleInitiateCheckout = async () => {
     if (!isAuthenticated || !user) {
       navigate('/login', { state: { from: '/carrito' } });
       return;
@@ -34,6 +37,34 @@ export function Cart() {
         return;
       }
 
+      setShowCheckout(true);
+    } catch (err) {
+      console.error('Error in checkout:', err);
+      setError('Error inesperado al validar el pedido.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCheckoutSubmit = async (checkoutData: CheckoutData) => {
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const cliente = await findOrCreateCliente({
+        nombre: checkoutData.nombre,
+        apellidos: checkoutData.apellidos,
+        email: checkoutData.email,
+        telefono: checkoutData.telefono,
+        direccion: checkoutData.direccion,
+        ciudad: checkoutData.ciudad,
+        codigo_postal: checkoutData.codigo_postal,
+        provincia: checkoutData.provincia,
+        pais: checkoutData.pais
+      });
+
+      const direccionCompleta = `${checkoutData.direccion}, ${checkoutData.codigo_postal} ${checkoutData.ciudad}, ${checkoutData.provincia}, ${checkoutData.pais}`;
+
       const detalles = items.map(item => ({
         libro_id: parseInt(item.book.id),
         cantidad: item.quantity,
@@ -41,15 +72,18 @@ export function Cart() {
       }));
 
       const pedido = await crearPedido({
-        usuario_id: user.id,
+        usuario_id: user!.id,
+        cliente_id: cliente.id,
         tipo: 'interno',
-        metodo_pago: 'tarjeta',
+        metodo_pago: checkoutData.metodo_pago,
+        direccion_envio: direccionCompleta,
+        observaciones: checkoutData.observaciones || undefined,
         detalles
       });
 
       if (pedido) {
         clearCart();
-        alert('¡Pedido creado con éxito! Puede ver el estado en su panel de usuario.');
+        alert(`¡Pedido #${pedido.id} creado con éxito! Puede ver el estado en su panel de usuario.`);
         navigate('/mi-cuenta');
       } else {
         setError('Error al crear el pedido. Por favor, intente nuevamente.');
@@ -60,6 +94,10 @@ export function Cart() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleCancelCheckout = () => {
+    setShowCheckout(false);
   };
 
   if (items.length === 0) {
@@ -212,7 +250,7 @@ export function Cart() {
               )}
 
               <button
-                onClick={handleCheckout}
+                onClick={handleInitiateCheckout}
                 className="checkout-btn"
                 disabled={isProcessing}
                 style={{
@@ -221,7 +259,7 @@ export function Cart() {
                 }}
               >
                 <CreditCard size={20} />
-                {isProcessing ? 'Procesando...' : isAuthenticated ? 'Proceder al Checkout' : 'Iniciar Sesión'}
+                {isProcessing ? 'Validando...' : isAuthenticated ? 'Proceder al Checkout' : 'Iniciar Sesión'}
               </button>
 
               <div className="security-badges">
@@ -232,6 +270,21 @@ export function Cart() {
             </div>
           </div>
         </div>
+
+        {showCheckout && (
+          <div className="checkout-overlay">
+            <div className="checkout-modal">
+              <CheckoutForm
+                subtotal={total}
+                iva={total * 0.21}
+                total={total + (total * 0.21)}
+                onSubmit={handleCheckoutSubmit}
+                onCancel={handleCancelCheckout}
+                isProcessing={isProcessing}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
