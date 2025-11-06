@@ -59,6 +59,9 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
   const [urlExterna, setUrlExterna] = useState('');
   const [precioExterno, setPrecioExterno] = useState(0);
 
+  const [modoEntrada, setModoEntrada] = useState<'manual' | 'pegar'>('manual');
+  const [datosPegados, setDatosPegados] = useState('');
+
   useEffect(() => {
     if (isOpen) {
       cargarUsuarios();
@@ -219,6 +222,119 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     ));
   };
 
+  const parsearDatosPegados = () => {
+    if (!datosPegados.trim()) {
+      alert('Por favor, pega la información del pedido');
+      return;
+    }
+
+    const lineas = datosPegados.split('\n').filter(l => l.trim());
+    let clienteInfo = '';
+    let direccion = '';
+    let telefono = '';
+    let email = '';
+    let productosTexto: string[] = [];
+    let metodoPagoTexto = '';
+    let transportistaTexto = '';
+    let trackingTexto = '';
+    let observacionesTexto = '';
+
+    for (const linea of lineas) {
+      const lineaLower = linea.toLowerCase();
+
+      if (lineaLower.includes('cliente:') || lineaLower.includes('nombre:')) {
+        clienteInfo = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('dirección:') || lineaLower.includes('direccion:')) {
+        direccion = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('teléfono:') || lineaLower.includes('telefono:') || lineaLower.includes('tel:')) {
+        telefono = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('email:') || lineaLower.includes('correo:')) {
+        email = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('método de pago:') || lineaLower.includes('metodo de pago:') || lineaLower.includes('pago:')) {
+        metodoPagoTexto = linea.split(':')[1]?.trim().toLowerCase() || '';
+      } else if (lineaLower.includes('transportista:') || lineaLower.includes('envío:') || lineaLower.includes('envio:')) {
+        transportistaTexto = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('tracking:') || lineaLower.includes('seguimiento:')) {
+        trackingTexto = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('observaciones:') || lineaLower.includes('notas:')) {
+        observacionesTexto = linea.split(':')[1]?.trim() || '';
+      } else if (lineaLower.includes('producto:') || lineaLower.includes('libro:') || lineaLower.includes('título:') || lineaLower.includes('titulo:')) {
+        productosTexto.push(linea);
+      } else if (linea.match(/^\d+[\s\-x]+/)) {
+        productosTexto.push(linea);
+      }
+    }
+
+    if (clienteInfo) {
+      setClienteSearch(clienteInfo);
+    }
+
+    if (direccion) {
+      setDireccionEnvio(direccion);
+    }
+
+    if (metodoPagoTexto) {
+      if (metodoPagoTexto.includes('tarjeta')) setMetodoPago('tarjeta');
+      else if (metodoPagoTexto.includes('paypal')) setMetodoPago('paypal');
+      else if (metodoPagoTexto.includes('transferencia')) setMetodoPago('transferencia');
+      else if (metodoPagoTexto.includes('reembolso')) setMetodoPago('reembolso');
+    }
+
+    if (transportistaTexto) {
+      const transportistaLower = transportistaTexto.toLowerCase();
+      if (transportistaLower.includes('asm')) setTransportista('ASM');
+      else if (transportistaLower.includes('gls')) setTransportista('GLS');
+      else if (transportistaLower.includes('envialia')) setTransportista('Envialia');
+      else setTransportista(transportistaTexto);
+    }
+
+    if (trackingTexto) {
+      setTracking(trackingTexto);
+    }
+
+    if (observacionesTexto) {
+      setObservaciones(observacionesTexto);
+    }
+
+    const nuevasLineas: LineaPedido[] = [];
+    productosTexto.forEach((productoTexto, index) => {
+      const match = productoTexto.match(/^(\d+)[\s\-x]+(.+?)(?:\s+[-–]\s+)?(?:(\d+[.,]\d{1,2})\s*€?)?$/i);
+
+      if (match) {
+        const cantidad = parseInt(match[1]);
+        const nombre = match[2].trim();
+        const precio = match[3] ? parseFloat(match[3].replace(',', '.')) : 0;
+
+        nuevasLineas.push({
+          id: `temp-${Date.now()}-${index}`,
+          cantidad: cantidad || 1,
+          precio_unitario: precio,
+          es_externo: true,
+          nombre_externo: nombre,
+          url_externa: ''
+        });
+      } else {
+        const nombreProducto = productoTexto.replace(/^(producto:|libro:|título:|titulo:)/i, '').trim();
+        if (nombreProducto) {
+          nuevasLineas.push({
+            id: `temp-${Date.now()}-${index}`,
+            cantidad: 1,
+            precio_unitario: 0,
+            es_externo: true,
+            nombre_externo: nombreProducto,
+            url_externa: ''
+          });
+        }
+      }
+    });
+
+    setLineas(nuevasLineas);
+    setModoEntrada('manual');
+    setDatosPegados('');
+
+    alert(`Se han parseado ${nuevasLineas.length} producto(s). Revisa y ajusta los datos según sea necesario.`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -324,11 +440,86 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
         </div>
 
         <form onSubmit={handleSubmit} className="modal-body">
-          <div className="form-section">
-            <div className="section-header">
-              <User size={20} />
-              <h3>Información del Cliente</h3>
+          <div className="form-section" style={{ borderBottom: '2px solid #e5e7eb', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+            <div className="section-header" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>Modo de Entrada de Datos</h3>
             </div>
+
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => setModoEntrada('manual')}
+                className={modoEntrada === 'manual' ? 'btn-mode active' : 'btn-mode'}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  border: modoEntrada === 'manual' ? '2px solid var(--primary-color)' : '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  background: modoEntrada === 'manual' ? '#eff6ff' : 'white',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  color: modoEntrada === 'manual' ? 'var(--primary-color)' : '#6b7280'
+                }}
+              >
+                ✍️ Entrada Manual
+              </button>
+              <button
+                type="button"
+                onClick={() => setModoEntrada('pegar')}
+                className={modoEntrada === 'pegar' ? 'btn-mode active' : 'btn-mode'}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  border: modoEntrada === 'pegar' ? '2px solid var(--primary-color)' : '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  background: modoEntrada === 'pegar' ? '#eff6ff' : 'white',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  color: modoEntrada === 'pegar' ? 'var(--primary-color)' : '#6b7280'
+                }}
+              >
+                📋 Pegar Datos de Plataforma
+              </button>
+            </div>
+
+            {modoEntrada === 'pegar' && (
+              <div style={{ background: '#f9fafb', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#374151' }}>
+                  Pega aquí toda la información del pedido
+                </label>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+                  Copia y pega toda la información del pedido de la plataforma externa. El sistema intentará extraer automáticamente los datos.
+                </p>
+                <textarea
+                  value={datosPegados}
+                  onChange={(e) => setDatosPegados(e.target.value)}
+                  className="form-input"
+                  rows={12}
+                  placeholder="Ejemplo:&#10;Cliente: Juan Pérez&#10;Dirección: Calle Mayor 123, Madrid&#10;Teléfono: 600123456&#10;Email: juan@ejemplo.com&#10;Método de Pago: Tarjeta&#10;Transportista: GLS&#10;Tracking: 123456789&#10;&#10;Productos:&#10;2 - Don Quijote de la Mancha - 25.50€&#10;1 - Cien años de soledad - 18.99€&#10;&#10;Observaciones: Entregar en horario de mañana"
+                  style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.9rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={parsearDatosPegados}
+                  className="btn-primary"
+                  style={{ marginTop: '1rem', width: '100%' }}
+                >
+                  🔍 Analizar y Rellenar Formulario
+                </button>
+                <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.75rem', fontStyle: 'italic' }}>
+                  Tip: Formatos reconocidos para productos: "2 - Título del libro - 25.50€" o "Producto: Título del libro"
+                </p>
+              </div>
+            )}
+          </div>
+
+          {modoEntrada === 'manual' && (
+            <>
+              <div className="form-section">
+                <div className="section-header">
+                  <User size={20} />
+                  <h3>Información del Cliente</h3>
+                </div>
 
             <div className="form-grid">
               <div className="form-group full-width" ref={clienteAutocompleteRef} style={{ position: 'relative' }}>
@@ -753,6 +944,8 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
               />
             </div>
           </div>
+            </>
+          )}
 
           <div className="modal-footer">
             <button
