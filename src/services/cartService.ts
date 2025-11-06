@@ -28,15 +28,41 @@ export const saveCartToSupabase = async (userId: string, items: CartItem[]): Pro
       return true;
     }
 
-    const cartItems = items.map(item => ({
-      user_id: userId,
-      libro_id: parseInt(item.book.id),
-      cantidad: item.quantity
-    }));
+    const validItems: Array<{ user_id: string; libro_id: number; cantidad: number }> = [];
+
+    for (const item of items) {
+      const libroId = parseInt(item.book.id);
+
+      if (isNaN(libroId)) {
+        console.warn(`Skipping invalid book ID: ${item.book.id}`);
+        continue;
+      }
+
+      const { data: libro, error } = await supabase
+        .from('libros')
+        .select('id')
+        .eq('id', libroId)
+        .maybeSingle();
+
+      if (error || !libro) {
+        console.warn(`Book ${libroId} not found in database, skipping`);
+        continue;
+      }
+
+      validItems.push({
+        user_id: userId,
+        libro_id: libroId,
+        cantidad: item.quantity
+      });
+    }
+
+    if (validItems.length === 0) {
+      return true;
+    }
 
     const { error: insertError } = await supabase
       .from('carritos')
-      .insert(cartItems);
+      .insert(validItems);
 
     if (insertError) {
       console.error('Error saving cart:', insertError);

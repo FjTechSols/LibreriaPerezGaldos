@@ -50,7 +50,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (isLoading) return;
 
     if (isAuthenticated && user) {
-      saveCartToSupabase(user.id, items);
+      saveCartToSupabase(user.id, items).catch(error => {
+        console.error('Error saving cart to Supabase:', error);
+      });
     } else {
       saveLocalCart(items);
     }
@@ -92,7 +94,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
-  const total = items.reduce((sum, item) => sum + item.book.price * item.quantity, 0);
+  const total = items.reduce((sum, item) => {
+    const price = item.book.price || 0;
+    return sum + price * item.quantity;
+  }, 0);
 
   return (
     <CartContext.Provider value={{
