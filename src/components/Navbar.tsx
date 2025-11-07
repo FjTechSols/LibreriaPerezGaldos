@@ -49,7 +49,7 @@ export function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <BookOpen size={32} />
+          <img src="/Logo Exlibris Perez Galdos.png" alt="Logo" className="navbar-logo-img" />
           <span>{settings.company.name}</span>
         </Link>
 

@@ -38,6 +38,12 @@
   margin-bottom: 0.5rem;
 }
 
+.footer-logo-img {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+}
+
 .footer-description {
   color: #cbd5e1;
   line-height: 1.6;

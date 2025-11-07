@@ -15,7 +15,7 @@ export function Footer() {
         <div className="footer-content">
           <div className="footer-section">
             <div className="footer-logo">
-              <BookOpen size={28} />
+              <img src="/Logo Exlibris Perez Galdos.png" alt="Logo" className="footer-logo-img" />
               <span>{settings.company.name}</span>
             </div>
             <p className="footer-description">

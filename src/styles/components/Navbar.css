@@ -35,6 +35,12 @@
   transition: color 0.2s ease;
 }
 
+.navbar-logo-img {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
 .navbar-logo:hover {
   color: #1d4ed8;
 }
