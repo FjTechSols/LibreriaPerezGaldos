@@ -105,7 +105,7 @@ CREATE TRIGGER settings_updated_at_trigger
 -- Insertar configuraciones por defecto
 INSERT INTO settings (key, value, category, description) VALUES
   -- Datos de la Empresa
-  ('company_name', '"Perez Galdos S.L."', 'company', 'Nombre legal de la empresa'),
+  ('company_name', '"Perez Galdos"', 'company', 'Nombre legal de la empresa'),
   ('company_address', '"Calle Hortaleza 5, 28004 Madrid, España"', 'company', 'Dirección completa de la empresa'),
   ('company_phone', '"+34 91 531 26 40"', 'company', 'Teléfono de contacto'),
   ('company_email', '"libreria@perezgaldos.com"', 'company', 'Email de contacto'),

@@ -251,7 +251,7 @@ class SettingsService {
   private getDefaultSettings(): AllSettings {
     return {
       company: {
-        name: 'Perez Galdos S.L.',
+        name: 'Perez Galdos',
         address: 'Calle Hortaleza 5, 28004 Madrid, España',
         phone: '+34 91 531 26 40',
         email: 'libreria@perezgaldos.com',
