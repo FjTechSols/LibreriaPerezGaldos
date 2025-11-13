@@ -17,6 +17,7 @@ export function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const { register } = useAuth();
   const { t } = useLanguage();
   const { settings } = useSettings();
@@ -44,12 +45,13 @@ export function Register() {
 
     setIsLoading(true);
     const success = await register(formData.email, formData.password, formData.name);
-    if (success) {
-      navigate('/');
-    } else {
-      setError('Este email ya está registrado');
-    }
     setIsLoading(false);
+
+    if (success) {
+      setRegistrationSuccess(true);
+    } else {
+      setError('Este email ya está registrado o ha ocurrido un error');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +60,38 @@ export function Register() {
       [e.target.name]: e.target.value
     }));
   };
+
+  if (registrationSuccess) {
+    return (
+      <div className="register">
+        <div className="register-container">
+          <div className="register-card">
+            <div className="success-message-container">
+              <div className="success-icon">✓</div>
+              <h1 className="register-title">¡Registro Exitoso!</h1>
+              <p className="success-message">
+                Hemos enviado un email de verificación a <strong>{formData.email}</strong>
+              </p>
+              <p className="success-instructions">
+                Por favor, revisa tu bandeja de entrada y haz clic en el enlace de verificación para activar tu cuenta.
+              </p>
+              <div className="success-notice">
+                <p>
+                  ⚠️ No olvides revisar tu carpeta de spam si no ves el email en unos minutos.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-back-to-login"
+              >
+                Volver al inicio de sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="register">

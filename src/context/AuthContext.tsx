@@ -147,7 +147,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/verificacion-email`,
+          data: {
+            username: name
+          }
+        }
       });
 
       if (authError) {
@@ -168,6 +174,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userError) {
           console.error('Error creating user record:', userError);
           return false;
+        }
+
+        if (!authData.session) {
+          return true;
         }
 
         await loadUserData(authData.user.id);

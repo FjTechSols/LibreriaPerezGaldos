@@ -26,6 +26,7 @@ import TermsOfService from './pages/TermsOfService';
 import CookiesPolicy from './pages/CookiesPolicy';
 import StripeCheckout from './pages/StripeCheckout';
 import PaymentSuccess from './pages/PaymentSuccess';
+import EmailVerification from './pages/EmailVerification';
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { user, isAuthenticated } = useAuth();
@@ -58,6 +59,7 @@ function AppRoutes() {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/cookies" element={<CookiesPolicy />} />
+          <Route path="/verificacion-email" element={<EmailVerification />} />
           <Route
             path="/stripe-checkout"
             element={
