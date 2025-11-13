@@ -24,6 +24,8 @@ import { AdminSettings } from './pages/AdminSettings';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookiesPolicy from './pages/CookiesPolicy';
+import StripeCheckout from './pages/StripeCheckout';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { user, isAuthenticated } = useAuth();
@@ -56,6 +58,22 @@ function AppRoutes() {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/cookies" element={<CookiesPolicy />} />
+          <Route
+            path="/stripe-checkout"
+            element={
+              <ProtectedRoute>
+                <StripeCheckout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pago-completado"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/mi-cuenta"
             element={

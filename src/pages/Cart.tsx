@@ -51,6 +51,12 @@ export function Cart() {
     setError(null);
 
     try {
+      if (checkoutData.metodo_pago === 'tarjeta') {
+        localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+        navigate('/stripe-checkout');
+        return;
+      }
+
       const cliente = await findOrCreateCliente({
         nombre: checkoutData.nombre,
         apellidos: checkoutData.apellidos,

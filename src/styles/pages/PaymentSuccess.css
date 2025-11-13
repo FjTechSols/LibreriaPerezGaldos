@@ -1,0 +1,257 @@
+.payment-success-container {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.success-card {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 48px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 50%;
+  margin-bottom: 24px;
+  animation: scaleIn 0.6s ease-out 0.2s both;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.success-icon svg {
+  color: white;
+}
+
+.success-card h1 {
+  font-size: 2rem;
+  color: #1e293b;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.success-message {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.order-details {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item .label {
+  font-weight: 500;
+  color: #64748b;
+}
+
+.detail-item .value {
+  font-weight: 600;
+  color: #1e293b;
+  font-family: monospace;
+}
+
+.detail-item .value.total {
+  font-size: 1.5rem;
+  color: #10b981;
+}
+
+.success-info {
+  display: flex;
+  gap: 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.success-info svg {
+  flex-shrink: 0;
+  color: #2563eb;
+  margin-top: 4px;
+}
+
+.success-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  color: #1e40af;
+}
+
+.success-info p {
+  margin: 4px 0;
+  color: #64748b;
+  font-size: 0.9375rem;
+}
+
+.success-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+  background: white;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+
+.btn-secondary:hover {
+  background: #eff6ff;
+  transform: translateY(-2px);
+}
+
+.dark-mode .success-card {
+  background: #1e293b;
+}
+
+.dark-mode .success-card h1 {
+  color: #f1f5f9;
+}
+
+.dark-mode .success-message {
+  color: #cbd5e1;
+}
+
+.dark-mode .order-details {
+  background: #0f172a;
+}
+
+.dark-mode .detail-item {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .detail-item .label {
+  color: #94a3b8;
+}
+
+.dark-mode .detail-item .value {
+  color: #f1f5f9;
+}
+
+.dark-mode .success-info {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.dark-mode .success-info h3 {
+  color: #93c5fd;
+}
+
+.dark-mode .success-info p {
+  color: #cbd5e1;
+}
+
+.dark-mode .btn-secondary {
+  background: #1e293b;
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+.dark-mode .btn-secondary:hover {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+@media (max-width: 768px) {
+  .success-card {
+    padding: 32px 24px;
+  }
+
+  .success-card h1 {
+    font-size: 1.5rem;
+  }
+
+  .success-icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .success-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
