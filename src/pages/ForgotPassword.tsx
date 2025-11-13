@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Mail, ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import '../styles/pages/ForgotPassword.css';
 
@@ -9,11 +9,20 @@ export function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const sendResetEmail = async () => {
     setIsLoading(true);
     setError('');
+    setResendMessage('');
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -23,15 +32,36 @@ export function ForgotPassword() {
       if (error) {
         setError('Ha ocurrido un error. Verifica que el email sea correcto.');
         console.error('Reset password error:', error);
-      } else {
-        setEmailSent(true);
+        return false;
       }
+      return true;
     } catch (err) {
       setError('Ha ocurrido un error inesperado. Inténtalo de nuevo.');
       console.error('Unexpected error:', err);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setIsLoading(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await sendResetEmail();
+    if (success) {
+      setEmailSent(true);
+      setResendCooldown(60);
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return;
+
+    const success = await sendResetEmail();
+    if (success) {
+      setResendMessage('¡Email reenviado exitosamente!');
+      setResendCooldown(60);
+      setTimeout(() => setResendMessage(''), 3000);
+    }
   };
 
   if (emailSent) {
@@ -58,7 +88,32 @@ export function ForgotPassword() {
               <p>Si no ves el email, revisa tu carpeta de spam.</p>
             </div>
 
+            {resendMessage && (
+              <div className="resend-success-message">
+                {resendMessage}
+              </div>
+            )}
+
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+
             <div className="action-buttons">
+              <button
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || isLoading}
+                className="btn-resend-email"
+              >
+                <RefreshCw size={16} />
+                {resendCooldown > 0
+                  ? `Reenviar en ${resendCooldown}s`
+                  : isLoading
+                  ? 'Reenviando...'
+                  : 'Reenviar email'}
+              </button>
+
               <Link to="/login" className="btn-back-to-login">
                 <ArrowLeft size={16} />
                 Volver al inicio de sesión

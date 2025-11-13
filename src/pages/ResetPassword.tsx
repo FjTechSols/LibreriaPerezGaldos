@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import '../styles/pages/ResetPassword.css';
 
@@ -14,11 +14,22 @@ export function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [isValidSession, setIsValidSession] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [timeRemaining, setTimeRemaining] = useState<number>(3600);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkSession();
   }, []);
+
+  useEffect(() => {
+    if (isValidSession && timeRemaining > 0) {
+      const timer = setTimeout(() => setTimeRemaining(timeRemaining - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeRemaining === 0) {
+      setError('El enlace ha expirado. Solicita uno nuevo.');
+      setIsValidSession(false);
+    }
+  }, [timeRemaining, isValidSession]);
 
   const checkSession = async () => {
     try {
@@ -154,6 +165,12 @@ export function ResetPassword() {
     );
   }
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="reset-password">
       <div className="reset-password-container">
@@ -164,6 +181,13 @@ export function ResetPassword() {
               Ingresa tu nueva contraseña
             </p>
           </div>
+
+          {timeRemaining > 0 && (
+            <div className="countdown-timer">
+              <Clock size={16} />
+              <span>Enlace válido por: <strong>{formatTime(timeRemaining)}</strong></span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="reset-password-form">
             <div className="form-group">

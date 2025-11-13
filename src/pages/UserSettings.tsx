@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key } from 'lucide-react';
 import '../styles/pages/UserSettings.css';
 
 export function UserSettings() {
@@ -10,14 +11,22 @@ export function UserSettings() {
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'notifications'>('profile');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    newEmail: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [showOtpInput, setShowOtpInput] = useState(false);
 
   const [preferences, setPreferences] = useState({
     language: language,
@@ -33,13 +42,161 @@ export function UserSettings() {
     console.log('Actualizar perfil:', formData);
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: formData.newEmail
+      });
+
+      if (error) {
+        setError('Error al cambiar el email. Verifica que sea válido.');
+        console.error('Email change error:', error);
+      } else {
+        setMessage('Se ha enviado un email de confirmación a tu nuevo correo.');
+        setFormData({ ...formData, newEmail: '' });
+      }
+    } catch (err) {
+      setError('Error inesperado. Inténtalo de nuevo.');
+      console.error('Unexpected error:', err);
+    }
+
+    setIsLoading(false);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
     if (formData.newPassword !== formData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      setError('Las contraseñas no coinciden');
+      setIsLoading(false);
       return;
     }
-    console.log('Cambiar contraseña');
+
+    if (formData.newPassword.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: formData.newPassword
+      });
+
+      if (error) {
+        setError('Error al cambiar la contraseña.');
+        console.error('Password change error:', error);
+      } else {
+        setMessage('Contraseña actualizada exitosamente.');
+        setFormData({
+          ...formData,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      }
+    } catch (err) {
+      setError('Error inesperado. Inténtalo de nuevo.');
+      console.error('Unexpected error:', err);
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleEnable2FA = async () => {
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: 'totp'
+      });
+
+      if (error) {
+        setError('Error al habilitar 2FA.');
+        console.error('2FA enroll error:', error);
+      } else if (data) {
+        setMessage('2FA habilitado. Usa una app como Google Authenticator.');
+        setShowOtpInput(true);
+      }
+    } catch (err) {
+      setError('Error inesperado. Inténtalo de nuevo.');
+      console.error('Unexpected error:', err);
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleVerify2FA = async () => {
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const factors = await supabase.auth.mfa.listFactors();
+      if (factors.data && factors.data.totp && factors.data.totp.length > 0) {
+        const factorId = factors.data.totp[0].id;
+
+        const { error } = await supabase.auth.mfa.challengeAndVerify({
+          factorId: factorId,
+          code: otpCode
+        });
+
+        if (error) {
+          setError('Código OTP inválido.');
+          console.error('2FA verify error:', error);
+        } else {
+          setMessage('2FA verificado exitosamente.');
+          setTwoFactorEnabled(true);
+          setShowOtpInput(false);
+          setOtpCode('');
+        }
+      }
+    } catch (err) {
+      setError('Error inesperado. Inténtalo de nuevo.');
+      console.error('Unexpected error:', err);
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleDisable2FA = async () => {
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const factors = await supabase.auth.mfa.listFactors();
+      if (factors.data && factors.data.totp && factors.data.totp.length > 0) {
+        const factorId = factors.data.totp[0].id;
+
+        const { error } = await supabase.auth.mfa.unenroll({
+          factorId: factorId
+        });
+
+        if (error) {
+          setError('Error al deshabilitar 2FA.');
+          console.error('2FA unenroll error:', error);
+        } else {
+          setMessage('2FA deshabilitado exitosamente.');
+          setTwoFactorEnabled(false);
+        }
+      }
+    } catch (err) {
+      setError('Error inesperado. Inténtalo de nuevo.');
+      console.error('Unexpected error:', err);
+    }
+
+    setIsLoading(false);
   };
 
   const handlePreferencesUpdate = () => {
@@ -123,53 +280,136 @@ export function UserSettings() {
             {activeTab === 'security' && (
               <div className="settings-section">
                 <h2>Seguridad de la cuenta</h2>
-                <form onSubmit={handlePasswordChange} className="settings-form">
-                  <div className="form-group">
-                    <label htmlFor="currentPassword">
-                      <Lock size={16} />
-                      Contraseña actual
-                    </label>
-                    <input
-                      id="currentPassword"
-                      type="password"
-                      value={formData.currentPassword}
-                      onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                      placeholder="••••••••"
-                    />
-                  </div>
 
-                  <div className="form-group">
-                    <label htmlFor="newPassword">
-                      <Lock size={16} />
-                      Nueva contraseña
-                    </label>
-                    <input
-                      id="newPassword"
-                      type="password"
-                      value={formData.newPassword}
-                      onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                      placeholder="••••••••"
-                    />
-                  </div>
+                {message && <div className="success-message-box">{message}</div>}
+                {error && <div className="error-message-box">{error}</div>}
 
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword">
-                      <Lock size={16} />
-                      Confirmar nueva contraseña
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      placeholder="••••••••"
-                    />
-                  </div>
+                <div className="security-subsection">
+                  <h3>Cambiar Email</h3>
+                  <form onSubmit={handleEmailChange} className="settings-form">
+                    <div className="form-group">
+                      <label htmlFor="newEmail">
+                        <Mail size={16} />
+                        Nuevo correo electrónico
+                      </label>
+                      <input
+                        id="newEmail"
+                        type="email"
+                        value={formData.newEmail}
+                        onChange={(e) => setFormData({ ...formData, newEmail: e.target.value })}
+                        placeholder="nuevo@email.com"
+                        disabled={isLoading}
+                      />
+                      <p className="form-hint">
+                        Recibirás un email de confirmación en tu nueva dirección
+                      </p>
+                    </div>
+                    <button type="submit" className="btn-secondary" disabled={isLoading}>
+                      {isLoading ? 'Enviando...' : 'Cambiar Email'}
+                    </button>
+                  </form>
+                </div>
 
-                  <button type="submit" className="btn-primary">
-                    Cambiar contraseña
-                  </button>
-                </form>
+                <div className="security-subsection">
+                  <h3>Cambiar Contraseña</h3>
+                  <form onSubmit={handlePasswordChange} className="settings-form">
+                    <div className="form-group">
+                      <label htmlFor="newPassword">
+                        <Lock size={16} />
+                        Nueva contraseña
+                      </label>
+                      <input
+                        id="newPassword"
+                        type="password"
+                        value={formData.newPassword}
+                        onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                        placeholder="••••••••"
+                        minLength={8}
+                        disabled={isLoading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword">
+                        <Lock size={16} />
+                        Confirmar nueva contraseña
+                      </label>
+                      <input
+                        id="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        placeholder="••••••••"
+                        minLength={8}
+                        disabled={isLoading}
+                      />
+                    </div>
+
+                    <button type="submit" className="btn-secondary" disabled={isLoading}>
+                      {isLoading ? 'Actualizando...' : 'Cambiar Contraseña'}
+                    </button>
+                  </form>
+                </div>
+
+                <div className="security-subsection">
+                  <h3>Autenticación de Dos Factores (2FA)</h3>
+                  <p className="security-description">
+                    Agrega una capa adicional de seguridad a tu cuenta usando códigos OTP
+                  </p>
+
+                  {!twoFactorEnabled && !showOtpInput && (
+                    <button
+                      onClick={handleEnable2FA}
+                      className="btn-primary"
+                      disabled={isLoading}
+                    >
+                      <Key size={16} />
+                      {isLoading ? 'Habilitando...' : 'Habilitar 2FA'}
+                    </button>
+                  )}
+
+                  {showOtpInput && (
+                    <div className="otp-verification">
+                      <div className="form-group">
+                        <label htmlFor="otpCode">
+                          Código de Verificación
+                        </label>
+                        <input
+                          id="otpCode"
+                          type="text"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          placeholder="123456"
+                          maxLength={6}
+                          disabled={isLoading}
+                        />
+                        <p className="form-hint">
+                          Ingresa el código de 6 dígitos de tu app autenticadora
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleVerify2FA}
+                        className="btn-primary"
+                        disabled={isLoading || otpCode.length !== 6}
+                      >
+                        {isLoading ? 'Verificando...' : 'Verificar Código'}
+                      </button>
+                    </div>
+                  )}
+
+                  {twoFactorEnabled && (
+                    <div className="2fa-enabled">
+                      <p className="success-text">✓ 2FA está activo en tu cuenta</p>
+                      <button
+                        onClick={handleDisable2FA}
+                        className="btn-danger"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Deshabilitando...' : 'Deshabilitar 2FA'}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
