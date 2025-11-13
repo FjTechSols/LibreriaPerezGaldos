@@ -27,6 +27,8 @@ import CookiesPolicy from './pages/CookiesPolicy';
 import StripeCheckout from './pages/StripeCheckout';
 import PaymentSuccess from './pages/PaymentSuccess';
 import EmailVerification from './pages/EmailVerification';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { user, isAuthenticated } = useAuth();
@@ -56,6 +58,8 @@ function AppRoutes() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/recuperar" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/cookies" element={<CookiesPolicy />} />
