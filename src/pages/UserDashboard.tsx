@@ -273,18 +273,18 @@ export function UserDashboard() {
           <div className="quick-links-card">
             <h2>Accesos Rápidos</h2>
             <div className="quick-links">
-              <a href="/wishlist" className="quick-link">
+              <Link to="/wishlist" className="quick-link">
                 <Heart size={20} />
                 <span>Mis Favoritos</span>
-              </a>
-              <a href="/cart" className="quick-link">
+              </Link>
+              <Link to="/carrito" className="quick-link">
                 <ShoppingCart size={20} />
                 <span>Mi Carrito</span>
-              </a>
-              <a href="/catalog" className="quick-link">
+              </Link>
+              <Link to="/catalogo" className="quick-link">
                 <Package size={20} />
                 <span>Ver Catálogo</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

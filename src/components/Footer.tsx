@@ -37,22 +37,22 @@ export function Footer() {
           <div className="footer-section">
             <h3 className="footer-title">{t('quickLinks')}</h3>
             <ul className="footer-links">
-              <li><a href="/">{t('home')}</a></li>
-              <li><a href="/catalogo">{t('catalog')}</a></li>
-              <li><a href="/catalogo?category=Novedades">{t('latestReleases')}</a></li>
-              <li><a href="/catalogo?featured=true">{t('featuredBooks')}</a></li>
-              <li><a href="/catalogo?category=Ofertas">{t('specialOffers')}</a></li>
+              <li><Link to="/">{t('home')}</Link></li>
+              <li><Link to="/catalogo">{t('catalog')}</Link></li>
+              <li><Link to="/catalogo?category=Novedades">{t('latestReleases')}</Link></li>
+              <li><Link to="/catalogo?featured=true">{t('featuredBooks')}</Link></li>
+              <li><Link to="/catalogo?category=Ofertas">{t('specialOffers')}</Link></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h3 className="footer-title">{t('categories')}</h3>
             <ul className="footer-links">
-              <li><a href="/catalogo?category=Clásicos">Clásicos</a></li>
-              <li><a href="/catalogo?category=Fantasía">Fantasía</a></li>
-              <li><a href="/catalogo?category=Romance">Romance</a></li>
-              <li><a href="/catalogo?category=Misterio">Misterio</a></li>
-              <li><a href="/catalogo?category=Historia">Historia</a></li>
+              <li><Link to="/catalogo?category=Clásicos">Clásicos</Link></li>
+              <li><Link to="/catalogo?category=Fantasía">Fantasía</Link></li>
+              <li><Link to="/catalogo?category=Romance">Romance</Link></li>
+              <li><Link to="/catalogo?category=Misterio">Misterio</Link></li>
+              <li><Link to="/catalogo?category=Historia">Historia</Link></li>
             </ul>
           </div>
 

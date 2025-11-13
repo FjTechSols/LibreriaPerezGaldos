@@ -220,9 +220,9 @@ export function Register() {
           <div className="terms-notice">
             <p>
               Al crear una cuenta, aceptas nuestros{' '}
-              <a href="/terminos" className="terms-link">Términos de Servicio</a>{' '}
+              <Link to="/terms" className="terms-link">Términos de Servicio</Link>{' '}
               y{' '}
-              <a href="/privacidad" className="privacy-link">Política de Privacidad</a>
+              <Link to="/privacy" className="privacy-link">Política de Privacidad</Link>
             </p>
           </div>
         </div>
