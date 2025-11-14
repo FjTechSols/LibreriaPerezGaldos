@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
-import { mockBooks, categories } from '../data/mockBooks';
+import { categories } from '../data/categories';
+import { obtenerLibros } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -25,7 +26,8 @@ export function AdminDashboard() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
   const { formatPrice, settings } = useSettings();
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
-  const [books, setBooks] = useState<BookType[]>(mockBooks);
+  const [books, setBooks] = useState<BookType[]>([]);
+  const [loadingBooks, setLoadingBooks] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingBook, setEditingBook] = useState<BookType | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -59,7 +61,18 @@ export function AdminDashboard() {
       const data = await obtenerUbicacionesActivas();
       setUbicaciones(data);
     };
+    const cargarLibros = async () => {
+      try {
+        const libros = await obtenerLibros();
+        setBooks(libros);
+      } catch (error) {
+        console.error('Error loading books:', error);
+      } finally {
+        setLoadingBooks(false);
+      }
+    };
     cargarUbicaciones();
+    cargarLibros();
   }, []);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({

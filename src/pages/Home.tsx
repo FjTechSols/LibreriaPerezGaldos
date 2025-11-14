@@ -1,15 +1,33 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Sparkles, Tag } from 'lucide-react';
 import { BookCard } from '../components/BookCard';
-import { mockBooks } from '../data/mockBooks';
 import { useLanguage } from '../context/LanguageContext';
+import { obtenerLibros } from '../services/libroService';
 import '../styles/pages/Home.css';
 
 export function Home() {
   const { t } = useLanguage();
-  const featuredBooks = mockBooks.filter(book => book.featured);
-  const newBooks = mockBooks.filter(book => book.isNew);
-  const saleBooks = mockBooks.filter(book => book.isOnSale);
+  const [featuredBooks, setFeaturedBooks] = useState<any[]>([]);
+  const [newBooks, setNewBooks] = useState<any[]>([]);
+  const [saleBooks, setSaleBooks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBooks = async () => {
+      try {
+        const allBooks = await obtenerLibros();
+        setFeaturedBooks(allBooks.filter(book => book.featured).slice(0, 4));
+        setNewBooks(allBooks.filter(book => book.is_new).slice(0, 4));
+        setSaleBooks(allBooks.filter(book => book.on_sale).slice(0, 4));
+      } catch (error) {
+        console.error('Error loading books:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBooks();
+  }, []);
 
   return (
     <div className="home">
@@ -54,9 +72,15 @@ export function Home() {
             </Link>
           </div>
           <div className="books-grid">
-            {featuredBooks.slice(0, 4).map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
+            {loading ? (
+              <p>Cargando libros...</p>
+            ) : featuredBooks.length > 0 ? (
+              featuredBooks.map(book => (
+                <BookCard key={book.id} book={book} />
+              ))
+            ) : (
+              <p>No hay libros destacados disponibles.</p>
+            )}
           </div>
         </div>
       </section>
@@ -73,9 +97,15 @@ export function Home() {
             </Link>
           </div>
           <div className="books-grid">
-            {newBooks.slice(0, 4).map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
+            {loading ? (
+              <p>Cargando libros...</p>
+            ) : newBooks.length > 0 ? (
+              newBooks.map(book => (
+                <BookCard key={book.id} book={book} />
+              ))
+            ) : (
+              <p>No hay novedades disponibles.</p>
+            )}
           </div>
         </div>
       </section>
@@ -92,9 +122,15 @@ export function Home() {
             </Link>
           </div>
           <div className="books-grid">
-            {saleBooks.slice(0, 4).map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
+            {loading ? (
+              <p>Cargando libros...</p>
+            ) : saleBooks.length > 0 ? (
+              saleBooks.map(book => (
+                <BookCard key={book.id} book={book} />
+              ))
+            ) : (
+              <p>No hay ofertas disponibles.</p>
+            )}
           </div>
         </div>
       </section>

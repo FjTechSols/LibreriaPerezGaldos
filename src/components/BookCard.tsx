@@ -6,7 +6,6 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useSettings } from '../context/SettingsContext';
-import { getTranslatedBook, getTranslatedCategory } from '../data/mockBooks';
 import '../styles/components/BookCard.css';
 
 interface BookCardProps {
@@ -17,10 +16,8 @@ interface BookCardProps {
 export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { formatPrice } = useSettings();
-
-  const translatedBook = getTranslatedBook(book, language);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -54,11 +51,11 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
   return (
     <Link to={`/libro/${book.id}`} className={`bookcard ${viewMode === 'list' ? 'bookcard--list' : ''}`}>
       <div className="bookcard__image-container">
-        <img src={translatedBook.coverImage} alt={translatedBook.title} className="bookcard__image" />
+        <img src={book.cover_image} alt={book.title} className="bookcard__image" />
 
-        {translatedBook.isNew && <span className="bookcard__badge bookcard__badge--new">{language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Nouveau'}</span>}
-        {translatedBook.isOnSale && <span className="bookcard__badge bookcard__badge--sale">{language === 'es' ? 'Oferta' : language === 'en' ? 'Sale' : 'Promo'}</span>}
-        {translatedBook.stock === 0 && <span className="bookcard__badge bookcard__badge--stock">{t('outOfStock')}</span>}
+        {book.is_new && <span className="bookcard__badge bookcard__badge--new">{t('new')}</span>}
+        {book.on_sale && <span className="bookcard__badge bookcard__badge--sale">{t('sale')}</span>}
+        {book.stock === 0 && <span className="bookcard__badge bookcard__badge--stock">{t('outOfStock')}</span>}
 
         <button
           onClick={handleWishlistToggle}
@@ -72,47 +69,47 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
         <div className="bookcard__overlay">
           <button
             onClick={handleAddToCart}
-            disabled={translatedBook.stock === 0}
+            disabled={book.stock === 0}
             className="bookcard__add-to-cart-btn"
           >
             <ShoppingCart size={16} />
-            {translatedBook.stock === 0 ? t('outOfStock') : t('addToCart')}
+            {book.stock === 0 ? t('outOfStock') : t('addToCart')}
           </button>
         </div>
       </div>
 
       <div className="bookcard__info">
-        <h3 className="bookcard__title">{translatedBook.title}</h3>
-        <p className="bookcard__author">{language === 'es' ? 'por' : language === 'en' ? 'by' : 'par'} {translatedBook.author}</p>
+        <h3 className="bookcard__title">{book.title}</h3>
+        <p className="bookcard__author">{t('by')} {book.author}</p>
 
         <div className="bookcard__rating">
-          <div className="bookcard__stars">{renderStars(translatedBook.rating)}</div>
-          <span className="bookcard__rating-text">({translatedBook.rating})</span>
+          <div className="bookcard__stars">{renderStars(book.rating || 0)}</div>
+          <span className="bookcard__rating-text">({book.rating || 0})</span>
         </div>
 
         <div className="bookcard__pricing">
-          {translatedBook.isOnSale && translatedBook.originalPrice ? (
+          {book.on_sale && book.original_price ? (
             <>
-              <span className="bookcard__original-price">{formatPrice(translatedBook.originalPrice)}</span>
-              <span className="bookcard__sale-price">{formatPrice(translatedBook.price)}</span>
+              <span className="bookcard__original-price">{formatPrice(book.original_price)}</span>
+              <span className="bookcard__sale-price">{formatPrice(book.price)}</span>
               <span className="bookcard__discount">
                 <Tag size={14} />
-                {Math.round(((translatedBook.originalPrice - translatedBook.price) / translatedBook.originalPrice) * 100)}% OFF
+                {Math.round(((book.original_price - book.price) / book.original_price) * 100)}% OFF
               </span>
             </>
           ) : (
-            <span className="bookcard__current-price">{formatPrice(translatedBook.price)}</span>
+            <span className="bookcard__current-price">{formatPrice(book.price)}</span>
           )}
         </div>
 
         {viewMode === 'list' && (
-          <p className="bookcard__description">{translatedBook.description.substring(0, 120)}...</p>
+          <p className="bookcard__description">{book.description?.substring(0, 120)}...</p>
         )}
 
         <div className="bookcard__meta">
-          <span className="bookcard__category">{translatedBook.category}</span>
+          <span className="bookcard__category">{book.category}</span>
           <span className="bookcard__stock">
-            {translatedBook.stock > 0 ? `${translatedBook.stock} ${language === 'es' ? 'disponibles' : language === 'en' ? 'available' : 'disponibles'}` : t('outOfStock')}
+            {book.stock > 0 ? `${book.stock} ${t('available')}` : t('outOfStock')}
           </span>
         </div>
       </div>

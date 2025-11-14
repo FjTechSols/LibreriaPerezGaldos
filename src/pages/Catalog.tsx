@@ -5,15 +5,16 @@ import { SearchBar } from '../components/SearchBar';
 import { BookFilter } from '../components/BookFilter';
 import { Pagination } from '../components/Pagination';
 import { Book, FilterState } from '../types';
-import { mockBooks } from '../data/mockBooks';
+import { obtenerLibros } from '../services/libroService';
 import { useSettings } from '../context/SettingsContext';
 import '../styles/pages/Catalog.css';
 
 export function Catalog() {
   const [searchParams] = useSearchParams();
   const { settings } = useSettings();
-  const [books, setBooks] = useState<Book[]>(mockBooks);
-  const [filteredBooks, setFilteredBooks] = useState<Book[]>(mockBooks);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(settings.system.itemsPerPageCatalog);
@@ -24,6 +25,22 @@ export function Catalog() {
     sortBy: 'title',
     sortOrder: 'asc'
   });
+
+  // Cargar libros desde la base de datos
+  useEffect(() => {
+    const loadBooks = async () => {
+      try {
+        const libros = await obtenerLibros();
+        setBooks(libros);
+        setFilteredBooks(libros);
+      } catch (error) {
+        console.error('Error loading books:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBooks();
+  }, []);
 
   useEffect(() => {
     let filtered = [...books];
@@ -127,13 +144,13 @@ export function Catalog() {
         <div className="catalog-header">
           <h1 className="catalog-title">Catálogo de Libros</h1>
           <p className="catalog-subtitle">
-            Descubre nuestra amplia colección de {mockBooks.length} libros
+            Descubre nuestra amplia colección de {books.length} libros
           </p>
         </div>
 
         <div className="search-section">
           <SearchBar 
-            books={mockBooks} 
+            books={books} 
             onSearchResults={handleSearchResults}
             placeholder="Buscar por título, autor, categoría o ISBN..."
           />
@@ -186,7 +203,7 @@ export function Catalog() {
                       sortBy: 'title',
                       sortOrder: 'asc'
                     });
-                    setBooks(mockBooks);
+                    // Reset filtros
                   }}
                   className="reset-btn"
                 >

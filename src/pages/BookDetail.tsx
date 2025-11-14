@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Star, ArrowLeft, Bookmark, Share2, Truck } from 'lucide-react';
-import { mockBooks, getTranslatedBook } from '../data/mockBooks';
+import { obtenerLibroPorId } from '../services/libroService';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ShareModal } from '../components/ShareModal';
+import { Book } from '../types';
 import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
   const { id } = useParams<{ id: string }>();
-  const book = mockBooks.find(b => b.id === id);
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -19,7 +21,20 @@ export function BookDetail() {
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
 
-  const translatedBook = book ? getTranslatedBook(book, language) : null;
+  useEffect(() => {
+    const loadBook = async () => {
+      if (!id) return;
+      try {
+        const libroData = await obtenerLibroPorId(id);
+        setBook(libroData);
+      } catch (error) {
+        console.error('Error loading book:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBook();
+  }, [id]);
 
   // Scroll to top when tab changes
   const handleTabChange = (tab: 'description' | 'reviews') => {
@@ -36,7 +51,7 @@ export function BookDetail() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (!book || !translatedBook) {
+  if (!book || !book) {
     return (
       <div className="book-detail">
         <div className="container">
@@ -88,9 +103,9 @@ export function BookDetail() {
         <div className="book-detail-content">
           <div className="book-image-section">
             <div className="book-image-container">
-              <img src={translatedBook.coverImage} alt={translatedBook.title} className="book-image" />
-              {translatedBook.isNew && <span className="badge new-badge">{language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Nouveau'}</span>}
-              {translatedBook.isOnSale && <span className="badge sale-badge">{language === 'es' ? 'Oferta' : language === 'en' ? 'Sale' : 'Promo'}</span>}
+              <img src={book.coverImage} alt={book.title} className="book-image" />
+              {book.isNew && <span className="badge new-badge">{language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Nouveau'}</span>}
+              {book.isOnSale && <span className="badge sale-badge">{language === 'es' ? 'Oferta' : language === 'en' ? 'Sale' : 'Promo'}</span>}
             </div>
             
             <div className="book-actions">
@@ -114,28 +129,28 @@ export function BookDetail() {
 
           <div className="book-info-section">
             <div className="book-header">
-              <h1 className="book-title">{translatedBook.title}</h1>
-              <p className="book-author">{language === 'es' ? 'por' : language === 'en' ? 'by' : 'par'} {translatedBook.author}</p>
+              <h1 className="book-title">{book.title}</h1>
+              <p className="book-author">{language === 'es' ? 'por' : language === 'en' ? 'by' : 'par'} {book.author}</p>
               
               <div className="book-rating">
-                <div className="stars">{renderStars(translatedBook.rating)}</div>
+                <div className="stars">{renderStars(book.rating)}</div>
                 <span className="rating-text">
-                  {translatedBook.rating}/5 ({translatedBook.reviews.length} {language === 'es' ? `reseña${translatedBook.reviews.length !== 1 ? 's' : ''}` : language === 'en' ? `review${translatedBook.reviews.length !== 1 ? 's' : ''}` : `avis`})
+                  {book.rating}/5 ({book.reviews.length} {language === 'es' ? `reseña${book.reviews.length !== 1 ? 's' : ''}` : language === 'en' ? `review${book.reviews.length !== 1 ? 's' : ''}` : `avis`})
                 </span>
               </div>
             </div>
 
             <div className="book-pricing">
-              {translatedBook.isOnSale && translatedBook.originalPrice ? (
+              {book.isOnSale && book.originalPrice ? (
                 <div className="pricing-sale">
-                  <span className="original-price">${translatedBook.originalPrice}</span>
-                  <span className="sale-price">${translatedBook.price}</span>
+                  <span className="original-price">${book.originalPrice}</span>
+                  <span className="sale-price">${book.price}</span>
                   <span className="discount-badge">
-                    {Math.round(((translatedBook.originalPrice - translatedBook.price) / translatedBook.originalPrice) * 100)}% OFF
+                    {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% OFF
                   </span>
                 </div>
               ) : (
-                <span className="current-price">${translatedBook.price}</span>
+                <span className="current-price">${book.price}</span>
               )}
             </div>
 
@@ -146,12 +161,12 @@ export function BookDetail() {
               </div>
               <div className="meta-item">
                 <span className="meta-label">{language === 'es' ? 'Categoría' : language === 'en' ? 'Category' : 'Catégorie'}:</span>
-                <span className="meta-value">{translatedBook.category}</span>
+                <span className="meta-value">{book.category}</span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Stock:</span>
-                <span className={`meta-value ${translatedBook.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                  {translatedBook.stock > 0 ? `${translatedBook.stock} ${language === 'es' ? 'disponibles' : language === 'en' ? 'available' : 'disponibles'}` : t('outOfStock')}
+                <span className={`meta-value ${book.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                  {book.stock > 0 ? `${book.stock} ${language === 'es' ? 'disponibles' : language === 'en' ? 'available' : 'disponibles'}` : t('outOfStock')}
                 </span>
               </div>
             </div>
@@ -214,7 +229,7 @@ export function BookDetail() {
               onClick={() => handleTabChange('reviews')}
               className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
             >
-              {language === 'es' ? 'Reseñas' : language === 'en' ? 'Reviews' : 'Avis'} ({translatedBook.reviews.length})
+              {language === 'es' ? 'Reseñas' : language === 'en' ? 'Reviews' : 'Avis'} ({book.reviews.length})
             </button>
           </div>
 
@@ -222,7 +237,7 @@ export function BookDetail() {
             {activeTab === 'description' && (
               <div className="description-content">
                 <h3>{language === 'es' ? 'Acerca de este libro' : language === 'en' ? 'About this book' : 'À propos de ce livre'}</h3>
-                <p>{translatedBook.description}</p>
+                <p>{book.description}</p>
                 
                 <div className="book-specs">
                   <h4>{language === 'es' ? 'Especificaciones' : language === 'en' ? 'Specifications' : 'Spécifications'}</h4>
@@ -245,7 +260,7 @@ export function BookDetail() {
                     </div>
                     <div className="spec-item">
                       <span className="spec-label">{language === 'es' ? 'Categoría' : language === 'en' ? 'Category' : 'Catégorie'}:</span>
-                      <span className="spec-value">{translatedBook.category}</span>
+                      <span className="spec-value">{book.category}</span>
                     </div>
                     <div className="spec-item">
                       <span className="spec-label">Año de Publicación:</span>

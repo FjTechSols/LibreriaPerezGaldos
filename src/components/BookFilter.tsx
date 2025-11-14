@@ -1,7 +1,7 @@
 import React from 'react';
 import { Filter, SlidersHorizontal, Grid2x2 as Grid, List } from 'lucide-react';
 import { FilterState } from '../types';
-import { categories, getTranslatedCategory } from '../data/mockBooks';
+import { categories } from '../data/categories';
 import { useLanguage } from '../context/LanguageContext';
 import '../styles/components/BookFilter.css';
 
@@ -80,7 +80,7 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
               className="filter-select"
             >
               {categories.map(category => (
-                <option key={category} value={category}>{getTranslatedCategory(category, language)}</option>
+                <option key={category} value={category}>{category}</option>
               ))}
             </select>
           </div>

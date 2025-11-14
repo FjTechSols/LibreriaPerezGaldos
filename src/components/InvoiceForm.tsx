@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InvoiceFormData, InvoiceItem } from '../types';
-import { mockBooks } from '../data/mockBooks';
+import { obtenerLibros } from '../services/libroService';
 import { Plus, Trash2, FileText, Search } from 'lucide-react';
 import { getClientes } from '../services/clienteService';
-import type { Cliente } from '../types';
+import type { Cliente, Book } from '../types';
 import '../styles/components/InvoiceForm.css';
 
 interface InvoiceFormProps {
@@ -41,13 +41,27 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   const [isManualEntry, setIsManualEntry] = useState(false);
   const [loadingClientes, setLoadingClientes] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredBooks, setFilteredBooks] = useState(mockBooks);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+  const [loadingBooks, setLoadingBooks] = useState(true);
   const autocompleteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchClientes = async () => {
-      setLoadingClientes(true);
+    const fetchData = async () => {
+      // Cargar libros
       try {
+        const libros = await obtenerLibros();
+        setBooks(libros);
+        setFilteredBooks(libros);
+      } catch (error) {
+        console.error('Error loading books:', error);
+      } finally {
+        setLoadingBooks(false);
+      }
+
+      // Cargar clientes
+      setLoadingClientes(true);
+      try{
         const clientesData = await getClientes();
         setClientes(clientesData.filter(c => c.activo));
       } catch (error) {
@@ -56,7 +70,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
         setLoadingClientes(false);
       }
     };
-    fetchClientes();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -75,14 +89,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
   useEffect(() => {
     if (searchTerm.trim()) {
-      const filtered = mockBooks.filter(book => 
+      const filtered = books.filter(book => 
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredBooks(filtered);
     } else {
-      setFilteredBooks(mockBooks);
+      setFilteredBooks(books);
     }
   }, [searchTerm]);
 
@@ -98,7 +112,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   }, []);
 
   const handleSelectBook = (bookId: string) => {
-    const book = mockBooks.find(b => b.id === bookId);
+    const book = books.find(b => b.id === bookId);
     if (book) {
       setSelectedBookId(bookId);
       setSearchTerm(book.title);
@@ -113,7 +127,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       return;
     }
 
-    const book = mockBooks.find(b => b.id === selectedBookId);
+    const book = books.find(b => b.id === selectedBookId);
     if (!book) return;
 
     const lineTotal = quantity * unitPrice;
