@@ -39,26 +39,57 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
  * Transforma el formato JSON normalizado al formato de la tabla libros
+ *
+ * Estructura de la tabla libros en Supabase:
+ * - id (SERIAL PRIMARY KEY)
+ * - isbn (VARCHAR)
+ * - titulo (VARCHAR) - NOT NULL
+ * - autor (TEXT) - Campo temporal
+ * - anio (SMALLINT)
+ * - paginas (INT)
+ * - descripcion (TEXT)
+ * - notas (TEXT)
+ * - categoria_id (INT) - Foreign key a categorias
+ * - editorial_id (INT) - Foreign key a editoriales
+ * - legacy_id (VARCHAR) - Código interno del libro
+ * - precio (DECIMAL)
+ * - ubicacion (VARCHAR)
+ * - fecha_ingreso (DATE)
+ * - activo (BOOLEAN)
+ * - imagen_url (TEXT)
+ * - stock (INT)
  */
 function transformToDatabase(book) {
   return {
-    code: book.code || '',
-    title: book.title || book.titulo || 'Sin título',
-    author: book.author || book.autor || 'Desconocido',
-    editorial: book.editorial || '',
-    year: book.year || book.año ? parseInt(book.year || book.año) : null,
-    price: parseFloat(book.price || book.precio || '0'),
-    pages: parseInt(book.pages || book.paginas || '0'),
-    description: book.description || book.descripcion || '',
-    category: book.category || book.categoria || 'General',
-    ubicacion: book.ubicacion || 'almacen',
-    stock: parseInt(book.stock || '1'),
+    // Campos principales
     isbn: book.isbn || '',
-    cover_image: book.cover_image || '',
-    rating: parseFloat(book.rating || '0'),
-    featured: book.featured || false,
-    is_new: book.is_new || false,
-    on_sale: book.on_sale || false
+    titulo: book.title || book.titulo || 'Sin título',
+    autor: book.author || book.autor || 'Desconocido',
+    anio: book.year || book.año ? parseInt(book.year || book.año) : null,
+    paginas: parseInt(book.pages || book.paginas || '0') || null,
+    descripcion: book.description || book.descripcion || '',
+
+    // Legacy ID es el código interno del libro
+    legacy_id: book.code || '',
+
+    // Precio y stock
+    precio: parseFloat(book.price || book.precio || '0'),
+    stock: parseInt(book.stock || '1'),
+
+    // Ubicación
+    ubicacion: book.ubicacion || 'almacen',
+
+    // Imagen
+    imagen_url: book.cover_image || book.imagen_url || '',
+
+    // Estado
+    activo: true,
+    fecha_ingreso: new Date().toISOString().split('T')[0],
+
+    // Campos que usaremos null por ahora (requieren búsqueda en otras tablas)
+    categoria_id: null,
+    editorial_id: null,
+    notas: book.notas || ''
   };
 }
 
@@ -110,7 +141,7 @@ async function uploadBooks(books, batchSize = 100) {
                 } else {
                   errors++;
                   errorDetails.push({
-                    book: book.code || book.title,
+                    book: book.legacy_id || book.titulo,
                     error: singleError.message
                   });
                 }
@@ -120,7 +151,7 @@ async function uploadBooks(books, batchSize = 100) {
             } catch (err) {
               errors++;
               errorDetails.push({
-                book: book.code || book.title,
+                book: book.legacy_id || book.titulo,
                 error: err.message
               });
             }
@@ -136,7 +167,7 @@ async function uploadBooks(books, batchSize = 100) {
           errorDetails.push({
             batch: batchNum,
             error: error.message,
-            books: batch.slice(0, 3).map(b => b.code)
+            books: batch.slice(0, 3).map(b => b.legacy_id)
           });
         }
       } else {
@@ -222,11 +253,11 @@ async function main() {
     console.log('\n📋 Muestra de los primeros 3 libros:');
     console.log('═'.repeat(50));
     books.slice(0, 3).forEach((book, i) => {
-      console.log(`\n${i + 1}. ${book.title}`);
-      console.log(`   Código: ${book.code}`);
-      console.log(`   Autor: ${book.author}`);
-      console.log(`   Precio: €${book.price}`);
-      console.log(`   Categoría: ${book.category}`);
+      console.log(`\n${i + 1}. ${book.titulo}`);
+      console.log(`   Código: ${book.legacy_id}`);
+      console.log(`   Autor: ${book.autor}`);
+      console.log(`   Precio: €${book.precio}`);
+      console.log(`   Ubicación: ${book.ubicacion}`);
     });
     console.log('\n' + '═'.repeat(50));
 
