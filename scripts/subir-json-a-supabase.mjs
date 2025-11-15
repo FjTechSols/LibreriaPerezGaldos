@@ -77,9 +77,13 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
  * - stock (INT)
  */
 function transformToDatabase(book) {
+  // Generar un ISBN único si está vacío para evitar conflictos
+  // Si el ISBN ya existe, lo dejamos vacío para que no haya conflicto con UNIQUE constraint
+  const isbn = book.isbn && book.isbn.trim() !== '' ? book.isbn : null;
+
   return {
     // Campos principales
-    isbn: book.isbn || '',
+    isbn: isbn, // Puede ser null si está vacío
     titulo: book.title || book.titulo || 'Sin título',
     autor: book.author || book.autor || 'Desconocido',
     anio: book.year || book.año ? parseInt(book.year || book.año) : null,
@@ -112,13 +116,14 @@ function transformToDatabase(book) {
 
 /**
  * Sube libros a Supabase en lotes
+ * NOTA: Sube TODOS los libros sin verificar duplicados
  */
 async function uploadBooks(books, batchSize = 100) {
   console.log(`\n📦 Subiendo ${books.length} libros en lotes de ${batchSize}...\n`);
+  console.log('⚠️  MODO: Subiendo TODOS los libros (se permiten duplicados)\n');
 
   let imported = 0;
   let errors = 0;
-  let duplicates = 0;
   const errorDetails = [];
 
   for (let i = 0; i < books.length; i += batchSize) {
@@ -135,61 +140,16 @@ async function uploadBooks(books, batchSize = 100) {
         .select();
 
       if (error) {
-        // Verificar si es error de duplicados
-        if (error.message.includes('duplicate') || error.message.includes('unique')) {
-          console.log(`⚠️  Lote ${batchNum}: Algunos libros ya existen (duplicados)`);
-          duplicates += batch.length;
-
-          // Intentar subir uno por uno para identificar cuáles son duplicados
-          console.log(`   🔄 Reintentando libro por libro...`);
-          let batchImported = 0;
-          let batchDuplicates = 0;
-
-          for (const book of batch) {
-            try {
-              const { error: singleError } = await supabase
-                .from('libros')
-                .insert([book])
-                .select();
-
-              if (singleError) {
-                if (singleError.message.includes('duplicate') || singleError.message.includes('unique')) {
-                  batchDuplicates++;
-                } else {
-                  errors++;
-                  errorDetails.push({
-                    book: book.legacy_id || book.titulo,
-                    error: singleError.message
-                  });
-                }
-              } else {
-                batchImported++;
-              }
-            } catch (err) {
-              errors++;
-              errorDetails.push({
-                book: book.legacy_id || book.titulo,
-                error: err.message
-              });
-            }
-          }
-
-          imported += batchImported;
-          duplicates = batchDuplicates;
-          console.log(`   ✅ ${batchImported} nuevos, ⚠️  ${batchDuplicates} duplicados`);
-
-        } else {
-          console.error(`❌ Error en lote ${batchNum}: ${error.message}`);
-          errors += batch.length;
-          errorDetails.push({
-            batch: batchNum,
-            error: error.message,
-            books: batch.slice(0, 3).map(b => b.legacy_id)
-          });
-        }
+        console.error(`❌ Error en lote ${batchNum}: ${error.message}`);
+        errors += batch.length;
+        errorDetails.push({
+          batch: batchNum,
+          error: error.message,
+          books: batch.slice(0, 3).map(b => b.legacy_id || b.titulo)
+        });
       } else {
         imported += batch.length;
-        console.log(`✅ Lote ${batchNum} importado exitosamente`);
+        console.log(`✅ Lote ${batchNum} importado exitosamente (${batch.length} libros)`);
       }
     } catch (err) {
       console.error(`❌ Error inesperado en lote ${batchNum}: ${err.message}`);
@@ -200,13 +160,13 @@ async function uploadBooks(books, batchSize = 100) {
       });
     }
 
-    // Pausa entre lotes
+    // Pausa entre lotes para no saturar Supabase
     if (i + batchSize < books.length) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
   }
 
-  return { imported, errors, duplicates, errorDetails };
+  return { imported, errors, errorDetails };
 }
 
 /**
@@ -298,29 +258,43 @@ async function main() {
     console.log('📊 RESUMEN DE SUBIDA');
     console.log('═'.repeat(50));
     console.log(`✅ Importados:   ${result.imported}`);
-    console.log(`⚠️  Duplicados:   ${result.duplicates}`);
     console.log(`❌ Errores:      ${result.errors}`);
     console.log(`📈 Total:        ${books.length}`);
+
+    const successRate = ((result.imported / books.length) * 100).toFixed(1);
+    console.log(`📈 Tasa éxito:   ${successRate}%`);
 
     if (result.errorDetails.length > 0 && result.errorDetails.length <= 10) {
       console.log('\n⚠️  Detalles de errores:');
       result.errorDetails.forEach(err => {
-        if (err.book) {
-          console.log(`   • ${err.book}: ${err.error}`);
-        } else {
+        if (err.batch) {
           console.log(`   • Lote ${err.batch}: ${err.error}`);
+          if (err.books && err.books.length > 0) {
+            console.log(`     Primeros libros: ${err.books.join(', ')}`);
+          }
         }
       });
     } else if (result.errorDetails.length > 10) {
-      console.log(`\n⚠️  ${result.errorDetails.length} errores detectados (demasiados para mostrar)`);
+      console.log(`\n⚠️  ${result.errorDetails.length} lotes con errores (demasiados para mostrar todos)`);
+      console.log(`   Mostrando los primeros 5:`);
+      result.errorDetails.slice(0, 5).forEach(err => {
+        if (err.batch) {
+          console.log(`   • Lote ${err.batch}: ${err.error.substring(0, 80)}...`);
+        }
+      });
     }
 
     if (result.imported > 0) {
       console.log('\n✅ Subida completada exitosamente');
+      console.log(`\n📚 ${result.imported} libros importados a Supabase`);
       console.log('\n💡 Próximos pasos:');
       console.log('   1. Verifica los libros en el panel de administración');
-      console.log('   2. Agrega imágenes de portada si es necesario');
-      console.log('   3. Ajusta stock y precios según corresponda');
+      console.log('   2. Asigna categorías y editoriales correctas');
+      console.log('   3. Agrega imágenes de portada si es necesario');
+      console.log('   4. Revisa y ajusta precios/stock según corresponda');
+    } else {
+      console.log('\n❌ No se importó ningún libro');
+      console.log('   Revisa los errores arriba para más detalles');
     }
 
   } catch (error) {
