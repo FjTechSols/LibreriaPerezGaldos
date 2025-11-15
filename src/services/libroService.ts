@@ -252,3 +252,39 @@ export const obtenerTotalLibros = async (): Promise<number> => {
     return 0;
   }
 };
+
+// Función para obtener estadísticas de libros
+export const obtenerEstadisticasLibros = async (): Promise<{
+  total: number;
+  enStock: number;
+  sinStock: number;
+}> => {
+  try {
+    // Obtener total de libros activos
+    const { count: total, error: errorTotal } = await supabase
+      .from('libros')
+      .select('*', { count: 'exact', head: true })
+      .eq('activo', true);
+
+    // Obtener libros con stock > 0
+    const { count: enStock, error: errorStock } = await supabase
+      .from('libros')
+      .select('*', { count: 'exact', head: true })
+      .eq('activo', true)
+      .gt('stock', 0);
+
+    if (errorTotal || errorStock) {
+      console.error('Error al obtener estadísticas:', errorTotal || errorStock);
+      return { total: 0, enStock: 0, sinStock: 0 };
+    }
+
+    return {
+      total: total || 0,
+      enStock: enStock || 0,
+      sinStock: (total || 0) - (enStock || 0)
+    };
+  } catch (error) {
+    console.error('Error inesperado al obtener estadísticas:', error);
+    return { total: 0, enStock: 0, sinStock: 0 };
+  }
+};

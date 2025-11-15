@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
-import { obtenerLibros, obtenerTotalLibros } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -49,6 +49,8 @@ export function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalBooks, setTotalBooks] = useState(0);
+  const [booksInStock, setBooksInStock] = useState(0);
+  const [booksOutOfStock, setBooksOutOfStock] = useState(0);
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
 
   useEffect(() => {
@@ -66,15 +68,26 @@ export function AdminDashboard() {
     cargarUbicaciones();
   }, []);
 
+  // Cargar estadísticas al inicio
+  useEffect(() => {
+    const cargarEstadisticas = async () => {
+      try {
+        const stats = await obtenerEstadisticasLibros();
+        setTotalBooks(stats.total);
+        setBooksInStock(stats.enStock);
+        setBooksOutOfStock(stats.sinStock);
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    };
+    cargarEstadisticas();
+  }, []);
+
   // Cargar libros con paginación cuando cambia la página
   useEffect(() => {
     const cargarLibros = async () => {
       setLoadingBooks(true);
       try {
-        // Cargar total de libros
-        const total = await obtenerTotalLibros();
-        setTotalBooks(total);
-
         // Cargar libros de la página actual
         const offset = (currentPage - 1) * itemsPerPage;
         const libros = await obtenerLibros(itemsPerPage, offset);
@@ -303,12 +316,12 @@ export function AdminDashboard() {
   };
 
   const stats = {
-    totalBooks: books.length,
+    totalBooks: totalBooks,
     totalInvoices: invoices.length,
     totalOrders: 0,
     totalRevenue: invoices.reduce((sum, invoice) => sum + invoice.total, 0),
-    inStock: books.filter(book => book.stock > 0).length,
-    outOfStock: books.filter(book => book.stock === 0).length,
+    inStock: booksInStock,
+    outOfStock: booksOutOfStock,
     pendingInvoices: invoices.filter(invoice => invoice.status === 'Pendiente').length,
     processingOrders: 0
   };
@@ -655,7 +668,7 @@ export function AdminDashboard() {
                   </h2>
                   <p className="content-subtitle">
                     {activeSection === 'dashboard' ? 'Resumen general y estadísticas' :
-                     activeSection === 'books' ? `${filteredBooks.length} libros encontrados` :
+                     activeSection === 'books' ? `${searchQuery ? currentBooks.length : totalBooks} libros ${searchQuery ? 'encontrados' : 'en total'}` :
                      activeSection === 'invoices' ? 'Gestión de facturas desde Supabase' :
                      'Gestión de pedidos desde Supabase'}
                   </p>
