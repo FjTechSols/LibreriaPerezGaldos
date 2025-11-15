@@ -27,15 +27,32 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '../.env.development') });
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Error: Variables de entorno no configuradas');
-  console.error('   Asegúrate de tener VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.development');
+if (!supabaseUrl) {
+  console.error('❌ Error: VITE_SUPABASE_URL no está configurada');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseServiceKey) {
+  console.error('❌ Error: SUPABASE_SERVICE_ROLE_KEY no está configurada');
+  console.error('\n⚠️  Este script requiere la SERVICE_ROLE_KEY para evitar restricciones de RLS');
+  console.error('\n📖 Para obtener la SERVICE_ROLE_KEY:');
+  console.error('   1. Ve a https://supabase.com/dashboard/project/weaihscsaqxadxjgsfbt/settings/api');
+  console.error('   2. Busca "service_role" en la sección "Project API keys"');
+  console.error('   3. Copia la key y agrégala al archivo .env.development:');
+  console.error('      SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_aqui');
+  console.error('\n⚠️  IMPORTANTE: La SERVICE_ROLE_KEY es secreta, NUNCA la subas a git');
+  process.exit(1);
+}
+
+// Usar SERVICE_ROLE_KEY para evitar restricciones de RLS
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 /**
  * Transforma el formato JSON normalizado al formato de la tabla libros
