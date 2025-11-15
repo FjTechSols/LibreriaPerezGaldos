@@ -28,7 +28,7 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   code: libro.legacy_id || libro.id.toString(),  // Mostrar legacy_id si existe, sino el id
   title: libro.titulo,
   author: libro.autor,
-  publisher: '',  // TODO: Obtener de editorial_id
+  publisher: libro.editorial_id ? `Editorial ${libro.editorial_id}` : 'Editorial Desconocida',
   pages: libro.paginas || 0,
   publicationYear: libro.anio || new Date().getFullYear(),
   isbn: libro.isbn || '',
@@ -36,8 +36,8 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   originalPrice: undefined,  // No existe en la BD actual
   stock: libro.stock,
   ubicacion: libro.ubicacion || '',
-  category: '',  // TODO: Obtener de categoria_id
-  description: libro.descripcion || '',
+  category: libro.categoria_id ? `Categoría ${libro.categoria_id}` : 'General',
+  description: libro.descripcion || 'Sin descripción disponible',
   coverImage: libro.imagen_url || 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=300',
   rating: 0,  // No existe en la BD actual
   reviews: [],

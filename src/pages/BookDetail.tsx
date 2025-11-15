@@ -11,7 +11,7 @@ import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
   const { id } = useParams<{ id: string }>();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -51,15 +51,27 @@ export function BookDetail() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (!book || !book) {
+  if (loading) {
+    return (
+      <div className="book-detail">
+        <div className="container">
+          <div className="loading-state">
+            <p>Cargando libro...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!book) {
     return (
       <div className="book-detail">
         <div className="container">
           <div className="not-found">
-            <h1>{language === 'es' ? 'Libro no encontrado' : language === 'en' ? 'Book not found' : 'Livre introuvable'}</h1>
+            <h1>{t('bookNotFound')}</h1>
             <Link to="/catalogo" className="back-link">
               <ArrowLeft size={20} />
-              {language === 'es' ? 'Volver al catálogo' : language === 'en' ? 'Back to catalog' : 'Retour au catalogue'}
+              {t('backToCatalog')}
             </Link>
           </div>
         </div>
