@@ -26,10 +26,11 @@ export function Catalog() {
     sortOrder: 'asc'
   });
 
-  // Cargar libros desde la base de datos
+  // Cargar libros desde la base de datos (sin límite para catálogo completo)
   useEffect(() => {
     const loadBooks = async () => {
       try {
+        // Cargar todos los libros para el catálogo
         const libros = await obtenerLibros();
         setBooks(libros);
         setFilteredBooks(libros);

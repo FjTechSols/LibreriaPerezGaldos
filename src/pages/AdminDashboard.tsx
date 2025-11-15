@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
-import { obtenerLibros } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -48,6 +48,7 @@ export function AdminDashboard() {
   const [refreshPedidos, setRefreshPedidos] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [totalBooks, setTotalBooks] = useState(0);
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
 
   useEffect(() => {
@@ -56,14 +57,27 @@ export function AdminDashboard() {
     }
   }, [settings]);
 
+  // Cargar ubicaciones al inicio
   useEffect(() => {
     const cargarUbicaciones = async () => {
       const data = await obtenerUbicacionesActivas();
       setUbicaciones(data);
     };
+    cargarUbicaciones();
+  }, []);
+
+  // Cargar libros con paginación cuando cambia la página
+  useEffect(() => {
     const cargarLibros = async () => {
+      setLoadingBooks(true);
       try {
-        const libros = await obtenerLibros();
+        // Cargar total de libros
+        const total = await obtenerTotalLibros();
+        setTotalBooks(total);
+
+        // Cargar libros de la página actual
+        const offset = (currentPage - 1) * itemsPerPage;
+        const libros = await obtenerLibros(itemsPerPage, offset);
         setBooks(libros);
       } catch (error) {
         console.error('Error loading books:', error);
@@ -71,9 +85,8 @@ export function AdminDashboard() {
         setLoadingBooks(false);
       }
     };
-    cargarUbicaciones();
     cargarLibros();
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -189,20 +202,19 @@ export function AdminDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter data based on search query
-  const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.publisher.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Pagination basada en el total de libros en BD
+  const totalPages = Math.ceil(totalBooks / itemsPerPage);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentBooks = filteredBooks.slice(startIndex, endIndex);
+  // Filtrar books localmente solo para búsquedas
+  const currentBooks = searchQuery
+    ? books.filter(book =>
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.publisher.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : books;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -530,11 +542,11 @@ export function AdminDashboard() {
         currentPage={currentPage}
         totalPages={totalPages}
         itemsPerPage={itemsPerPage}
-        totalItems={filteredBooks.length}
+        totalItems={searchQuery ? currentBooks.length : totalBooks}
         onPageChange={handlePageChange}
         onItemsPerPageChange={handleItemsPerPageChange}
         showItemsPerPageSelector={true}
-        itemsPerPageOptions={[10, 20, 50]}
+        itemsPerPageOptions={[10, 20, 50, 100]}
       />
     </div>
   );

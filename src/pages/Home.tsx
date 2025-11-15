@@ -16,10 +16,14 @@ export function Home() {
   useEffect(() => {
     const loadBooks = async () => {
       try {
-        const allBooks = await obtenerLibros();
-        setFeaturedBooks(allBooks.filter(book => book.featured).slice(0, 4));
-        setNewBooks(allBooks.filter(book => book.is_new).slice(0, 4));
-        setSaleBooks(allBooks.filter(book => book.on_sale).slice(0, 4));
+        // Cargar los primeros libros disponibles
+        const allBooks = await obtenerLibros(12, 0);
+
+        // Por ahora, dividir los libros en 3 secciones
+        // TODO: Cuando se agreguen campos featured, is_new, on_sale usar esos campos
+        setFeaturedBooks(allBooks.slice(0, 4));
+        setNewBooks(allBooks.slice(4, 8));
+        setSaleBooks(allBooks.slice(8, 12));
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {
