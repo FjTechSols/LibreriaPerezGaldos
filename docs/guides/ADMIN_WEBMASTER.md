@@ -1,59 +1,90 @@
-# Crear Usuario Administrador WebMaster
+# Guía: Crear Usuario Administrador
 
-## 🎯 Credenciales del Administrador
+## ✅ Pre-requisito: Trigger Automático Instalado
 
-- **Usuario**: WebMaster
-- **Email**: fjtechsols@gmail.com
-- **Contraseña**: WebMaster2024!
-- **Rol**: Administrador
-
----
-
-## 📝 Pasos para Crear el Usuario
-
-### Paso 1: Registrarse en la Aplicación
-
-1. **Abre la aplicación** en tu navegador
-2. **Ve a la página de Registro**: Haz clic en "Registrarse" en la barra de navegación
-3. **Completa el formulario** con los siguientes datos:
-   - **Nombre completo**: `WebMaster`
-   - **Email**: `fjtechsols@gmail.com`
-   - **Contraseña**: `WebMaster2024!`
-   - **Confirmar contraseña**: `WebMaster2024!`
-4. **Haz clic en "Registrarse"**
-
-✅ Esto creará:
-- Usuario en Supabase Auth
-- Registro en tabla `usuarios` con rol de usuario normal (rol_id: 2)
+Has aplicado el trigger automático, lo que significa que:
+- ✅ Nuevos usuarios se crean automáticamente en ambas tablas (`auth.users` y `usuarios`)
+- ✅ No necesitas hacer sincronización manual
+- ✅ El sistema está listo para usar
 
 ---
 
-### Paso 2: Actualizar a Rol Administrador
+## 🧹 Paso 1: Limpiar Todos los Usuarios (OPCIONAL)
 
-Después de registrarte, dile a tu asistente de Bolt:
+Si quieres empezar desde cero:
 
-```
-"Actualiza el usuario fjtechsols@gmail.com para que tenga rol de administrador"
-```
+### Limpiar tabla `usuarios`
 
-El asistente ejecutará automáticamente esta query SQL:
+En **SQL Editor** de Supabase:
 
 ```sql
+-- Ver usuarios actuales
+SELECT id, username, email, rol_id FROM usuarios;
+
+-- Borrar todos
+DELETE FROM usuarios;
+
+-- Verificar
+SELECT COUNT(*) FROM usuarios;
+```
+
+### Limpiar Authentication
+
+**Desde el Dashboard:**
+1. Ve a **Authentication** → **Users**
+2. Borra cada usuario manualmente (3 puntos → Delete user)
+
+---
+
+## 🆕 Paso 2: Crear tu Usuario Administrador
+
+### Desde la aplicación web:
+
+1. **Abre tu aplicación** en el navegador
+2. **Haz clic en "Registrarse"**
+3. **Completa el formulario:**
+   - Nombre: `Admin` (o el que prefieras)
+   - Email: `fjtechsols@gmail.com`
+   - Contraseña: Una contraseña segura (guárdala bien)
+4. **Haz clic en "Registrarse"**
+
+✅ **El trigger automáticamente crea:**
+- Usuario en `auth.users`
+- Registro en tabla `usuarios` con `rol_id = 2` (usuario normal)
+
+---
+
+## 👑 Paso 3: Convertir a Administrador
+
+El usuario se creó como usuario normal. Para hacerlo admin:
+
+### En SQL Editor de Supabase:
+
+```sql
+-- Actualizar a administrador
 UPDATE usuarios
-SET rol_id = 1, username = 'WebMaster'
+SET rol_id = 1
+WHERE email = 'fjtechsols@gmail.com';
+
+-- Verificar
+SELECT id, username, email, rol_id, activo
+FROM usuarios
 WHERE email = 'fjtechsols@gmail.com';
 ```
 
+**Resultado esperado:**
+- `rol_id = 1` ✅
+- `activo = true` ✅
+
 ---
 
-### Paso 3: Verificar el Acceso
+## 🔄 Paso 4: Recargar Sesión
 
-1. **Cierra sesión** si estás logueado
-2. **Inicia sesión** con:
+1. **Cierra sesión** en la aplicación (botón "Salir")
+2. **Inicia sesión** de nuevo con:
    - Email: `fjtechsols@gmail.com`
-   - Contraseña: `WebMaster2024!`
-3. **Verifica** que aparece el botón **"Admin"** en la barra de navegación
-4. **Haz clic en "Admin"** para acceder al Dashboard de Administrador
+   - Contraseña: La que elegiste en el registro
+3. ✅ Ahora deberías ver el botón **"Admin"** en la navbar
 
 ---
 
