@@ -166,24 +166,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (authData.user) {
-        const { error: userError } = await supabase
-          .from('usuarios')
-          .insert({
-            auth_user_id: authData.user.id,
-            username: name,
-            email: email,
-            rol_id: 2
-          });
+        console.log('User created successfully in auth.users');
+        console.log('Trigger will automatically create user record in usuarios table');
 
-        if (userError) {
-          console.error('Error creating user record:', userError);
-          return false;
-        }
+        // Wait a moment for the trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         if (!authData.session) {
+          console.log('No session created, email confirmation required');
           return true;
         }
 
+        console.log('Loading user data...');
         await loadUserData(authData.user.id);
         return true;
       }

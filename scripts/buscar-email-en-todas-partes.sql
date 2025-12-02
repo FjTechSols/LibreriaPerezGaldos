@@ -1,50 +1,68 @@
 -- ============================================
--- BUSCAR EMAIL EN TODAS LAS TABLAS
+-- DIAGNÓSTICO COMPLETO: Database error saving new user
 -- ============================================
 
--- 1. Buscar en tabla usuarios
-SELECT 'usuarios' as tabla, id, email, username, rol_id
-FROM usuarios
-WHERE email ILIKE '%fjtechsols%';
+-- PASO 1: Verificar estructura de tabla usuarios
+-- ============================================
+SELECT
+  column_name,
+  data_type,
+  is_nullable,
+  column_default
+FROM information_schema.columns
+WHERE table_name = 'usuarios'
+ORDER BY ordinal_position;
 
--- 2. Buscar en auth.users (puede dar error de permisos)
-SELECT 'auth.users' as tabla, id, email, created_at
+-- PASO 2: Verificar constraints (UNIQUE, FK, etc.)
+-- ============================================
+SELECT
+  con.conname as constraint_name,
+  con.contype as constraint_type,
+  pg_get_constraintdef(con.oid) as definition
+FROM pg_constraint con
+JOIN pg_class rel ON rel.oid = con.conrelid
+WHERE rel.relname = 'usuarios';
+
+-- PASO 3: Verificar políticas RLS actuales
+-- ============================================
+SELECT
+  policyname,
+  permissive,
+  roles,
+  cmd,
+  qual,
+  with_check
+FROM pg_policies
+WHERE tablename = 'usuarios'
+ORDER BY policyname;
+
+-- PASO 4: Ver si el email ya existe en auth.users
+-- ============================================
+SELECT
+  id,
+  email,
+  created_at,
+  email_confirmed_at,
+  last_sign_in_at,
+  deleted_at
 FROM auth.users
-WHERE email ILIKE '%fjtechsols%';
+WHERE email ILIKE 'fjtechsols@gmail.com'
+ORDER BY created_at DESC;
 
--- 3. Buscar en tabla clientes
-SELECT 'clientes' as tabla, id, email, nombre
-FROM clientes
-WHERE email ILIKE '%fjtechsols%';
-
--- 4. Buscar en tabla facturas (por si hay email de cliente)
-SELECT 'facturas' as tabla, id, cliente_email
-FROM facturas
-WHERE cliente_email ILIKE '%fjtechsols%';
-
--- 5. Buscar en tabla pedidos
-SELECT 'pedidos' as tabla, id, usuario_id
-FROM pedidos p
-JOIN usuarios u ON u.id = p.usuario_id
-WHERE u.email ILIKE '%fjtechsols%';
-
+-- PASO 5: Verificar roles existen
 -- ============================================
--- LIMPIAR DE TODAS PARTES
+SELECT * FROM roles ORDER BY id;
+
+-- Debe mostrar:
+-- id=1, nombre='admin'
+-- id=2, nombre='usuario'
+
+-- PASO 6: Verificar si hay triggers
 -- ============================================
-
--- Borrar de clientes
-DELETE FROM clientes WHERE email ILIKE '%fjtechsols%';
-
--- Borrar de usuarios
-DELETE FROM usuarios WHERE email ILIKE '%fjtechsols%';
-
--- Verificar que se borraron
-SELECT 'usuarios' as tabla, COUNT(*) as cantidad
-FROM usuarios
-WHERE email ILIKE '%fjtechsols%'
-UNION ALL
-SELECT 'clientes' as tabla, COUNT(*) as cantidad
-FROM clientes
-WHERE email ILIKE '%fjtechsols%';
-
--- Debe mostrar 0 en ambos
+SELECT
+  tgname as trigger_name,
+  tgenabled as enabled,
+  pg_get_triggerdef(oid) as definition
+FROM pg_trigger
+WHERE tgrelid = 'usuarios'::regclass
+AND tgisinternal = false;

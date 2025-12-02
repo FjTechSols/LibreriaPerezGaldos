@@ -1,154 +1,144 @@
 -- ============================================
--- LIMPIAR USUARIOS HUÉRFANOS
+-- SOLUCIÓN DEFINITIVA: Usar TRIGGER automático
 -- ============================================
--- Este script elimina usuarios que existen en la tabla usuarios
--- pero NO existen en auth.users (Authentication)
 
--- 1. VER USUARIOS ACTUALES EN LA TABLA USUARIOS
+/*
+  PROBLEMA ACTUAL:
+  - El código hace INSERT manual en tabla usuarios después de auth.signUp()
+  - Ese INSERT está fallando con "Database error saving new user"
+
+  SOLUCIÓN:
+  - Crear un TRIGGER que se dispare automáticamente cuando se crea un usuario en auth.users
+  - El trigger inserta en la tabla usuarios automáticamente
+  - No necesitamos INSERT manual ni políticas complicadas
+*/
+
+-- ============================================
+-- PASO 1: Crear función para el trigger
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Insertar en tabla usuarios cuando se crea en auth.users
+  INSERT INTO public.usuarios (auth_user_id, username, email, rol_id, activo)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
+    NEW.email,
+    2,  -- rol_id = 2 (usuario normal por defecto)
+    true
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+-- ============================================
+-- PASO 2: Crear trigger en auth.users
+-- ============================================
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
+-- PASO 3: Verificar que el trigger se creó
 -- ============================================
 
 SELECT
-  id,
-  auth_user_id,
-  username,
-  email,
-  rol_id,
-  activo,
-  fecha_registro
-FROM usuarios
-ORDER BY fecha_registro DESC;
+  tgname as trigger_name,
+  tgenabled as enabled,
+  pg_get_triggerdef(oid) as definition
+FROM pg_trigger
+WHERE tgname = 'on_auth_user_created';
 
--- 2. VERIFICAR SI HAY USUARIOS HUÉRFANOS
 -- ============================================
--- Estos son usuarios en la tabla 'usuarios' cuyo auth_user_id
--- no existe en auth.users
+-- PASO 4: Eliminar política INSERT (ya no necesaria)
+-- ============================================
 
+DROP POLICY IF EXISTS "Allow user registration" ON usuarios;
+
+-- ============================================
+-- PASO 5: Limpiar datos anteriores
+-- ============================================
+
+DELETE FROM usuarios;
+SELECT COUNT(*) as usuarios_restantes FROM usuarios;
+
+-- ============================================
+-- PASO 6: AHORA REGÍSTRATE EN LA APP
+-- ============================================
+
+/*
+  INSTRUCCIONES:
+
+  1. Ve a tu aplicación web
+  2. Haz clic en "Registrarse"
+  3. Completa el formulario:
+     - Email: fjtechsols@gmail.com (o cualquier otro)
+     - Nombre: Admin
+     - Contraseña: Una segura que recuerdes
+  4. Haz clic en "Registrarse"
+  5. ✅ El TRIGGER creará el usuario automáticamente
+
+  NOTA: Si aún dice "email ya existe", usa un email diferente:
+  - admin@exlibris.com
+  - test@test.com
+  - info@tudominio.com
+*/
+
+-- ============================================
+-- PASO 7: Convertir a administrador
+-- ============================================
+
+-- Ver el usuario que acabas de crear
 SELECT
   u.id,
   u.auth_user_id,
   u.username,
   u.email,
-  u.rol_id,
-  'HUÉRFANO - No existe en auth.users' as estado
-FROM usuarios u
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM auth.users au
-  WHERE au.id = u.auth_user_id
-);
-
--- 3. BORRAR TODOS LOS USUARIOS DE LA TABLA USUARIOS
--- ============================================
--- Esto borra TODOS los usuarios de la tabla usuarios
--- Úsalo con precaución
-
-DELETE FROM usuarios;
-
--- 4. VERIFICAR QUE SE BORRARON
--- ============================================
-
-SELECT COUNT(*) as usuarios_restantes FROM usuarios;
-
--- Debe mostrar 0
-
--- 5. VERIFICAR QUE AUTHENTICATION ESTÁ VACÍO
--- ============================================
-
-SELECT
-  id,
-  email,
-  created_at,
-  email_confirmed_at
-FROM auth.users;
-
--- Si aparecen usuarios aquí, necesitas borrarlos manualmente
--- desde el Dashboard: Authentication → Users → Borrar cada uno
-
-
--- ============================================
--- DESPUÉS DE LIMPIAR TODO:
--- ============================================
-
-/*
-  PASOS SIGUIENTES:
-
-  1. ✅ Ya ejecutaste este script y borraste todos los usuarios de la tabla usuarios
-
-  2. ⚠️ Ve al Dashboard de Supabase:
-     - Authentication → Users
-     - Borra TODOS los usuarios que aparezcan ahí
-     - (Los usuarios en auth.users no se pueden borrar con SQL)
-
-  3. ✅ Verifica que ambas tablas estén vacías:
-     - Ejecuta las consultas de verificación abajo
-
-  4. ✅ Ahora puedes registrar tu usuario:
-     - Ve a tu aplicación web
-     - Haz clic en "Registrarse"
-     - Email: fjtechsols@gmail.com (o FjTechSols@gmail.com, es case-insensitive)
-     - Contraseña: La que quieras (guárdala bien)
-
-  5. ✅ Convierte el usuario en admin:
-     - Ejecuta el script de conversión a admin
-*/
-
-
--- ============================================
--- VERIFICACIONES FINALES
--- ============================================
-
--- Verificar tabla usuarios está vacía
-SELECT 'Usuarios en tabla usuarios:' as verificacion, COUNT(*) as cantidad
-FROM usuarios;
-
--- Verificar Authentication (puede dar error de permisos, es normal)
-SELECT 'Usuarios en auth.users:' as verificacion, COUNT(*) as cantidad
-FROM auth.users;
-
--- Ver estructura de la tabla usuarios (confirmar que existe)
-SELECT
-  column_name,
-  data_type,
-  is_nullable
-FROM information_schema.columns
-WHERE table_name = 'usuarios'
-ORDER BY ordinal_position;
-
-
--- ============================================
--- SCRIPT PARA DESPUÉS DEL REGISTRO
--- ============================================
-
-/*
-  Ejecuta esto DESPUÉS de registrarte en la aplicación:
-*/
-
--- Ver el usuario que acabas de crear
-SELECT
-  id,
-  auth_user_id,
-  username,
-  email,
-  rol_id,
-  activo,
-  fecha_registro
-FROM usuarios
-WHERE email ILIKE '%fjtechsols%';
-
--- Convertir a administrador
-UPDATE usuarios
-SET rol_id = 1
-WHERE email ILIKE '%fjtechsols%';
-
--- Verificar que ahora es admin
-SELECT
-  u.id,
-  u.username,
-  u.email,
   r.nombre as rol,
   u.activo
 FROM usuarios u
-JOIN roles r ON r.id = u.rol_id
-WHERE email ILIKE '%fjtechsols%';
+LEFT JOIN roles r ON r.id = u.rol_id
+ORDER BY u.fecha_registro DESC;
 
--- Debe mostrar rol = 'admin'
+-- Convertir a admin (cambia el email por el que usaste)
+UPDATE usuarios
+SET rol_id = 1
+WHERE email = 'fjtechsols@gmail.com';  -- Cambia esto
+
+-- Verificar
+SELECT
+  u.username,
+  u.email,
+  r.nombre as rol
+FROM usuarios u
+LEFT JOIN roles r ON r.id = u.rol_id
+WHERE email = 'fjtechsols@gmail.com';  -- Cambia esto
+
+-- Debe mostrar: rol = 'admin'
+
+-- ============================================
+-- RESUMEN
+-- ============================================
+
+/*
+  ✅ TRIGGER creado: handle_new_user()
+  ✅ Se dispara automáticamente al crear usuario en auth.users
+  ✅ Crea registro en tabla usuarios con rol_id=2
+  ✅ Ya NO necesitas INSERT manual en el código
+  ✅ Ya NO necesitas políticas INSERT complicadas
+
+  IMPORTANTE:
+  Ahora debes ACTUALIZAR AuthContext.tsx para eliminar el INSERT manual
+  Ver instrucciones abajo.
+*/
