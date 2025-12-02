@@ -28,43 +28,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkUser = async () => {
     try {
-      console.log('Checking user session...');
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('Session:', session);
 
       if (session?.user) {
-        console.log('User found, loading data...');
         await loadUserData(session.user.id);
-      } else {
-        console.log('No session found');
       }
     } catch (error) {
-      console.error('Error checking user:', error);
+      // Silent error handling
     } finally {
-      console.log('Auth check complete, setting loading to false');
       setLoading(false);
     }
   };
 
   const loadUserData = async (authUserId: string) => {
     try {
-      console.log('Loading user data for auth_user_id:', authUserId);
       const { data: userData, error } = await supabase
         .from('usuarios')
         .select('id, username, email, rol_id')
         .eq('auth_user_id', authUserId)
         .maybeSingle();
 
-      console.log('User data response:', { userData, error });
-
       if (error) {
-        console.error('Error loading user data:', error);
         await supabase.auth.signOut();
         return;
       }
 
       if (userData) {
-        console.log('Setting user state:', userData);
         setUser({
           id: userData.id,
           email: userData.email,
@@ -72,18 +61,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: userData.rol_id === 1 ? 'admin' : 'user'
         });
       } else {
-        console.error('No user data found for auth user:', authUserId);
         await supabase.auth.signOut();
       }
     } catch (error) {
-      console.error('Error in loadUserData:', error);
       await supabase.auth.signOut();
     }
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    console.log('Login attempt:', email);
-
     const demoUsers = [
       { email: 'admin@admin.com', password: 'admin', id: 1, name: 'Admin Demo', role: 'admin' as const },
       { email: 'user@user.com', password: 'user', id: 2, name: 'Usuario Demo', role: 'user' as const }
@@ -92,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const demoUser = demoUsers.find(u => u.email === email && u.password === password);
 
     if (demoUser) {
-      console.log('Demo user login successful');
       setUser({
         id: demoUser.id,
         email: demoUser.email,
@@ -110,7 +94,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.warn('Supabase login failed:', error.message);
         return false;
       }
 
@@ -122,7 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle();
 
         if (userError || !userData) {
-          console.error('Error loading user data:', userError);
           await supabase.auth.signOut();
           return false;
         }
@@ -138,14 +120,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return false;
     } catch (error) {
-      console.error('Error in login:', error);
       return false;
     }
   };
 
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
     try {
-      console.log('Attempting registration with email:', email);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -157,34 +137,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      console.log('Supabase signUp response:', { authData, authError });
-
       if (authError) {
-        console.error('Registration error:', authError.message);
-        console.error('Full error object:', authError);
         return false;
       }
 
       if (authData.user) {
-        console.log('User created successfully in auth.users');
-        console.log('Trigger will automatically create user record in usuarios table');
-
-        // Wait a moment for the trigger to complete
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         if (!authData.session) {
-          console.log('No session created, email confirmation required');
           return true;
         }
 
-        console.log('Loading user data...');
         await loadUserData(authData.user.id);
         return true;
       }
 
       return false;
     } catch (error) {
-      console.error('Error in register:', error);
       return false;
     }
   };
@@ -194,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
       setUser(null);
     } catch (error) {
-      console.error('Error in logout:', error);
+      // Silent error handling
     }
   };
 
