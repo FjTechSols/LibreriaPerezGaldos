@@ -68,13 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (emailOrUsername: string, password: string): Promise<boolean> => {
     const demoUsers = [
-      { email: 'admin@admin.com', password: 'admin', id: 1, name: 'Admin Demo', role: 'admin' as const },
-      { email: 'user@user.com', password: 'user', id: 2, name: 'Usuario Demo', role: 'user' as const }
+      { email: 'admin@admin.com', username: 'admin', password: 'admin', id: 1, name: 'Admin Demo', role: 'admin' as const },
+      { email: 'user@user.com', username: 'user', password: 'user', id: 2, name: 'Usuario Demo', role: 'user' as const }
     ];
 
-    const demoUser = demoUsers.find(u => u.email === email && u.password === password);
+    const demoUser = demoUsers.find(u =>
+      (u.email === emailOrUsername || u.username === emailOrUsername) && u.password === password
+    );
 
     if (demoUser) {
       setUser({
@@ -88,8 +90,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      let userEmail = emailOrUsername;
+
+      if (!emailOrUsername.includes('@')) {
+        const { data: userData } = await supabase
+          .from('usuarios')
+          .select('email')
+          .ilike('username', emailOrUsername)
+          .maybeSingle();
+
+        if (!userData) {
+          return false;
+        }
+
+        userEmail = userData.email;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: userEmail,
         password
       });
 

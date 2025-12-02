@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/Login.css';
 
 export function Login() {
-  const [email, setEmail] = useState('');
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ export function Login() {
     setIsLoading(true);
     setError('');
 
-    const success = await login(email, password);
+    const success = await login(emailOrUsername, password);
     if (success) {
       navigate(from, { replace: true });
     } else {
@@ -45,18 +45,18 @@ export function Login() {
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                <Mail size={16} />
-                {t('email')}
+              <label htmlFor="emailOrUsername" className="form-label">
+                <User size={16} />
+                {t('emailOrUsername')}
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="emailOrUsername"
+                type="text"
+                value={emailOrUsername}
+                onChange={(e) => setEmailOrUsername(e.target.value)}
                 required
                 className="form-input"
-                placeholder="tu@email.com"
+                placeholder={t('emailOrUsernamePlaceholder')}
               />
             </div>
 
