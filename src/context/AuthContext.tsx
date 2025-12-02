@@ -145,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
     try {
+      console.log('Attempting registration with email:', email);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -156,8 +157,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
 
+      console.log('Supabase signUp response:', { authData, authError });
+
       if (authError) {
         console.error('Registration error:', authError.message);
+        console.error('Full error object:', authError);
         return false;
       }
 
