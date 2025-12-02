@@ -93,17 +93,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let userEmail = emailOrUsername;
 
       if (!emailOrUsername.includes('@')) {
-        const { data: userData } = await supabase
+        const { data: userData, error: lookupError } = await supabase
           .from('usuarios')
           .select('email')
           .ilike('username', emailOrUsername)
           .maybeSingle();
 
-        if (!userData) {
-          return false;
-        }
+        if (lookupError || !userData) {
+          const { data: userDataExact } = await supabase
+            .from('usuarios')
+            .select('email')
+            .eq('username', emailOrUsername)
+            .maybeSingle();
 
-        userEmail = userData.email;
+          if (!userDataExact) {
+            return false;
+          }
+          userEmail = userDataExact.email;
+        } else {
+          userEmail = userData.email;
+        }
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
