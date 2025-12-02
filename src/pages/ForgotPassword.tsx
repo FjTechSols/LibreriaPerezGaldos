@@ -25,8 +25,12 @@ export function ForgotPassword() {
     setResendMessage('');
 
     try {
+      const redirectUrl = import.meta.env.MODE === 'production'
+        ? 'https://perezgaldos.bolt.host/reset-password'
+        : `${window.location.origin}/reset-password`;
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) {

@@ -33,15 +33,37 @@ export function ResetPassword() {
 
   const checkSession = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
 
-      if (session) {
-        setIsValidSession(true);
+      if (type === 'recovery' && accessToken) {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+          const { error: setError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: hashParams.get('refresh_token') || ''
+          });
+
+          if (setError) {
+            setError('Enlace inválido o expirado. Solicita un nuevo enlace de recuperación.');
+          } else {
+            setIsValidSession(true);
+          }
+        } else {
+          setIsValidSession(true);
+        }
       } else {
-        setError('Enlace inválido o expirado. Solicita un nuevo enlace de recuperación.');
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+          setIsValidSession(true);
+        } else {
+          setError('Enlace inválido o expirado. Solicita un nuevo enlace de recuperación.');
+        }
       }
     } catch (err) {
-      console.error('Error checking session:', err);
       setError('Ha ocurrido un error. Inténtalo de nuevo.');
     } finally {
       setIsChecking(false);
