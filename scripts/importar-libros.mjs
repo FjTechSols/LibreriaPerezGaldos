@@ -33,11 +33,12 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Mapeo de campos del archivo TSV a campos de la base de datos
-// Basado en el formato: N0001026\tEN BUSCA DEL GRAN KAN\tDescripción\t...\t12.00\t336\t...
+// Basado en el formato: N0001026\tEN BUSCA DEL GRAN KAN\tDescripción\tISBN\t...\t12.00\t336\t...
 const FIELD_MAPPING = {
   0: 'code',           // Código interno (N0001026)
   1: 'title',          // Título del libro
   2: 'description',    // Descripción
+  3: 'isbn',           // ISBN del libro
   4: 'editorial',      // Editorial
   5: 'year',           // Año de publicación
   6: 'author',         // Autor
@@ -56,6 +57,7 @@ function parseBookLine(line) {
   const code = fields[0] || '';
   const title = fields[1] || 'Sin título';
   const description = fields[2] || '';
+  const isbn = fields[3] || '';
   const editorial = fields[4] || '';
   const yearStr = fields[5] || '';
   const author = fields[6] || 'Desconocido';
@@ -85,6 +87,7 @@ function parseBookLine(line) {
     code: code.trim(),
     title: title.trim(),
     author: author.trim(),
+    isbn: isbn.trim(),
     editorial: editorial.trim(),
     year,
     price,
@@ -93,7 +96,6 @@ function parseBookLine(line) {
     category,
     ubicacion: ubicacion.trim(),
     stock: 1, // Por defecto 1 en stock
-    isbn: '', // No disponible en el archivo
     cover_image: '', // Se puede agregar después manualmente
     rating: 0,
     featured: false,

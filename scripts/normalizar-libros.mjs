@@ -96,6 +96,7 @@ function parseAndNormalizeLine(line) {
   const code = fixEncoding(fields[0] || '');
   const title = fixEncoding(fields[1] || 'Sin título');
   const description = fixEncoding(fields[2] || '');
+  const isbn = fixEncoding(fields[3] || '');
   const editorial = fixEncoding(fields[4] || '');
   const yearStr = fields[5] || '';
   const author = fixEncoding(fields[6] || 'Desconocido');
@@ -133,6 +134,7 @@ function parseAndNormalizeLine(line) {
     code: code.trim(),
     title: title.trim(),
     author: author.trim(),
+    isbn: isbn.trim(),
     editorial: editorial.trim(),
     year,
     price,
@@ -161,6 +163,7 @@ function generateReadableTXT(books) {
     output += `Código:      ${book.code}\n`;
     output += `Título:      ${book.title}\n`;
     output += `Autor:       ${book.author}\n`;
+    output += `ISBN:        ${book.isbn || 'N/A'}\n`;
     output += `Editorial:   ${book.editorial}\n`;
     output += `Año:         ${book.year || 'N/A'}\n`;
     output += `Precio:      €${book.price}\n`;
@@ -183,6 +186,7 @@ function generateTSV(books) {
     'codigo',
     'titulo',
     'autor',
+    'isbn',
     'editorial',
     'año',
     'precio',
@@ -198,6 +202,7 @@ function generateTSV(books) {
       book.code,
       book.title,
       book.author,
+      book.isbn,
       book.editorial,
       book.year,
       book.price,
