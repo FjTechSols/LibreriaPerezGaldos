@@ -7,7 +7,7 @@
  * las editoriales en la base de datos de Supabase.
  *
  * Uso:
- *   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json
+ *   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --email=admin@example.com --password=tu-password
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -30,6 +30,35 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+/**
+ * Autentica al usuario admin
+ */
+async function autenticarAdmin(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    console.error('❌ Error al autenticar:', error.message);
+    return false;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    console.error('❌ Error: El usuario no tiene permisos de administrador');
+    return false;
+  }
+
+  console.log('✅ Autenticado como admin:', email);
+  return true;
+}
 
 // Cache de editoriales para evitar búsquedas repetidas
 const editorialesCache = new Map();
@@ -190,11 +219,35 @@ async function main() {
   console.log('='.repeat(60));
 
   const filePath = process.argv[2];
+  const emailArg = process.argv.find(arg => arg.startsWith('--email='));
+  const passwordArg = process.argv.find(arg => arg.startsWith('--password='));
 
   if (!filePath) {
     console.error('\n❌ Error: No se especificó archivo JSON');
     console.log('\n📖 Uso:');
-    console.log('   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json');
+    console.log('   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --email=admin@example.com --password=tu-password');
+    process.exit(1);
+  }
+
+  if (!emailArg || !passwordArg) {
+    console.error('\n❌ Error: Se requieren credenciales de administrador');
+    console.log('\n📖 Uso:');
+    console.log('   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --email=admin@example.com --password=tu-password');
+    process.exit(1);
+  }
+
+  const email = emailArg.split('=')[1];
+  const password = passwordArg.split('=')[1];
+
+  if (!email || !password) {
+    console.error('\n❌ Error: Email y password no pueden estar vacíos');
+    process.exit(1);
+  }
+
+  console.log('\n🔐 Autenticando como administrador...');
+  const autenticado = await autenticarAdmin(email, password);
+
+  if (!autenticado) {
     process.exit(1);
   }
 
