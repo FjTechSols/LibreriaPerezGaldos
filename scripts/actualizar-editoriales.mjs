@@ -7,7 +7,7 @@
  * las editoriales en la base de datos de Supabase.
  *
  * Uso:
- *   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --email=admin@example.com --password=tu-password
+ *   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --confirm
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -22,43 +22,15 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '../.env.development') });
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Error: Variables de entorno no configuradas');
+  console.error('   Asegúrate de tener VITE_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en .env.development');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-/**
- * Autentica al usuario admin
- */
-async function autenticarAdmin(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    console.error('❌ Error al autenticar:', error.message);
-    return false;
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', data.user.id)
-    .single();
-
-  if (profile?.role !== 'admin') {
-    console.error('❌ Error: El usuario no tiene permisos de administrador');
-    return false;
-  }
-
-  console.log('✅ Autenticado como admin:', email);
-  return true;
-}
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Cache de editoriales para evitar búsquedas repetidas
 const editorialesCache = new Map();
@@ -217,37 +189,14 @@ async function procesarLibros(libros) {
 async function main() {
   console.log('📝 Script de Actualización de Editoriales\n');
   console.log('='.repeat(60));
+  console.log('🔑 Usando SERVICE_ROLE_KEY (bypassa RLS)');
 
   const filePath = process.argv[2];
-  const emailArg = process.argv.find(arg => arg.startsWith('--email='));
-  const passwordArg = process.argv.find(arg => arg.startsWith('--password='));
 
   if (!filePath) {
     console.error('\n❌ Error: No se especificó archivo JSON');
     console.log('\n📖 Uso:');
-    console.log('   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --email=admin@example.com --password=tu-password');
-    process.exit(1);
-  }
-
-  if (!emailArg || !passwordArg) {
-    console.error('\n❌ Error: Se requieren credenciales de administrador');
-    console.log('\n📖 Uso:');
-    console.log('   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --email=admin@example.com --password=tu-password');
-    process.exit(1);
-  }
-
-  const email = emailArg.split('=')[1];
-  const password = passwordArg.split('=')[1];
-
-  if (!email || !password) {
-    console.error('\n❌ Error: Email y password no pueden estar vacíos');
-    process.exit(1);
-  }
-
-  console.log('\n🔐 Autenticando como administrador...');
-  const autenticado = await autenticarAdmin(email, password);
-
-  if (!autenticado) {
+    console.log('   node scripts/actualizar-editoriales.mjs ruta/al/archivo.json --confirm');
     process.exit(1);
   }
 
