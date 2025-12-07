@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Book } from '../types';
+import { generarCodigoLibro, actualizarCodigoPorUbicacion } from '../utils/codigoHelper';
 
 export interface LibroSupabase {
   id: number;
@@ -95,10 +96,10 @@ export const obtenerLibroPorId = async (id: string | number): Promise<Book | nul
 
 export const crearLibro = async (libro: Partial<LibroSupabase>): Promise<Book | null> => {
   try {
-    const { data, error } = await supabase
+    // Primero insertamos sin legacy_id para obtener el ID autogenerado
+    const { data: libroTemp, error: insertError } = await supabase
       .from('libros')
       .insert({
-        legacy_id: libro.legacy_id || null,
         titulo: libro.titulo,
         autor: libro.autor,
         isbn: libro.isbn || null,
@@ -118,8 +119,27 @@ export const crearLibro = async (libro: Partial<LibroSupabase>): Promise<Book | 
       .select()
       .single();
 
-    if (error) {
-      console.error('Error al crear libro:', error);
+    if (insertError || !libroTemp) {
+      console.error('Error al crear libro:', insertError);
+      return null;
+    }
+
+    // Generar el código basado en el ID y la ubicación
+    const ubicacion = libro.ubicacion || 'almacen';
+    const codigoGenerado = libro.legacy_id
+      ? actualizarCodigoPorUbicacion(libro.legacy_id, ubicacion)
+      : generarCodigoLibro(libroTemp.id, ubicacion);
+
+    // Actualizar el libro con el código generado
+    const { data, error: updateError } = await supabase
+      .from('libros')
+      .update({ legacy_id: codigoGenerado })
+      .eq('id', libroTemp.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error al actualizar código del libro:', updateError);
       return null;
     }
 
@@ -132,15 +152,25 @@ export const crearLibro = async (libro: Partial<LibroSupabase>): Promise<Book | 
 
 export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>): Promise<Book | null> => {
   try {
+    // Obtener el libro actual para saber su código y ubicación actual
+    const { data: libroActual, error: fetchError } = await supabase
+      .from('libros')
+      .select('legacy_id, ubicacion')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error al obtener libro actual:', fetchError);
+      return null;
+    }
+
     const updateData: any = {};
 
-    if (libro.legacy_id !== undefined) updateData.legacy_id = libro.legacy_id;
     if (libro.titulo !== undefined) updateData.titulo = libro.titulo;
     if (libro.autor !== undefined) updateData.autor = libro.autor;
     if (libro.isbn !== undefined) updateData.isbn = libro.isbn;
     if (libro.precio !== undefined) updateData.precio = libro.precio;
     if (libro.stock !== undefined) updateData.stock = libro.stock;
-    if (libro.ubicacion !== undefined) updateData.ubicacion = libro.ubicacion;
     if (libro.descripcion !== undefined) updateData.descripcion = libro.descripcion;
     if (libro.imagen_url !== undefined) updateData.imagen_url = libro.imagen_url;
     if (libro.paginas !== undefined) updateData.paginas = libro.paginas;
@@ -149,6 +179,19 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
     if (libro.editorial_id !== undefined) updateData.editorial_id = libro.editorial_id;
     if (libro.notas !== undefined) updateData.notas = libro.notas;
     if (libro.activo !== undefined) updateData.activo = libro.activo;
+
+    // Si se cambia la ubicación, actualizar el código
+    if (libro.ubicacion !== undefined) {
+      updateData.ubicacion = libro.ubicacion;
+
+      // Actualizar el código basado en la nueva ubicación
+      const codigoActual = libroActual?.legacy_id || id.toString();
+      const nuevoCodigo = actualizarCodigoPorUbicacion(codigoActual, libro.ubicacion);
+      updateData.legacy_id = nuevoCodigo;
+    } else if (libro.legacy_id !== undefined) {
+      // Si se proporciona un legacy_id manualmente, usarlo
+      updateData.legacy_id = libro.legacy_id;
+    }
 
     updateData.updated_at = new Date().toISOString();
 

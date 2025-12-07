@@ -32,6 +32,37 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+/**
+ * Obtiene el sufijo correspondiente a una ubicación
+ */
+function obtenerSufijoUbicacion(ubicacion) {
+  const ubicacionNormalizada = ubicacion.toLowerCase().trim();
+
+  switch (ubicacionNormalizada) {
+    case 'almacen':
+      return '';
+    case 'galeon':
+      return 'G';
+    case 'hortaleza':
+      return 'H';
+    case 'reina':
+      return 'R';
+    case 'abebooks':
+      return 'Ab';
+    default:
+      return '';
+  }
+}
+
+/**
+ * Genera un código de libro basado en el ID y la ubicación
+ */
+function generarCodigoLibro(idLibro, ubicacion, paddingLength = 6) {
+  const numero = idLibro.toString().padStart(paddingLength, '0');
+  const sufijo = obtenerSufijoUbicacion(ubicacion);
+  return `${numero}${sufijo}`;
+}
+
 // Mapeo de campos del archivo TSV a campos de la base de datos
 // Basado en el formato: N0001026\tEN BUSCA DEL GRAN KAN\tDescripción\tISBN\t...\t12.00\t336\t...
 const FIELD_MAPPING = {
@@ -129,51 +160,87 @@ function determineCategory(title, description) {
 /**
  * Importa libros en lotes
  */
-async function importBooks(books, batchSize = 100) {
-  console.log(`\n📦 Importando ${books.length} libros en lotes de ${batchSize}...`);
+async function importBooks(books, batchSize = 50) {
+  console.log(`\n📦 Importando ${books.length} libros (uno por uno para generar códigos)...`);
 
   let imported = 0;
   let errors = 0;
   const errorDetails = [];
 
-  for (let i = 0; i < books.length; i += batchSize) {
-    const batch = books.slice(i, i + batchSize);
-    const batchNum = Math.floor(i / batchSize) + 1;
-    const totalBatches = Math.ceil(books.length / batchSize);
-
-    console.log(`\n📤 Procesando lote ${batchNum}/${totalBatches} (${batch.length} libros)...`);
+  // Procesar libros uno por uno para generar códigos correctos
+  for (let i = 0; i < books.length; i++) {
+    const book = books[i];
 
     try {
-      const { data, error } = await supabase
+      // 1. Insertar el libro sin legacy_id
+      const { data: libroInsertado, error: insertError } = await supabase
         .from('libros')
-        .insert(batch)
-        .select();
+        .insert({
+          titulo: book.title,
+          autor: book.author,
+          isbn: book.isbn || null,
+          precio: book.price,
+          stock: book.stock || 1,
+          ubicacion: book.ubicacion || 'almacen',
+          descripcion: book.description || null,
+          paginas: book.pages || null,
+          anio: book.year || null,
+          categoria_id: null,
+          editorial_id: null,
+          activo: true,
+          fecha_ingreso: new Date().toISOString().split('T')[0]
+        })
+        .select()
+        .single();
 
-      if (error) {
-        console.error(`❌ Error en lote ${batchNum}:`, error.message);
-        errors += batch.length;
+      if (insertError) {
+        console.error(`❌ Error al insertar libro "${book.title}":`, insertError.message);
+        errors++;
         errorDetails.push({
-          batch: batchNum,
-          error: error.message,
-          books: batch.map(b => b.code)
+          book: book.title,
+          error: insertError.message
         });
-      } else {
-        imported += batch.length;
-        console.log(`✅ Lote ${batchNum} importado exitosamente`);
+        continue;
       }
+
+      // 2. Generar el código basado en el ID y la ubicación
+      const codigoGenerado = generarCodigoLibro(libroInsertado.id, book.ubicacion || 'almacen');
+
+      // 3. Actualizar el libro con el código generado
+      const { error: updateError } = await supabase
+        .from('libros')
+        .update({ legacy_id: codigoGenerado })
+        .eq('id', libroInsertado.id);
+
+      if (updateError) {
+        console.error(`❌ Error al actualizar código del libro "${book.title}":`, updateError.message);
+        errors++;
+        errorDetails.push({
+          book: book.title,
+          error: updateError.message
+        });
+        continue;
+      }
+
+      imported++;
+
+      // Mostrar progreso cada 10 libros
+      if ((i + 1) % 10 === 0 || i === books.length - 1) {
+        console.log(`✅ Progreso: ${i + 1}/${books.length} libros importados`);
+      }
+
     } catch (err) {
-      console.error(`❌ Error inesperado en lote ${batchNum}:`, err.message);
-      errors += batch.length;
+      console.error(`❌ Error inesperado al importar "${book.title}":`, err.message);
+      errors++;
       errorDetails.push({
-        batch: batchNum,
-        error: err.message,
-        books: batch.map(b => b.code)
+        book: book.title,
+        error: err.message
       });
     }
 
-    // Pequeña pausa entre lotes para no saturar la API
-    if (i + batchSize < books.length) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    // Pequeña pausa para no saturar la API
+    if (i < books.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
 
@@ -285,11 +352,13 @@ async function main() {
 
     if (result.errorDetails.length > 0) {
       console.log('\n⚠️  Detalles de errores:');
-      result.errorDetails.forEach(err => {
-        console.log(`\n  Lote ${err.batch}:`);
+      result.errorDetails.slice(0, 10).forEach(err => {
+        console.log(`\n  Libro: ${err.book}`);
         console.log(`  Error: ${err.error}`);
-        console.log(`  Códigos: ${err.books.slice(0, 5).join(', ')}${err.books.length > 5 ? '...' : ''}`);
       });
+      if (result.errorDetails.length > 10) {
+        console.log(`\n  ... y ${result.errorDetails.length - 10} errores más`);
+      }
     }
 
     if (result.imported > 0) {
