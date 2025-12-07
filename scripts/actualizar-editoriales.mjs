@@ -69,7 +69,7 @@ async function obtenerOCrearEditorial(nombreEditorial) {
   // Crear nueva editorial
   const { data: nueva, error: insertError } = await supabase
     .from('editoriales')
-    .insert({ nombre, activo: true })
+    .insert({ nombre })
     .select('id')
     .single();
 
