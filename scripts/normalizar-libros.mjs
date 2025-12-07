@@ -55,6 +55,54 @@ function fixEncoding(text = '') {
 }
 
 /**
+ * Extrae el ISBN de un texto y devuelve el ISBN y el texto limpio
+ */
+function extractISBN(text) {
+  if (!text) return { isbn: '', cleanText: text };
+
+  // Patrones comunes de ISBN
+  const patterns = [
+    /ISBN[\s:-]*(\d{10,13})/i,           // ISBN: 9788477743163
+    /ISBN[\s:-]*(\d{1,5}[-\s]?\d{1,7}[-\s]?\d{1,7}[-\s]?\d{1,7}[-\s]?\d{1})/i, // ISBN con guiones
+    /\bISBN\s*[:\-]?\s*([0-9X-]{10,17})\b/i, // ISBN general
+    /\b(\d{13})\b/,                      // Solo 13 dígitos
+    /\b(\d{10})\b/,                      // Solo 10 dígitos
+  ];
+
+  let isbn = '';
+  let cleanText = text;
+
+  // Intentar cada patrón
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      isbn = match[1].replace(/[-\s]/g, ''); // Remover guiones y espacios
+
+      // Validar longitud del ISBN
+      if (isbn.length === 10 || isbn.length === 13) {
+        // Remover el ISBN y texto relacionado de la descripción
+        cleanText = text
+          .replace(pattern, '')
+          .replace(/ISBN[\s:-]*/gi, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        break;
+      }
+    }
+  }
+
+  // Limpiar múltiples espacios y comas
+  cleanText = cleanText
+    .replace(/\s*,\s*,\s*/g, ', ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[,\s]+|[,\s]+$/g, '')
+    .trim();
+
+  return { isbn, cleanText };
+}
+
+/**
  * Determina la categoría basándose en el título y descripción
  */
 function determineCategory(title, description, code) {
@@ -95,14 +143,18 @@ function parseAndNormalizeLine(line) {
   // Extraer y limpiar campos
   const code = fixEncoding(fields[0] || '');
   const title = fixEncoding(fields[1] || 'Sin título');
-  const description = fixEncoding(fields[2] || '');
-  const isbn = fixEncoding(fields[3] || '');
+  const rawDescription = fixEncoding(fields[2] || '');
+  const isbnField = fixEncoding(fields[3] || '');
   const editorial = fixEncoding(fields[4] || '');
   const yearStr = fields[5] || '';
   const author = fixEncoding(fields[6] || 'Desconocido');
   const priceStr = fields[9] || '0';
   const pagesStr = fields[10] || '0';
   const ubicacion = fixEncoding(fields[16] || 'almacen');
+
+  // Extraer ISBN de la descripción si no está en el campo dedicado
+  const { isbn: extractedISBN, cleanText: description } = extractISBN(rawDescription);
+  const isbn = isbnField || extractedISBN;
 
   // Normalizar año
   let year = '';
