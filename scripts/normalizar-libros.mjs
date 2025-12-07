@@ -30,23 +30,73 @@ const __dirname = path.dirname(__filename);
 function fixEncoding(text = '') {
   if (!text) return '';
 
-  // Mapa de caracteres comunes mal codificados
+  // Mapa extendido de caracteres comunes mal codificados
+  // Incluye ISO-8859-1, Windows-1252 y UTF-8 mal interpretado
   const replacements = {
+    // Vocales minúsculas con tildes
     'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
-    'Ã±': 'ñ', 'Ã': 'Ñ',
+    'á': 'á', 'é': 'é', 'í': 'í', 'ó': 'ó', 'ú': 'ú',
+
+    // Vocales mayúsculas con tildes
     'Ã': 'Á', 'Ã‰': 'É', 'Ã': 'Í', 'Ã"': 'Ó', 'Ãš': 'Ú',
+    'Á': 'Á', 'É': 'É', 'Í': 'Í', 'Ó': 'Ó', 'Ú': 'Ú',
+
+    // Ñ y ñ
+    'Ã±': 'ñ', 'Ã'': 'Ñ', 'ñ': 'ñ', 'Ñ': 'Ñ',
+
+    // Diéresis
     'Ã¼': 'ü', 'Ã¶': 'ö', 'Ã¤': 'ä',
+    'Ãœ': 'Ü', 'Ã–': 'Ö', 'Ã„': 'Ä',
+    'ü': 'ü', 'ö': 'ö', 'ä': 'ä',
+
+    // Otros acentos
+    'Ã ': 'à', 'Ã¨': 'è', 'Ã¬': 'ì', 'Ã²': 'ò', 'Ã¹': 'ù',
+    'Ã€': 'À', 'Ãˆ': 'È', 'ÃŒ': 'Ì', 'Ã'': 'Ò', 'Ã™': 'Ù',
+    'Ã¢': 'â', 'Ãª': 'ê', 'Ã®': 'î', 'Ã´': 'ô', 'Ã»': 'û',
+    'Ã‚': 'Â', 'ÃŠ': 'Ê', 'ÃŽ': 'Î', 'Ã"': 'Ô', 'Ã›': 'Û',
+
+    // Caracteres especiales
+    'Ã§': 'ç', 'Ã‡': 'Ç', 'ç': 'ç',
     'Â°': '°', 'Âª': 'ª', 'Âº': 'º',
-    'â€œ': '"', 'â€': '"', 'â€™': "'", 'â€˜': "'",
-    'â€"': '—', 'â€"': '–',
     'Â¿': '¿', 'Â¡': '¡',
-    'Ã§': 'ç', 'Ã€': 'À', 'Ã‡': 'Ç',
+    'Â«': '«', 'Â»': '»',
+    'Â·': '·', 'Â¢': '¢', 'Â£': '£',
+    'Â€': '€', 'Â¥': '¥',
+
+    // Comillas y apóstrofes
+    'â€œ': '"', 'â€': '"', 'â€™': "'", 'â€˜': "'",
+    'â€º': '›', 'â€¹': '‹',
+    '"': '"', '"': '"', ''': "'", ''': "'",
+
+    // Guiones y rayas
+    'â€"': '—', 'â€"': '–', 'â€¢': '•',
+    '—': '—', '–': '–', '•': '•',
+
+    // Símbolos matemáticos
+    'Ã—': '×', 'Ã·': '÷',
+    'Â±': '±', 'Â¼': '¼', 'Â½': '½', 'Â¾': '¾',
+
+    // Otros símbolos
+    'Â©': '©', 'Â®': '®', 'â„¢': '™',
+    'Â§': '§', 'Â¶': '¶',
+
+    // Caracteres problemáticos específicos
+    'Ã�': 'Ñ',
+    'Â ': ' ',  // Espacio no-break
+    '\u00A0': ' ',  // Non-breaking space
+    'Ã³': 'ó',
+    'Ã­': 'í',
   };
 
   let fixed = text;
+
+  // Aplicar reemplazos
   for (const [bad, good] of Object.entries(replacements)) {
-    fixed = fixed.replace(new RegExp(bad, 'g'), good);
+    fixed = fixed.replace(new RegExp(bad.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), good);
   }
+
+  // Normalizar espacios múltiples
+  fixed = fixed.replace(/\s+/g, ' ');
 
   // Eliminar caracteres de control no deseados
   fixed = fixed.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');

@@ -233,6 +233,40 @@ WHERE activo = true
 -- Opción 2: Usar el script con filtros personalizados
 ```
 
+## Normalización de Caracteres
+
+Ambos scripts también normalizan automáticamente caracteres especiales mal codificados:
+
+### Caracteres Soportados
+
+**Vocales con tildes:**
+- `á é í ó ú` y `Á É Í Ó Ú`
+- `Did�cticos` → `Didácticos`
+- `R�stica` → `Rústica`
+
+**Letra ñ:**
+- `ñ Ñ`
+- `Espa�a` → `España`
+
+**Diéresis:**
+- `ü ö ä` y `Ü Ö Ä`
+
+**Comillas y símbolos:**
+- `"texto"` → `"texto"`
+- `—` (guiones largos)
+- `©` `®` `™` (símbolos legales)
+
+### Ejemplo de Normalización Completa
+
+```
+Entrada:
+"Did�cticos. R�stica, ISBN: 9788477743163, Espa�a"
+
+Salida:
+isbn: "9788477743163"
+descripcion: "Didácticos. Rústica, España"
+```
+
 ## Ejemplos Reales
 
 ### Ejemplo 1: ISBN Simple
@@ -277,6 +311,38 @@ Salida:
 {
   "isbn": "9788477743163",
   "descripcion": "Autor Ejemplo, Año 2020"
+}
+```
+
+### Ejemplo 4: Con Caracteres Especiales
+
+```
+Entrada:
+{
+  "descripcion": "Did�cticos. R�stica, ISBN: 9788477743163, Editorial MACHADO, Espa�a"
+}
+
+Salida:
+{
+  "isbn": "9788477743163",
+  "descripcion": "Didácticos. Rústica, Editorial MACHADO, España"
+}
+```
+
+### Ejemplo 5: Todo Junto
+
+```
+Entrada:
+{
+  "titulo": "El g�nero de la filosof�a",
+  "descripcion": "Gianpiero Moretti, ISBN: 9788477743163, (Espa�a) Nueva edici�n"
+}
+
+Salida:
+{
+  "titulo": "El género de la filosofía",
+  "isbn": "9788477743163",
+  "descripcion": "Gianpiero Moretti, (España) Nueva edición"
 }
 ```
 

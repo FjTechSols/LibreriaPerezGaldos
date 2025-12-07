@@ -34,6 +34,70 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
+ * Repara encoding de caracteres especiales
+ */
+function fixEncoding(text = '') {
+  if (!text) return '';
+
+  // Mapa extendido de caracteres comunes mal codificados
+  const replacements = {
+    // Vocales minúsculas con tildes
+    'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
+    'á': 'á', 'é': 'é', 'í': 'í', 'ó': 'ó', 'ú': 'ú',
+
+    // Vocales mayúsculas con tildes
+    'Ã': 'Á', 'Ã‰': 'É', 'Ã': 'Í', 'Ã"': 'Ó', 'Ãš': 'Ú',
+    'Á': 'Á', 'É': 'É', 'Í': 'Í', 'Ó': 'Ó', 'Ú': 'Ú',
+
+    // Ñ y ñ
+    'Ã±': 'ñ', 'Ã'': 'Ñ', 'ñ': 'ñ', 'Ñ': 'Ñ',
+
+    // Diéresis
+    'Ã¼': 'ü', 'Ã¶': 'ö', 'Ã¤': 'ä',
+    'Ãœ': 'Ü', 'Ã–': 'Ö', 'Ã„': 'Ä',
+    'ü': 'ü', 'ö': 'ö', 'ä': 'ä',
+
+    // Otros acentos
+    'Ã ': 'à', 'Ã¨': 'è', 'Ã¬': 'ì', 'Ã²': 'ò', 'Ã¹': 'ù',
+    'Ã€': 'À', 'Ãˆ': 'È', 'ÃŒ': 'Ì', 'Ã'': 'Ò', 'Ã™': 'Ù',
+    'Ã¢': 'â', 'Ãª': 'ê', 'Ã®': 'î', 'Ã´': 'ô', 'Ã»': 'û',
+    'Ã‚': 'Â', 'ÃŠ': 'Ê', 'ÃŽ': 'Î', 'Ã"': 'Ô', 'Ã›': 'Û',
+
+    // Caracteres especiales
+    'Ã§': 'ç', 'Ã‡': 'Ç', 'ç': 'ç',
+    'Â°': '°', 'Âª': 'ª', 'Âº': 'º',
+    'Â¿': '¿', 'Â¡': '¡',
+    'Â«': '«', 'Â»': '»',
+    'Â·': '·', 'Â¢': '¢', 'Â£': '£',
+
+    // Comillas y apóstrofes
+    'â€œ': '"', 'â€': '"', 'â€™': "'", 'â€˜': "'",
+    'â€º': '›', 'â€¹': '‹',
+    '"': '"', '"': '"', ''': "'", ''': "'",
+
+    // Guiones y rayas
+    'â€"': '—', 'â€"': '–', 'â€¢': '•',
+    '—': '—', '–': '–', '•': '•',
+
+    // Caracteres problemáticos específicos
+    'Ã�': 'Ñ',
+    'Â ': ' ',
+    '\u00A0': ' ',
+  };
+
+  let fixed = text;
+
+  for (const [bad, good] of Object.entries(replacements)) {
+    fixed = fixed.replace(new RegExp(bad.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), good);
+  }
+
+  fixed = fixed.replace(/\s+/g, ' ');
+  fixed = fixed.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  return fixed.trim();
+}
+
+/**
  * Extrae el ISBN de un texto y devuelve el ISBN y el texto limpio
  */
 function extractISBN(text) {
@@ -140,8 +204,9 @@ async function main() {
         ? libro.titulo.substring(0, 50) + '...'
         : libro.titulo;
 
-      // Extraer ISBN de la descripción
-      const { isbn: isbnExtraido, cleanText: descripcionLimpia } = extractISBN(libro.descripcion);
+      // Normalizar y extraer ISBN de la descripción
+      const descripcionNormalizada = fixEncoding(libro.descripcion);
+      const { isbn: isbnExtraido, cleanText: descripcionLimpia } = extractISBN(descripcionNormalizada);
 
       // Si no se encontró ISBN en la descripción, saltar
       if (!isbnExtraido) {
@@ -171,8 +236,10 @@ async function main() {
         console.log(`   ✨ ISBN extraído: ${isbnExtraido}`);
       }
 
-      console.log(`   📝 Descripción anterior: ${libro.descripcion.substring(0, 80)}...`);
-      console.log(`   ✅ Descripción limpia: ${descripcionFinal.substring(0, 80)}${descripcionFinal.length > 80 ? '...' : ''}`);
+      const descAnteriorMuestra = libro.descripcion.substring(0, 80);
+      const descLimpiaMuestra = descripcionFinal.substring(0, 80);
+      console.log(`   📝 Anterior: ${descAnteriorMuestra}${libro.descripcion.length > 80 ? '...' : ''}`);
+      console.log(`   ✅ Limpia:   ${descLimpiaMuestra}${descripcionFinal.length > 80 ? '...' : ''}`);
 
       // Actualizar si no es dry-run
       if (!isDryRun) {
