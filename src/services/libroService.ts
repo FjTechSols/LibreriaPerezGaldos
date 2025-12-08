@@ -4,13 +4,13 @@ import { generarCodigoLibro, actualizarCodigoPorUbicacion } from '../utils/codig
 
 export interface LibroSupabase {
   id: number;
-  legacy_id?: string;  // Código interno del libro
+  legacy_id?: string;
   isbn?: string;
   titulo: string;
   autor: string;
   editorial_id?: number;
   categoria_id?: number;
-  anio?: number;  // año de publicación
+  anio?: number;
   paginas?: number;
   descripcion?: string;
   notas?: string;
@@ -19,43 +19,46 @@ export interface LibroSupabase {
   ubicacion?: string;
   fecha_ingreso?: string;
   activo: boolean;
-  imagen_url?: string;  // URL de la imagen de portada
+  imagen_url?: string;
   created_at?: string;
   updated_at?: string;
+  editoriales?: {
+    id: number;
+    nombre: string;
+  };
 }
 
 export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   id: libro.id.toString(),
-  code: libro.legacy_id || libro.id.toString(),  // Mostrar legacy_id si existe, sino el id
+  code: libro.legacy_id || libro.id.toString(),
   title: libro.titulo,
   author: libro.autor,
-  publisher: libro.editorial_id ? `Editorial ${libro.editorial_id}` : 'Editorial Desconocida',
+  publisher: libro.editoriales?.nombre || 'Editorial Desconocida',
   pages: libro.paginas || 0,
   publicationYear: libro.anio || new Date().getFullYear(),
   isbn: libro.isbn || '',
   price: Number(libro.precio),
-  originalPrice: undefined,  // No existe en la BD actual
+  originalPrice: undefined,
   stock: libro.stock,
   ubicacion: libro.ubicacion || '',
   category: libro.categoria_id ? `Categoría ${libro.categoria_id}` : 'General',
   description: libro.descripcion || 'Sin descripción disponible',
   coverImage: libro.imagen_url || 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=300',
-  rating: 0,  // No existe en la BD actual
+  rating: 0,
   reviews: [],
-  featured: false,  // No existe en la BD actual
-  isNew: false,  // No existe en la BD actual
-  isOnSale: false  // No existe en la BD actual
+  featured: false,
+  isNew: false,
+  isOnSale: false
 });
 
 export const obtenerLibros = async (limit?: number, offset?: number): Promise<Book[]> => {
   try {
     let query = supabase
       .from('libros')
-      .select('*')
+      .select('*, editoriales(id, nombre)')
       .eq('activo', true)
       .order('titulo', { ascending: true });
 
-    // Si no se especifica límite, traer todos los libros
     if (limit !== undefined) {
       query = query.range(offset || 0, (offset || 0) + limit - 1);
     }
@@ -78,7 +81,7 @@ export const obtenerLibroPorId = async (id: string | number): Promise<Book | nul
   try {
     const { data, error } = await supabase
       .from('libros')
-      .select('*')
+      .select('*, editoriales(id, nombre)')
       .eq('id', id)
       .maybeSingle();
 
@@ -238,7 +241,7 @@ export const buscarLibros = async (query: string): Promise<Book[]> => {
   try {
     const { data, error } = await supabase
       .from('libros')
-      .select('*')
+      .select('*, editoriales(id, nombre)')
       .eq('activo', true)
       .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
       .order('titulo', { ascending: true });
@@ -259,7 +262,7 @@ export const obtenerLibrosPorCategoria = async (categoriaId: number): Promise<Bo
   try {
     const { data, error } = await supabase
       .from('libros')
-      .select('*')
+      .select('*, editoriales(id, nombre)')
       .eq('activo', true)
       .eq('categoria_id', categoriaId)
       .order('titulo', { ascending: true });
