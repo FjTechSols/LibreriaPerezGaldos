@@ -1,15 +1,15 @@
 import { supabase } from '../lib/supabase';
 
 export interface Rol {
-  id: string;
+  id: number;
   nombre: string;
   display_name: string;
   descripcion: string;
   nivel_jerarquia: number;
   activo: boolean;
   es_sistema: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Permiso {
@@ -78,15 +78,13 @@ export const obtenerPermisosDeRol = async (rolId: string): Promise<Permiso[]> =>
 
 export const obtenerRolesDeUsuario = async (userId: string): Promise<Rol[]> => {
   const { data, error } = await supabase
-    .from('usuarios_roles')
-    .select(`
-      roles (*)
-    `)
-    .eq('user_id', userId)
-    .eq('activo', true);
+    .rpc('obtener_roles_usuario', { usuario_id: userId });
 
-  if (error) throw error;
-  return data?.map((item: any) => item.roles) || [];
+  if (error) {
+    console.error('Error al obtener roles:', error);
+    return [];
+  }
+  return data || [];
 };
 
 export const obtenerRolPrincipal = async (userId: string): Promise<Rol | null> => {
@@ -134,7 +132,7 @@ export const tienePermiso = async (userId: string, permisoCodigo: string): Promi
 
 export const asignarRolAUsuario = async (
   userId: string,
-  rolId: string,
+  rolId: number,
   asignadoPor: string,
   notas?: string
 ): Promise<void> => {
@@ -154,7 +152,7 @@ export const asignarRolAUsuario = async (
   if (error) throw error;
 };
 
-export const removerRolDeUsuario = async (userId: string, rolId: string): Promise<void> => {
+export const removerRolDeUsuario = async (userId: string, rolId: number): Promise<void> => {
   const { error } = await supabase
     .from('usuarios_roles')
     .update({ activo: false })
@@ -194,7 +192,7 @@ export const obtenerTodosLosUsuariosConRoles = async (): Promise<UsuarioConRoles
 export const crearUsuarioAdministrativo = async (
   email: string,
   password: string,
-  rolId: string,
+  rolId: number,
   asignadoPor: string,
   notas?: string
 ): Promise<string> => {
@@ -213,7 +211,7 @@ export const crearUsuarioAdministrativo = async (
 
 export const actualizarRolesUsuario = async (
   userId: string,
-  rolesIds: string[],
+  rolesIds: number[],
   asignadoPor: string
 ): Promise<void> => {
   const { error: deleteError } = await supabase

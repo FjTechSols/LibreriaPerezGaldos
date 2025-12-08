@@ -28,7 +28,7 @@ export function GestionUsuariosAdmin() {
     email: '',
     password: '',
     confirmPassword: '',
-    rolId: '',
+    rolId: 0,
     notas: ''
   });
 
@@ -82,7 +82,7 @@ export function GestionUsuariosAdmin() {
         email: '',
         password: '',
         confirmPassword: '',
-        rolId: '',
+        rolId: 0,
         notas: ''
       });
       await cargarDatos();
@@ -101,7 +101,7 @@ export function GestionUsuariosAdmin() {
     try {
       const rolesSeleccionados = Array.from(
         document.querySelectorAll<HTMLInputElement>('input[name="roles"]:checked')
-      ).map(input => input.value);
+      ).map(input => parseInt(input.value));
 
       if (rolesSeleccionados.length === 0) {
         setError('Debes seleccionar al menos un rol');
@@ -369,10 +369,10 @@ export function GestionUsuariosAdmin() {
                 <label>Rol *</label>
                 <select
                   value={formData.rolId}
-                  onChange={(e) => setFormData({ ...formData, rolId: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, rolId: parseInt(e.target.value) })}
                   required
                 >
-                  <option value="">Selecciona un rol</option>
+                  <option value="0">Selecciona un rol</option>
                   {roles.map(rol => (
                     <option key={rol.id} value={rol.id}>
                       {rol.display_name} - {rol.descripcion}
