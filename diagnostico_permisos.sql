@@ -1,10 +1,9 @@
 -- ==========================================
--- DIAGNÓSTICO DE PERMISOS - VERSIÓN CORREGIDA
+-- DIAGNÓSTICO SIMPLIFICADO
 -- ==========================================
 
--- 1. Ver estructura de la tabla usuarios
+-- 1. Ver estructura de tabla usuarios
 SELECT 
-  'Estructura tabla usuarios' as info,
   column_name,
   data_type
 FROM information_schema.columns
@@ -12,9 +11,8 @@ WHERE table_schema = 'public'
   AND table_name = 'usuarios'
 ORDER BY ordinal_position;
 
--- 2. Ver estructura de la tabla roles
+-- 2. Ver estructura de tabla roles
 SELECT 
-  'Estructura tabla roles' as info,
   column_name,
   data_type
 FROM information_schema.columns
@@ -22,41 +20,23 @@ WHERE table_schema = 'public'
   AND table_name = 'roles'
 ORDER BY ordinal_position;
 
--- 3. Tu auth.uid() actual
-SELECT
-  'Tu auth.uid()' as descripcion,
-  auth.uid() as valor;
+-- 3. Tu auth.uid()
+SELECT auth.uid() as mi_auth_uid;
 
--- 4. Ver todos los usuarios en auth.users
-SELECT
-  'Usuarios en auth.users' as descripcion,
-  id,
-  email,
-  created_at
+-- 4. Usuarios en auth.users (solo admin)
+SELECT id, email
 FROM auth.users
-ORDER BY created_at DESC
-LIMIT 5;
+WHERE email ILIKE '%admin%';
 
--- 5. Ver todos los registros en tabla usuarios
-SELECT
-  'Registros en tabla usuarios' as descripcion,
-  *
-FROM usuarios
-ORDER BY created_at DESC
-LIMIT 5;
+-- 5. Todos los datos de tabla usuarios
+SELECT * FROM usuarios;
 
--- 6. Ver todos los roles
-SELECT
-  'Roles disponibles' as descripcion,
-  *
-FROM roles
-ORDER BY id;
+-- 6. Todos los roles
+SELECT * FROM roles;
 
--- 7. Buscar tu usuario específicamente
+-- 7. Verificar funciones
 SELECT
-  'Tu usuario' as descripcion,
-  u.*,
-  r.*
-FROM usuarios u
-LEFT JOIN roles r ON u.rol_id = r.id
-WHERE u.auth_user_id = auth.uid();
+  is_admin() as es_admin,
+  is_editor() as es_editor,
+  can_manage_books() as puede_gestionar_libros,
+  can_view_all() as puede_ver_todo;
