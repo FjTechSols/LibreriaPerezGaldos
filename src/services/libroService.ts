@@ -212,6 +212,13 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
 
     console.log('Datos preparados para UPDATE:', updateData);
 
+    // Verificar permisos antes del UPDATE
+    const { data: permisosCheck } = await supabase.rpc('can_manage_books');
+    console.log('Resultado can_manage_books():', permisosCheck);
+
+    const { data: editorCheck } = await supabase.rpc('is_editor');
+    console.log('Resultado is_editor():', editorCheck);
+
     const { error: updateError } = await supabase
       .from('libros')
       .update(updateData)
