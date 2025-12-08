@@ -6,7 +6,6 @@
 
 -- FUNCIÓN: is_editor
 -- Verifica si el usuario tiene rol de Admin (1), Editor (2) o Gestor (3)
-DROP FUNCTION IF EXISTS is_editor();
 CREATE OR REPLACE FUNCTION is_editor()
 RETURNS BOOLEAN
 SECURITY DEFINER
@@ -28,7 +27,6 @@ $$;
 
 -- FUNCIÓN: can_manage_books
 -- Verifica si el usuario puede gestionar libros
-DROP FUNCTION IF EXISTS can_manage_books();
 CREATE OR REPLACE FUNCTION can_manage_books()
 RETURNS BOOLEAN
 SECURITY DEFINER
@@ -43,7 +41,6 @@ $$;
 
 -- FUNCIÓN: can_view_all
 -- Verifica si el usuario puede ver todos los datos
-DROP FUNCTION IF EXISTS can_view_all();
 CREATE OR REPLACE FUNCTION can_view_all()
 RETURNS BOOLEAN
 SECURITY DEFINER
@@ -56,9 +53,8 @@ BEGIN
 END;
 $$;
 
--- FUNCIÓN: is_admin
+-- FUNCIÓN: is_admin (actualizar sin eliminar por dependencias RLS)
 -- Verifica si el usuario es Admin (rol_id = 1)
-DROP FUNCTION IF EXISTS is_admin();
 CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN
 SECURITY DEFINER
