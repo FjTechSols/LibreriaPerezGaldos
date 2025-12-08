@@ -438,13 +438,6 @@ export function AdminDashboard() {
     processingOrders: 0
   };
 
-  console.log('📊 Estadísticas Dashboard:', {
-    invoices: invoices.length,
-    totalRevenue: stats.totalRevenue,
-    pendingInvoices: stats.pendingInvoices,
-    loading: loading
-  });
-
   const renderDashboard = () => (
     <div className="stats-section">
       {loading && (

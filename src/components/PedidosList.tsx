@@ -50,14 +50,12 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
     }
 
     const data = await obtenerPedidos(filtros);
-    console.log('📦 Pedidos cargados:', data.length, 'pedidos');
     setPedidos(data);
     setLoading(false);
   };
 
   const cargarEstadisticas = async () => {
     const stats = await obtenerEstadisticasPedidos();
-    console.log('📊 Estadísticas pedidos:', stats);
     setEstadisticas(stats);
   };
 

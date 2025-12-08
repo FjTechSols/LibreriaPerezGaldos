@@ -39,7 +39,6 @@ export function UserSettings() {
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Actualizar perfil:', formData);
   };
 
   const handleEmailChange = async (e: React.FormEvent) => {
@@ -200,7 +199,6 @@ export function UserSettings() {
   };
 
   const handlePreferencesUpdate = () => {
-    console.log('Actualizar preferencias:', preferences);
     setLanguage(preferences.language as 'es' | 'en');
     setTheme(preferences.theme as 'light' | 'dark' | 'auto');
   };
