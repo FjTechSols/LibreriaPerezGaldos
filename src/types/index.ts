@@ -240,6 +240,7 @@ export interface Book {
   price: number;
   originalPrice?: number;
   stock: number;
+  ubicacion?: string;
   category: string;
   description: string;
   coverImage: string;

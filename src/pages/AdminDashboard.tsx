@@ -277,14 +277,14 @@ export function AdminDashboard() {
       const libroActualizado = await actualizarLibro(parseInt(editingBook.id), {
         titulo: editingBook.title,
         autor: editingBook.author,
-        isbn: editingBook.isbn,
+        isbn: editingBook.isbn || null,
         precio: editingBook.price,
         stock: editingBook.stock,
-        descripcion: editingBook.description,
-        imagen_url: editingBook.coverImage,
-        paginas: editingBook.pages,
-        anio: editingBook.publicationYear,
-        ubicacion: editingBook.ubicacion,
+        descripcion: editingBook.description || null,
+        imagen_url: editingBook.coverImage || null,
+        paginas: editingBook.pages || null,
+        anio: editingBook.publicationYear || null,
+        ubicacion: editingBook.ubicacion || null,
       });
 
       if (libroActualizado) {
@@ -293,13 +293,20 @@ export function AdminDashboard() {
         ));
         setEditingBook(null);
         alert('Libro actualizado correctamente');
+
+        // Recargar estadísticas
+        const stats = await obtenerEstadisticasLibros();
+        setTotalBooks(stats.total);
+        setBooksInStock(stats.enStock);
+        setBooksOutOfStock(stats.sinStock);
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        alert('Error al actualizar el libro');
+        alert('Error al actualizar el libro. Por favor verifica los datos.');
       }
     } catch (error) {
       console.error('Error al guardar libro:', error);
-      alert('Error al actualizar el libro');
+      alert(`Error al actualizar el libro: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setSavingBook(false);
     }
