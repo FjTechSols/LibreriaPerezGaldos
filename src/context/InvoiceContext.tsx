@@ -55,7 +55,6 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         .order('issue_date', { ascending: false });
 
       if (invoicesError) {
-        console.warn('Supabase not available, using local storage only:', invoicesError);
         setLoading(false);
         return;
       }
@@ -68,7 +67,6 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
 
       setInvoices(invoicesWithItems);
       localStorage.setItem('invoices', JSON.stringify(invoicesWithItems));
-      console.log('✅ Facturas cargadas desde Supabase:', invoicesWithItems.length, 'facturas');
     } catch (err) {
       console.error('❌ Error fetching invoices:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar facturas');
@@ -153,7 +151,6 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
 
       const newInvoice = { ...invoice, items };
       setInvoices(prev => [newInvoice, ...prev]);
-      console.log('✅ Factura creada exitosamente:', newInvoice.invoice_number);
 
       return newInvoice;
     } catch (err) {

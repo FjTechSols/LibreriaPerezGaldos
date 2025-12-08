@@ -34,7 +34,6 @@ export const saveCartToSupabase = async (userId: string, items: CartItem[]): Pro
       const libroId = parseInt(item.book.id);
 
       if (isNaN(libroId)) {
-        console.warn(`Skipping invalid book ID: ${item.book.id}`);
         continue;
       }
 
@@ -45,7 +44,6 @@ export const saveCartToSupabase = async (userId: string, items: CartItem[]): Pro
         .maybeSingle();
 
       if (error || !libro) {
-        console.warn(`Book ${libroId} not found in database, skipping`);
         continue;
       }
 

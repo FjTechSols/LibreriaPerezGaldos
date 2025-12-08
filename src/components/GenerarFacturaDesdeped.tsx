@@ -123,10 +123,6 @@ export default function GenerarFacturaModal({
   );
 
   const pedidoActual = pedidos.find(p => p.id === pedidoSeleccionado);
-  let totales = null;
-  if (pedidoActual?.detalles) {
-    calcularTotalesFactura(pedidoActual.detalles).then(t => { totales = t; });
-  }
 
   if (!isOpen) return null;
 

@@ -27,7 +27,6 @@ export const buscarLibroPorISBN = async (isbn: string): Promise<ISBNBookData | n
     const data = await response.json();
 
     if (!data.items || data.items.length === 0) {
-      console.log('No se encontró información para el ISBN:', isbn);
       return null;
     }
 
@@ -70,7 +69,6 @@ export const buscarLibrosOpenLibrary = async (isbn: string): Promise<ISBNBookDat
     const bookKey = `ISBN:${cleanISBN}`;
 
     if (!data[bookKey]) {
-      console.log('No se encontró información en Open Library para el ISBN:', isbn);
       return null;
     }
 

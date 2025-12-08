@@ -166,7 +166,6 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       throw detallesError;
     }
 
-    console.log('✅ Pedido creado exitosamente:', pedido.id);
     return await obtenerPedidoPorId(pedido.id);
   } catch (error) {
     console.error('❌ Error en crearPedido:', error);

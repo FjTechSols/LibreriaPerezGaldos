@@ -160,7 +160,6 @@ export function AdminSettings() {
     setIsExporting(true);
     try {
       await exportFunction();
-      console.log(`${name} exportado correctamente`);
     } catch (error) {
       console.error(`Error exportando ${name}:`, error);
     } finally {

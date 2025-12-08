@@ -19,8 +19,6 @@ export function Home() {
         // Cargar los primeros libros disponibles
         const allBooks = await obtenerLibros(12, 0);
 
-        // Por ahora, dividir los libros en 3 secciones
-        // TODO: Cuando se agreguen campos featured, is_new, on_sale usar esos campos
         setFeaturedBooks(allBooks.slice(0, 4));
         setNewBooks(allBooks.slice(4, 8));
         setSaleBooks(allBooks.slice(8, 12));

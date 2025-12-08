@@ -198,7 +198,6 @@ export const findOrCreateCliente = async (clienteData: ClienteFormData): Promise
         .maybeSingle();
 
       if (existingCliente) {
-        console.log('Cliente existente encontrado:', existingCliente.id);
         return existingCliente;
       }
     }
@@ -209,7 +208,6 @@ export const findOrCreateCliente = async (clienteData: ClienteFormData): Promise
       throw new Error('No se pudo crear el cliente');
     }
 
-    console.log('Nuevo cliente creado:', nuevoCliente.id);
     return nuevoCliente;
   } catch (error) {
     console.error('Error in findOrCreateCliente:', error);
