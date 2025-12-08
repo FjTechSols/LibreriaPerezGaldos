@@ -1,146 +1,123 @@
-# Solución al Error: Could not find function obtener_permisos_usuario
+# 🔍 Diagnóstico del Problema de Permisos
 
-## Problema
+## Problema Principal Encontrado
 
-Al iniciar la aplicación, aparece este error en la consola:
+**auth.uid() retorna NULL** porque estás ejecutando las consultas desde el SQL Editor como administrador postgres, no como un usuario autenticado de la aplicación.
 
-```
-POST .../rpc/obtener_permisos_usuario 404 (Not Found)
-Error: Could not find the function public.obtener_permisos_usuario(usuario_id) in the schema cache
-```
+## Resultado del Diagnóstico
 
-## Causa
+### 1. Estructura de tabla `usuarios` ✅
+- Columnas: id, auth_user_id, username, email, rol_id, fecha_registro, legacy_id, activo
+- **NO tiene `created_at`**, solo tiene `fecha_registro`
 
-Las funciones RPC necesarias para el sistema de roles y permisos no están creadas en tu base de datos Supabase.
+### 2. Sesión actual ⚠️
+- `auth.uid()`: **NULL** (no autenticado)
+- Usuario postgres: postgres (administrador)
 
-## Solución
+### 3. Todas las funciones retornan FALSE
+Porque dependen de `auth.uid()` que es NULL.
 
-### Paso 1: Acceder al SQL Editor de Supabase
+---
 
-1. Ve a [Supabase Dashboard](https://supabase.com/dashboard)
-2. Selecciona tu proyecto
-3. En el menú lateral, haz clic en **SQL Editor**
-4. Haz clic en **New query**
+## 🔧 Solución 1: Verificar con un Usuario Específico
 
-### Paso 2: Ejecutar el Script de Creación de Funciones
+Ejecuta estas consultas para verificar directamente con tu usuario:
 
-1. Abre el archivo `CREAR_FUNCIONES_RPC_ROLES.sql` que se encuentra en la raíz del proyecto
-2. Copia **TODO** el contenido del archivo
-3. Pégalo en el SQL Editor de Supabase
-4. Haz clic en **Run** (o presiona Ctrl/Cmd + Enter)
-
-### Paso 3: Verificar que las Funciones se Crearon Correctamente
-
-Ejecuta esta consulta para verificar:
-
+### A. Primero, encuentra tu usuario en auth.users:
 ```sql
-SELECT
-  routine_name,
-  routine_type
-FROM information_schema.routines
-WHERE routine_schema = 'public'
-  AND routine_name IN (
-    'obtener_permisos_usuario',
-    'tiene_permiso',
-    'obtener_rol_principal',
-    'obtener_roles_usuario'
-  )
-ORDER BY routine_name;
+SELECT 
+  id::text,
+  email,
+  raw_user_meta_data,
+  raw_app_meta_data,
+  created_at
+FROM auth.users
+WHERE email = 'TU_EMAIL_AQUI@ejemplo.com'
+LIMIT 1;
 ```
 
-Deberías ver 4 funciones listadas:
-
-| routine_name | routine_type |
-|--------------|--------------|
-| obtener_permisos_usuario | FUNCTION |
-| obtener_rol_principal | FUNCTION |
-| obtener_roles_usuario | FUNCTION |
-| tiene_permiso | FUNCTION |
-
-### Paso 4: Probar la Aplicación
-
-1. Recarga la aplicación (F5 o Ctrl/Cmd + R)
-2. El error debería desaparecer de la consola
-3. El sistema de permisos debería funcionar correctamente
-
-## ¿Qué hacen estas funciones?
-
-- **obtener_permisos_usuario**: Obtiene todos los permisos de un usuario basándose en sus roles
-- **tiene_permiso**: Verifica si un usuario tiene un permiso específico
-- **obtener_rol_principal**: Obtiene el rol de mayor jerarquía de un usuario
-- **obtener_roles_usuario**: Lista todos los roles activos de un usuario
-
-## Correcciones Aplicadas al Script
-
-El script `CREAR_FUNCIONES_RPC_ROLES.sql` incluye las siguientes correcciones:
-
-### 1. Agregado de Columnas a la Tabla Roles
-
-El script agrega automáticamente las columnas necesarias si no existen:
-
-- `display_name` (VARCHAR 100): Nombre amigable para mostrar
-- `nivel_jerarquia` (INTEGER): Nivel jerárquico del rol (1 = mayor autoridad)
-
-### 2. Conversión de Tipos de Datos
-
-Las funciones usan `::TEXT` para convertir VARCHAR a TEXT y evitar conflictos de tipo:
-
+### B. Verificar estructura de la tabla roles:
 ```sql
-SELECT r.nombre::TEXT, r.display_name::TEXT, r.nivel_jerarquia
+SELECT 
+  column_name,
+  data_type
+FROM information_schema.columns
+WHERE table_name = 'roles'
+  AND table_schema = 'public'
+ORDER BY ordinal_position;
 ```
 
-### 3. Corrección de Columnas en Tabla Usuarios
-
-El script usa `fecha_registro` en lugar de `created_at` para la tabla `usuarios`:
-
+### C. Ver todos los roles:
 ```sql
--- Correcto para tabla usuarios
-u.fecha_registro
-
--- Correcto para tabla usuarios_roles
-ur.created_at
+SELECT * FROM roles ORDER BY nivel DESC;
 ```
 
-## Problemas Comunes
-
-### Error: "permission denied for schema public"
-
-Si recibes este error, significa que no tienes permisos para crear funciones. Soluciones:
-
-1. Asegúrate de estar usando una cuenta con permisos de administrador en Supabase
-2. Contacta al administrador del proyecto para que ejecute el script
-
-### Las funciones se crean pero el error persiste
-
-1. Recarga completamente la página (Ctrl/Cmd + Shift + R)
-2. Limpia el caché del navegador
-3. Cierra sesión y vuelve a iniciar sesión
-
-### Error: "function already exists"
-
-Esto es normal si ya ejecutaste el script antes. Las funciones incluyen `DROP FUNCTION IF EXISTS` por lo que deberían actualizarse automáticamente.
-
-## Verificación de Permisos
-
-Si después de crear las funciones sigues teniendo problemas de permisos, verifica:
-
+### D. Ver tu usuario en la tabla usuarios:
 ```sql
--- Ver tus roles asignados
-SELECT
+SELECT 
+  u.id::text,
+  u.auth_user_id::text,
+  u.username,
   u.email,
-  r.nombre as rol,
-  r.display_name,
-  ur.activo
-FROM auth.users u
-LEFT JOIN usuarios_roles ur ON u.id = ur.user_id
-LEFT JOIN roles r ON ur.rol_id = r.id
-WHERE u.email = 'tu-email@ejemplo.com';
+  u.rol_id,
+  r.nombre as rol_nombre,
+  r.nivel as rol_nivel,
+  u.activo,
+  u.fecha_registro
+FROM usuarios u
+LEFT JOIN roles r ON u.rol_id = r.id
+WHERE u.email = 'TU_EMAIL_AQUI@ejemplo.com'
+  OR u.auth_user_id::text = 'TU_AUTH_ID_DEL_PASO_A';
 ```
 
-Si no aparece ningún rol, necesitas asignar un rol siguiendo las instrucciones en `docs/SOLUCIONAR_ERROR_403_ADMIN.md`.
+### E. Verificar permisos directamente:
+```sql
+-- Reemplaza 'TU_AUTH_UUID' con el ID de auth.users del paso A
+SELECT 
+  'tiene_rol_admin' as verificacion,
+  EXISTS (
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = 'TU_AUTH_UUID'
+      AND r.nombre = 'admin'
+      AND u.activo = true
+  )::text as resultado
+UNION ALL
+SELECT 
+  'tiene_rol_editor',
+  EXISTS (
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = 'TU_AUTH_UUID'
+      AND r.nombre IN ('admin', 'editor')
+      AND u.activo = true
+  )::text;
+```
 
-## Referencia
+---
 
-- Script SQL: `CREAR_FUNCIONES_RPC_ROLES.sql`
-- Documentación de roles: `docs/SISTEMA_ROLES_PERMISOS.md`
-- Guía de asignación de roles: `docs/SOLUCIONAR_ERROR_403_ADMIN.md`
+## 🔧 Solución 2: Verificar desde la Aplicación
+
+Las funciones RLS solo funcionan correctamente cuando te autenticas **desde la aplicación React**.
+
+1. Inicia sesión en la aplicación web
+2. Abre la consola del navegador (F12)
+3. Ejecuta:
+
+```javascript
+const { data: { user } } = await supabase.auth.getUser();
+console.log('Usuario autenticado:', user.id);
+
+// Verificar permisos
+const { data, error } = await supabase.rpc('is_admin');
+console.log('is_admin:', data, error);
+
+const { data: data2, error: error2 } = await supabase.rpc('can_manage_books');
+console.log('can_manage_books:', data2, error2);
+```
+
+---
+
+## 📋 Siguiente Paso
+
+Ejecuta primero **la consulta A** con tu email real y comparte el resultado.
