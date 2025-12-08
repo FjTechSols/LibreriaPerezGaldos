@@ -28,6 +28,8 @@ export interface LibroSupabase {
   };
 }
 
+const DEFAULT_BOOK_COVER = 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=400';
+
 export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   id: libro.id.toString(),
   code: libro.legacy_id || libro.id.toString(),
@@ -43,7 +45,7 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   ubicacion: libro.ubicacion || '',
   category: libro.categoria_id ? `Categoría ${libro.categoria_id}` : 'General',
   description: libro.descripcion || 'Sin descripción disponible',
-  coverImage: libro.imagen_url || 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=300',
+  coverImage: libro.imagen_url || DEFAULT_BOOK_COVER,
   rating: 0,
   reviews: [],
   featured: false,

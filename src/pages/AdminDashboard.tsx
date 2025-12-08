@@ -1215,8 +1215,16 @@ export function AdminDashboard() {
                       }
                     }}
                     className="form-input"
-                    placeholder="https://ejemplo.com/imagen.jpg"
+                    placeholder="https://ejemplo.com/portada.jpg (opcional)"
                   />
+                  <small style={{
+                    display: 'block',
+                    marginTop: '0.5rem',
+                    color: '#64748b',
+                    fontSize: '0.875rem'
+                  }}>
+                    Si no se proporciona una imagen, se usará una portada por defecto
+                  </small>
                 </div>
               </div>
 
