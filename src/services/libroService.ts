@@ -200,10 +200,19 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
 
     updateData.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('libros')
       .update(updateData)
-      .eq('id', id)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error al actualizar libro:', error);
+      throw new Error(`Error de base de datos: ${error.message}`);
+    }
+
+    // Obtener el libro actualizado con un SELECT separado
+    const { data: libroActualizado, error: selectError } = await supabase
+      .from('libros')
       .select(`
         *,
         editoriales (
@@ -211,18 +220,19 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
           nombre
         )
       `)
-      .single();
+      .eq('id', id)
+      .maybeSingle();
 
-    if (error) {
-      console.error('Error al actualizar libro:', error);
-      throw new Error(`Error de base de datos: ${error.message}`);
+    if (selectError) {
+      console.error('Error al obtener libro actualizado:', selectError);
+      throw new Error(`Error al obtener libro actualizado: ${selectError.message}`);
     }
 
-    if (!data) {
-      throw new Error('No se pudo actualizar el libro');
+    if (!libroActualizado) {
+      throw new Error('No se pudo obtener el libro actualizado');
     }
 
-    return mapLibroToBook(data);
+    return mapLibroToBook(libroActualizado);
   } catch (error) {
     console.error('Error inesperado al actualizar libro:', error);
     throw error;
