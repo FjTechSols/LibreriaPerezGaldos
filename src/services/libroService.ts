@@ -212,13 +212,11 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
 
     console.log('Datos preparados para UPDATE:', updateData);
 
-    const { data: updateResult, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('libros')
       .update(updateData)
-      .eq('id', id)
-      .select();
+      .eq('id', id);
 
-    console.log('Resultado del UPDATE:', updateResult);
     console.log('Error del UPDATE:', updateError);
 
     if (updateError) {
@@ -226,9 +224,7 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
       throw new Error(`Error de base de datos: ${updateError.message}`);
     }
 
-    if (!updateResult || updateResult.length === 0) {
-      throw new Error('La actualización no devolvió resultados. Verifica los permisos.');
-    }
+    console.log('✓ UPDATE ejecutado correctamente');
 
     // Obtener el libro actualizado con un SELECT separado para incluir editoriales
     const { data: libroActualizado, error: selectError } = await supabase
