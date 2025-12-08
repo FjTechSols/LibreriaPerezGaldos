@@ -241,11 +241,22 @@ $$;
 -- =====================================================
 
 DROP POLICY IF EXISTS "Authenticated users can view active books" ON libros;
+DROP POLICY IF EXISTS "Anonymous users can view active books" ON libros;
+DROP POLICY IF EXISTS "Public can view active books" ON libros;
 DROP POLICY IF EXISTS "Admin can insert books" ON libros;
+DROP POLICY IF EXISTS "Editor can insert books" ON libros;
 DROP POLICY IF EXISTS "Admin can update books" ON libros;
+DROP POLICY IF EXISTS "Editor can update books" ON libros;
 DROP POLICY IF EXISTS "Admin can delete books" ON libros;
 
-CREATE POLICY "Authenticated users can view active books"
+-- Permitir a usuarios ANÓNIMOS ver libros activos (para la página principal)
+CREATE POLICY "Public can view active books"
+  ON libros FOR SELECT
+  TO public
+  USING (activo = true);
+
+-- Permitir a usuarios AUTENTICADOS ver libros activos o todos si son editores
+CREATE POLICY "Authenticated users can view books"
   ON libros FOR SELECT
   TO authenticated
   USING (activo = true OR can_manage_books());
@@ -271,13 +282,17 @@ CREATE POLICY "Admin can delete books"
 -- =====================================================
 
 DROP POLICY IF EXISTS "Anyone authenticated can view editoriales" ON editoriales;
+DROP POLICY IF EXISTS "Public can view editoriales" ON editoriales;
 DROP POLICY IF EXISTS "Admin can insert editoriales" ON editoriales;
+DROP POLICY IF EXISTS "Editor can insert editoriales" ON editoriales;
 DROP POLICY IF EXISTS "Admin can update editoriales" ON editoriales;
+DROP POLICY IF EXISTS "Editor can update editoriales" ON editoriales;
 DROP POLICY IF EXISTS "Admin can delete editoriales" ON editoriales;
 
-CREATE POLICY "Anyone authenticated can view editoriales"
+-- Permitir a TODOS (anónimos y autenticados) ver editoriales
+CREATE POLICY "Public can view editoriales"
   ON editoriales FOR SELECT
-  TO authenticated
+  TO public
   USING (true);
 
 CREATE POLICY "Editor can insert editoriales"
@@ -301,13 +316,17 @@ CREATE POLICY "Admin can delete editoriales"
 -- =====================================================
 
 DROP POLICY IF EXISTS "Anyone authenticated can view categorias" ON categorias;
+DROP POLICY IF EXISTS "Public can view categorias" ON categorias;
 DROP POLICY IF EXISTS "Admin can insert categorias" ON categorias;
+DROP POLICY IF EXISTS "Editor can insert categorias" ON categorias;
 DROP POLICY IF EXISTS "Admin can update categorias" ON categorias;
+DROP POLICY IF EXISTS "Editor can update categorias" ON categorias;
 DROP POLICY IF EXISTS "Admin can delete categorias" ON categorias;
 
-CREATE POLICY "Anyone authenticated can view categorias"
+-- Permitir a TODOS (anónimos y autenticados) ver categorías
+CREATE POLICY "Public can view categorias"
   ON categorias FOR SELECT
-  TO authenticated
+  TO public
   USING (true);
 
 CREATE POLICY "Editor can insert categorias"
