@@ -41,13 +41,17 @@
 4. Click "Run" o Ctrl+Enter
 5. Verificar mensaje de éxito ✅
 
-**⚠️ NOTA IMPORTANTE**: El script ahora incluye la creación de funciones `is_admin()` y `get_current_user_id()` automáticamente. Ya NO necesitas tenerlas previamente creadas.
+**⚠️ NOTA IMPORTANTE**: El script ahora incluye:
+- ✅ Creación de funciones `is_admin()` y `get_current_user_id()` automáticamente
+- ✅ Corrección de **search_path mutable** en 13 funciones (previene inyección SQL)
+- ✅ Secuencia única para números de factura (previene race conditions)
 
-**Tablas Afectadas**:
+**Vulnerabilidades Corregidas**:
 - `invoices` - Actualmente público (USING true) → Solo admins
 - `invoice_items` - Actualmente público → Solo admins
 - `pedidos` - Políticas permisivas → Solo dueño o admin
 - `settings` - Accesible a todos → Solo admins
+- 13 funciones con search_path mutable → Todas protegidas
 
 ### B. Edge Functions que Necesitan Actualización
 

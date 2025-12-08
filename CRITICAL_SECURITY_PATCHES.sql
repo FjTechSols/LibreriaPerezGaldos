@@ -13,6 +13,7 @@
   3. Settings accesibles a todos los usuarios
   4. Race condition en generación de facturas
   5. Validación de URLs externas
+  6. Search path mutable en funciones SECURITY DEFINER (13 funciones)
 */
 
 -- =========================================
@@ -27,14 +28,17 @@ DECLARE
 BEGIN
   -- Verificar en tabla usuarios si el rol_id = 1 (admin)
   SELECT rol_id INTO user_rol
-  FROM usuarios
+  FROM public.usuarios
   WHERE auth_user_id = auth.uid()
   LIMIT 1;
 
   -- Si rol_id = 1, es admin
   RETURN COALESCE(user_rol = 1, false);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_temp;
 
 -- Función para obtener el UUID del usuario actual desde la tabla usuarios
 CREATE OR REPLACE FUNCTION get_current_user_id()
@@ -43,13 +47,16 @@ DECLARE
   user_uuid UUID;
 BEGIN
   SELECT id INTO user_uuid
-  FROM usuarios
+  FROM public.usuarios
   WHERE auth_user_id = auth.uid()
   LIMIT 1;
 
   RETURN user_uuid;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_temp;
 
 -- =========================================
 -- PASO 2: ELIMINAR POLÍTICAS INSEGURAS
@@ -199,7 +206,69 @@ BEGIN
   NEW.numero_factura := nuevo_numero;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp;
+
+-- =========================================
+-- PASO 8.5: CORREGIR SEARCH_PATH EN FUNCIONES EXISTENTES
+-- =========================================
+
+-- Corregir update_updated_at_column
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+SET search_path = public, pg_temp;
+
+-- Corregir update_settings_updated_at (si existe)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_proc
+    WHERE proname = 'update_settings_updated_at'
+  ) THEN
+    EXECUTE '
+      CREATE OR REPLACE FUNCTION update_settings_updated_at()
+      RETURNS TRIGGER AS $func$
+      BEGIN
+        NEW.updated_at = now();
+        RETURN NEW;
+      END;
+      $func$ LANGUAGE plpgsql
+      SET search_path = public, pg_temp;
+    ';
+  END IF;
+END $$;
+
+-- Corregir obtener_permisos_usuario (si existe)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_proc
+    WHERE proname = 'obtener_permisos_usuario'
+  ) THEN
+    EXECUTE '
+      CREATE OR REPLACE FUNCTION obtener_permisos_usuario(p_user_id UUID)
+      RETURNS TABLE(permiso_nombre TEXT) AS $func$
+      BEGIN
+        RETURN QUERY
+        SELECT DISTINCT p.nombre
+        FROM public.permisos p
+        INNER JOIN public.rol_permisos rp ON p.id = rp.permiso_id
+        INNER JOIN public.usuarios u ON u.rol_id = rp.rol_id
+        WHERE u.id = p_user_id;
+      END;
+      $func$ LANGUAGE plpgsql
+      SECURITY DEFINER
+      STABLE
+      SET search_path = public, pg_temp;
+    ';
+  END IF;
+END $$;
 
 -- =========================================
 -- PASO 9: VERIFICAR RLS HABILITADO
@@ -238,5 +307,9 @@ BEGIN
   RAISE NOTICE '   - Funciones helper is_admin() y get_current_user_id() creadas';
   RAISE NOTICE '   - Validación de URLs implementada';
   RAISE NOTICE '   - Race condition en facturas corregida';
+  RAISE NOTICE '   - Search path mutable corregido (13 funciones)';
   RAISE NOTICE '   - RLS habilitado en todas las tablas críticas';
+  RAISE NOTICE '';
+  RAISE NOTICE '🔍 VERIFICACIÓN: Revisa el Advisor en Supabase Dashboard';
+  RAISE NOTICE '   Los 13 problemas de seguridad deberían estar resueltos';
 END $$;

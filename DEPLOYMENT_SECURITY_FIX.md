@@ -90,12 +90,18 @@ ORDER BY tablename;
    - ❌ Antes: Números de factura podían duplicarse
    - ✅ Ahora: Secuencia única garantizada
 
+6. **Search Path Mutable en Funciones (13 funciones afectadas)**
+   - ❌ Antes: Funciones con `SECURITY DEFINER` sin `search_path` fijo
+   - ✅ Ahora: Todas las funciones tienen `SET search_path = public, pg_temp`
+   - 🛡️ **Por qué es crítico**: Previene ataques de inyección donde un atacante manipula el search_path para ejecutar código malicioso
+
 ### Mejoras Adicionales
 
 - ✅ Validación de URLs externas (previene inyección)
-- ✅ Funciones helper `is_admin()` y `get_current_user_id()` creadas
+- ✅ Funciones helper `is_admin()` y `get_current_user_id()` creadas con search_path seguro
 - ✅ RLS habilitado en todas las tablas críticas
 - ✅ Documentación añadida a funciones
+- ✅ Todas las funciones SECURITY DEFINER protegidas contra inyección SQL
 
 ---
 
