@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building, BookOpen } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
-import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros, buscarLibroPorISBN, incrementarStockLibro, crearLibro } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros, buscarLibroPorISBN, incrementarStockLibro, crearLibro, buscarLibros } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -87,15 +87,21 @@ export function AdminDashboard() {
     cargarEstadisticas();
   }, []);
 
-  // Cargar libros con paginación cuando cambia la página
+  // Cargar libros con paginación cuando cambia la página o búsqueda
   useEffect(() => {
     const cargarLibros = async () => {
       setLoadingBooks(true);
       try {
-        // Cargar libros de la página actual
-        const offset = (currentPage - 1) * itemsPerPage;
-        const libros = await obtenerLibros(itemsPerPage, offset);
-        setBooks(libros);
+        if (searchQuery.trim()) {
+          // Si hay búsqueda, buscar en toda la base de datos
+          const libros = await buscarLibros(searchQuery.trim());
+          setBooks(libros);
+        } else {
+          // Si no hay búsqueda, cargar libros de la página actual
+          const offset = (currentPage - 1) * itemsPerPage;
+          const libros = await obtenerLibros(itemsPerPage, offset);
+          setBooks(libros);
+        }
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {
@@ -103,7 +109,7 @@ export function AdminDashboard() {
       }
     };
     cargarLibros();
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, searchQuery]);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -327,19 +333,11 @@ export function AdminDashboard() {
     }
   };
 
-  // Pagination basada en el total de libros en BD
-  const totalPages = Math.ceil(totalBooks / itemsPerPage);
+  // Pagination basada en el total de libros en BD o resultados de búsqueda
+  const totalPages = searchQuery.trim() ? 1 : Math.ceil(totalBooks / itemsPerPage);
 
-  // Filtrar books localmente solo para búsquedas
-  const currentBooks = searchQuery
-    ? books.filter(book =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.publisher.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.isbn.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : books;
+  // Ya no necesitamos filtrar localmente, la búsqueda se hace en el servidor
+  const currentBooks = books;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
