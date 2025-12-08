@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building, BookOpen } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
-import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros, buscarLibroPorISBN, incrementarStockLibro, crearLibro, buscarLibros } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros, buscarLibroPorISBN, incrementarStockLibro, crearLibro, buscarLibros, actualizarLibro, eliminarLibro } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -56,6 +56,8 @@ export function AdminDashboard() {
   const [isbnSearchMode, setIsbnSearchMode] = useState(false);
   const [searchingISBN, setSearchingISBN] = useState(false);
   const [isbnSearchQuery, setIsbnSearchQuery] = useState('');
+  const [savingBook, setSavingBook] = useState(false);
+  const [deletingBook, setDeletingBook] = useState(false);
 
   useEffect(() => {
     if (settings?.system?.itemsPerPageAdmin) {
@@ -267,19 +269,68 @@ export function AdminDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSaveEdit = () => {
-    if (editingBook) {
-      setBooks(prev => prev.map(book => 
-        book.id === editingBook.id ? editingBook : book
-      ));
-      setEditingBook(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleSaveEdit = async () => {
+    if (!editingBook) return;
+
+    setSavingBook(true);
+    try {
+      const libroActualizado = await actualizarLibro(parseInt(editingBook.id), {
+        titulo: editingBook.title,
+        autor: editingBook.author,
+        isbn: editingBook.isbn,
+        precio: editingBook.price,
+        stock: editingBook.stock,
+        descripcion: editingBook.description,
+        imagen_url: editingBook.coverImage,
+        paginas: editingBook.pages,
+        anio: editingBook.publicationYear,
+        ubicacion: editingBook.ubicacion,
+      });
+
+      if (libroActualizado) {
+        setBooks(prev => prev.map(book =>
+          book.id === editingBook.id ? libroActualizado : book
+        ));
+        setEditingBook(null);
+        alert('Libro actualizado correctamente');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        alert('Error al actualizar el libro');
+      }
+    } catch (error) {
+      console.error('Error al guardar libro:', error);
+      alert('Error al actualizar el libro');
+    } finally {
+      setSavingBook(false);
     }
   };
 
-  const handleDeleteBook = (bookId: string) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este libro?')) {
-      setBooks(prev => prev.filter(book => book.id !== bookId));
+  const handleDeleteBook = async (bookId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este libro?')) {
+      return;
+    }
+
+    setDeletingBook(true);
+    try {
+      const eliminado = await eliminarLibro(parseInt(bookId));
+
+      if (eliminado) {
+        setBooks(prev => prev.filter(book => book.id !== bookId));
+        alert('Libro eliminado correctamente');
+
+        // Actualizar estadísticas
+        const stats = await obtenerEstadisticasLibros();
+        setTotalBooks(stats.total);
+        setBooksInStock(stats.enStock);
+        setBooksOutOfStock(stats.sinStock);
+      } else {
+        alert('Error al eliminar el libro');
+      }
+    } catch (error) {
+      console.error('Error al eliminar libro:', error);
+      alert('Error al eliminar el libro');
+    } finally {
+      setDeletingBook(false);
     }
   };
 
@@ -1314,12 +1365,17 @@ export function AdminDashboard() {
               </div>
 
               <div className="form-actions">
-                <button 
+                <button
                   onClick={isCreating ? handleCreateBook : handleSaveEdit}
                   className="save-btn"
+                  disabled={savingBook}
+                  style={{
+                    opacity: savingBook ? 0.6 : 1,
+                    cursor: savingBook ? 'not-allowed' : 'pointer'
+                  }}
                 >
                   <Save size={16} />
-                  {isCreating ? 'Crear Libro' : 'Guardar Cambios'}
+                  {isCreating ? 'Crear Libro' : (savingBook ? 'Guardando...' : 'Guardar Cambios')}
                 </button>
               </div>
             </div>
