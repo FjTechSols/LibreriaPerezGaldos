@@ -1,22 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Star, ArrowLeft, Bookmark, Share2, Truck } from 'lucide-react';
+import { ShoppingCart, Heart, Star, ArrowLeft, Bookmark, Share2, Truck, Edit, Trash2 } from 'lucide-react';
 import { obtenerLibroPorId } from '../services/libroService';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { ShareModal } from '../components/ShareModal';
+import { ReviewForm } from '../components/ReviewForm';
 import { Book } from '../types';
+import {
+  getReviewsByLibroId,
+  getUserReviewForLibro,
+  deleteReview,
+  Review,
+  getBookAverageRating
+} from '../services/reviewService';
 import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [userReview, setUserReview] = useState<Review | null>(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [editingReview, setEditingReview] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
 
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
@@ -27,6 +42,17 @@ export function BookDetail() {
       try {
         const libroData = await obtenerLibroPorId(id);
         setBook(libroData);
+
+        const reviewsData = await getReviewsByLibroId(Number(id));
+        setReviews(reviewsData);
+
+        const avgRating = await getBookAverageRating(Number(id));
+        setAverageRating(avgRating);
+
+        if (user) {
+          const userReviewData = await getUserReviewForLibro(Number(id), user.id);
+          setUserReview(userReviewData);
+        }
       } catch (error) {
         console.error('Error loading book:', error);
       } finally {
@@ -34,7 +60,7 @@ export function BookDetail() {
       }
     };
     loadBook();
-  }, [id]);
+  }, [id, user]);
 
   // Scroll to top when tab changes
   const handleTabChange = (tab: 'description' | 'reviews') => {
@@ -104,6 +130,40 @@ export function BookDetail() {
     ));
   };
 
+  const handleReviewSuccess = async () => {
+    setShowReviewForm(false);
+    setEditingReview(false);
+
+    const reviewsData = await getReviewsByLibroId(Number(id));
+    setReviews(reviewsData);
+
+    const avgRating = await getBookAverageRating(Number(id));
+    setAverageRating(avgRating);
+
+    if (user) {
+      const userReviewData = await getUserReviewForLibro(Number(id!), user.id);
+      setUserReview(userReviewData);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: number) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar tu reseña?')) return;
+
+    const success = await deleteReview(reviewId);
+    if (success) {
+      handleReviewSuccess();
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="book-detail">
       <div className="container">
@@ -145,9 +205,9 @@ export function BookDetail() {
               <p className="book-author">{language === 'es' ? 'por' : language === 'en' ? 'by' : 'par'} {book.author}</p>
               
               <div className="book-rating">
-                <div className="stars">{renderStars(book.rating)}</div>
+                <div className="stars">{renderStars(averageRating)}</div>
                 <span className="rating-text">
-                  {book.rating}/5 ({book.reviews.length} {language === 'es' ? `reseña${book.reviews.length !== 1 ? 's' : ''}` : language === 'en' ? `review${book.reviews.length !== 1 ? 's' : ''}` : `avis`})
+                  {averageRating}/5 ({reviews.length} {language === 'es' ? `reseña${reviews.length !== 1 ? 's' : ''}` : language === 'en' ? `review${reviews.length !== 1 ? 's' : ''}` : `avis`})
                 </span>
               </div>
             </div>
@@ -243,7 +303,7 @@ export function BookDetail() {
               onClick={() => handleTabChange('reviews')}
               className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
             >
-              {language === 'es' ? 'Reseñas' : language === 'en' ? 'Reviews' : 'Avis'} ({book.reviews.length})
+              {language === 'es' ? 'Reseñas' : language === 'en' ? 'Reviews' : 'Avis'} ({reviews.length})
             </button>
           </div>
 
@@ -284,7 +344,7 @@ export function BookDetail() {
                     </div>
                     <div className="spec-item">
                       <span className="spec-label">Valoración:</span>
-                      <span className="spec-value">{book.rating}/5 estrellas</span>
+                      <span className="spec-value">{averageRating}/5 estrellas</span>
                     </div>
                   </div>
                 </div>
@@ -293,16 +353,97 @@ export function BookDetail() {
 
             {activeTab === 'reviews' && (
               <div className="reviews-content">
-                {book.reviews.length > 0 ? (
+                {isAuthenticated && (
+                  <div className="review-form-section">
+                    {!userReview && !showReviewForm && (
+                      <button
+                        onClick={() => setShowReviewForm(true)}
+                        className="write-review-btn"
+                      >
+                        Escribir una reseña
+                      </button>
+                    )}
+
+                    {userReview && !editingReview && (
+                      <div className="user-review-card">
+                        <div className="user-review-header">
+                          <h4>Tu reseña</h4>
+                          <div className="user-review-actions">
+                            <button
+                              onClick={() => setEditingReview(true)}
+                              className="edit-review-btn"
+                              title="Editar reseña"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteReview(userReview.id)}
+                              className="delete-review-btn"
+                              title="Eliminar reseña"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="review-rating">
+                          {renderStars(userReview.rating)}
+                        </div>
+                        <p className="review-comment">{userReview.comment}</p>
+                        <span className="review-date">{formatDate(userReview.created_at)}</span>
+                      </div>
+                    )}
+
+                    {(showReviewForm || editingReview) && (
+                      <ReviewForm
+                        libroId={Number(id)}
+                        existingReview={editingReview && userReview ? {
+                          id: userReview.id,
+                          rating: userReview.rating,
+                          comment: userReview.comment
+                        } : undefined}
+                        onSuccess={handleReviewSuccess}
+                        onCancel={() => {
+                          setShowReviewForm(false);
+                          setEditingReview(false);
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {!isAuthenticated && (
+                  <div className="login-prompt">
+                    <p>
+                      <Link to="/login">Inicia sesión</Link> para dejar una reseña
+                    </p>
+                  </div>
+                )}
+
+                <div className="reviews-summary">
+                  <h3>Todas las reseñas ({reviews.length})</h3>
+                  {reviews.length > 0 && (
+                    <div className="average-rating-display">
+                      <div className="large-rating">{averageRating}</div>
+                      <div className="rating-details">
+                        <div className="stars">{renderStars(averageRating)}</div>
+                        <span>{reviews.length} reseña{reviews.length !== 1 ? 's' : ''}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {reviews.length > 0 ? (
                   <div className="reviews-list">
-                    {book.reviews.map(review => (
+                    {reviews.filter(r => r.id !== userReview?.id).map(review => (
                       <div key={review.id} className="review-item">
                         <div className="review-header">
-                          <span className="reviewer-name">{review.userName}</span>
+                          <span className="reviewer-name">
+                            {review.usuario?.email?.split('@')[0] || 'Usuario'}
+                          </span>
                           <div className="review-rating">
                             {renderStars(review.rating)}
                           </div>
-                          <span className="review-date">{review.date}</span>
+                          <span className="review-date">{formatDate(review.created_at)}</span>
                         </div>
                         <p className="review-comment">{review.comment}</p>
                       </div>
@@ -311,7 +452,7 @@ export function BookDetail() {
                 ) : (
                   <div className="no-reviews">
                     <p>Este libro aún no tiene reseñas</p>
-                    <p>¡Sé el primero en dejar una reseña!</p>
+                    {isAuthenticated && <p>¡Sé el primero en dejar una reseña!</p>}
                   </div>
                 )}
               </div>

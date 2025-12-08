@@ -505,6 +505,148 @@
   margin: 0 0 0.5rem 0;
 }
 
+.review-form-section {
+  margin-bottom: 2rem;
+}
+
+.write-review-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.5rem;
+}
+
+.write-review-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.user-review-card {
+  background: #eff6ff;
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.user-review-header h4 {
+  margin: 0;
+  color: #1e40af;
+  font-size: 1.125rem;
+}
+
+.user-review-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-review-btn,
+.delete-review-btn {
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.edit-review-btn:hover {
+  background: #f3f4f6;
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.delete-review-btn:hover {
+  background: #fee;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.login-prompt {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-prompt p {
+  margin: 0;
+  color: #475569;
+  font-size: 1rem;
+}
+
+.login-prompt a {
+  color: #3b82f6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+.reviews-summary {
+  margin-bottom: 2rem;
+}
+
+.reviews-summary h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.average-rating-display {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.large-rating {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fbbf24;
+  line-height: 1;
+}
+
+.rating-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rating-details .stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.rating-details span {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 1024px) {
   .book-detail-content {
     grid-template-columns: 1fr;
