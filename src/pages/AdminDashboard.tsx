@@ -287,26 +287,23 @@ export function AdminDashboard() {
         ubicacion: editingBook.ubicacion || null,
       });
 
-      if (libroActualizado) {
-        setBooks(prev => prev.map(book =>
-          book.id === editingBook.id ? libroActualizado : book
-        ));
-        setEditingBook(null);
-        alert('Libro actualizado correctamente');
+      setBooks(prev => prev.map(book =>
+        book.id === editingBook.id ? libroActualizado : book
+      ));
+      setEditingBook(null);
+      alert('✓ Libro actualizado correctamente');
 
-        // Recargar estadísticas
-        const stats = await obtenerEstadisticasLibros();
-        setTotalBooks(stats.total);
-        setBooksInStock(stats.enStock);
-        setBooksOutOfStock(stats.sinStock);
+      // Recargar estadísticas
+      const stats = await obtenerEstadisticasLibros();
+      setTotalBooks(stats.total);
+      setBooksInStock(stats.enStock);
+      setBooksOutOfStock(stats.sinStock);
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        alert('Error al actualizar el libro. Por favor verifica los datos.');
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error al guardar libro:', error);
-      alert(`Error al actualizar el libro: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`✗ Error al actualizar el libro:\n${errorMessage}\n\nVerifica los datos e intenta nuevamente.`);
     } finally {
       setSavingBook(false);
     }

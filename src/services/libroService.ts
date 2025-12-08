@@ -204,18 +204,28 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
       .from('libros')
       .update(updateData)
       .eq('id', id)
-      .select()
+      .select(`
+        *,
+        editoriales (
+          id,
+          nombre
+        )
+      `)
       .single();
 
     if (error) {
       console.error('Error al actualizar libro:', error);
-      return null;
+      throw new Error(`Error de base de datos: ${error.message}`);
     }
 
-    return data ? mapLibroToBook(data) : null;
+    if (!data) {
+      throw new Error('No se pudo actualizar el libro');
+    }
+
+    return mapLibroToBook(data);
   } catch (error) {
     console.error('Error inesperado al actualizar libro:', error);
-    return null;
+    throw error;
   }
 };
 
