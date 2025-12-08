@@ -121,6 +121,33 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Check if target user is super_admin and requesting user is only admin
+    const { data: targetUserRoles } = await supabaseAdmin
+      .from("usuarios_roles")
+      .select("rol_id, roles(nombre)")
+      .eq("user_id", userId)
+      .eq("activo", true);
+
+    const targetIsSuperAdmin = targetUserRoles?.some(
+      (ur: any) => ur.roles?.nombre === "super_admin"
+    );
+
+    const requestingUserIsOnlyAdmin = userRoles?.some(
+      (ur: any) => ur.roles?.nombre === "admin"
+    ) && !userRoles?.some(
+      (ur: any) => ur.roles?.nombre === "super_admin"
+    );
+
+    if (targetIsSuperAdmin && requestingUserIsOnlyAdmin) {
+      return new Response(
+        JSON.stringify({ error: "Admins cannot delete super admins" }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Delete user using admin client
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(
       userId

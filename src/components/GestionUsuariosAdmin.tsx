@@ -152,6 +152,14 @@ export function GestionUsuariosAdmin() {
       return;
     }
 
+    const esSuperAdmin = usuario.roles.some(r => r.nombre === 'super_admin');
+    const usuarioActualEsAdmin = usuarios.find(u => u.id === user?.id)?.roles.some(r => r.nombre === 'admin');
+
+    if (esSuperAdmin && usuarioActualEsAdmin) {
+      setError('Los administradores no pueden eliminar super administradores');
+      return;
+    }
+
     const confirmacion = window.confirm(
       `¿Estás seguro de eliminar al usuario ${usuario.email}? Esta acción no se puede deshacer.`
     );
@@ -170,8 +178,9 @@ export function GestionUsuariosAdmin() {
   const getRolBadgeColor = (nivelJerarquia: number) => {
     switch (nivelJerarquia) {
       case 1: return '#dc2626';
-      case 2: return '#2563eb';
-      case 3: return '#16a34a';
+      case 2: return '#ea580c';
+      case 3: return '#2563eb';
+      case 4: return '#16a34a';
       default: return '#64748b';
     }
   };
@@ -300,7 +309,11 @@ export function GestionUsuariosAdmin() {
                     >
                       <Key size={16} />
                     </button>
-                    {usuario.id !== user?.id && (
+                    {(() => {
+                      const esSuperAdmin = usuario.roles.some(r => r.nombre === 'super_admin');
+                      const usuarioActualEsAdmin = usuarios.find(u => u.id === user?.id)?.roles.some(r => r.nombre === 'admin' && !r.nombre.includes('super'));
+                      const puedeEliminar = usuario.id !== user?.id && !(esSuperAdmin && usuarioActualEsAdmin);
+                      return puedeEliminar && (
                       <button
                         className="btn-icon btn-danger"
                         title="Eliminar usuario"
@@ -308,7 +321,8 @@ export function GestionUsuariosAdmin() {
                       >
                         <Trash2 size={16} />
                       </button>
-                    )}
+                    );
+                    })()}
                   </div>
                 </td>
               </tr>

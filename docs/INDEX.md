@@ -82,6 +82,12 @@ Guía completa de toda la documentación disponible del proyecto.
   - Asignar permisos
   - Gestión de roles
 
+- **[Jerarquía de Roles](JERARQUIA_ROLES.md)** 🎭
+  - Sistema de roles completo
+  - Permisos por rol
+  - Super Admin vs Admin
+  - Restricciones de seguridad
+
 ### Para Desarrolladores:
 - **[Incorporación de Desarrollador](guides/GUIA_INCORPORACION_DESARROLLADOR.md)** 👨‍💻
   - Setup del entorno local
@@ -206,6 +212,7 @@ docs/
 | **Entender arquitectura** | [Frontend](DOCUMENTACION_FRONTEND.md) + [Backend](DOCUMENTACION_BACKEND.md) |
 | **Aplicar migraciones** | [Migraciones](database/MIGRACIONES_PRODUCCION.md) |
 | **Crear admin** | [Crear Admin](guides/CREAR_ADMIN_INSTRUCCIONES.md) |
+| **Gestionar roles** | [Jerarquía de Roles](JERARQUIA_ROLES.md) |
 | **Usar panel admin** | [Admin Webmaster](guides/ADMIN_WEBMASTER.md) |
 | **Integrar Stripe** | [Stripe](INTEGRACION_STRIPE.md) |
 | **Gestionar pedidos** | [Pedidos](DOCUMENTACION_PEDIDOS.md) |
@@ -244,6 +251,8 @@ docs/
 ### Autenticación y Usuarios:
 - [Verificación Email](VERIFICACION_EMAIL.md)
 - [Crear Admin](guides/CREAR_ADMIN_INSTRUCCIONES.md)
+- [Jerarquía de Roles](JERARQUIA_ROLES.md)
+- [Sistema Roles y Permisos](SISTEMA_ROLES_PERMISOS.md)
 - [Configurar Supabase](database/CONFIGURAR_SUPABASE.md)
 
 ### Pagos y Facturación:
