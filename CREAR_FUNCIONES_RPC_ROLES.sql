@@ -1,223 +1,146 @@
-/*
-  # Crear Funciones RPC para Sistema de Roles y Permisos
+-- ============================================================
+-- CORRECCIÓN FUNCIONES RPC - RECONOCER JERARQUÍA COMPLETA
+-- ============================================================
+-- Este script actualiza todas las funciones RPC para que
+-- reconozcan correctamente super_admin, admin y editor
+-- según la jerarquía de roles del sistema.
+-- ============================================================
 
-  Este script crea todas las funciones RPC necesarias para el sistema de roles.
-
-  ## Instrucciones de Aplicación:
-  1. Ve a Supabase Dashboard → SQL Editor
-  2. Crea una nueva query
-  3. Copia y pega TODO este contenido
-  4. Ejecuta la query
-
-  ## Funciones que se crean:
-  - obtener_permisos_usuario: Obtiene todos los permisos de un usuario
-  - tiene_permiso: Verifica si un usuario tiene un permiso específico
-  - obtener_rol_principal: Obtiene el rol principal de un usuario
-  - obtener_roles_usuario: Obtiene todos los roles de un usuario
-
-  ## Nota:
-  - Este script primero agrega las columnas necesarias a la tabla roles si no existen
-*/
-
--- =========================
--- Paso 1: Agregar columnas a la tabla roles si no existen
--- =========================
-
-DO $$
-BEGIN
-  -- Agregar display_name si no existe
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'roles' AND column_name = 'display_name'
-  ) THEN
-    ALTER TABLE roles ADD COLUMN display_name VARCHAR(100);
-    UPDATE roles SET display_name = nombre WHERE display_name IS NULL;
-    ALTER TABLE roles ALTER COLUMN display_name SET NOT NULL;
-  END IF;
-
-  -- Agregar nivel_jerarquia si no existe
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'roles' AND column_name = 'nivel_jerarquia'
-  ) THEN
-    ALTER TABLE roles ADD COLUMN nivel_jerarquia INTEGER DEFAULT 999;
-    -- Asignar niveles jerárquicos por defecto
-    UPDATE roles SET nivel_jerarquia = 1 WHERE nombre = 'webmaster';
-    UPDATE roles SET nivel_jerarquia = 2 WHERE nombre = 'admin';
-    UPDATE roles SET nivel_jerarquia = 3 WHERE nombre = 'gerente';
-    UPDATE roles SET nivel_jerarquia = 4 WHERE nombre = 'empleado';
-    UPDATE roles SET nivel_jerarquia = 5 WHERE nombre = 'cliente';
-    ALTER TABLE roles ALTER COLUMN nivel_jerarquia SET NOT NULL;
-  END IF;
-END $$;
-
--- =========================
--- Función: obtener_permisos_usuario
--- Retorna los permisos de un usuario
--- =========================
-
-DROP FUNCTION IF EXISTS obtener_permisos_usuario(UUID);
-
-CREATE OR REPLACE FUNCTION obtener_permisos_usuario(usuario_id UUID)
-RETURNS TABLE(permiso_codigo TEXT)
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  RETURN QUERY
-  -- Permisos desde usuarios_roles (sistema nuevo)
-  SELECT DISTINCT p.codigo
-  FROM permisos p
-  INNER JOIN roles_permisos rp ON p.id = rp.permiso_id
-  INNER JOIN usuarios_roles ur ON rp.rol_id = ur.rol_id
-  WHERE ur.user_id = usuario_id
-    AND ur.activo = true
-
-  UNION
-
-  -- Permisos desde usuarios.rol_id (sistema legacy)
-  SELECT DISTINCT p.codigo
-  FROM permisos p
-  INNER JOIN roles_permisos rp ON p.id = rp.permiso_id
-  INNER JOIN usuarios u ON u.rol_id = rp.rol_id
-  WHERE u.auth_user_id = usuario_id;
-END;
-$$ LANGUAGE plpgsql STABLE;
-
--- =========================
--- Función: tiene_permiso
--- Verifica si un usuario tiene un permiso específico
--- =========================
-
-DROP FUNCTION IF EXISTS tiene_permiso(UUID, TEXT);
-
-CREATE OR REPLACE FUNCTION tiene_permiso(usuario_id UUID, permiso_codigo TEXT)
-RETURNS BOOLEAN
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
+-- 1. Función: is_super_admin
+-- Verifica si el usuario actual es super_admin
+DROP FUNCTION IF EXISTS is_super_admin();
+CREATE OR REPLACE FUNCTION is_super_admin()
+RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    -- Verificar en usuarios_roles (sistema nuevo)
-    SELECT 1
-    FROM permisos p
-    INNER JOIN roles_permisos rp ON p.id = rp.permiso_id
-    INNER JOIN usuarios_roles ur ON rp.rol_id = ur.rol_id
-    WHERE ur.user_id = usuario_id
-      AND p.codigo = permiso_codigo
-      AND ur.activo = true
-  ) OR EXISTS (
-    -- Verificar en usuarios.rol_id (sistema legacy)
-    SELECT 1
-    FROM permisos p
-    INNER JOIN roles_permisos rp ON p.id = rp.permiso_id
-    INNER JOIN usuarios u ON u.rol_id = rp.rol_id
-    WHERE u.auth_user_id = usuario_id
-      AND p.codigo = permiso_codigo
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = auth.uid()
+      AND r.nombre = 'super_admin'
+      AND u.activo = true
   );
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- =========================
--- Función: obtener_rol_principal
--- Obtiene el rol principal de un usuario (el de mayor jerarquía)
--- =========================
+-- 2. Función: is_admin (actualizada)
+-- Verifica si el usuario es admin O super_admin
+DROP FUNCTION IF EXISTS is_admin();
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = auth.uid()
+      AND r.nombre IN ('super_admin', 'admin')
+      AND u.activo = true
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP FUNCTION IF EXISTS obtener_rol_principal(UUID);
+-- 3. Función: is_editor (actualizada)
+-- Verifica si el usuario es editor, admin O super_admin
+DROP FUNCTION IF EXISTS is_editor();
+CREATE OR REPLACE FUNCTION is_editor()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = auth.uid()
+      AND r.nombre IN ('super_admin', 'admin', 'editor')
+      AND u.activo = true
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE FUNCTION obtener_rol_principal(usuario_id UUID)
-RETURNS TABLE(
-  rol_nombre TEXT,
-  rol_display_name TEXT,
-  nivel_jerarquia INTEGER
-)
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
+-- 4. Función: can_manage_books (actualizada)
+-- Verifica permisos para gestionar libros
+DROP FUNCTION IF EXISTS can_manage_books();
+CREATE OR REPLACE FUNCTION can_manage_books()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = auth.uid()
+      AND r.nombre IN ('super_admin', 'admin', 'editor')
+      AND u.activo = true
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 5. Función: can_view_all (actualizada)
+-- Verifica permisos para ver todo
+DROP FUNCTION IF EXISTS can_view_all();
+CREATE OR REPLACE FUNCTION can_view_all()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id
+    WHERE u.auth_user_id = auth.uid()
+      AND r.nombre IN ('super_admin', 'admin', 'editor', 'visualizador')
+      AND u.activo = true
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 6. Función: obtener_permisos_usuario (actualizada)
+-- Retorna todos los permisos del usuario actual
+DROP FUNCTION IF EXISTS obtener_permisos_usuario();
+CREATE OR REPLACE FUNCTION obtener_permisos_usuario()
+RETURNS TABLE (
+  user_id uuid,
+  username text,
+  email text,
+  rol_nombre text,
+  rol_display_name text,
+  nivel_jerarquia integer,
+  is_super_admin boolean,
+  is_admin boolean,
+  is_editor boolean,
+  can_manage_books boolean,
+  can_manage_users boolean,
+  can_manage_orders boolean,
+  can_manage_invoices boolean,
+  can_view_all boolean
+) AS $$
 BEGIN
   RETURN QUERY
-  -- Primero buscar en usuarios_roles (sistema nuevo)
-  SELECT r.nombre::TEXT, r.display_name::TEXT, r.nivel_jerarquia
-  FROM roles r
-  INNER JOIN usuarios_roles ur ON r.id = ur.rol_id
-  WHERE ur.user_id = usuario_id
-    AND ur.activo = true
-  ORDER BY r.nivel_jerarquia ASC
-  LIMIT 1;
-
-  -- Si no hay resultado, buscar en usuarios.rol_id (sistema legacy)
-  IF NOT FOUND THEN
-    RETURN QUERY
-    SELECT r.nombre::TEXT, r.display_name::TEXT, r.nivel_jerarquia
-    FROM roles r
-    INNER JOIN usuarios u ON u.rol_id = r.id
-    WHERE u.auth_user_id = usuario_id
-    LIMIT 1;
-  END IF;
-END;
-$$ LANGUAGE plpgsql STABLE;
-
--- =========================
--- Función: obtener_roles_usuario
--- Obtiene todos los roles activos de un usuario
--- =========================
-
-DROP FUNCTION IF EXISTS obtener_roles_usuario(UUID);
-
-CREATE OR REPLACE FUNCTION obtener_roles_usuario(usuario_id UUID)
-RETURNS TABLE(
-  rol_id INTEGER,
-  rol_nombre TEXT,
-  rol_display_name TEXT,
-  nivel_jerarquia INTEGER,
-  asignado_en TIMESTAMPTZ
-)
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  RETURN QUERY
-  -- Roles desde usuarios_roles (sistema nuevo)
-  SELECT
-    r.id,
-    r.nombre::TEXT,
-    r.display_name::TEXT,
+  SELECT 
+    u.auth_user_id as user_id,
+    u.username,
+    u.email,
+    r.nombre as rol_nombre,
+    r.display_name as rol_display_name,
     r.nivel_jerarquia,
-    ur.created_at
-  FROM roles r
-  INNER JOIN usuarios_roles ur ON r.id = ur.rol_id
-  WHERE ur.user_id = usuario_id
-    AND ur.activo = true
-
-  UNION
-
-  -- Rol desde usuarios.rol_id (sistema legacy)
-  SELECT
-    r.id,
-    r.nombre::TEXT,
-    r.display_name::TEXT,
-    r.nivel_jerarquia,
-    u.fecha_registro
-  FROM roles r
-  INNER JOIN usuarios u ON u.rol_id = r.id
-  WHERE u.auth_user_id = usuario_id
-
-  ORDER BY nivel_jerarquia ASC;
+    (r.nombre = 'super_admin') as is_super_admin,
+    (r.nombre IN ('super_admin', 'admin')) as is_admin,
+    (r.nombre IN ('super_admin', 'admin', 'editor')) as is_editor,
+    (r.nombre IN ('super_admin', 'admin', 'editor')) as can_manage_books,
+    (r.nombre IN ('super_admin', 'admin')) as can_manage_users,
+    (r.nombre IN ('super_admin', 'admin', 'editor')) as can_manage_orders,
+    (r.nombre IN ('super_admin', 'admin', 'editor')) as can_manage_invoices,
+    (r.nombre IN ('super_admin', 'admin', 'editor', 'visualizador')) as can_view_all
+  FROM usuarios u
+  INNER JOIN roles r ON u.rol_id = r.id
+  WHERE u.auth_user_id = auth.uid()
+    AND u.activo = true;
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- =========================
--- Comentarios sobre las funciones
--- =========================
+-- 7. VERIFICACIÓN: Probar la función con tu usuario
+SELECT 
+  'VERIFICACIÓN DE PERMISOS DESPUÉS DE ACTUALIZAR' as titulo,
+  *
+FROM obtener_permisos_usuario();
 
-COMMENT ON FUNCTION obtener_permisos_usuario(UUID) IS
-'Obtiene todos los códigos de permisos activos de un usuario. Busca en usuarios_roles y usuarios.rol_id para compatibilidad.';
-
-COMMENT ON FUNCTION tiene_permiso(UUID, TEXT) IS
-'Verifica si un usuario tiene un permiso específico. Retorna true si el usuario tiene el permiso, false en caso contrario.';
-
-COMMENT ON FUNCTION obtener_rol_principal(UUID) IS
-'Obtiene el rol principal (de mayor jerarquía) de un usuario. Busca primero en usuarios_roles, luego en usuarios.rol_id.';
-
-COMMENT ON FUNCTION obtener_roles_usuario(UUID) IS
-'Obtiene todos los roles activos asignados a un usuario, ordenados por nivel de jerarquía.';
+-- 8. VERIFICACIÓN: Probar cada función individual
+SELECT 
+  'FUNCIONES INDIVIDUALES' as titulo,
+  is_super_admin() as es_super_admin,
+  is_admin() as es_admin,
+  is_editor() as es_editor,
+  can_manage_books() as puede_gestionar_libros,
+  can_view_all() as puede_ver_todo;
