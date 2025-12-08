@@ -1,47 +1,62 @@
--- Script de diagnóstico de permisos
--- Ejecuta esto en el SQL Editor de Supabase
+-- ==========================================
+-- DIAGNÓSTICO DE PERMISOS - VERSIÓN CORREGIDA
+-- ==========================================
 
--- 1. Ver tu usuario actual
+-- 1. Ver estructura de la tabla usuarios
+SELECT 
+  'Estructura tabla usuarios' as info,
+  column_name,
+  data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' 
+  AND table_name = 'usuarios'
+ORDER BY ordinal_position;
+
+-- 2. Ver estructura de la tabla roles
+SELECT 
+  'Estructura tabla roles' as info,
+  column_name,
+  data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' 
+  AND table_name = 'roles'
+ORDER BY ordinal_position;
+
+-- 3. Tu auth.uid() actual
 SELECT
-  auth.uid() as auth_user_id,
-  u.id as usuario_id,
-  u.email,
-  u.rol_id,
-  r.nombre as rol_nombre
+  'Tu auth.uid()' as descripcion,
+  auth.uid() as valor;
+
+-- 4. Ver todos los usuarios en auth.users
+SELECT
+  'Usuarios en auth.users' as descripcion,
+  id,
+  email,
+  created_at
+FROM auth.users
+ORDER BY created_at DESC
+LIMIT 5;
+
+-- 5. Ver todos los registros en tabla usuarios
+SELECT
+  'Registros en tabla usuarios' as descripcion,
+  *
+FROM usuarios
+ORDER BY created_at DESC
+LIMIT 5;
+
+-- 6. Ver todos los roles
+SELECT
+  'Roles disponibles' as descripcion,
+  *
+FROM roles
+ORDER BY id;
+
+-- 7. Buscar tu usuario específicamente
+SELECT
+  'Tu usuario' as descripcion,
+  u.*,
+  r.*
 FROM usuarios u
-LEFT JOIN roles r ON r.id = u.rol_id
+LEFT JOIN roles r ON u.rol_id = r.id
 WHERE u.auth_user_id = auth.uid();
-
--- 2. Verificar las funciones de permisos
-SELECT
-  'is_editor()' as funcion,
-  is_editor() as resultado
-UNION ALL
-SELECT
-  'can_manage_books()' as funcion,
-  can_manage_books() as resultado
-UNION ALL
-SELECT
-  'can_view_all()' as funcion,
-  can_view_all() as resultado;
-
--- 3. Probar el UPDATE directamente
-UPDATE libros
-SET titulo = 'TEST UPDATE - Configuración del estado constitucional en España',
-    isbn = '9788491482871'
-WHERE id = 249128
-RETURNING *;
-
--- 4. Verificar políticas RLS activas en libros
-SELECT
-  schemaname,
-  tablename,
-  policyname,
-  permissive,
-  roles,
-  cmd,
-  qual,
-  with_check
-FROM pg_policies
-WHERE tablename = 'libros'
-ORDER BY cmd, policyname;
