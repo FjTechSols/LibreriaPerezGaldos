@@ -110,10 +110,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Validate password strength
-    if (newPassword.length < 6) {
+    // Validate password strength (mínimo 8 caracteres, mayúsculas, minúsculas, números)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
       return new Response(
-        JSON.stringify({ error: "Password must be at least 6 characters" }),
+        JSON.stringify({
+          error: "Password must be at least 8 characters and include uppercase, lowercase, and numbers"
+        }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -139,9 +142,14 @@ Deno.serve(async (req: Request) => {
       }
     );
   } catch (error) {
+    // Log detallado solo en servidor
     console.error("Error in admin-update-password:", error);
+
+    // Mensaje sanitizado para el cliente
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        error: "An error occurred while updating the password. Please try again."
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
