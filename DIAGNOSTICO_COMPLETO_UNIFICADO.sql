@@ -28,7 +28,7 @@ usuarios_info AS (
     id::text as identificador,
     email as dato_1,
     rol_id::text as dato_2,
-    COALESCE(metadata->>'role', 'sin_metadata') as dato_3
+    created_at::text as dato_3
   FROM usuarios
   WHERE id = (SELECT user_id FROM mi_uid)
 ),
