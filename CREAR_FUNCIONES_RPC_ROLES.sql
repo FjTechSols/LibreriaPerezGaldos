@@ -14,7 +14,42 @@
   - tiene_permiso: Verifica si un usuario tiene un permiso específico
   - obtener_rol_principal: Obtiene el rol principal de un usuario
   - obtener_roles_usuario: Obtiene todos los roles de un usuario
+
+  ## Nota:
+  - Este script primero agrega las columnas necesarias a la tabla roles si no existen
 */
+
+-- =========================
+-- Paso 1: Agregar columnas a la tabla roles si no existen
+-- =========================
+
+DO $$
+BEGIN
+  -- Agregar display_name si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'roles' AND column_name = 'display_name'
+  ) THEN
+    ALTER TABLE roles ADD COLUMN display_name VARCHAR(100);
+    UPDATE roles SET display_name = nombre WHERE display_name IS NULL;
+    ALTER TABLE roles ALTER COLUMN display_name SET NOT NULL;
+  END IF;
+
+  -- Agregar nivel_jerarquia si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'roles' AND column_name = 'nivel_jerarquia'
+  ) THEN
+    ALTER TABLE roles ADD COLUMN nivel_jerarquia INTEGER DEFAULT 999;
+    -- Asignar niveles jerárquicos por defecto
+    UPDATE roles SET nivel_jerarquia = 1 WHERE nombre = 'webmaster';
+    UPDATE roles SET nivel_jerarquia = 2 WHERE nombre = 'admin';
+    UPDATE roles SET nivel_jerarquia = 3 WHERE nombre = 'gerente';
+    UPDATE roles SET nivel_jerarquia = 4 WHERE nombre = 'empleado';
+    UPDATE roles SET nivel_jerarquia = 5 WHERE nombre = 'cliente';
+    ALTER TABLE roles ALTER COLUMN nivel_jerarquia SET NOT NULL;
+  END IF;
+END $$;
 
 -- =========================
 -- Función: obtener_permisos_usuario
@@ -102,7 +137,7 @@ AS $$
 BEGIN
   RETURN QUERY
   -- Primero buscar en usuarios_roles (sistema nuevo)
-  SELECT r.nombre, r.display_name, r.nivel_jerarquia
+  SELECT r.nombre::TEXT, r.display_name::TEXT, r.nivel_jerarquia
   FROM roles r
   INNER JOIN usuarios_roles ur ON r.id = ur.rol_id
   WHERE ur.user_id = usuario_id
@@ -113,7 +148,7 @@ BEGIN
   -- Si no hay resultado, buscar en usuarios.rol_id (sistema legacy)
   IF NOT FOUND THEN
     RETURN QUERY
-    SELECT r.nombre, r.display_name, r.nivel_jerarquia
+    SELECT r.nombre::TEXT, r.display_name::TEXT, r.nivel_jerarquia
     FROM roles r
     INNER JOIN usuarios u ON u.rol_id = r.id
     WHERE u.auth_user_id = usuario_id
@@ -145,8 +180,8 @@ BEGIN
   -- Roles desde usuarios_roles (sistema nuevo)
   SELECT
     r.id,
-    r.nombre,
-    r.display_name,
+    r.nombre::TEXT,
+    r.display_name::TEXT,
     r.nivel_jerarquia,
     ur.created_at
   FROM roles r
@@ -159,10 +194,10 @@ BEGIN
   -- Rol desde usuarios.rol_id (sistema legacy)
   SELECT
     r.id,
-    r.nombre,
-    r.display_name,
+    r.nombre::TEXT,
+    r.display_name::TEXT,
     r.nivel_jerarquia,
-    u.created_at
+    u.fecha_registro
   FROM roles r
   INNER JOIN usuarios u ON u.rol_id = r.id
   WHERE u.auth_user_id = usuario_id

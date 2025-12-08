@@ -70,6 +70,37 @@ Deberías ver 4 funciones listadas:
 - **obtener_rol_principal**: Obtiene el rol de mayor jerarquía de un usuario
 - **obtener_roles_usuario**: Lista todos los roles activos de un usuario
 
+## Correcciones Aplicadas al Script
+
+El script `CREAR_FUNCIONES_RPC_ROLES.sql` incluye las siguientes correcciones:
+
+### 1. Agregado de Columnas a la Tabla Roles
+
+El script agrega automáticamente las columnas necesarias si no existen:
+
+- `display_name` (VARCHAR 100): Nombre amigable para mostrar
+- `nivel_jerarquia` (INTEGER): Nivel jerárquico del rol (1 = mayor autoridad)
+
+### 2. Conversión de Tipos de Datos
+
+Las funciones usan `::TEXT` para convertir VARCHAR a TEXT y evitar conflictos de tipo:
+
+```sql
+SELECT r.nombre::TEXT, r.display_name::TEXT, r.nivel_jerarquia
+```
+
+### 3. Corrección de Columnas en Tabla Usuarios
+
+El script usa `fecha_registro` en lugar de `created_at` para la tabla `usuarios`:
+
+```sql
+-- Correcto para tabla usuarios
+u.fecha_registro
+
+-- Correcto para tabla usuarios_roles
+ur.created_at
+```
+
 ## Problemas Comunes
 
 ### Error: "permission denied for schema public"
