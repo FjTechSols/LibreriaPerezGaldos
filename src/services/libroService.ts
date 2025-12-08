@@ -334,3 +334,65 @@ export const obtenerEstadisticasLibros = async (): Promise<{
     return { total: 0, enStock: 0, sinStock: 0 };
   }
 };
+
+export const buscarLibroPorISBN = async (isbn: string): Promise<LibroSupabase | null> => {
+  try {
+    if (!isbn) return null;
+
+    const cleanISBN = isbn.replace(/[-\s]/g, '');
+
+    const { data, error } = await supabase
+      .from('libros')
+      .select('*, editoriales(id, nombre)')
+      .eq('activo', true)
+      .eq('isbn', cleanISBN)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error al buscar libro por ISBN:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error inesperado al buscar libro por ISBN:', error);
+    return null;
+  }
+};
+
+export const incrementarStockLibro = async (id: number, cantidad: number = 1): Promise<Book | null> => {
+  try {
+    const { data: libroActual, error: fetchError } = await supabase
+      .from('libros')
+      .select('stock')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error al obtener stock actual:', fetchError);
+      return null;
+    }
+
+    const nuevoStock = (libroActual.stock || 0) + cantidad;
+
+    const { data, error } = await supabase
+      .from('libros')
+      .update({
+        stock: nuevoStock,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select('*, editoriales(id, nombre)')
+      .single();
+
+    if (error) {
+      console.error('Error al incrementar stock:', error);
+      return null;
+    }
+
+    return data ? mapLibroToBook(data) : null;
+  } catch (error) {
+    console.error('Error inesperado al incrementar stock:', error);
+    return null;
+  }
+};

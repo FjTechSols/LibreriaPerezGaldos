@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building, BookOpen } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
-import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros, buscarLibroPorISBN, incrementarStockLibro, crearLibro } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -140,56 +140,119 @@ export function AdminDashboard() {
     );
   }
 
-  const handleCreateBook = () => {
-    if (newBook.title && newBook.author && newBook.publisher && newBook.isbn && newBook.price) {
-      const bookId = Date.now().toString();
-      const autoCode = newBook.code || `LIB${bookId.slice(-6)}`;
+  const handleCreateBook = async () => {
+    if (!newBook.title || !newBook.author || !newBook.isbn || !newBook.price) {
+      alert('Por favor completa todos los campos requeridos: Título, Autor, ISBN y Precio');
+      return;
+    }
 
-      const bookToAdd: BookType = {
-        id: bookId,
-        code: autoCode,
-        title: newBook.title,
-        author: newBook.author,
-        publisher: newBook.publisher,
-        pages: newBook.pages || 0,
-        publicationYear: newBook.publicationYear || new Date().getFullYear(),
-        isbn: newBook.isbn,
-        price: newBook.price,
-        originalPrice: newBook.isOnSale ? newBook.originalPrice : undefined,
-        stock: newBook.stock || 0,
-        category: newBook.category || categories[1],
-        description: newBook.description || '',
-        coverImage: newBook.coverImage || 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=400',
-        rating: newBook.rating || 0,
-        reviews: [],
-        featured: newBook.featured || false,
-        isNew: newBook.isNew || false,
-        isOnSale: newBook.isOnSale || false
-      };
+    try {
+      const cleanISBN = newBook.isbn.replace(/[-\s]/g, '');
 
-      setBooks(prev => [...prev, bookToAdd]);
-      setNewBook({
-        code: '',
-        title: '',
-        author: '',
-        publisher: '',
-        pages: 0,
-        publicationYear: new Date().getFullYear(),
-        isbn: '',
-        price: 0,
-        originalPrice: undefined,
-        stock: 0,
-        category: categories[1],
-        description: '',
-        coverImage: '',
-        rating: 0,
-        reviews: [],
-        featured: false,
-        isNew: false,
-        isOnSale: false
-      });
-      setIsCreating(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const libroExistente = await buscarLibroPorISBN(cleanISBN);
+
+      if (libroExistente) {
+        const libroActualizado = await incrementarStockLibro(libroExistente.id, 1);
+
+        if (libroActualizado) {
+          alert(`El libro "${libroExistente.titulo}" ya existe en el catálogo. Se ha incrementado el stock en 1 unidad.\n\nStock actual: ${libroActualizado.stock}`);
+
+          const stats = await obtenerEstadisticasLibros();
+          setTotalBooks(stats.total);
+          setBooksInStock(stats.enStock);
+          setBooksOutOfStock(stats.sinStock);
+
+          const offset = (currentPage - 1) * itemsPerPage;
+          const libros = await obtenerLibros(itemsPerPage, offset);
+          setBooks(libros);
+
+          setNewBook({
+            code: '',
+            title: '',
+            author: '',
+            publisher: '',
+            pages: 0,
+            publicationYear: new Date().getFullYear(),
+            isbn: '',
+            price: 0,
+            originalPrice: undefined,
+            stock: 0,
+            ubicacion: '',
+            category: categories[1],
+            description: '',
+            coverImage: '',
+            rating: 0,
+            reviews: [],
+            featured: false,
+            isNew: false,
+            isOnSale: false
+          });
+          setIsCreating(false);
+          setIsbnSearchMode(false);
+          setIsbnSearchQuery('');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          alert('Error al incrementar el stock del libro');
+        }
+      } else {
+        const nuevoLibro = await crearLibro({
+          titulo: newBook.title,
+          autor: newBook.author,
+          isbn: cleanISBN,
+          precio: newBook.price,
+          stock: 1,
+          ubicacion: newBook.ubicacion || 'almacen',
+          descripcion: newBook.description || null,
+          imagen_url: newBook.coverImage || null,
+          paginas: newBook.pages || null,
+          anio: newBook.publicationYear || null,
+          activo: true
+        });
+
+        if (nuevoLibro) {
+          alert(`Libro "${newBook.title}" creado exitosamente con stock inicial de 1 unidad`);
+
+          const stats = await obtenerEstadisticasLibros();
+          setTotalBooks(stats.total);
+          setBooksInStock(stats.enStock);
+          setBooksOutOfStock(stats.sinStock);
+
+          const offset = (currentPage - 1) * itemsPerPage;
+          const libros = await obtenerLibros(itemsPerPage, offset);
+          setBooks(libros);
+
+          setNewBook({
+            code: '',
+            title: '',
+            author: '',
+            publisher: '',
+            pages: 0,
+            publicationYear: new Date().getFullYear(),
+            isbn: '',
+            price: 0,
+            originalPrice: undefined,
+            stock: 0,
+            ubicacion: '',
+            category: categories[1],
+            description: '',
+            coverImage: '',
+            rating: 0,
+            reviews: [],
+            featured: false,
+            isNew: false,
+            isOnSale: false
+          });
+          setIsCreating(false);
+          setIsbnSearchMode(false);
+          setIsbnSearchQuery('');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          alert('Error al crear el libro');
+        }
+      }
+    } catch (error) {
+      console.error('Error al crear/actualizar libro:', error);
+      alert('Ocurrió un error al procesar la operación');
     }
   };
 
@@ -1063,22 +1126,40 @@ export function AdminDashboard() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Stock</label>
-                  <input
-                    type="number"
-                    value={isCreating ? newBook.stock : editingBook?.stock}
-                    onChange={(e) => {
-                      if (isCreating) {
-                        setNewBook(prev => ({ ...prev, stock: Number(e.target.value) }));
-                      } else {
+                {!isCreating && (
+                  <div className="form-group">
+                    <label>Stock</label>
+                    <input
+                      type="number"
+                      value={editingBook?.stock}
+                      onChange={(e) => {
                         setEditingBook(prev => prev ? { ...prev, stock: Number(e.target.value) } : null);
-                      }
-                    }}
-                    className="form-input"
-                    placeholder="0"
-                  />
-                </div>
+                      }}
+                      className="form-input"
+                      placeholder="0"
+                    />
+                  </div>
+                )}
+
+                {isCreating && (
+                  <div className="form-group">
+                    <label>Stock Inicial</label>
+                    <div style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      borderRadius: '8px',
+                      color: '#0369a1',
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <Package size={18} />
+                      <span>El stock inicial será de 1 unidad. Si el libro ya existe, se incrementará en 1.</span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label>Ubicación</label>
