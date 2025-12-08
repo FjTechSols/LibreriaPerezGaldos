@@ -167,10 +167,12 @@ export function BookDetail() {
             </div>
 
             <div className="book-meta">
-              <div className="meta-item">
-                <span className="meta-label">ISBN:</span>
-                <span className="meta-value">{book.isbn}</span>
-              </div>
+              {book.isbn && book.isbn.trim() !== '' && (
+                <div className="meta-item">
+                  <span className="meta-label">ISBN:</span>
+                  <span className="meta-value">{book.isbn}</span>
+                </div>
+              )}
               <div className="meta-item">
                 <span className="meta-label">{language === 'es' ? 'Categoría' : language === 'en' ? 'Category' : 'Catégorie'}:</span>
                 <span className="meta-value">{book.category}</span>
@@ -262,10 +264,12 @@ export function BookDetail() {
                       <span className="spec-label">Editorial:</span>
                       <span className="spec-value">{book.publisher}</span>
                     </div>
-                    <div className="spec-item">
-                      <span className="spec-label">ISBN:</span>
-                      <span className="spec-value">{book.isbn}</span>
-                    </div>
+                    {book.isbn && book.isbn.trim() !== '' && (
+                      <div className="spec-item">
+                        <span className="spec-label">ISBN:</span>
+                        <span className="spec-value">{book.isbn}</span>
+                      </div>
+                    )}
                     <div className="spec-item">
                       <span className="spec-label">Páginas:</span>
                       <span className="spec-value">{book.pages}</span>
