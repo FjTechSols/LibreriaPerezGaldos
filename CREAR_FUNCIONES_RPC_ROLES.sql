@@ -153,7 +153,6 @@ BEGIN
   INNER JOIN usuarios_roles ur ON r.id = ur.rol_id
   WHERE ur.user_id = usuario_id
     AND ur.activo = true
-  ORDER BY r.nivel_jerarquia ASC
 
   UNION
 
@@ -166,7 +165,9 @@ BEGIN
     u.created_at
   FROM roles r
   INNER JOIN usuarios u ON u.rol_id = r.id
-  WHERE u.auth_user_id = usuario_id;
+  WHERE u.auth_user_id = usuario_id
+
+  ORDER BY nivel_jerarquia ASC;
 END;
 $$ LANGUAGE plpgsql STABLE;
 
