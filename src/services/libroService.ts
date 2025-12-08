@@ -157,32 +157,42 @@ export const crearLibro = async (libro: Partial<LibroSupabase>): Promise<Book | 
 
 export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>): Promise<Book | null> => {
   try {
+    console.log('=== ACTUALIZAR LIBRO ===');
+    console.log('ID:', id);
+    console.log('Datos a actualizar:', libro);
+
     // Obtener el libro actual para saber su código y ubicación actual
     const { data: libroActual, error: fetchError } = await supabase
       .from('libros')
-      .select('legacy_id, ubicacion')
+      .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (fetchError) {
       console.error('Error al obtener libro actual:', fetchError);
-      return null;
+      throw new Error(`Error al obtener libro actual: ${fetchError.message}`);
     }
+
+    if (!libroActual) {
+      throw new Error('Libro no encontrado');
+    }
+
+    console.log('Libro actual:', libroActual);
 
     const updateData: any = {};
 
     if (libro.titulo !== undefined) updateData.titulo = libro.titulo;
     if (libro.autor !== undefined) updateData.autor = libro.autor;
-    if (libro.isbn !== undefined) updateData.isbn = libro.isbn;
+    if (libro.isbn !== undefined) updateData.isbn = libro.isbn || null;
     if (libro.precio !== undefined) updateData.precio = libro.precio;
     if (libro.stock !== undefined) updateData.stock = libro.stock;
-    if (libro.descripcion !== undefined) updateData.descripcion = libro.descripcion;
-    if (libro.imagen_url !== undefined) updateData.imagen_url = libro.imagen_url;
-    if (libro.paginas !== undefined) updateData.paginas = libro.paginas;
-    if (libro.anio !== undefined) updateData.anio = libro.anio;
-    if (libro.categoria_id !== undefined) updateData.categoria_id = libro.categoria_id;
-    if (libro.editorial_id !== undefined) updateData.editorial_id = libro.editorial_id;
-    if (libro.notas !== undefined) updateData.notas = libro.notas;
+    if (libro.descripcion !== undefined) updateData.descripcion = libro.descripcion || null;
+    if (libro.imagen_url !== undefined) updateData.imagen_url = libro.imagen_url || null;
+    if (libro.paginas !== undefined) updateData.paginas = libro.paginas || null;
+    if (libro.anio !== undefined) updateData.anio = libro.anio || null;
+    if (libro.categoria_id !== undefined) updateData.categoria_id = libro.categoria_id || null;
+    if (libro.editorial_id !== undefined) updateData.editorial_id = libro.editorial_id || null;
+    if (libro.notas !== undefined) updateData.notas = libro.notas || null;
     if (libro.activo !== undefined) updateData.activo = libro.activo;
 
     // Si se cambia la ubicación, actualizar el código
@@ -200,17 +210,27 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
 
     updateData.updated_at = new Date().toISOString();
 
-    const { error } = await supabase
+    console.log('Datos preparados para UPDATE:', updateData);
+
+    const { data: updateResult, error: updateError } = await supabase
       .from('libros')
       .update(updateData)
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
-    if (error) {
-      console.error('Error al actualizar libro:', error);
-      throw new Error(`Error de base de datos: ${error.message}`);
+    console.log('Resultado del UPDATE:', updateResult);
+    console.log('Error del UPDATE:', updateError);
+
+    if (updateError) {
+      console.error('Error al actualizar libro:', updateError);
+      throw new Error(`Error de base de datos: ${updateError.message}`);
     }
 
-    // Obtener el libro actualizado con un SELECT separado
+    if (!updateResult || updateResult.length === 0) {
+      throw new Error('La actualización no devolvió resultados. Verifica los permisos.');
+    }
+
+    // Obtener el libro actualizado con un SELECT separado para incluir editoriales
     const { data: libroActualizado, error: selectError } = await supabase
       .from('libros')
       .select(`
@@ -223,6 +243,8 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
       .eq('id', id)
       .maybeSingle();
 
+    console.log('Libro actualizado (con SELECT):', libroActualizado);
+
     if (selectError) {
       console.error('Error al obtener libro actualizado:', selectError);
       throw new Error(`Error al obtener libro actualizado: ${selectError.message}`);
@@ -232,7 +254,11 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>)
       throw new Error('No se pudo obtener el libro actualizado');
     }
 
-    return mapLibroToBook(libroActualizado);
+    const libroMapeado = mapLibroToBook(libroActualizado);
+    console.log('Libro mapeado final:', libroMapeado);
+    console.log('=== FIN ACTUALIZAR LIBRO ===');
+
+    return libroMapeado;
   } catch (error) {
     console.error('Error inesperado al actualizar libro:', error);
     throw error;

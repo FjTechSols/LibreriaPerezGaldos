@@ -274,6 +274,9 @@ export function AdminDashboard() {
 
     setSavingBook(true);
     try {
+      console.log('=== GUARDANDO EDICIÓN ===');
+      console.log('Libro a editar:', editingBook);
+
       const libroActualizado = await actualizarLibro(parseInt(editingBook.id), {
         titulo: editingBook.title,
         autor: editingBook.author,
@@ -287,9 +290,20 @@ export function AdminDashboard() {
         ubicacion: editingBook.ubicacion || null,
       });
 
-      setBooks(prev => prev.map(book =>
-        book.id === editingBook.id ? libroActualizado : book
-      ));
+      console.log('Libro actualizado recibido:', libroActualizado);
+
+      if (!libroActualizado) {
+        throw new Error('No se recibió el libro actualizado del servidor');
+      }
+
+      setBooks(prev => {
+        const nuevosLibros = prev.map(book =>
+          book.id === editingBook.id ? libroActualizado : book
+        );
+        console.log('Nuevos libros en estado:', nuevosLibros);
+        return nuevosLibros;
+      });
+
       setEditingBook(null);
       alert('✓ Libro actualizado correctamente');
 
