@@ -32,6 +32,12 @@ Antes de aplicar cambios, crea un respaldo:
 2. Click en **"Run"** o presiona Ctrl+Enter
 3. Espera a que aparezca "Success" ✅
 
+**⚠️ NOTA IMPORTANTE:**
+- ✅ El script es **idempotente** (puedes ejecutarlo múltiples veces sin errores)
+- ✅ Si ves "policy already exists" u otro error, simplemente ejecuta el script completo de nuevo
+- ✅ El script elimina políticas existentes antes de crear nuevas
+- ✅ No necesitas limpiar nada manualmente
+
 ### 3. Verificación (2 minutos)
 
 #### a) Verificar Mensajes de Éxito

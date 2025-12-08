@@ -3,6 +3,8 @@
 -- =========================================
 -- IMPORTANTE: Ejecutar este script INMEDIATAMENTE en Supabase
 -- Dashboard -> SQL Editor -> Pegar y ejecutar
+--
+-- ✅ Este script es IDEMPOTENTE (puede ejecutarse múltiples veces)
 -- =========================================
 
 /*
@@ -14,6 +16,11 @@
   4. Race condition en generación de facturas
   5. Validación de URLs externas
   6. Search path mutable en funciones SECURITY DEFINER (13 funciones)
+
+  CARACTERÍSTICAS:
+  - ✅ Script idempotente (puede ejecutarse múltiples veces sin errores)
+  - ✅ Elimina políticas existentes antes de crear nuevas
+  - ✅ No causa errores si se ejecuta parcialmente
 */
 
 -- =========================================
@@ -79,6 +86,13 @@ DROP POLICY IF EXISTS "Authenticated users can update settings" ON settings;
 -- POLÍTICAS SEGURAS - INVOICES
 -- =========================================
 
+-- Eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Only admins can view legacy invoices" ON invoices;
+DROP POLICY IF EXISTS "Only admins can create legacy invoices" ON invoices;
+DROP POLICY IF EXISTS "Only admins can update legacy invoices" ON invoices;
+DROP POLICY IF EXISTS "Only admins can delete legacy invoices" ON invoices;
+
+-- Crear políticas seguras
 CREATE POLICY "Only admins can view legacy invoices"
   ON invoices FOR SELECT TO authenticated
   USING (is_admin());
@@ -99,6 +113,13 @@ CREATE POLICY "Only admins can delete legacy invoices"
 -- POLÍTICAS SEGURAS - INVOICE_ITEMS
 -- =========================================
 
+-- Eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Only admins can view legacy invoice items" ON invoice_items;
+DROP POLICY IF EXISTS "Only admins can create legacy invoice items" ON invoice_items;
+DROP POLICY IF EXISTS "Only admins can update legacy invoice items" ON invoice_items;
+DROP POLICY IF EXISTS "Only admins can delete legacy invoice items" ON invoice_items;
+
+-- Crear políticas seguras
 CREATE POLICY "Only admins can view legacy invoice items"
   ON invoice_items FOR SELECT TO authenticated
   USING (is_admin());
@@ -119,6 +140,13 @@ CREATE POLICY "Only admins can delete legacy invoice items"
 -- POLÍTICAS SEGURAS - PEDIDOS
 -- =========================================
 
+-- Eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Users can view own pedidos or admin views all" ON pedidos;
+DROP POLICY IF EXISTS "Users can create own pedidos" ON pedidos;
+DROP POLICY IF EXISTS "Users can update own pedidos or admin updates all" ON pedidos;
+DROP POLICY IF EXISTS "Only admins can delete pedidos" ON pedidos;
+
+-- Crear políticas seguras
 CREATE POLICY "Users can view own pedidos or admin views all"
   ON pedidos FOR SELECT TO authenticated
   USING (usuario_id = get_current_user_id() OR is_admin());
@@ -140,6 +168,13 @@ CREATE POLICY "Only admins can delete pedidos"
 -- POLÍTICAS SEGURAS - SETTINGS
 -- =========================================
 
+-- Eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Only admins can read settings" ON settings;
+DROP POLICY IF EXISTS "Only admins can create settings" ON settings;
+DROP POLICY IF EXISTS "Only admins can update settings" ON settings;
+DROP POLICY IF EXISTS "Only admins can delete settings" ON settings;
+
+-- Crear políticas seguras
 CREATE POLICY "Only admins can read settings"
   ON settings FOR SELECT TO authenticated
   USING (is_admin());
