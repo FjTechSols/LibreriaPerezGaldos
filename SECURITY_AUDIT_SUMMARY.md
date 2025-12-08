@@ -32,10 +32,16 @@
 
 **ARCHIVO**: `CRITICAL_SECURITY_PATCHES.sql` (creado en la raíz del proyecto)
 
-**INSTRUCCIONES**:
+**📖 GUÍA COMPLETA**: Lee `DEPLOYMENT_SECURITY_FIX.md` para instrucciones paso a paso
+
+**INSTRUCCIONES RÁPIDAS**:
 1. Ir a Supabase Dashboard → SQL Editor
-2. Copiar y pegar el contenido de `CRITICAL_SECURITY_PATCHES.sql`
-3. Ejecutar el script
+2. Copiar **TODO** el contenido de `CRITICAL_SECURITY_PATCHES.sql`
+3. Pegar en SQL Editor
+4. Click "Run" o Ctrl+Enter
+5. Verificar mensaje de éxito ✅
+
+**⚠️ NOTA IMPORTANTE**: El script ahora incluye la creación de funciones `is_admin()` y `get_current_user_id()` automáticamente. Ya NO necesitas tenerlas previamente creadas.
 
 **Tablas Afectadas**:
 - `invoices` - Actualmente público (USING true) → Solo admins
