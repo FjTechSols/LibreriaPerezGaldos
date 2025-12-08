@@ -1,11 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
 import { supabase } from '../lib/supabase';
+import {
+  obtenerRolesDeUsuario,
+  obtenerPermisosDeUsuario,
+  obtenerRolPrincipal,
+  Rol
+} from '../services/rolesService';
 
-const AuthContext = createContext<AuthState | undefined>(undefined);
+interface ExtendedUser extends User {
+  roles?: Rol[];
+  permisos?: string[];
+  rolPrincipal?: Rol;
+}
+
+interface ExtendedAuthState extends AuthState {
+  user: ExtendedUser | null;
+  hasPermission: (permiso: string) => boolean;
+  hasRole: (rol: string) => boolean;
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+}
+
+const AuthContext = createContext<ExtendedAuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,29 +62,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUserData = async (authUserId: string) => {
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userEmail = sessionData.session?.user?.email;
+
       const { data: userData, error } = await supabase
         .from('usuarios')
         .select('id, username, email, rol_id')
         .eq('auth_user_id', authUserId)
         .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         await supabase.auth.signOut();
         return;
       }
 
-      if (userData) {
-        setUser({
-          id: userData.id,
-          email: userData.email,
-          name: userData.username,
-          role: userData.rol_id === 1 ? 'admin' : 'user'
-        });
-      } else {
-        await supabase.auth.signOut();
-      }
+      const roles = await obtenerRolesDeUsuario(authUserId);
+      const permisos = await obtenerPermisosDeUsuario(authUserId);
+      const rolPrincipal = await obtenerRolPrincipal(authUserId);
+
+      const roleType = rolPrincipal?.nombre === 'super_admin' || rolPrincipal?.nombre === 'admin'
+        ? 'admin'
+        : (userData?.rol_id === 1 ? 'admin' : 'user');
+
+      setUser({
+        id: userData?.id || authUserId,
+        email: userData?.email || userEmail || '',
+        name: userData?.username || userEmail?.split('@')[0] || 'Usuario',
+        role: roleType,
+        roles,
+        permisos,
+        rolPrincipal
+      });
     } catch (error) {
-      await supabase.auth.signOut();
+      console.error('Error loading user data:', error);
     }
   };
 
@@ -209,13 +239,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  const hasPermission = (permiso: string): boolean => {
+    if (!user) return false;
+    return user.permisos?.includes(permiso) || false;
+  };
+
+  const hasRole = (rol: string): boolean => {
+    if (!user) return false;
+    return user.roles?.some(r => r.nombre === rol) || false;
+  };
+
+  const isAdmin = hasRole('admin') || hasRole('super_admin');
+  const isSuperAdmin = hasRole('super_admin');
+
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated: !!user,
       login,
       register,
-      logout
+      logout,
+      hasPermission,
+      hasRole,
+      isAdmin,
+      isSuperAdmin
     }}>
       {children}
     </AuthContext.Provider>

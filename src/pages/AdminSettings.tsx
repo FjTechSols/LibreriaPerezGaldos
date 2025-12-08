@@ -7,6 +7,7 @@ import {
   Package, CreditCard, Download, HardDrive, Check, MapPin
 } from 'lucide-react';
 import { GestionUbicaciones } from '../components/GestionUbicaciones';
+import { GestionUsuariosAdmin } from '../components/GestionUsuariosAdmin';
 import {
   exportLibrosToCSV,
   exportCategoriasToCSV,
@@ -30,7 +31,7 @@ export function AdminSettings() {
     updateSecuritySettings
   } = useSettings();
 
-  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup' | 'ubicaciones'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
   const [isExporting, setIsExporting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -174,6 +175,7 @@ export function AdminSettings() {
     { id: 'system', label: 'Sistema', icon: SettingsIcon },
     { id: 'security', label: 'Seguridad', icon: Shield },
     { id: 'ubicaciones', label: 'Ubicaciones', icon: MapPin },
+    { id: 'usuarios', label: 'Usuarios Admin', icon: Shield },
     { id: 'backup', label: 'Copias de Seguridad', icon: HardDrive }
   ];
 
@@ -673,6 +675,12 @@ export function AdminSettings() {
             {activeTab === 'ubicaciones' && (
               <div className="settings-section">
                 <GestionUbicaciones />
+              </div>
+            )}
+
+            {activeTab === 'usuarios' && (
+              <div className="settings-section">
+                <GestionUsuariosAdmin />
               </div>
             )}
 
