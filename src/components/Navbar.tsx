@@ -85,6 +85,16 @@ export function Navbar() {
               </button>
               {isAccountMenuOpen && (
                 <div className="account-menu">
+                  <div className="account-menu-header">
+                    <div className="account-user-info">
+                      <User size={20} className="user-avatar-icon" />
+                      <div className="user-details">
+                        <span className="user-email">{user.email}</span>
+                        {user.role && <span className="user-role">{user.role}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="account-menu-divider" />
                   <Link
                     to={user.role === 'admin' ? '/admin' : '/mi-cuenta'}
                     className="account-menu-item"
