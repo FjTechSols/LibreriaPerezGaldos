@@ -54,7 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await loadUserData(session.user.id);
       }
     } catch (error) {
-      // Silent error handling
+      console.error('Error checking user session:', error);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -99,24 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (emailOrUsername: string, password: string): Promise<boolean> => {
-    const demoUsers = [
-      { email: 'admin@admin.com', username: 'admin', password: 'admin', id: 1, name: 'Admin Demo', role: 'admin' as const },
-      { email: 'user@user.com', username: 'user', password: 'user', id: 2, name: 'Usuario Demo', role: 'user' as const }
-    ];
-
-    const demoUser = demoUsers.find(u =>
-      (u.email === emailOrUsername || u.username === emailOrUsername) && u.password === password
-    );
-
-    if (demoUser) {
-      setUser({
-        id: demoUser.id,
-        email: demoUser.email,
-        name: demoUser.name,
-        role: demoUser.role
-      });
-      localStorage.setItem('demo_user', JSON.stringify(demoUser));
-      return true;
+    // Validar que los campos no estén vacíos
+    if (!emailOrUsername?.trim() || !password?.trim()) {
+      console.error('Email/username y contraseña son requeridos');
+      return false;
     }
 
     try {
@@ -211,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return false;
     } catch (error) {
+      console.error('Error during registration:', error);
       return false;
     }
   };
@@ -220,7 +208,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
       setUser(null);
     } catch (error) {
-      // Silent error handling
+      console.error('Error during logout:', error);
+      setUser(null); // Limpiar estado local aunque falle
     }
   };
 

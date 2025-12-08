@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { User, Mail, Lock, Save, Package, FileText, Heart, ShoppingCart } from 'lucide-react';
@@ -88,6 +89,17 @@ export function UserDashboard() {
       }
 
       if (editForm.newPassword && editForm.currentPassword) {
+        // Primero verificar que la contraseña actual sea correcta
+        const { error: verifyError } = await supabase.auth.signInWithPassword({
+          email: user?.email || '',
+          password: editForm.currentPassword
+        });
+
+        if (verifyError) {
+          throw new Error('La contraseña actual es incorrecta');
+        }
+
+        // Si la verificación fue exitosa, actualizar la contraseña
         const { error } = await supabase.auth.updateUser({
           password: editForm.newPassword
         });

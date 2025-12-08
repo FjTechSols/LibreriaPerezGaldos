@@ -18,12 +18,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    let isCancelled = false;
+
     const loadCart = async () => {
       setIsLoading(true);
       try {
         if (isAuthenticated && user) {
           const localCart = getLocalCart();
           const serverCart = await loadCartFromSupabase(user.id);
+
+          // No actualizar si el efecto fue cancelado
+          if (isCancelled) return;
+
           const mergedCart = mergeCartWithLocal(serverCart, localCart);
           setItems(mergedCart);
           if (localCart.length > 0) {
@@ -31,19 +37,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
             clearLocalCart();
           }
         } else {
+          if (isCancelled) return;
           const localCart = getLocalCart();
           setItems(localCart);
         }
       } catch (error) {
+        if (isCancelled) return;
         console.error('Error loading cart:', error);
         const localCart = getLocalCart();
         setItems(localCart);
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadCart();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [isAuthenticated, user]);
 
   useEffect(() => {

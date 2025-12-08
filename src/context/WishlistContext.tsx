@@ -58,21 +58,39 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     setItems(prev => [...prev, book]);
 
     if (isAuthenticated && user) {
-      await addToWishlistSupabase(user.id, book.id);
+      try {
+        await addToWishlistSupabase(user.id, book.id);
+      } catch (error) {
+        console.error('Error adding item to wishlist:', error);
+        // Revertir cambio si falla sincronización
+        setItems(prev => prev.filter(item => item.id !== book.id));
+      }
     } else {
-      const updatedItems = [...items, book];
-      saveLocalWishlist(updatedItems);
+      // Usar callback para obtener el estado más reciente
+      setItems(prev => {
+        saveLocalWishlist(prev);
+        return prev;
+      });
     }
   };
 
   const removeItem = async (bookId: string) => {
+    const originalItems = items;
     setItems(prev => prev.filter(item => item.id !== bookId));
 
     if (isAuthenticated && user) {
-      await removeFromWishlistSupabase(user.id, bookId);
+      try {
+        await removeFromWishlistSupabase(user.id, bookId);
+      } catch (error) {
+        console.error('Error removing item from wishlist:', error);
+        // Revertir cambio si falla sincronización
+        setItems(originalItems);
+      }
     } else {
-      const updatedItems = items.filter(item => item.id !== bookId);
-      saveLocalWishlist(updatedItems);
+      setItems(prev => {
+        saveLocalWishlist(prev);
+        return prev;
+      });
     }
   };
 

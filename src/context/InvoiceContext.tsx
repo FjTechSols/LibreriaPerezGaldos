@@ -24,7 +24,13 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
   useEffect(() => {
     const savedInvoices = localStorage.getItem('invoices');
     if (savedInvoices) {
-      setInvoices(JSON.parse(savedInvoices));
+      try {
+        const parsed = JSON.parse(savedInvoices);
+        setInvoices(parsed);
+      } catch (error) {
+        console.error('Error parsing saved invoices:', error);
+        localStorage.removeItem('invoices');
+      }
     }
     fetchInvoices();
   }, []);
@@ -39,9 +45,13 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
+      // Usar JOIN para obtener facturas con sus items en una sola consulta
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
-        .select('*')
+        .select(`
+          *,
+          invoice_items (*)
+        `)
         .order('issue_date', { ascending: false });
 
       if (invoicesError) {
@@ -50,19 +60,11 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         return;
       }
 
-      const invoicesWithItems = await Promise.all(
-        (invoicesData || []).map(async (invoice) => {
-          const { data: itemsData } = await supabase
-            .from('invoice_items')
-            .select('*')
-            .eq('invoice_id', invoice.id);
-
-          return {
-            ...invoice,
-            items: itemsData || []
-          };
-        })
-      );
+      // Transformar la respuesta para que tenga el formato esperado
+      const invoicesWithItems = (invoicesData || []).map(invoice => ({
+        ...invoice,
+        items: invoice.invoice_items || []
+      }));
 
       setInvoices(invoicesWithItems);
       localStorage.setItem('invoices', JSON.stringify(invoicesWithItems));
