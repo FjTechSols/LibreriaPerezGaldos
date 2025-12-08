@@ -163,30 +163,29 @@ export const removerRolDeUsuario = async (userId: string, rolId: number): Promis
 };
 
 export const obtenerTodosLosUsuariosConRoles = async (): Promise<UsuarioConRoles[]> => {
-  const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (authError) throw authError;
-
-  const usuariosConRoles: UsuarioConRoles[] = [];
-
-  for (const user of authUsers.users) {
-    const roles = await obtenerRolesDeUsuario(user.id);
-    const rolPrincipal = roles.length > 0
-      ? roles.reduce((prev, current) =>
-          prev.nivel_jerarquia < current.nivel_jerarquia ? prev : current
-        )
-      : undefined;
-
-    usuariosConRoles.push({
-      id: user.id,
-      email: user.email || '',
-      created_at: user.created_at,
-      roles,
-      rol_principal: rolPrincipal
-    });
+  if (!session) {
+    throw new Error('No authenticated session');
   }
 
-  return usuariosConRoles;
+  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-list-users`;
+
+  const response = await fetch(apiUrl, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch users');
+  }
+
+  const { users } = await response.json();
+  return users;
 };
 
 export const crearUsuarioAdministrativo = async (
@@ -227,17 +226,52 @@ export const actualizarRolesUsuario = async (
 };
 
 export const eliminarUsuario = async (userId: string): Promise<void> => {
-  const { error } = await supabase.auth.admin.deleteUser(userId);
-  if (error) throw error;
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error('No authenticated session');
+  }
+
+  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`;
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete user');
+  }
 };
 
 export const cambiarPasswordUsuario = async (
   userId: string,
   newPassword: string
 ): Promise<void> => {
-  const { error } = await supabase.auth.admin.updateUserById(userId, {
-    password: newPassword
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error('No authenticated session');
+  }
+
+  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-update-password`;
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId, newPassword }),
   });
 
-  if (error) throw error;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update password');
+  }
 };
