@@ -4,7 +4,7 @@
 Al intentar acceder a la gestión de usuarios, recibes un error 403 (Forbidden) desde la edge function `admin-list-users`.
 
 ## Causa
-La edge function verifica que el usuario tenga rol de "admin" o "webmaster" en la tabla `usuarios_roles`, pero tu usuario no tiene estos roles asignados.
+La edge function verifica que el usuario tenga rol de "admin", "webmaster" o "super_admin" en la tabla `usuarios_roles`, pero tu usuario no tiene estos roles asignados.
 
 ## Solución
 

@@ -81,7 +81,10 @@ Deno.serve(async (req: Request) => {
     }
 
     const isAdmin = userRoles?.some(
-      (ur: any) => ur.roles?.nombre === "admin" || ur.roles?.nombre === "webmaster"
+      (ur: any) =>
+        ur.roles?.nombre === "admin" ||
+        ur.roles?.nombre === "webmaster" ||
+        ur.roles?.nombre === "super_admin"
     );
 
     if (!isAdmin) {
