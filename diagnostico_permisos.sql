@@ -1,42 +1,61 @@
--- ==========================================
--- DIAGNÓSTICO SIMPLIFICADO
--- ==========================================
+-- ========================================
+-- DIAGNÓSTICO DE PERMISOS - PASO A PASO
+-- ========================================
 
--- 1. Ver estructura de tabla usuarios
-SELECT 
-  column_name,
-  data_type
-FROM information_schema.columns
-WHERE table_schema = 'public' 
-  AND table_name = 'usuarios'
-ORDER BY ordinal_position;
-
--- 2. Ver estructura de tabla roles
-SELECT 
-  column_name,
-  data_type
-FROM information_schema.columns
-WHERE table_schema = 'public' 
-  AND table_name = 'roles'
-ORDER BY ordinal_position;
-
--- 3. Tu auth.uid()
-SELECT auth.uid() as mi_auth_uid;
-
--- 4. Usuarios en auth.users (solo admin)
-SELECT id, email
-FROM auth.users
-WHERE email ILIKE '%admin%';
-
--- 5. Todos los datos de tabla usuarios
-SELECT * FROM usuarios;
-
--- 6. Todos los roles
-SELECT * FROM roles;
-
--- 7. Verificar funciones
+-- PASO 1: Ver la estructura de la tabla usuarios
 SELECT
-  is_admin() as es_admin,
-  is_editor() as es_editor,
-  can_manage_books() as puede_gestionar_libros,
-  can_view_all() as puede_ver_todo;
+  '1_ESTRUCTURA_USUARIOS' as paso,
+  column_name,
+  data_type,
+  is_nullable
+FROM information_schema.columns
+WHERE table_name = 'usuarios'
+  AND table_schema = 'public'
+ORDER BY ordinal_position;
+
+-- PASO 2: Tu usuario actual
+SELECT
+  '2_MI_UID' as paso,
+  auth.uid()::text as mi_user_id,
+  current_user as postgres_user,
+  session_user as session;
+
+-- PASO 3: Tu información en auth.users
+SELECT
+  '3_AUTH_USERS' as paso,
+  id::text,
+  email,
+  COALESCE(raw_user_meta_data->>'role', 'sin_rol') as user_meta_role,
+  COALESCE(raw_app_meta_data->>'role', 'sin_rol_app') as app_meta_role
+FROM auth.users
+WHERE id = auth.uid();
+
+-- PASO 4: Todos los roles disponibles
+SELECT
+  '4_ROLES_DISPONIBLES' as paso,
+  id::text,
+  nombre,
+  jerarquia
+FROM roles
+ORDER BY jerarquia DESC;
+
+-- PASO 5: Verificar funciones de permisos
+SELECT
+  '5_FUNCIONES' as paso,
+  'is_admin' as funcion,
+  is_admin()::text as resultado
+UNION ALL
+SELECT
+  '5_FUNCIONES',
+  'is_editor',
+  is_editor()::text
+UNION ALL
+SELECT
+  '5_FUNCIONES',
+  'can_manage_books',
+  can_manage_books()::text
+UNION ALL
+SELECT
+  '5_FUNCIONES',
+  'can_view_all',
+  can_view_all()::text;
