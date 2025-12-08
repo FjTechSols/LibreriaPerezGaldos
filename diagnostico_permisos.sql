@@ -21,14 +21,7 @@ SELECT
   session_user as session;
 
 -- PASO 3: Tu información en auth.users
-SELECT
-  '3_AUTH_USERS' as paso,
-  id::text,
-  email,
-  COALESCE(raw_user_meta_data->>'role', 'sin_rol') as user_meta_role,
-  COALESCE(raw_app_meta_data->>'role', 'sin_rol_app') as app_meta_role
-FROM auth.users
-WHERE id = auth.uid();
+
 
 -- PASO 4: Todos los roles disponibles
 SELECT
