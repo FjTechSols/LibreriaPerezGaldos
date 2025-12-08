@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building, BookOpen } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
 import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros } from '../services/libroService';
@@ -17,6 +17,7 @@ import CrearPedido from '../components/CrearPedido';
 import { GestionClientes } from '../components/GestionClientes';
 import { Pagination } from '../components/Pagination';
 import { obtenerUbicacionesActivas } from '../services/ubicacionService';
+import { buscarLibroPorISBNMultiple } from '../services/isbnService';
 import '../styles/pages/AdminDashboard.css';
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients';
@@ -52,6 +53,9 @@ export function AdminDashboard() {
   const [booksInStock, setBooksInStock] = useState(0);
   const [booksOutOfStock, setBooksOutOfStock] = useState(0);
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
+  const [isbnSearchMode, setIsbnSearchMode] = useState(false);
+  const [searchingISBN, setSearchingISBN] = useState(false);
+  const [isbnSearchQuery, setIsbnSearchQuery] = useState('');
 
   useEffect(() => {
     if (settings?.system?.itemsPerPageAdmin) {
@@ -213,6 +217,51 @@ export function AdminDashboard() {
   const handleSectionChange = (section: AdminSection) => {
     setActiveSection(section);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleISBNSearch = async () => {
+    if (!isbnSearchQuery || isbnSearchQuery.trim().length < 10) {
+      alert('Por favor ingresa un ISBN válido (mínimo 10 caracteres)');
+      return;
+    }
+
+    setSearchingISBN(true);
+
+    try {
+      const bookData = await buscarLibroPorISBNMultiple(isbnSearchQuery);
+
+      if (bookData) {
+        setNewBook({
+          code: '',
+          title: bookData.title,
+          author: bookData.authors.join(', '),
+          publisher: bookData.publisher,
+          pages: bookData.pageCount,
+          publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : new Date().getFullYear(),
+          isbn: bookData.isbn,
+          price: 0,
+          originalPrice: undefined,
+          stock: 0,
+          ubicacion: '',
+          category: bookData.categories[0] || categories[1],
+          description: bookData.description,
+          coverImage: bookData.imageUrl,
+          rating: 0,
+          reviews: [],
+          featured: false,
+          isNew: false,
+          isOnSale: false
+        });
+        alert('Información del libro encontrada y cargada en el formulario');
+      } else {
+        alert('No se encontró información para este ISBN. Puedes continuar ingresando los datos manualmente.');
+      }
+    } catch (error) {
+      console.error('Error al buscar ISBN:', error);
+      alert('Ocurrió un error al buscar el ISBN. Por favor, intenta nuevamente.');
+    } finally {
+      setSearchingISBN(false);
+    }
   };
 
   // Pagination basada en el total de libros en BD
@@ -736,16 +785,142 @@ export function AdminDashboard() {
             <div className="modal">
               <div className="modal-header">
                 <h3 className="modal-title">{isCreating ? 'Crear Nuevo Libro' : 'Editar Libro'}</h3>
-                <button 
+                <button
                   onClick={() => {
                     setIsCreating(false);
                     setEditingBook(null);
+                    setIsbnSearchMode(false);
+                    setIsbnSearchQuery('');
                   }}
                   className="close-btn"
                 >
                   <X size={20} />
                 </button>
               </div>
+
+              {isCreating && (
+                <div style={{
+                  padding: '1rem 1.5rem',
+                  borderBottom: '1px solid #e2e8f0',
+                  display: 'flex',
+                  gap: '1rem',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <button
+                    onClick={() => setIsbnSearchMode(false)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: !isbnSearchMode ? '2px solid #3b82f6' : '1px solid #cbd5e1',
+                      backgroundColor: !isbnSearchMode ? '#eff6ff' : 'white',
+                      color: !isbnSearchMode ? '#3b82f6' : '#64748b',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontWeight: !isbnSearchMode ? '600' : '400',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <Edit size={18} />
+                    Crear Manualmente
+                  </button>
+                  <button
+                    onClick={() => setIsbnSearchMode(true)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: isbnSearchMode ? '2px solid #3b82f6' : '1px solid #cbd5e1',
+                      backgroundColor: isbnSearchMode ? '#eff6ff' : 'white',
+                      color: isbnSearchMode ? '#3b82f6' : '#64748b',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontWeight: isbnSearchMode ? '600' : '400',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <BookOpen size={18} />
+                    Buscar por ISBN
+                  </button>
+                </div>
+              )}
+
+              {isCreating && isbnSearchMode && (
+                <div style={{
+                  padding: '1.5rem',
+                  backgroundColor: '#f8fafc',
+                  borderBottom: '1px solid #e2e8f0'
+                }}>
+                  <h4 style={{
+                    marginBottom: '1rem',
+                    color: '#1e293b',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}>
+                    Buscar Libro por ISBN
+                  </h4>
+                  <p style={{
+                    marginBottom: '1rem',
+                    color: '#64748b',
+                    fontSize: '0.875rem'
+                  }}>
+                    Ingresa el ISBN del libro para buscar automáticamente su información en bases de datos internacionales.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <input
+                      type="text"
+                      value={isbnSearchQuery}
+                      onChange={(e) => setIsbnSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !searchingISBN) {
+                          handleISBNSearch();
+                        }
+                      }}
+                      placeholder="Ingresa ISBN (ej: 9788420412146)"
+                      style={{
+                        flex: 1,
+                        padding: '0.75rem',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        fontSize: '0.875rem'
+                      }}
+                      disabled={searchingISBN}
+                    />
+                    <button
+                      onClick={handleISBNSearch}
+                      disabled={searchingISBN || !isbnSearchQuery}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        backgroundColor: searchingISBN ? '#94a3b8' : '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: searchingISBN ? 'not-allowed' : 'pointer',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        minWidth: '120px',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Search size={18} />
+                      {searchingISBN ? 'Buscando...' : 'Buscar'}
+                    </button>
+                  </div>
+                  <small style={{
+                    display: 'block',
+                    marginTop: '0.5rem',
+                    color: '#64748b',
+                    fontSize: '0.75rem'
+                  }}>
+                    Si se encuentra el libro, los campos del formulario se llenarán automáticamente
+                  </small>
+                </div>
+              )}
 
               <div className="form-grid">
                 <div className="form-group">
