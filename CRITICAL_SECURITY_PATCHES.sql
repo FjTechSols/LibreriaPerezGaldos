@@ -295,15 +295,16 @@ BEGIN
 END $$;
 
 -- Crear la función con la firma correcta
-CREATE OR REPLACE FUNCTION obtener_permisos_usuario(p_user_id UUID)
-RETURNS TABLE(permiso_nombre TEXT) AS $$
+-- NOTA: Usar 'usuario_id' (consistente con otras funciones) y devolver 'permiso_codigo'
+CREATE OR REPLACE FUNCTION obtener_permisos_usuario(usuario_id UUID)
+RETURNS TABLE(permiso_codigo TEXT) AS $$
 BEGIN
   RETURN QUERY
-  SELECT DISTINCT p.nombre
+  SELECT DISTINCT p.codigo
   FROM public.permisos p
   INNER JOIN public.rol_permisos rp ON p.id = rp.permiso_id
   INNER JOIN public.usuarios u ON u.rol_id = rp.rol_id
-  WHERE u.id = p_user_id;
+  WHERE u.id = usuario_id;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER
