@@ -280,30 +280,35 @@ BEGIN
 END $$;
 
 -- Corregir obtener_permisos_usuario (si existe)
+-- NOTA: Necesitamos hacer DROP primero porque el tipo de retorno puede ser diferente
 DO $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_proc
     WHERE proname = 'obtener_permisos_usuario'
   ) THEN
-    EXECUTE '
-      CREATE OR REPLACE FUNCTION obtener_permisos_usuario(p_user_id UUID)
-      RETURNS TABLE(permiso_nombre TEXT) AS $func$
-      BEGIN
-        RETURN QUERY
-        SELECT DISTINCT p.nombre
-        FROM public.permisos p
-        INNER JOIN public.rol_permisos rp ON p.id = rp.permiso_id
-        INNER JOIN public.usuarios u ON u.rol_id = rp.rol_id
-        WHERE u.id = p_user_id;
-      END;
-      $func$ LANGUAGE plpgsql
-      SECURITY DEFINER
-      STABLE
-      SET search_path = public, pg_temp;
-    ';
+    -- Eliminar todas las versiones de la función (puede tener diferentes firmas)
+    DROP FUNCTION IF EXISTS obtener_permisos_usuario(UUID);
+    DROP FUNCTION IF EXISTS obtener_permisos_usuario(TEXT);
+    DROP FUNCTION IF EXISTS obtener_permisos_usuario();
   END IF;
 END $$;
+
+-- Crear la función con la firma correcta
+CREATE OR REPLACE FUNCTION obtener_permisos_usuario(p_user_id UUID)
+RETURNS TABLE(permiso_nombre TEXT) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT p.nombre
+  FROM public.permisos p
+  INNER JOIN public.rol_permisos rp ON p.id = rp.permiso_id
+  INNER JOIN public.usuarios u ON u.rol_id = rp.rol_id
+  WHERE u.id = p_user_id;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public, pg_temp;
 
 -- =========================================
 -- PASO 9: VERIFICAR RLS HABILITADO
