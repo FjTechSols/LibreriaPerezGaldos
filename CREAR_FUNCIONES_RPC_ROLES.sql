@@ -8,7 +8,6 @@
 
 -- 1. Función: is_super_admin
 -- Verifica si el usuario actual es super_admin
-DROP FUNCTION IF EXISTS is_super_admin();
 CREATE OR REPLACE FUNCTION is_super_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -24,7 +23,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 2. Función: is_admin (actualizada)
 -- Verifica si el usuario es admin O super_admin
-DROP FUNCTION IF EXISTS is_admin();
 CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -40,7 +38,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 3. Función: is_editor (actualizada)
 -- Verifica si el usuario es editor, admin O super_admin
-DROP FUNCTION IF EXISTS is_editor();
 CREATE OR REPLACE FUNCTION is_editor()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -56,7 +53,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 4. Función: can_manage_books (actualizada)
 -- Verifica permisos para gestionar libros
-DROP FUNCTION IF EXISTS can_manage_books();
 CREATE OR REPLACE FUNCTION can_manage_books()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -72,7 +68,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 5. Función: can_view_all (actualizada)
 -- Verifica permisos para ver todo
-DROP FUNCTION IF EXISTS can_view_all();
 CREATE OR REPLACE FUNCTION can_view_all()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -88,7 +83,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 6. Función: obtener_permisos_usuario (actualizada)
 -- Retorna todos los permisos del usuario actual
-DROP FUNCTION IF EXISTS obtener_permisos_usuario();
 CREATE OR REPLACE FUNCTION obtener_permisos_usuario()
 RETURNS TABLE (
   user_id uuid,
