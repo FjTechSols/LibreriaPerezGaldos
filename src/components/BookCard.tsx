@@ -51,10 +51,10 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
   return (
     <Link to={`/libro/${book.id}`} className={`bookcard ${viewMode === 'list' ? 'bookcard--list' : ''}`}>
       <div className="bookcard__image-container">
-        <img src={book.cover_image} alt={book.title} className="bookcard__image" />
+        <img src={book.coverImage} alt={book.title} className="bookcard__image" />
 
-        {book.is_new && <span className="bookcard__badge bookcard__badge--new">{t('new')}</span>}
-        {book.on_sale && <span className="bookcard__badge bookcard__badge--sale">{t('sale')}</span>}
+        {book.isNew && <span className="bookcard__badge bookcard__badge--new">{t('new')}</span>}
+        {book.isOnSale && <span className="bookcard__badge bookcard__badge--sale">{t('sale')}</span>}
         {book.stock === 0 && <span className="bookcard__badge bookcard__badge--stock">{t('outOfStock')}</span>}
 
         <button
@@ -88,13 +88,13 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
         </div>
 
         <div className="bookcard__pricing">
-          {book.on_sale && book.original_price ? (
+          {book.isOnSale && book.originalPrice ? (
             <>
-              <span className="bookcard__original-price">{formatPrice(book.original_price)}</span>
+              <span className="bookcard__original-price">{formatPrice(book.originalPrice)}</span>
               <span className="bookcard__sale-price">{formatPrice(book.price)}</span>
               <span className="bookcard__discount">
                 <Tag size={14} />
-                {Math.round(((book.original_price - book.price) / book.original_price) * 100)}% OFF
+                {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% OFF
               </span>
             </>
           ) : (
