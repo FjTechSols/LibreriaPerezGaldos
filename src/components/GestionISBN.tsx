@@ -70,9 +70,9 @@ export function GestionISBN() {
     setProcessingIds(prev => new Set(prev).add(libro.id));
 
     try {
-      const success = await actualizarISBN(parseInt(libro.id), isbnToSave);
+      const result = await actualizarISBN(parseInt(libro.id), isbnToSave);
 
-      if (success) {
+      if (result.success) {
         setLibrosSinISBN(prev => prev.filter(l => l.id !== libro.id));
         setIsbnResults(prev => {
           const newMap = new Map(prev);
@@ -90,11 +90,11 @@ export function GestionISBN() {
           return newSet;
         });
       } else {
-        alert('Error al guardar el ISBN');
+        alert(result.error || 'Error al guardar el ISBN');
       }
     } catch (error) {
       console.error('Error al guardar ISBN:', error);
-      alert('Error al guardar el ISBN');
+      alert('Error inesperado al guardar el ISBN');
     } finally {
       setProcessingIds(prev => {
         const newSet = new Set(prev);

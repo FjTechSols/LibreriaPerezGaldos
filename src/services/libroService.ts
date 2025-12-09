@@ -470,9 +470,28 @@ export const obtenerLibrosSinISBN = async (limit: number = 50): Promise<Book[]> 
   }
 };
 
-export const actualizarISBN = async (id: number, isbn: string): Promise<boolean> => {
+export const actualizarISBN = async (id: number, isbn: string): Promise<{ success: boolean; error?: string }> => {
   try {
     const cleanISBN = isbn.replace(/[-\s]/g, '');
+
+    const { data: libroExistente, error: checkError } = await supabase
+      .from('libros')
+      .select('id, titulo')
+      .eq('isbn', cleanISBN)
+      .neq('id', id)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error al verificar ISBN duplicado:', checkError);
+      return { success: false, error: 'Error al verificar ISBN' };
+    }
+
+    if (libroExistente) {
+      return {
+        success: false,
+        error: `Este ISBN ya está asignado al libro "${libroExistente.titulo}" (ID: ${libroExistente.id})`
+      };
+    }
 
     const { error } = await supabase
       .from('libros')
@@ -484,12 +503,15 @@ export const actualizarISBN = async (id: number, isbn: string): Promise<boolean>
 
     if (error) {
       console.error('Error al actualizar ISBN:', error);
-      return false;
+      if (error.code === '23505') {
+        return { success: false, error: 'Este ISBN ya existe en otro libro' };
+      }
+      return { success: false, error: error.message };
     }
 
-    return true;
+    return { success: true };
   } catch (error) {
     console.error('Error inesperado al actualizar ISBN:', error);
-    return false;
+    return { success: false, error: 'Error inesperado al actualizar ISBN' };
   }
 };
