@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building, BookOpen } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, BarChart3, Book, FileText, ShoppingBag, Home, Search, DollarSign, Users as UsersIcon, Package, Calendar, Phone, Mail, MapPin, Globe, Building, BookOpen, Barcode } from 'lucide-react';
 import { Book as BookType, Invoice, Order, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 import { categories } from '../data/categories';
 import { obtenerLibros, obtenerTotalLibros, obtenerEstadisticasLibros, buscarLibroPorISBN, incrementarStockLibro, crearLibro, buscarLibros, actualizarLibro, eliminarLibro } from '../services/libroService';
@@ -15,12 +15,13 @@ import PedidosList from '../components/PedidosList';
 import PedidoDetalle from '../components/PedidoDetalle';
 import CrearPedido from '../components/CrearPedido';
 import { GestionClientes } from '../components/GestionClientes';
+import { GestionISBN } from '../components/GestionISBN';
 import { Pagination } from '../components/Pagination';
 import { obtenerUbicacionesActivas } from '../services/ubicacionService';
 import { buscarLibroPorISBNMultiple } from '../services/isbnService';
 import '../styles/pages/AdminDashboard.css';
 
-type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients';
+type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'clients' | 'isbn';
 
 export function AdminDashboard() {
   const { user } = useAuth();
@@ -825,11 +826,18 @@ export function AdminDashboard() {
                 <UsersIcon size={20} />
                 Clientes
               </button>
+              <button
+                onClick={() => handleSectionChange('isbn')}
+                className={`nav-item ${activeSection === 'isbn' ? 'active' : ''}`}
+              >
+                <Barcode size={20} />
+                Completar ISBNs
+              </button>
             </nav>
           </div>
 
           <div className="dashboard-content">
-            {activeSection !== 'clients' && (
+            {activeSection !== 'clients' && activeSection !== 'isbn' && (
               <div className="content-header">
                 <div>
                   <h2 className="content-title">
@@ -899,6 +907,7 @@ export function AdminDashboard() {
             {activeSection === 'invoices' && renderInvoices()}
             {activeSection === 'orders' && renderOrders()}
             {activeSection === 'clients' && <GestionClientes />}
+            {activeSection === 'isbn' && <GestionISBN />}
           </div>
         </div>
 

@@ -103,3 +103,46 @@ export const buscarLibroPorISBNMultiple = async (isbn: string): Promise<ISBNBook
 
   return result;
 };
+
+export const buscarLibroPorTituloAutor = async (titulo: string, autor: string): Promise<ISBNBookData | null> => {
+  try {
+    const query = `intitle:${encodeURIComponent(titulo)}+inauthor:${encodeURIComponent(autor)}`;
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`
+    );
+
+    if (!response.ok) {
+      console.error('Error en la respuesta de Google Books API');
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (!data.items || data.items.length === 0) {
+      return null;
+    }
+
+    const bookInfo = data.items[0].volumeInfo;
+    const isbn13 = bookInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier;
+    const isbn10 = bookInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier;
+    const isbn = isbn13 || isbn10 || '';
+
+    const bookData: ISBNBookData = {
+      isbn: isbn.replace(/[-\s]/g, ''),
+      title: bookInfo.title || '',
+      authors: bookInfo.authors || [],
+      publisher: bookInfo.publisher || '',
+      publishedDate: bookInfo.publishedDate || '',
+      pageCount: bookInfo.pageCount || 0,
+      description: bookInfo.description || '',
+      categories: bookInfo.categories || [],
+      imageUrl: bookInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
+      language: bookInfo.language || 'es'
+    };
+
+    return bookData;
+  } catch (error) {
+    console.error('Error al buscar libro por título y autor:', error);
+    return null;
+  }
+};

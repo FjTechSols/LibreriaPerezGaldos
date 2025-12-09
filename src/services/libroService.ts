@@ -447,3 +447,49 @@ export const incrementarStockLibro = async (id: number, cantidad: number = 1): P
     return null;
   }
 };
+
+export const obtenerLibrosSinISBN = async (limit: number = 50): Promise<Book[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('libros')
+      .select('*, editoriales(id, nombre)')
+      .eq('activo', true)
+      .or('isbn.is.null,isbn.eq.')
+      .order('titulo', { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error al obtener libros sin ISBN:', error);
+      return [];
+    }
+
+    return data ? data.map(mapLibroToBook) : [];
+  } catch (error) {
+    console.error('Error inesperado al obtener libros sin ISBN:', error);
+    return [];
+  }
+};
+
+export const actualizarISBN = async (id: number, isbn: string): Promise<boolean> => {
+  try {
+    const cleanISBN = isbn.replace(/[-\s]/g, '');
+
+    const { error } = await supabase
+      .from('libros')
+      .update({
+        isbn: cleanISBN,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error al actualizar ISBN:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error inesperado al actualizar ISBN:', error);
+    return false;
+  }
+};
