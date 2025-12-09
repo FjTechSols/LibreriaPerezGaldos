@@ -16,8 +16,8 @@ export function Home() {
   useEffect(() => {
     const loadBooks = async () => {
       try {
-        // Cargar los primeros libros disponibles
-        const allBooks = await obtenerLibros(12, 0);
+        // Cargar los primeros libros disponibles (Pagina 1, 12 items)
+        const { data: allBooks } = await obtenerLibros(1, 12);
 
         setFeaturedBooks(allBooks.slice(0, 4));
         setNewBooks(allBooks.slice(4, 8));

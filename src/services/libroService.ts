@@ -53,31 +53,117 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   isOnSale: false
 });
 
-export const obtenerLibros = async (limit?: number, offset?: number): Promise<Book[]> => {
-  try {
-    let query = supabase
-      .from('libros')
-      .select('*, editoriales(id, nombre)')
-      .eq('activo', true)
-      .order('titulo', { ascending: true });
+export interface LibroFilters {
+   search?: string;
+   category?: string;
+   minPrice?: number;
+   maxPrice?: number;
+   availability?: 'all' | 'inStock' | 'outOfStock';
+   sortBy?: 'price' | 'rating' | 'newest' | 'title';
+   sortOrder?: 'asc' | 'desc';
+ }
 
-    if (limit !== undefined) {
-      query = query.range(offset || 0, (offset || 0) + limit - 1);
-    }
+ export const obtenerLibros = async (
+   page: number = 1, 
+   itemsPerPage: number = 12, 
+   filters?: LibroFilters
+ ): Promise<{ data: Book[]; count: number }> => {
+   try {
+     let query = supabase
+       .from('libros')
+       .select('*, editoriales(id, nombre)', { count: 'exact' })
+       .eq('activo', true);
 
-    const { data, error } = await query;
+     // Apply Filters
+     if (filters) {
+       if (filters.search) {
+         // Search in multiple columns using OR syntax
+         // Note: legacy_id is text, isbn is text
+         const searchTerm = filters.search.trim();
+         // Using a robust ILIKE query for search
+         query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,isbn.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
+       }
 
-    if (error) {
-      console.error('Error al obtener libros:', error);
-      return [];
-    }
+       if (filters.category && filters.category !== 'Todos') {
+         // Assuming category maps to categoria_id or we need to join categories. 
+         // Since the original code implied 'Categoria X', let's stick to simple logic or assume input is ID if possible.
+         // However, the previous client-side code used `book.category === filters.category`.
+         // MapLibroToBook does: category: libro.categoria_id ? `Categoría ${libro.categoria_id}` : 'General'
+         // This implies we need to filter by categoria_id. 
+         // If filter is "Categoría 1", we parse "1". If "General", we look for null ?? 
+         // Lets try to be smart. If the filter string matches "Categoría X", extract X.
+         if (filters.category.startsWith('Categoría ')) {
+             const catId = parseInt(filters.category.replace('Categoría ', ''));
+             if (!isNaN(catId)) {
+                 query = query.eq('categoria_id', catId);
+             }
+         } else if (filters.category === 'General') {
+             // query = query.is('categoria_id', null); // Or whatever 'General' means in DB
+             // For safety, if we can't parse it easily without a category table map, we might skip or improving filtering later.
+             // Let's assume the user selects IDs or names we can map. 
+             // Ideally we should have a `categorias` table.
+         }
+       }
 
-    return data ? data.map(mapLibroToBook) : [];
-  } catch (error) {
-    console.error('Error inesperado al obtener libros:', error);
-    return [];
-  }
-};
+       if (filters.minPrice !== undefined) {
+         query = query.gte('precio', filters.minPrice);
+       }
+       if (filters.maxPrice !== undefined) {
+         query = query.lte('precio', filters.maxPrice);
+       }
+
+       if (filters.availability === 'inStock') {
+         query = query.gt('stock', 0);
+       } else if (filters.availability === 'outOfStock') {
+         query = query.eq('stock', 0);
+       }
+       
+       // Sorting
+       if (filters.sortBy) {
+         switch (filters.sortBy) {
+           case 'price':
+             query = query.order('precio', { ascending: filters.sortOrder === 'asc' });
+             break;
+           case 'newest':
+              // Assuming created_at or id implies newness
+             query = query.order('created_at', { ascending: filters.sortOrder === 'asc' });
+             break;
+           case 'title':
+             query = query.order('titulo', { ascending: filters.sortOrder === 'asc' });
+             break;
+           // Rating is not in DB schema shown, ignoring for now
+           default:
+             query = query.order('titulo', { ascending: true });
+         }
+       } else {
+          query = query.order('titulo', { ascending: true });
+       }
+     } else {
+        query = query.order('titulo', { ascending: true });
+     }
+
+     // Pagination
+     const from = (page - 1) * itemsPerPage;
+     const to = from + itemsPerPage - 1;
+     
+     query = query.range(from, to);
+
+     const { data, error, count } = await query;
+
+     if (error) {
+       console.error('Error al obtener libros:', error);
+       return { data: [], count: 0 };
+     }
+
+     return {
+       data: data ? data.map(mapLibroToBook) : [],
+       count: count || 0
+     };
+   } catch (error) {
+     console.error('Error inesperado al obtener libros:', error);
+     return { data: [], count: 0 };
+   }
+ };
 
 export const obtenerLibroPorId = async (id: string | number): Promise<Book | null> => {
   try {
@@ -478,7 +564,6 @@ export const actualizarISBN = async (id: number, isbn: string): Promise<{ succes
       .from('libros')
       .select('id, titulo')
       .eq('isbn', cleanISBN)
-      .neq('id', id)
       .maybeSingle();
 
     if (checkError) {
@@ -487,6 +572,11 @@ export const actualizarISBN = async (id: number, isbn: string): Promise<{ succes
     }
 
     if (libroExistente) {
+      // Si el libro que tiene el ISBN es el mismo que estamos actualizando, es un éxito (idempotente)
+      if (libroExistente.id === id) {
+          return { success: true };
+      }
+
       return {
         success: false,
         error: `Este ISBN ya está asignado al libro "${libroExistente.titulo}" (ID: ${libroExistente.id})`

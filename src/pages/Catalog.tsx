@@ -5,19 +5,24 @@ import { SearchBar } from '../components/SearchBar';
 import { BookFilter } from '../components/BookFilter';
 import { Pagination } from '../components/Pagination';
 import { Book, FilterState } from '../types';
-import { obtenerLibros } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros } from '../services/libroService';
 import { useSettings } from '../context/SettingsContext';
+import { BookCardSkeleton } from '../components/BookCardSkeleton';
 import '../styles/pages/Catalog.css';
 
 export function Catalog() {
   const [searchParams] = useSearchParams();
   const { settings } = useSettings();
   const [books, setBooks] = useState<Book[]>([]);
-  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(settings.system.itemsPerPageCatalog);
+  
+  // Counts
+  const [totalFilteredBooks, setTotalFilteredBooks] = useState(0);
+  const [totalDatabaseBooks, setTotalDatabaseBooks] = useState(0);
+
   const [filters, setFilters] = useState<FilterState>({
     category: searchParams.get('category') || 'Todos',
     priceRange: [0, 1000],
@@ -26,102 +31,52 @@ export function Catalog() {
     sortOrder: 'asc'
   });
 
-  // Cargar libros desde la base de datos (sin límite para catálogo completo)
+  // Load Total Database Count Once
   useEffect(() => {
-    const loadBooks = async () => {
+     const loadTotalCount = async () => {
+         try {
+             // Try to fetch total count. If 0 (error), fallback to 0.
+             const count = await obtenerTotalLibros();
+             setTotalDatabaseBooks(count);
+         } catch (e) { console.error('Error loading total count:', e); }
+     };
+     loadTotalCount();
+  }, []);
+
+  // Main Fetch Effect
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
       try {
-        // Cargar todos los libros para el catálogo
-        const libros = await obtenerLibros();
-        setBooks(libros);
-        setFilteredBooks(libros);
+        // Construct Service Filters
+        const serviceFilters = {
+            search: searchParams.get('search') || undefined,
+            category: filters.category,
+            minPrice: filters.priceRange[0],
+            maxPrice: filters.priceRange[1],
+            availability: filters.availability,
+            sortBy: filters.sortBy,
+            sortOrder: filters.sortOrder
+        };
+
+        const { data, count } = await obtenerLibros(currentPage, itemsPerPage, serviceFilters);
+        
+        setBooks(data);
+        setTotalFilteredBooks(count);
+        
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {
         setLoading(false);
       }
     };
-    loadBooks();
-  }, []);
 
-  useEffect(() => {
-    let filtered = [...books];
-
-    // Apply search query from URL
-    const searchQuery = searchParams.get('search');
-    if (searchQuery) {
-      const normalizedQuery = searchQuery.toLowerCase();
-      const normalizedISBN = searchQuery.replace(/[-\s]/g, ''); // Remove hyphens and spaces for ISBN comparison
-      
-      filtered = filtered.filter(book =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.isbn.toLowerCase().includes(normalizedQuery) ||
-        book.isbn.replace(/[-\s]/g, '').toLowerCase().includes(normalizedISBN)
-      );
-    }
-
-    // Apply filters
-    if (filters.category !== 'Todos') {
-      filtered = filtered.filter(book => book.category === filters.category);
-    }
-
-    if (filters.availability === 'inStock') {
-      filtered = filtered.filter(book => book.stock > 0);
-    } else if (filters.availability === 'outOfStock') {
-      filtered = filtered.filter(book => book.stock === 0);
-    }
-
-    filtered = filtered.filter(book => 
-      book.price >= filters.priceRange[0] && book.price <= filters.priceRange[1]
-    );
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
-
-      switch (filters.sortBy) {
-        case 'price':
-          aValue = a.price;
-          bValue = b.price;
-          break;
-        case 'rating':
-          aValue = a.rating;
-          bValue = b.rating;
-          break;
-        case 'newest':
-          aValue = a.isNew ? 1 : 0;
-          bValue = b.isNew ? 1 : 0;
-          break;
-        default:
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-      }
-
-      if (filters.sortOrder === 'desc') {
-        return bValue > aValue ? 1 : bValue < aValue ? -1 : 0;
-      } else {
-        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      }
-    });
-
-    setFilteredBooks(filtered);
-    setCurrentPage(1);
-  }, [books, filters, searchParams]);
-
-  const handleSearchResults = (results: Book[]) => {
-    setBooks(results);
-    setCurrentPage(1);
-  };
+    fetchBooks();
+  }, [currentPage, itemsPerPage, filters, searchParams]); // Dependencies
 
   const handleFiltersChange = (newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setCurrentPage(1);
-    setTimeout(() => {
-      const resultsElement = document.querySelector('.catalog-results');
-      if (resultsElement) {
-        resultsElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+    setCurrentPage(1); // Reset to page 1 on filter change
   };
 
   const handlePageChange = (page: number) => {
@@ -134,10 +89,8 @@ export function Catalog() {
     setCurrentPage(1);
   };
 
-  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentBooks = filteredBooks.slice(startIndex, endIndex);
+  // derived state for pagination... calculated from totalFilteredBooks
+  const totalPages = Math.ceil(totalFilteredBooks / itemsPerPage);
 
   return (
     <div className="catalog">
@@ -145,14 +98,12 @@ export function Catalog() {
         <div className="catalog-header">
           <h1 className="catalog-title">Catálogo de Libros</h1>
           <p className="catalog-subtitle">
-            Descubre nuestra amplia colección de {books.length} libros
+            Descubre nuestra amplia colección de {totalDatabaseBooks} libros
           </p>
         </div>
 
         <div className="search-section">
-          <SearchBar 
-            books={books} 
-            onSearchResults={handleSearchResults}
+           <SearchBar 
             placeholder="Buscar por título, autor, categoría o ISBN..."
           />
         </div>
@@ -167,51 +118,61 @@ export function Catalog() {
         <div className="catalog-results">
           <div className="results-header">
             <span className="results-count">
-              {filteredBooks.length} libro{filteredBooks.length !== 1 ? 's' : ''} encontrado{filteredBooks.length !== 1 ? 's' : ''}
+              {totalFilteredBooks} libros encontrados
             </span>
           </div>
 
-          <div className={`books-container ${viewMode}`}>
-            {currentBooks.map(book => (
-              <BookCard key={book.id} book={book} viewMode={viewMode} />
-            ))}
-          </div>
-
-          {filteredBooks.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredBooks.length}
-              onPageChange={handlePageChange}
-              onItemsPerPageChange={handleItemsPerPageChange}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[10, 25, 50]}
-            />
-          )}
-
-          {filteredBooks.length === 0 && (
-            <div className="no-results">
-              <div className="no-results-content">
-                <h3>No se encontraron libros</h3>
-                <p>Intenta ajustar tus filtros o términos de búsqueda</p>
-                <button 
-                  onClick={() => {
-                    setFilters({
-                      category: 'Todos',
-                      priceRange: [0, 1000],
-                      availability: 'all',
-                      sortBy: 'title',
-                      sortOrder: 'asc'
-                    });
-                    // Reset filtros
-                  }}
-                  className="reset-btn"
-                >
-                  Mostrar todos los libros
-                </button>
+          {loading ? (
+             <div className={`books-container ${viewMode}`}>
+                {Array.from({ length: itemsPerPage }).map((_, i) => (
+                    <BookCardSkeleton key={i} />
+                ))}
+             </div>
+          ) : (
+            <>
+              <div className={`books-container ${viewMode}`}>
+                {books.map(book => (
+                  <BookCard key={book.id} book={book} viewMode={viewMode} />
+                ))}
               </div>
-            </div>
+
+              {books.length > 0 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={totalFilteredBooks}
+                  onPageChange={handlePageChange}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                  showItemsPerPageSelector={true}
+                  itemsPerPageOptions={[10, 25, 50]}
+                />
+              )}
+
+              {books.length === 0 && (
+                <div className="no-results">
+                  <div className="no-results-content">
+                    <h3>No se encontraron libros</h3>
+                    <p>Intenta ajustar tus filtros o términos de búsqueda</p>
+                    <button 
+                      onClick={() => {
+                        setFilters({
+                          category: 'Todos',
+                          priceRange: [0, 1000],
+                          availability: 'all',
+                          sortBy: 'title',
+                          sortOrder: 'asc'
+                        });
+                        // Also clear search param if needed, or simple reset filters locally
+                      }}
+                      className="reset-btn"
+                    >
+                        Limpiar filtros
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

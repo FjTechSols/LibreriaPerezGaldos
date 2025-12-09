@@ -101,9 +101,9 @@ export function AdminDashboard() {
           setBooks(libros);
         } else {
           // Si no hay búsqueda, cargar libros de la página actual
-          const offset = (currentPage - 1) * itemsPerPage;
-          const libros = await obtenerLibros(itemsPerPage, offset);
-          setBooks(libros);
+          // Si no hay búsqueda, cargar libros de la página actual
+          const { data } = await obtenerLibros(currentPage, itemsPerPage);
+          setBooks(data);
         }
       } catch (error) {
         console.error('Error loading books:', error);
@@ -171,9 +171,8 @@ export function AdminDashboard() {
           setBooksInStock(stats.enStock);
           setBooksOutOfStock(stats.sinStock);
 
-          const offset = (currentPage - 1) * itemsPerPage;
-          const libros = await obtenerLibros(itemsPerPage, offset);
-          setBooks(libros);
+          const { data } = await obtenerLibros(currentPage, itemsPerPage);
+          setBooks(data);
 
           setNewBook({
             code: '',
@@ -226,9 +225,8 @@ export function AdminDashboard() {
           setBooksInStock(stats.enStock);
           setBooksOutOfStock(stats.sinStock);
 
-          const offset = (currentPage - 1) * itemsPerPage;
-          const libros = await obtenerLibros(itemsPerPage, offset);
-          setBooks(libros);
+          const { data } = await obtenerLibros(currentPage, itemsPerPage);
+          setBooks(data);
 
           setNewBook({
             code: '',

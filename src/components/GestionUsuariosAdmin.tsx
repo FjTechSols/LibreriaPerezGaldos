@@ -206,7 +206,7 @@ export function GestionUsuariosAdmin() {
               email: '',
               password: '',
               confirmPassword: '',
-              rolId: '',
+              rolId: 0,
               notas: ''
             });
             setShowCreateModal(true);
@@ -549,11 +549,12 @@ export function GestionUsuariosAdmin() {
         .header-title h2 {
           margin: 0;
           font-size: 1.5rem;
+          color: var(--text-primary);
         }
 
         .header-title p {
           margin: 0.5rem 0 0 0;
-          color: #64748b;
+          color: var(--text-secondary);
           font-size: 0.875rem;
         }
 
@@ -567,22 +568,23 @@ export function GestionUsuariosAdmin() {
         }
 
         .alert-error {
-          background-color: #fef2f2;
-          color: #991b1b;
-          border: 1px solid #fecaca;
+          background-color: rgba(239, 68, 68, 0.1);
+          color: var(--danger-color);
+          border: 1px solid var(--danger-color);
         }
 
         .alert-success {
-          background-color: #f0fdf4;
-          color: #166534;
-          border: 1px solid #bbf7d0;
+          background-color: rgba(16, 185, 129, 0.1);
+          color: var(--success-color);
+          border: 1px solid var(--success-color);
         }
 
         .usuarios-table-container {
-          background: white;
+          background: var(--bg-secondary);
           border-radius: 8px;
           overflow-x: auto;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--shadow-md);
+          border: 1px solid var(--border-color);
         }
 
         .usuarios-table {
@@ -594,15 +596,25 @@ export function GestionUsuariosAdmin() {
         .usuarios-table td {
           padding: 1rem;
           text-align: left;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid var(--border-color);
+          color: var(--text-primary);
         }
 
         .usuarios-table th {
-          background-color: #f8fafc;
+          background-color: var(--bg-tertiary);
           font-weight: 600;
-          color: #475569;
+          color: var(--text-secondary);
           font-size: 0.875rem;
           text-transform: uppercase;
+        }
+
+        .dark-mode .usuarios-table th {
+          color: #f1f5f9; /* White text for headers in dark mode */
+          background-color: #334155; /* Lighter background for headers */
+        }
+        
+        .dark-mode .usuarios-table td {
+           color: #e2e8f0; /* Ensure body text is also bright */
         }
 
         .usuario-email {
@@ -612,8 +624,8 @@ export function GestionUsuariosAdmin() {
         }
 
         .badge-tu {
-          background-color: #dbeafe;
-          color: #1e40af;
+          background-color: rgba(37, 99, 235, 0.1);
+          color: var(--primary-color);
           padding: 0.25rem 0.5rem;
           border-radius: 4px;
           font-size: 0.75rem;
@@ -649,31 +661,31 @@ export function GestionUsuariosAdmin() {
 
         .btn-icon {
           background: none;
-          border: 1px solid #e2e8f0;
+          border: 1px solid var(--border-color);
           border-radius: 6px;
           padding: 0.5rem;
           cursor: pointer;
-          color: #64748b;
+          color: var(--text-secondary);
           transition: all 0.2s;
         }
 
         .btn-icon:hover {
-          background-color: #f1f5f9;
-          color: #334155;
+          background-color: var(--bg-hover);
+          color: var(--text-primary);
         }
 
         .btn-icon.btn-danger {
-          color: #dc2626;
-          border-color: #fecaca;
+          color: var(--danger-color);
+          border-color: rgba(239, 68, 68, 0.3);
         }
 
         .btn-icon.btn-danger:hover {
-          background-color: #fef2f2;
-          border-color: #dc2626;
+          background-color: rgba(239, 68, 68, 0.1);
+          border-color: var(--danger-color);
         }
 
         .btn-primary {
-          background-color: #2563eb;
+          background-color: var(--primary-color);
           color: white;
           border: none;
           padding: 0.75rem 1.5rem;
@@ -687,13 +699,13 @@ export function GestionUsuariosAdmin() {
         }
 
         .btn-primary:hover {
-          background-color: #1d4ed8;
+          background-color: var(--primary-hover);
         }
 
         .btn-secondary {
-          background-color: white;
-          color: #64748b;
-          border: 1px solid #e2e8f0;
+          background-color: var(--bg-tertiary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
           padding: 0.75rem 1.5rem;
           border-radius: 8px;
           cursor: pointer;
@@ -702,7 +714,7 @@ export function GestionUsuariosAdmin() {
         }
 
         .btn-secondary:hover {
-          background-color: #f8fafc;
+          background-color: var(--bg-hover);
         }
 
         .modal-overlay {
@@ -720,17 +732,19 @@ export function GestionUsuariosAdmin() {
         }
 
         .modal-content {
-          background: white;
+          background: var(--bg-secondary);
           border-radius: 12px;
           max-width: 600px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
+          box-shadow: var(--shadow-xl);
+          border: 1px solid var(--border-color);
         }
 
         .modal-header {
           padding: 1.5rem;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid var(--border-color);
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -739,18 +753,19 @@ export function GestionUsuariosAdmin() {
         .modal-header h3 {
           margin: 0;
           font-size: 1.25rem;
+          color: var(--text-primary);
         }
 
         .modal-close {
           background: none;
           border: none;
           cursor: pointer;
-          color: #64748b;
+          color: var(--text-secondary);
           padding: 0;
         }
 
         .modal-close:hover {
-          color: #334155;
+          color: var(--text-primary);
         }
 
         .modal-form {
@@ -765,7 +780,11 @@ export function GestionUsuariosAdmin() {
           display: block;
           margin-bottom: 0.5rem;
           font-weight: 500;
-          color: #334155;
+          color: var(--text-primary);
+        }
+
+        .dark-mode .form-group label {
+            color: #f8fafc; /* Bright white for labels */
         }
 
         .form-group input,
@@ -773,17 +792,27 @@ export function GestionUsuariosAdmin() {
         .form-group textarea {
           width: 100%;
           padding: 0.75rem;
-          border: 1px solid #e2e8f0;
+          border: 1px solid var(--input-border);
           border-radius: 6px;
           font-size: 1rem;
           transition: all 0.2s;
+          background-color: var(--input-bg);
+          color: var(--input-text);
+        }
+
+        .dark-mode .form-group input,
+        .dark-mode .form-group select,
+        .dark-mode .form-group textarea {
+            background-color: #1e293b;
+            color: #ffffff;
+            border-color: #475569;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
           outline: none;
-          border-color: #2563eb;
+          border-color: var(--primary-color);
           box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
@@ -798,10 +827,11 @@ export function GestionUsuariosAdmin() {
           align-items: flex-start;
           gap: 0.75rem;
           padding: 1rem;
-          border: 1px solid #e2e8f0;
-          border-radius: 6px;
+          background-color: var(--bg-tertiary);
+          border-radius: 8px;
           cursor: pointer;
           transition: all 0.2s;
+          border: 1px solid var(--border-color);
         }
 
         .checkbox-label:hover {
