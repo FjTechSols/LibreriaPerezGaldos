@@ -69,23 +69,38 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Check if user has admin role
-    const { data: userRoles, error: rolesError } = await supabaseAdmin
-      .from("usuarios_roles")
-      .select("rol_id, roles(nombre)")
-      .eq("user_id", user.id)
-      .eq("activo", true);
+    // Check if user has admin role - try both sistemas (usuarios and usuarios_roles)
+    let isAdmin = false;
 
-    if (rolesError) {
-      throw rolesError;
+    // Verificar en la tabla usuarios (sistema principal)
+    const { data: usuario, error: usuarioError } = await supabaseAdmin
+      .from("usuarios")
+      .select("rol_id, roles(nombre)")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (usuario && !usuarioError) {
+      const rolNombre = usuario.roles?.nombre;
+      isAdmin = rolNombre === "admin" || rolNombre === "webmaster" || rolNombre === "super_admin";
     }
 
-    const isAdmin = userRoles?.some(
-      (ur: any) =>
-        ur.roles?.nombre === "admin" ||
-        ur.roles?.nombre === "webmaster" ||
-        ur.roles?.nombre === "super_admin"
-    );
+    // Si no se encontró en usuarios, verificar en usuarios_roles (sistema alternativo)
+    if (!isAdmin) {
+      const { data: userRoles, error: rolesError } = await supabaseAdmin
+        .from("usuarios_roles")
+        .select("rol_id, roles(nombre)")
+        .eq("user_id", user.id)
+        .eq("activo", true);
+
+      if (!rolesError && userRoles) {
+        isAdmin = userRoles.some(
+          (ur: any) =>
+            ur.roles?.nombre === "admin" ||
+            ur.roles?.nombre === "webmaster" ||
+            ur.roles?.nombre === "super_admin"
+        );
+      }
+    }
 
     if (!isAdmin) {
       return new Response(

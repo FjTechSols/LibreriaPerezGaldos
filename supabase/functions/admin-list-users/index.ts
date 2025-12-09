@@ -77,23 +77,38 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Check if user has admin role
-    const { data: userRoles, error: rolesError } = await supabaseAdmin
-      .from("usuarios_roles")
-      .select("rol_id, roles(nombre)")
-      .eq("user_id", user.id)
-      .eq("activo", true);
+    // Check if user has admin role - try both sistemas (usuarios and usuarios_roles)
+    let isAdmin = false;
 
-    if (rolesError) {
-      throw rolesError;
+    // Verificar en la tabla usuarios (sistema principal)
+    const { data: usuario, error: usuarioError } = await supabaseAdmin
+      .from("usuarios")
+      .select("rol_id, roles(nombre)")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (usuario && !usuarioError) {
+      const rolNombre = usuario.roles?.nombre;
+      isAdmin = rolNombre === "admin" || rolNombre === "webmaster" || rolNombre === "super_admin";
     }
 
-    const isAdmin = userRoles?.some(
-      (ur: any) =>
-        ur.roles?.nombre === "admin" ||
-        ur.roles?.nombre === "webmaster" ||
-        ur.roles?.nombre === "super_admin"
-    );
+    // Si no se encontró en usuarios, verificar en usuarios_roles (sistema alternativo)
+    if (!isAdmin) {
+      const { data: userRoles, error: rolesError } = await supabaseAdmin
+        .from("usuarios_roles")
+        .select("rol_id, roles(nombre)")
+        .eq("user_id", user.id)
+        .eq("activo", true);
+
+      if (!rolesError && userRoles) {
+        isAdmin = userRoles.some(
+          (ur: any) =>
+            ur.roles?.nombre === "admin" ||
+            ur.roles?.nombre === "webmaster" ||
+            ur.roles?.nombre === "super_admin"
+        );
+      }
+    }
 
     if (!isAdmin) {
       return new Response(
@@ -117,11 +132,14 @@ Deno.serve(async (req: Request) => {
     const usuariosConRoles: UsuarioConRoles[] = [];
 
     for (const authUser of authUsers.users) {
-      const { data: rolesData, error: rolesErr } = await supabaseAdmin
-        .from("usuarios_roles")
+      let roles: any[] = [];
+      let rolPrincipal: any = undefined;
+
+      // Primero intentar obtener de la tabla usuarios (sistema principal)
+      const { data: usuarioData, error: usuarioErr } = await supabaseAdmin
+        .from("usuarios")
         .select(`
           rol_id,
-          activo,
           roles (
             id,
             nombre,
@@ -132,20 +150,43 @@ Deno.serve(async (req: Request) => {
             es_sistema
           )
         `)
-        .eq("user_id", authUser.id)
-        .eq("activo", true);
+        .eq("auth_user_id", authUser.id)
+        .maybeSingle();
 
-      if (rolesErr) {
-        console.error("Error fetching roles for user:", authUser.id, rolesErr);
-        continue;
+      if (!usuarioErr && usuarioData?.roles) {
+        roles = [usuarioData.roles];
+        rolPrincipal = usuarioData.roles;
       }
 
-      const roles = rolesData?.map((r: any) => r.roles).filter(Boolean) || [];
-      const rolPrincipal = roles.length > 0
-        ? roles.reduce((prev: any, current: any) =>
-            prev.nivel_jerarquia < current.nivel_jerarquia ? prev : current
-          )
-        : undefined;
+      // Si no tiene rol en usuarios, intentar usuarios_roles
+      if (roles.length === 0) {
+        const { data: rolesData, error: rolesErr } = await supabaseAdmin
+          .from("usuarios_roles")
+          .select(`
+            rol_id,
+            activo,
+            roles (
+              id,
+              nombre,
+              display_name,
+              descripcion,
+              nivel_jerarquia,
+              activo,
+              es_sistema
+            )
+          `)
+          .eq("user_id", authUser.id)
+          .eq("activo", true);
+
+        if (!rolesErr && rolesData) {
+          roles = rolesData.map((r: any) => r.roles).filter(Boolean);
+          rolPrincipal = roles.length > 0
+            ? roles.reduce((prev: any, current: any) =>
+                prev.nivel_jerarquia < current.nivel_jerarquia ? prev : current
+              )
+            : undefined;
+        }
+      }
 
       usuariosConRoles.push({
         id: authUser.id,
