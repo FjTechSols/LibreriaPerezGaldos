@@ -26,10 +26,19 @@
   margin-bottom: 2rem;
 }
 
+.dark-mode .gestion-ubicaciones .form-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
 .gestion-ubicaciones .form-card h4 {
   margin: 0 0 1.5rem 0;
   color: var(--text-color);
   font-size: 1.25rem;
+}
+
+.dark-mode .gestion-ubicaciones .form-card h4 {
+  color: #f1f5f9;
 }
 
 .gestion-ubicaciones .form-group {
@@ -50,6 +59,14 @@
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s;
+  background: white;
+  color: #1e293b;
+}
+
+.dark-mode .gestion-ubicaciones .form-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
 }
 
 .gestion-ubicaciones .form-input:focus {
@@ -99,6 +116,11 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+.dark-mode .gestion-ubicaciones .data-table {
+  background: #1e293b;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
 .gestion-ubicaciones .data-table thead {
   background: var(--primary-color);
   color: white;
@@ -113,10 +135,20 @@
 .gestion-ubicaciones .data-table td {
   padding: 1rem;
   border-top: 1px solid #dee2e6;
+  color: #1e293b;
+}
+
+.dark-mode .gestion-ubicaciones .data-table td {
+  border-top-color: #334155;
+  color: #e2e8f0;
 }
 
 .gestion-ubicaciones .data-table tr:hover {
   background: #f8f9fa;
+}
+
+.dark-mode .gestion-ubicaciones .data-table tr:hover {
+  background: #0f172a;
 }
 
 .gestion-ubicaciones .data-table .inactive-row {

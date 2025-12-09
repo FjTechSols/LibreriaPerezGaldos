@@ -228,7 +228,8 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
       return;
     }
 
-    const lineas = datosPegados.split('\n').filter(l => l.trim());
+    try {
+      const lineasTexto = datosPegados.split('\n').filter(l => l.trim());
     let clienteInfo = '';
     let direccion = '';
     let telefono = '';
@@ -239,7 +240,7 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     let trackingTexto = '';
     let observacionesTexto = '';
 
-    for (const linea of lineas) {
+    for (const linea of lineasTexto) {
       const lineaLower = linea.toLowerCase();
 
       if (lineaLower.includes('cliente:') || lineaLower.includes('nombre:')) {
@@ -333,6 +334,10 @@ export default function CrearPedido({ isOpen, onClose, onSuccess }: CrearPedidoP
     setDatosPegados('');
 
     alert(`Se han parseado ${nuevasLineas.length} producto(s). Revisa y ajusta los datos según sea necesario.`);
+    } catch (error) {
+      console.error('Error al parsear datos:', error);
+      alert('Error al procesar los datos pegados. Por favor, revisa el formato e intenta de nuevo.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -4,6 +4,10 @@
   padding: 2rem 1rem;
 }
 
+.dark-mode .user-dashboard {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -21,9 +25,17 @@
   margin-bottom: 0.5rem;
 }
 
+.dark-mode .dashboard-header h1 {
+  color: #f1f5f9;
+}
+
 .dashboard-header p {
   font-size: 1.125rem;
   color: #64748b;
+}
+
+.dark-mode .dashboard-header p {
+  color: #94a3b8;
 }
 
 .dashboard-grid {
@@ -40,6 +52,13 @@
   padding: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark-mode .stats-card,
+.dark-mode .profile-card,
+.dark-mode .quick-links-card {
+  background: #1e293b;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .stats-card:hover,
@@ -113,6 +132,10 @@
   color: #1e293b;
 }
 
+.dark-mode .card-header h2 {
+  color: #f1f5f9;
+}
+
 .edit-btn {
   padding: 0.5rem 1.5rem;
   background: #3b82f6;
@@ -144,6 +167,10 @@
   border-left: 4px solid #3b82f6;
 }
 
+.dark-mode .info-item {
+  background: #0f172a;
+}
+
 .info-item svg {
   color: #3b82f6;
   flex-shrink: 0;
@@ -158,10 +185,18 @@
   margin-bottom: 0.25rem;
 }
 
+.dark-mode .info-item label {
+  color: #94a3b8;
+}
+
 .info-item p {
   margin: 0;
   font-size: 1rem;
   color: #1e293b;
+}
+
+.dark-mode .info-item p {
+  color: #e2e8f0;
 }
 
 .profile-form {
@@ -185,6 +220,10 @@
   color: #1e293b;
 }
 
+.dark-mode .form-group label {
+  color: #e2e8f0;
+}
+
 .form-group label svg {
   color: #3b82f6;
 }
@@ -195,6 +234,14 @@
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  background: white;
+  color: #1e293b;
+}
+
+.dark-mode .form-group input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
 }
 
 .form-group input:focus {
@@ -206,6 +253,11 @@
   background: #f1f5f9;
   color: #94a3b8;
   cursor: not-allowed;
+}
+
+.dark-mode .form-group input.disabled {
+  background: #1e293b;
+  color: #64748b;
 }
 
 .form-group small {
@@ -233,6 +285,15 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #64748b;
+}
+
+.dark-mode .form-divider span {
+  color: #94a3b8;
+}
+
+.dark-mode .form-divider::before,
+.dark-mode .form-divider::after {
+  border-bottom-color: #334155;
 }
 
 .message {
@@ -300,6 +361,10 @@
   margin-bottom: 1.5rem;
 }
 
+.dark-mode .quick-links-card h2 {
+  color: #f1f5f9;
+}
+
 .quick-links {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -349,6 +414,10 @@
   min-height: 400px;
   font-size: 1.125rem;
   color: #64748b;
+}
+
+.dark-mode .loading {
+  color: #94a3b8;
 }
 
 @media (max-width: 480px) {
