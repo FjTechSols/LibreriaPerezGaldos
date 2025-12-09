@@ -89,7 +89,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
   useEffect(() => {
     if (searchTerm.trim()) {
-      const filtered = books.filter(book => 
+      const filtered = books.filter(book =>
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
@@ -98,7 +98,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     } else {
       setFilteredBooks(books);
     }
-  }, [searchTerm]);
+  }, [searchTerm, books]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

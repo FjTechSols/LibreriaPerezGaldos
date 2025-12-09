@@ -149,12 +149,25 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       throw pedidoError;
     }
 
-    const detallesConPedidoId = input.detalles.map(detalle => ({
-      pedido_id: pedido.id,
-      libro_id: detalle.libro_id,
-      cantidad: detalle.cantidad,
-      precio_unitario: detalle.precio_unitario
-    }));
+    const detallesConPedidoId = input.detalles.map(detalle => {
+      if ('libro_id' in detalle) {
+        return {
+          pedido_id: pedido.id,
+          libro_id: detalle.libro_id,
+          cantidad: detalle.cantidad,
+          precio_unitario: detalle.precio_unitario
+        };
+      } else {
+        return {
+          pedido_id: pedido.id,
+          libro_id: null,
+          cantidad: detalle.cantidad,
+          precio_unitario: detalle.precio_unitario,
+          nombre_externo: detalle.nombre_externo,
+          url_externa: detalle.url_externa
+        };
+      }
+    });
 
     const { error: detallesError } = await supabase
       .from('pedido_detalles')
