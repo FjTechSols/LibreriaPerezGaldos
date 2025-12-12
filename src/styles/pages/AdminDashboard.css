@@ -279,7 +279,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #1e293b;
 }
 
 .stat-icon.books {
@@ -1726,4 +1726,27 @@ html.dark-mode .create-book-modal,
 .dark-mode .cancel-btn:hover {
   background-color: #334155;
   color: white;
+}
+
+/* Dark Mode Stats Overrides */
+.dark-mode .stat-value {
+  color: #f1f5f9 !important;
+}
+
+.dark-mode .stat-label {
+  color: #94a3b8;
+}
+
+.dark-mode .content-title,
+.dark-mode .dashboard-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .content-subtitle,
+.dark-mode .dashboard-subtitle {
+  color: #94a3b8;
+}
+
+.dark-mode .stat-icon {
+  color: white !important;
 }

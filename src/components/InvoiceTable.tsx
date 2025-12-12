@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TableLoader } from './Loader';
 import { Invoice } from '../types';
 import { Download, Eye, CreditCard as Edit } from 'lucide-react';
 import '../styles/components/InvoiceTable.css';
@@ -78,9 +79,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   return (
     <div className="contenedor-tabla-facturas">
       {loading ? (
-        <div className="estado-cargando">
-          <p>Cargando facturas...</p>
-        </div>
+        <TableLoader text="Cargando facturas..." />
       ) : filteredInvoices.length === 0 ? (
         <div className="sin-facturas">
           <p>No se encontraron facturas{invoices.length === 0 ? '' : ' con los filtros aplicados'}</p>

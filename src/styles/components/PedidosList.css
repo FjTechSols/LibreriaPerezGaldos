@@ -581,3 +581,13 @@
   background: #1e293b;
   border-color: #334155;
 }
+
+.dark-mode .pedidos-loading,
+.dark-mode .no-pedidos {
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.dark-mode .no-pedidos svg {
+  color: #cbd5e1;
+}

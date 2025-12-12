@@ -3,6 +3,7 @@ import { Eye, Package, Filter, TrendingUp } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../services/pedidoService';
 import { useSettings } from '../context/SettingsContext';
+import { TableLoader } from './Loader';
 import '../styles/components/PedidosList.css';
 
 interface PedidosListProps {
@@ -80,7 +81,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   });
 
   if (loading) {
-    return <div className="pedidos-loading">Cargando pedidos...</div>;
+    return <TableLoader text="Cargando pedidos..." />;
   }
 
   return (

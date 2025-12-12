@@ -25,3 +25,12 @@ export const Loader: React.FC = () => {
     </div>
   );
 };
+
+export const TableLoader: React.FC<{ text?: string }> = ({ text = "Cargando..." }) => {
+  return (
+    <div className="table-loader-container">
+      <div className="table-loader-spinner"></div>
+      <p className="table-loader-text">{text}</p>
+    </div>
+  );
+};
