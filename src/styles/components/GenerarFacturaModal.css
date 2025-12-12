@@ -597,8 +597,21 @@
   border-bottom-color: #334155;
 }
 
-.dark-mode .modal-generar-factura .modal-header h3 {
-  color: #f1f5f9;
+.dark-mode .modal-generar-factura .modal-header h3,
+.dark-mode .form-header h4,
+.dark-mode .form-section h3,
+.dark-mode .form-section h4,
+.dark-mode .form-section h5,
+.dark-mode .section-title {
+  color: #ffffff !important;
+}
+
+.dark-mode .form-group label,
+.dark-mode .modal-body p,
+.dark-mode .modal-body span,
+.dark-mode .factura-info p,
+.dark-mode .factura-info strong {
+    color: #cbd5e1 !important;
 }
 
 .dark-mode .modal-generar-factura .close-btn {

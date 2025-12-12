@@ -473,3 +473,37 @@
 .dark-mode .no-facturas {
   color: #94a3b8;
 }
+
+/* Force text color for all spans in table rows */
+/* Fix actions layout */
+.factura-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+/* Dark Mode Text Overrides */
+.dark-mode .factura-table .table-header span,
+.dark-mode .factura-table .table-row span,
+.dark-mode .factura-table .table-row div,
+.dark-mode .factura-info p,
+.dark-mode .factura-info strong {
+  color: #f1f5f9 !important;
+}
+
+/* Specific overrides for badges to keep their contrast */
+.dark-mode .factura-table .table-row span.tipo-badge,
+.dark-mode .factura-table .table-row span.estado-badge {
+    color: inherit !important;
+}
+
+.dark-mode .factura-table .table-row span.factura-numero {
+    color: #60a5fa !important; /* Light blue for link/number */
+}
+
+/* Ensure actions don't get forced white if they are buttons */
+.dark-mode .btn-action {
+    color: inherit !important;
+}

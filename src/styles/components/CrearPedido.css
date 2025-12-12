@@ -409,6 +409,16 @@
   background-color: #334155;
 }
 
+.dark-mode .autocomplete-suggestions {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .suggestion-item {
+  border-bottom-color: #334155;
+}
+
 .dark-mode .btn-eliminar-linea {
   background: #7f1d1d;
   color: #fecaca;
@@ -645,6 +655,10 @@
   border-bottom-color: #334155;
 }
 
+.dark-mode .libro-nombre {
+  color: #f1f5f9;
+}
+
 .dark-mode .input-cantidad,
 .dark-mode .input-precio {
   background: #1e293b;
@@ -734,4 +748,21 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+.label-tipo-producto {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.dark-mode .label-tipo-producto {
+  color: #cbd5e1;
+}
+
+/* Ensure Search Icon is visible in dark mode (it relies on inheritance now) */
+.dark-mode .form-group .lucide-search {
+  color: #94a3b8;
 }

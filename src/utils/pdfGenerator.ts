@@ -2,6 +2,26 @@ import jsPDF from 'jspdf';
 import { Factura } from '../types';
 import { AllSettings } from '../services/settingsService';
 
+// Helper to load image
+const getBase64ImageFromURL = (url: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = url;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject('Could not get canvas context');
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/png');
+      resolve(dataURL);
+    };
+    img.onerror = error => reject(error);
+  });
+};
+
 export const generarPDFFactura = async (factura: Factura, settings?: AllSettings): Promise<Blob> => {
   const COMPANY_INFO = settings ? {
     nombre: settings.company.name,
@@ -11,17 +31,28 @@ export const generarPDFFactura = async (factura: Factura, settings?: AllSettings
     cif: settings.company.taxId,
     web: settings.company.website
   } : {
-    nombre: 'Librería Pérez Galdós',
-    direccion: 'Calle Benito Pérez Galdós, 28001 Madrid',
-    telefono: '+34 910 123 456',
-    email: 'info@libreriaperezgaldos.es',
-    cif: 'B-12345678',
-    web: 'www.libreriaperezgaldos.es'
+    nombre: 'Perez Galdos',
+    direccion: 'Calle Hortaleza 5, 28004 Madrid, España',
+    telefono: '+34 91 531 26 40',
+    email: 'libreria@perezgaldos.com',
+    cif: 'B12345678',
+    web: 'www.libreriaperezgaldos.com'
   };
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
+  
+  // Add Logo
+  try {
+    const logoUrl = '/Logo Exlibris Perez Galdos.png';
+    const logoBase64 = await getBase64ImageFromURL(logoUrl);
+    // Add logo at top left (margin, 10), size 30x30 roughly (adjust aspect ratio in real scenario if needed)
+    doc.addImage(logoBase64, 'PNG', margin, 15, 25, 25);
+  } catch (err) {
+    console.error('Error adding logo to PDF:', err);
+  }
+
   let yPos = 20;
 
   doc.setFontSize(22);
@@ -36,7 +67,8 @@ export const generarPDFFactura = async (factura: Factura, settings?: AllSettings
   }
 
   doc.setTextColor(0, 0, 0);
-  yPos += 15;
+  // Start text below logo. Logo ends at 15+25 = 40. Start at 45.
+  yPos = 50; 
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
@@ -51,7 +83,7 @@ export const generarPDFFactura = async (factura: Factura, settings?: AllSettings
   yPos += 4;
   doc.text(`Email: ${COMPANY_INFO.email}`, margin, yPos);
   yPos += 4;
-  doc.text(`CIF: ${COMPANY_INFO.cif}`, margin, yPos);
+  doc.text(`NIF: ${COMPANY_INFO.cif}`, margin, yPos);
 
   doc.setDrawColor(200, 200, 200);
   doc.line(margin, yPos + 5, pageWidth - margin, yPos + 5);

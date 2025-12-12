@@ -347,6 +347,8 @@ export default function CrearPedido({
           setMetodoPago("transferencia");
         else if (metodoPagoTexto.includes("reembolso"))
           setMetodoPago("reembolso");
+        else if (metodoPagoTexto.includes("efectivo") || metodoPagoTexto.includes("señal"))
+          setMetodoPago("efectivo");
       }
 
       if (transportistaTexto) {
@@ -476,9 +478,9 @@ export default function CrearPedido({
       } else {
         alert("Error al crear el pedido");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      alert("Error al crear el pedido");
+      alert("Error al crear el pedido: " + (error.message || JSON.stringify(error)));
     } finally {
       setLoading(false);
     }
@@ -629,7 +631,6 @@ export default function CrearPedido({
                           left: "0.75rem",
                           top: "50%",
                           transform: "translateY(-50%)",
-                          color: "#9ca3af",
                           pointerEvents: "none",
                         }}
                       />
@@ -645,15 +646,15 @@ export default function CrearPedido({
                               onClick={() => handleSelectCliente(cliente)}
                             >
                               <div
-                                style={{ fontWeight: 500, color: "#1e293b" }}
+                                style={{ fontWeight: 500 }}
                               >
                                 {cliente.nombre} {cliente.apellidos}
                               </div>
                               <div
                                 style={{
                                   fontSize: "0.75rem",
-                                  color: "#64748b",
                                   marginTop: "0.125rem",
+                                  opacity: 0.8
                                 }}
                               >
                                 {cliente.email || "Sin email"}{" "}
@@ -665,8 +666,8 @@ export default function CrearPedido({
                           <div
                             style={{
                               padding: "0.75rem",
-                              color: "#64748b",
                               fontSize: "0.875rem",
+                              opacity: 0.8
                             }}
                           >
                             No se encontraron clientes
@@ -701,7 +702,7 @@ export default function CrearPedido({
                       <option value="paypal">PayPal</option>
                       <option value="transferencia">Transferencia</option>
                       <option value="reembolso">Reembolso</option>
-                      <option value="señal">Señal</option>
+                      <option value="efectivo">Efectivo</option>
                     </select>
                   </div>
                 </div>
@@ -760,14 +761,9 @@ export default function CrearPedido({
 
                 <div style={{ marginBottom: "1rem" }}>
                   <label
-                    style={{
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
-                      color: "#334155",
-                      marginBottom: "0.5rem",
-                      display: "block",
-                    }}
+                    className="label-tipo-producto"
                   >
+
                     Tipo de Producto
                   </label>
                   <div style={{ display: "flex", gap: "1rem" }}>
@@ -1145,7 +1141,7 @@ export default function CrearPedido({
             <button
               type="submit"
               className="btn-guardar"
-              disabled={loading || !clienteSeleccionado || lineas.length === 0}
+              disabled={loading}
             >
               {loading ? "Guardando..." : "Guardar Pedido"}
             </button>

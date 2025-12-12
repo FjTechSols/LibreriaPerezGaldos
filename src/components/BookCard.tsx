@@ -51,7 +51,17 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
   return (
     <Link to={`/libro/${book.id}`} className={`bookcard ${viewMode === 'list' ? 'bookcard--list' : ''}`}>
       <div className="bookcard__image-container">
-        <img src={book.coverImage} alt={book.title} className="bookcard__image" />
+        {/* Blurred background for premium feel on low-res images */}
+        <div 
+          className="bookcard__image-background" 
+          style={{ backgroundImage: `url(${book.coverImage})` }} 
+        />
+        <img 
+          src={book.coverImage} 
+          alt={book.title} 
+          className="bookcard__image" 
+          loading="lazy" 
+        />
 
         {book.isNew && <span className="bookcard__badge bookcard__badge--new">{t('new')}</span>}
         {book.isOnSale && <span className="bookcard__badge bookcard__badge--sale">{t('sale')}</span>}

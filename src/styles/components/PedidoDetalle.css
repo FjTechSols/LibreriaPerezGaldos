@@ -368,3 +368,101 @@
     justify-content: center;
   }
 }
+
+/* Dark Mode Overrides */
+.dark-mode .modal-pedido-detalle {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+.dark-mode .modal-pedido-detalle .modal-header {
+  background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+  border-bottom-color: #334155;
+}
+
+.dark-mode .modal-pedido-detalle .info-card {
+  background: #131a27;
+  border-color: #475569;
+}
+
+.dark-mode .info-card:hover {
+  border-color: #475569;
+}
+
+.dark-mode .info-card-header h3 {
+  color: #cbd5e1;
+}
+
+.dark-mode .info-principal {
+  color: #f1f5f9;
+}
+
+.dark-mode .info-secundario {
+  color: #94a3b8;
+}
+
+.dark-mode .estado-selector-detalle {
+  background: #1e293b;
+  border-color: #4f46e5;
+  color: #f1f5f9;
+}
+
+.dark-mode .estado-selector-detalle:hover {
+  background: #312e81;
+}
+
+.dark-mode .detalles-header h3 {
+  color: #f1f5f9;
+}
+
+.dark-mode .detalles-table {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .detalles-table .table-header {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+.dark-mode .detalles-table .table-row {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .libro-titulo {
+  color: #f1f5f9;
+}
+
+.dark-mode .cantidad,
+.dark-mode .precio,
+.dark-mode .subtotal {
+  color: #cbd5e1;
+}
+
+.dark-mode .totales-section {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.dark-mode .total-row {
+  color: #cbd5e1;
+}
+
+.dark-mode .total-row.final {
+  border-top-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .modal-pedido-detalle .modal-footer {
+  background: #0f172a;
+  border-top-color: #334155;
+}
+
+.dark-mode .btn-cancelar {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .btn-cancelar:hover {
+  background: #475569;
+}

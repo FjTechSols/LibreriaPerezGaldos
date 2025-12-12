@@ -534,7 +534,50 @@
   border-color: rgba(13, 148, 136, 0.2);
 }
 
+
 .dark-mode .pedidos-stats .stat-card.total {
   background: rgba(148, 163, 184, 0.1);
   border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dark-mode .pedido-pago,
+.dark-mode .pedido-transportista {
+  color: #cbd5e1;
+}
+
+
+.dark-mode .pedidos-table .table-header {
+  color: #cbd5e1;
+  background: #1e293b;
+  border-bottom-color: #334155;
+}
+
+.dark-mode .pedido-numero,
+.dark-mode .usuario-nombre {
+  color: #f1f5f9;
+}
+
+.dark-mode .usuario-email,
+.dark-mode .pedido-fecha {
+  color: #94a3b8;
+}
+
+.dark-mode .filter-group svg {
+  color: #cbd5e1;
+}
+
+.dark-mode .filter-input,
+.dark-mode .filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .filter-input::placeholder {
+  color: #64748b;
+}
+
+.dark-mode .pedidos-table {
+  background: #1e293b;
+  border-color: #334155;
 }

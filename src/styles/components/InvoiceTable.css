@@ -1,20 +1,20 @@
-.invoice-table-container {
+.contenedor-tabla-facturas {
   background: var(--color-surface);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
 
-.invoice-table {
+.tabla-facturas {
   width: 100%;
   border-collapse: collapse;
 }
 
-.invoice-table thead {
+.tabla-facturas thead {
   background: var(--color-background);
 }
 
-.invoice-table th {
+.tabla-facturas th {
   padding: var(--spacing-4) var(--spacing-3);
   text-align: left;
   font-weight: 600;
@@ -23,34 +23,34 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.invoice-table tbody tr {
+.tabla-facturas tbody tr {
   border-bottom: 1px solid var(--color-border);
   transition: background-color 0.2s ease;
 }
 
-.invoice-table tbody tr:hover {
+.tabla-facturas tbody tr:hover {
   background: var(--color-background);
 }
 
-.invoice-table td {
+.tabla-facturas td {
   padding: var(--spacing-3);
   font-size: 0.875rem;
   color: var(--color-text);
 }
 
-.invoice-number {
+.numero-factura {
   font-family: 'Courier New', monospace;
   font-weight: 600;
   color: var(--color-primary);
 }
 
-.status-cell {
+.celda-estado {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
 }
 
-.status-badge {
+.badge-estado {
   padding: var(--spacing-1) var(--spacing-3);
   border-radius: var(--border-radius-full);
   font-size: 0.75rem;
@@ -59,26 +59,26 @@
   letter-spacing: 0.025em;
 }
 
-.status-badge.status-paid {
+.badge-estado.status-paid {
   background: #d1fae5;
   color: #065f46;
 }
 
-.status-badge.status-pending {
+.badge-estado.status-pending {
   background: #fef3c7;
   color: #92400e;
 }
 
-.status-badge.status-cancelled {
+.badge-estado.status-cancelled {
   background: #fee2e2;
   color: #991b1b;
 }
 
-.status-actions {
+.acciones-estado {
   position: relative;
 }
 
-.status-change-btn {
+.btn-cambiar-estado {
   padding: var(--spacing-1);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -91,20 +91,20 @@
   color: var(--color-text);
 }
 
-.status-change-btn:hover {
+.btn-cambiar-estado:hover {
   background: var(--color-background);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-.status-change-btn:active,
-.status-change-btn.active {
+.btn-cambiar-estado:active,
+.btn-cambiar-estado.activo {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: white;
 }
 
-.status-dropdown {
+.dropdown-estado {
   position: absolute;
   top: 100%;
   left: 0;
@@ -118,7 +118,7 @@
   overflow: hidden;
 }
 
-.status-dropdown button {
+.dropdown-estado button {
   display: block;
   width: 100%;
   padding: var(--spacing-3) var(--spacing-4);
@@ -132,45 +132,47 @@
   transition: all 0.2s ease;
 }
 
-.status-dropdown button:hover {
+.dropdown-estado button:hover {
   background: #f3f4f6;
   color: #1f2937;
   padding-left: calc(var(--spacing-4) + 4px);
 }
 
-.status-dropdown button:not(:last-child) {
+.dropdown-estado button:not(:last-child) {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.status-dropdown button:first-child {
+.dropdown-estado button:first-child {
   color: #059669;
 }
 
-.status-dropdown button:first-child:hover {
+.dropdown-estado button:first-child:hover {
   background: #d1fae5;
   color: #065f46;
 }
 
-.status-dropdown button:last-child {
+.dropdown-estado button:last-child {
   color: #dc2626;
 }
 
-.status-dropdown button:last-child:hover {
+.dropdown-estado button:last-child:hover {
   background: #fee2e2;
   color: #991b1b;
 }
 
-.total-amount {
+.monto-total {
   font-weight: 600;
   color: var(--color-primary);
 }
 
-.action-buttons {
+.botones-accion {
   display: flex;
   gap: var(--spacing-2);
+  flex-direction: row; /* Ensure explicit row direction */
+  flex-wrap: nowrap; /* Ensure no wrapping */
 }
 
-.action-btn {
+.btn-accion {
   padding: var(--spacing-2);
   background: transparent;
   border: 1px solid var(--color-border);
@@ -182,40 +184,111 @@
   transition: all 0.2s ease;
 }
 
-.action-btn:hover {
+.btn-accion:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
 
-.action-btn.view-btn {
+.btn-accion.btn-ver {
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
 
-.action-btn.view-btn:hover {
+.btn-accion.btn-ver:hover {
   background: var(--color-primary);
   color: white;
 }
 
-.action-btn.download-btn {
+.btn-accion.btn-descargar {
   color: #059669;
   border-color: #059669;
 }
 
-.action-btn.download-btn:hover {
+.btn-accion.btn-descargar:hover {
   background: #059669;
   color: white;
 }
 
-.no-invoices {
+.sin-facturas {
   padding: var(--spacing-8);
   text-align: center;
   color: var(--color-text-secondary);
 }
 
-.loading-state {
+.estado-cargando {
   padding: var(--spacing-8);
   text-align: center;
   color: var(--color-text-secondary);
   font-size: 1rem;
+}
+
+/* Dark Mode Styles */
+.dark-mode .contenedor-tabla-facturas {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .tabla-facturas thead {
+  background: #0f172a;
+}
+
+.dark-mode .tabla-facturas th {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+.dark-mode .tabla-facturas tbody tr {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .tabla-facturas tbody tr:hover {
+  background: #0f172a;
+}
+
+.dark-mode .tabla-facturas td {
+  color: #f1f5f9; /* Force white text */
+}
+
+.dark-mode .cliente-factura,
+.dark-mode .fecha-factura {
+  color: #f1f5f9;
+}
+
+.dark-mode .numero-factura {
+  color: #60a5fa; /* Light blue for inv number */
+}
+
+.dark-mode .monto-total {
+  color: #34d399; /* Green for total */
+}
+
+.dark-mode .sin-facturas,
+.dark-mode .estado-cargando {
+  color: #94a3b8;
+}
+
+.dark-mode .btn-cambiar-estado {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .btn-cambiar-estado:hover {
+  background: #334155;
+}
+
+.dark-mode .dropdown-estado {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+.dark-mode .dropdown-estado button {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+.dark-mode .dropdown-estado button:hover {
+  background: #0f172a;
+  color: #f1f5f9;
 }

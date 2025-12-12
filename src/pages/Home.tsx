@@ -26,14 +26,33 @@ export function Home() {
         };
 
         const [featured, newRelease, sale] = await Promise.all([
-          obtenerLibros(1, 10, { ...commonFilters, featured: true }),
-          obtenerLibros(1, 10, { ...commonFilters, isNew: true }),
-          obtenerLibros(1, 10, { ...commonFilters, isOnSale: true })
+          obtenerLibros(1, 30, { ...commonFilters, featured: true }),
+          obtenerLibros(1, 30, { ...commonFilters, isNew: true }),
+          obtenerLibros(1, 30, { ...commonFilters, isOnSale: true })
         ]);
 
-        setFeaturedBooks(featured.data);
-        setNewBooks(newRelease.data);
-        setSaleBooks(sale.data);
+        // Helper function to deduplicate by title
+        const getUniqueBooks = (books: any[], limit: number) => {
+          const seen = new Set();
+          const unique = [];
+          
+          for (const book of books) {
+            // Normalize title to ignore case and minor spacing differences
+            const normalizedTitle = book.title.toLowerCase().trim();
+            
+            if (!seen.has(normalizedTitle)) {
+              seen.add(normalizedTitle);
+              unique.push(book);
+              
+              if (unique.length >= limit) break;
+            }
+          }
+          return unique;
+        };
+
+        setFeaturedBooks(getUniqueBooks(featured.data, 10));
+        setNewBooks(getUniqueBooks(newRelease.data, 10));
+        setSaleBooks(getUniqueBooks(sale.data, 10));
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {

@@ -1,6 +1,6 @@
 export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado';
 export type TipoPedido = 'interno' | 'iberlibro' | 'conecta' | 'uniliber' | 'libreros_de_viejo';
-export type MetodoPago = 'tarjeta' | 'paypal' | 'transferencia' | 'reembolso';
+export type MetodoPago = 'tarjeta' | 'paypal' | 'transferencia' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'otro';
 export type TipoFactura = 'normal' | 'rectificativa';
 export type TipoDocumento = 'certificado' | 'factura' | 'reembolso' | 'tarjeta_adhesiva' | 'tarjeta_termica' | 'etiqueta_envio';

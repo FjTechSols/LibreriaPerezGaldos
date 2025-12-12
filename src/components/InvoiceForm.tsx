@@ -459,12 +459,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
           <div className="form-group">
             <label>Método de pago (opcional)</label>
-            <input
-              type="text"
+            <select
               value={formData.payment_method || ''}
               onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-              placeholder="Transferencia, Tarjeta, etc."
-            />
+              className="form-select"
+            >
+              <option value="">Seleccionar...</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="paypal">PayPal</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="reembolso">Reembolso</option>
+              <option value="efectivo">Efectivo</option>
+            </select>
           </div>
 
           <div className="form-group">

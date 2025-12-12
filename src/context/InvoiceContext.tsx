@@ -33,6 +33,26 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
       }
     }
     fetchInvoices();
+
+    // Realtime subscription for invoices
+    const channel = supabase
+      .channel('invoices-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'facturas'
+        },
+        () => {
+          fetchInvoices();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

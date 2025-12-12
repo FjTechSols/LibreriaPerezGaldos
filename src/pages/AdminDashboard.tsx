@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { 
   Book, 
   Users as UsersIcon, 
@@ -20,14 +21,13 @@ import {
   Sun, 
   Image as ImageIcon, 
   Home, 
-  Save, 
-  BookOpen 
+  Save 
 } from 'lucide-react';
 
 import type { Book as BookType, Invoice, InvoiceFormData, Factura, Pedido, Ubicacion } from '../types';
 
 import { categories } from '../data/categories';
-import { obtenerLibros, obtenerEstadisticasLibros, obtenerTotalUnidadesStock, buscarLibroPorISBN, incrementarStockLibro, crearLibro, buscarLibros, actualizarLibro, eliminarLibro } from '../services/libroService';
+import { obtenerLibros, obtenerEstadisticasLibros, obtenerTotalUnidadesStock, buscarLibroPorISBN, incrementarStockLibro, crearLibro, actualizarLibro, eliminarLibro } from '../services/libroService';
 import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -65,7 +65,6 @@ export function AdminDashboard() {
   };
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [books, setBooks] = useState<BookType[]>([]);
-  const [loadingBooks, setLoadingBooks] = useState(true);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,6 +89,7 @@ export function AdminDashboard() {
   const [refreshPedidos, setRefreshPedidos] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [filteredCount, setFilteredCount] = useState(0);
   const [totalBooks, setTotalBooks] = useState(0);
   const [booksInStock, setBooksInStock] = useState(0);
   const [totalStockUnits, setTotalStockUnits] = useState(0);
@@ -137,21 +137,117 @@ export function AdminDashboard() {
     cargarEstadisticas();
   }, []);
 
-  // Cargar libros con paginación cuando cambia la página o búsqueda
+  // Estado de filtros
+  const [filters, setFilters] = useState({
+    search: '',
+    category: 'Todos',
+    minPrice: '',
+    maxPrice: '',
+    stockStatus: 'all', // all, inStock, outOfStock
+    featured: false,
+    isNew: false,
+    isOnSale: false,
+    coverStatus: 'all', // all, with_cover, without_cover
+    // Advanced
+    location: '',
+    minPages: '',
+    maxPages: '',
+    startYear: '',
+    endYear: '',
+    isbn: '',
+    publisher: '' // We'll keep this state even if service doesn't fully use it yet, for future proofing or if we add simple ilike
+  });
+
+  const [advancedMode, setAdvancedMode] = useState(false);
+
+  const [loadingBooks, setLoadingBooks] = useState(true);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(filters.search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters.search]);
+
+  // Realtime Updates Trigger
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Subscribe to Realtime changes for Books
+  useEffect(() => {
+    const channel = supabase
+      .channel('books-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'libros'
+        },
+        (payload) => {
+          // console.log('Change received!', payload);
+          setRefreshTrigger(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Subscribe to Realtime changes for Pedidos
+  useEffect(() => {
+    const channel = supabase
+      .channel('pedidos-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pedidos'
+        },
+        () => {
+           setRefreshPedidos(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Cargar libros con filtros unificados
   useEffect(() => {
     const cargarLibros = async () => {
       setLoadingBooks(true);
       try {
-        if (searchQuery.trim()) {
-          // Si hay búsqueda, buscar en toda la base de datos
-          const libros = await buscarLibros(searchQuery.trim());
-          setBooks(libros);
-        } else {
-          // Si no hay búsqueda, cargar libros de la página actual
-          // Si no hay búsqueda, cargar libros de la página actual
-          const { data } = await obtenerLibros(currentPage, itemsPerPage);
-          setBooks(data);
-        }
+        const queryFilters = {
+          search: searchQuery, // Use debounced value
+          category: filters.category !== 'Todos' ? filters.category : undefined,
+          minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
+          maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
+          availability: filters.stockStatus !== 'all' ? filters.stockStatus as any : undefined,
+          featured: filters.featured,
+          isNew: filters.isNew,
+          isOnSale: filters.isOnSale,
+          coverStatus: filters.coverStatus as any,
+          // Advanced
+          location: filters.location || undefined,
+          minPages: filters.minPages ? Number(filters.minPages) : undefined,
+          maxPages: filters.maxPages ? Number(filters.maxPages) : undefined,
+          startYear: filters.startYear ? Number(filters.startYear) : undefined,
+          endYear: filters.endYear ? Number(filters.endYear) : undefined,
+          isbn: filters.isbn || undefined,
+          publisher: filters.publisher || undefined
+        };
+
+        const { data, count } = await obtenerLibros(currentPage, itemsPerPage, queryFilters);
+        setBooks(data);
+        setFilteredCount(count); 
+        
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {
@@ -159,7 +255,7 @@ export function AdminDashboard() {
       }
     };
     cargarLibros();
-  }, [currentPage, itemsPerPage, searchQuery]);
+  }, [currentPage, itemsPerPage, searchQuery, filters.category, filters.minPrice, filters.maxPrice, filters.stockStatus, filters.featured, filters.isNew, filters.isOnSale, filters.coverStatus, filters.location, filters.minPages, filters.maxPages, filters.startYear, filters.endYear, filters.isbn, filters.publisher, refreshTrigger]);
 
   const [newBook, setNewBook] = useState<Partial<BookType>>({
     code: '',
@@ -264,7 +360,6 @@ export function AdminDashboard() {
           activo: true,
           destacado: newBook.featured,
           novedad: newBook.isNew,
-          novedad: newBook.isNew,
           oferta: newBook.isOnSale,
           precio_original: newBook.originalPrice
         }, bookContents);
@@ -343,7 +438,6 @@ export function AdminDashboard() {
         anio: editingBook.publicationYear || undefined,
         ubicacion: editingBook.ubicacion || undefined,
         destacado: editingBook.featured,
-        novedad: editingBook.isNew,
         novedad: editingBook.isNew,
         oferta: editingBook.isOnSale,
         precio_original: editingBook.originalPrice
@@ -488,8 +582,8 @@ export function AdminDashboard() {
     }
   };
 
-  // Pagination basada en el total de libros en BD o resultados de búsqueda
-  const totalPages = searchQuery.trim() ? 1 : Math.ceil(totalBooks / itemsPerPage);
+  // Pagination basada en el total filtrado
+  const totalPages = Math.ceil((filters.search || filters.category !== 'Todos' || filters.stockStatus !== 'all' ? filteredCount : totalBooks) / itemsPerPage);
 
   // Ya no necesitamos filtrar localmente, la búsqueda se hace en el servidor
   const currentBooks = books;
@@ -740,6 +834,225 @@ export function AdminDashboard() {
 
   const renderBooks = () => (
     <div>
+      <div className="filters-container" style={{ 
+        padding: '1rem', 
+        background: actualTheme === 'dark' ? '#1f2937' : 'white',
+        borderRadius: '8px',
+        marginBottom: '1rem',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        border: actualTheme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb'
+      }}>
+        <div style={{ flex: '1 1 200px' }}>
+             <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Categoría</label>
+             <select 
+               value={filters.category}
+               onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+             >
+               <option value="Todos">Todas las categorías</option>
+               {categories.map(cat => (
+                 <option key={cat} value={cat}>{cat}</option>
+               ))}
+             </select>
+        </div>
+
+        <div style={{ flex: '0 1 150px' }}>
+           <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Stock</label>
+           <select 
+             value={filters.stockStatus}
+             onChange={(e) => setFilters(prev => ({ ...prev, stockStatus: e.target.value }))}
+             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+           >
+             <option value="all">Todos</option>
+             <option value="inStock">En Stock</option>
+             <option value="outOfStock">Agotados</option>
+           </select>
+        </div>
+
+        <div style={{ flex: '0 1 150px' }}>
+           <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Portada</label>
+           <select 
+             value={filters.coverStatus}
+             onChange={(e) => setFilters(prev => ({ ...prev, coverStatus: e.target.value }))}
+             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+           >
+             <option value="all">Todas</option>
+             <option value="with_cover">Con Portada</option>
+             <option value="without_cover">Sin Portada</option>
+           </select>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flex: '1 1 200px' }}>
+           <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Precio Mín</label>
+              <input 
+                type="number" 
+                placeholder="0" 
+                value={filters.minPrice}
+                onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+              />
+           </div>
+           <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Precio Máx</label>
+              <input 
+                type="number" 
+                placeholder="Top" 
+                value={filters.maxPrice}
+                onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+              />
+           </div>
+        </div>
+
+        {advancedMode && (
+          <div style={{ flex: '1 1 100%', display: 'flex', flexWrap: 'wrap', gap: '1rem', paddingTop: '1rem', borderTop: '1px dashed ' + (actualTheme === 'dark' ? '#374151' : '#e5e7eb'), marginBottom: '0.5rem' }}>
+              <div style={{ flex: '0 1 150px' }}>
+                 <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Ubicación</label>
+                 <select 
+                   value={filters.location}
+                   onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
+                   style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+                 >
+                   <option value="">Todas</option>
+                   {ubicaciones.map(ub => (
+                     <option key={ub.id} value={ub.nombre}>{ub.nombre}</option>
+                   ))}
+                 </select>
+              </div>
+
+              <div style={{ flex: '0 1 200px' }}>
+                 <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>ISBN</label>
+                 <input 
+                    type="text" 
+                    placeholder="Filtrar por ISBN..." 
+                    value={filters.isbn}
+                    onChange={(e) => setFilters(prev => ({ ...prev, isbn: e.target.value }))}
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+                 />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flex: '0 1 200px' }}>
+                 <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Páginas Mín</label>
+                    <input 
+                      type="number" 
+                      placeholder="0" 
+                      value={filters.minPages}
+                      onChange={(e) => setFilters(prev => ({ ...prev, minPages: e.target.value }))}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+                    />
+                 </div>
+                 <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Máx</label>
+                    <input 
+                      type="number" 
+                      placeholder="Top" 
+                      value={filters.maxPages}
+                      onChange={(e) => setFilters(prev => ({ ...prev, maxPages: e.target.value }))}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+                    />
+                 </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flex: '0 1 200px' }}>
+                 <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Año Desde</label>
+                    <input 
+                      type="number" 
+                      placeholder="1900" 
+                      value={filters.startYear}
+                      onChange={(e) => setFilters(prev => ({ ...prev, startYear: e.target.value }))}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+                    />
+                 </div>
+                 <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>Hasta</label>
+                    <input 
+                      type="number" 
+                      placeholder="Hoy" 
+                      value={filters.endYear}
+                      onChange={(e) => setFilters(prev => ({ ...prev, endYear: e.target.value }))}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', background: actualTheme === 'dark' ? '#374151' : 'white', color: actualTheme === 'dark' ? 'white' : 'inherit' }}
+                    />
+                 </div>
+              </div>
+          </div>
+        )}
+
+        <div style={{ flex: '1 1 100%', display: 'flex', gap: '1.5rem', alignItems: 'center', paddingTop: '0.5rem', borderTop: '1px solid ' + (actualTheme === 'dark' ? '#374151' : '#e5e7eb'), marginTop: '0.5rem' }}>
+           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600 }}>
+             <input 
+               type="checkbox" 
+               checked={advancedMode} 
+               onChange={(e) => setAdvancedMode(e.target.checked)}
+             />
+             Búsqueda Avanzada
+           </label>
+
+           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+             <input 
+               type="checkbox" 
+               checked={filters.featured} 
+               onChange={(e) => setFilters(prev => ({ ...prev, featured: e.target.checked }))}
+             />
+             Destacados
+           </label>
+           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+             <input 
+               type="checkbox" 
+               checked={filters.isNew} 
+               onChange={(e) => setFilters(prev => ({ ...prev, isNew: e.target.checked }))}
+             />
+             Novedades
+           </label>
+           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+             <input 
+               type="checkbox" 
+               checked={filters.isOnSale} 
+               onChange={(e) => setFilters(prev => ({ ...prev, isOnSale: e.target.checked }))}
+             />
+             Ofertas
+           </label>
+           
+           <button 
+             onClick={() => setFilters({
+               search: '',
+               category: 'Todos',
+               minPrice: '',
+               maxPrice: '',
+               stockStatus: 'all',
+               featured: false,
+               isNew: false,
+               isOnSale: false,
+               coverStatus: 'all',
+               location: '',
+               minPages: '',
+               maxPages: '',
+               startYear: '',
+               endYear: '',
+               isbn: '',
+               publisher: ''
+             })}
+             style={{ 
+               marginLeft: 'auto', 
+               padding: '0.5rem 1rem', 
+               background: 'transparent', 
+               border: '1px solid #ef4444', 
+               color: '#ef4444', 
+               borderRadius: '4px',
+               cursor: 'pointer' 
+             }}
+           >
+             Limpiar Filtros
+           </button>
+        </div>
+
+
+      </div>
+
       <div className="data-table books-table">
         <div className="table-header">
           <span>Código</span>
@@ -1118,14 +1431,14 @@ export function AdminDashboard() {
                       <input
                         type="text"
                         placeholder={
-                          activeSection === 'books' ? 'Buscar por código, título, autor, editorial o ISBN...' :
+                          activeSection === 'books' ? 'Buscar por ISBN, título, autor, editorial o código...' :
                           activeSection === 'invoices' ? 'Buscar facturas...' :
                           'Buscar pedidos...'
                         }
-                      value={searchQuery}
+                      value={filters.search}
                       onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setCurrentPage(1);
+                        setFilters(prev => ({ ...prev, search: e.target.value }));
+                        // Note: Pagination reset happens in the useEffect when searchQuery changes
                       }}
                       className="admin-search-input"
                     />
@@ -1640,7 +1953,6 @@ export function AdminDashboard() {
                <button onClick={() => {
                    setIsCreating(false);
                    setEditingBook(null);
-                   setIsbnSearchMode(false);
                    // Reset local states
                    setBookContents([]);
                    setShowContentInput(false);

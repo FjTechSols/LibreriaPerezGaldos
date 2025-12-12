@@ -76,17 +76,17 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   };
 
   return (
-    <div className="invoice-table-container">
+    <div className="contenedor-tabla-facturas">
       {loading ? (
-        <div className="loading-state">
+        <div className="estado-cargando">
           <p>Cargando facturas...</p>
         </div>
       ) : filteredInvoices.length === 0 ? (
-        <div className="no-invoices">
+        <div className="sin-facturas">
           <p>No se encontraron facturas{invoices.length === 0 ? '' : ' con los filtros aplicados'}</p>
         </div>
       ) : (
-        <table className="invoice-table">
+        <table className="tabla-facturas">
           <thead>
             <tr>
               <th>Número</th>
@@ -100,18 +100,18 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           <tbody>
             {filteredInvoices.map(invoice => (
               <tr key={invoice.id}>
-                <td className="invoice-number">{invoice.invoice_number}</td>
-                <td>{invoice.customer_name}</td>
-                <td>{formatDate(invoice.issue_date)}</td>
+                <td className="numero-factura">{invoice.invoice_number}</td>
+                <td className="cliente-factura">{invoice.customer_name}</td>
+                <td className="fecha-factura">{formatDate(invoice.issue_date)}</td>
                 <td>
-                  <div className="status-cell">
-                    <span className={`status-badge ${getStatusClass(invoice.status)}`}>
+                  <div className="celda-estado">
+                    <span className={`badge-estado ${getStatusClass(invoice.status)}`}>
                       {invoice.status}
                     </span>
                     {invoice.status === 'Pendiente' && (
-                      <div className="status-actions">
+                      <div className="acciones-estado">
                         <button
-                          className={`status-change-btn ${selectedInvoice === invoice.id ? 'active' : ''}`}
+                          className={`btn-cambiar-estado ${selectedInvoice === invoice.id ? 'activo' : ''}`}
                           onClick={() => setSelectedInvoice(
                             selectedInvoice === invoice.id ? null : invoice.id
                           )}
@@ -119,7 +119,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                           <Edit size={14} />
                         </button>
                         {selectedInvoice === invoice.id && (
-                          <div className="status-dropdown">
+                          <div className="dropdown-estado">
                             <button onClick={() => handleStatusChange(invoice.id, 'Pagada')}>
                               Marcar como Pagada
                             </button>
@@ -132,18 +132,18 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                     )}
                   </div>
                 </td>
-                <td className="total-amount">{formatCurrency(invoice.total)}</td>
+                <td className="monto-total">{formatCurrency(invoice.total)}</td>
                 <td>
-                  <div className="action-buttons">
+                  <div className="botones-accion">
                     <button
-                      className="action-btn view-btn"
+                      className="btn-accion btn-ver"
                       onClick={() => onViewDetails(invoice)}
                       title="Ver detalle"
                     >
                       <Eye size={16} />
                     </button>
                     <button
-                      className="action-btn download-btn"
+                      className="btn-accion btn-descargar"
                       onClick={() => onDownloadPDF(invoice)}
                       title="Descargar PDF"
                     >
