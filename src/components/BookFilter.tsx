@@ -1,8 +1,9 @@
 import React from 'react';
-import { Filter, SlidersHorizontal, Grid2x2 as Grid, List } from 'lucide-react';
+import { Filter, SlidersHorizontal, Grid2x2 as Grid, List, Sun, Moon } from 'lucide-react';
 import { FilterState } from '../types';
 import { categories } from '../data/categories';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import '../styles/components/BookFilter.css';
 
 interface BookFilterProps {
@@ -15,6 +16,11 @@ interface BookFilterProps {
 export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChange }: BookFilterProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { language } = useLanguage();
+  const { actualTheme, setTheme } = useTheme();
+
+  const handleToggleTheme = () => {
+    setTheme(actualTheme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <div className="book-filter">
@@ -33,6 +39,7 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
               onClick={() => onViewModeChange('grid')}
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               aria-label="Vista en cuadrícula"
+              title="Vista en cuadrícula"
             >
               <Grid size={20} />
             </button>
@@ -40,9 +47,21 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
               onClick={() => onViewModeChange('list')}
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
               aria-label="Vista en lista"
+              title="Vista en lista"
             >
               <List size={20} />
             </button>
+          </div>
+
+          <div className="theme-toggle-container">
+             <button
+               onClick={handleToggleTheme}
+               className="theme-toggle-btn"
+               aria-label={actualTheme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+               title={actualTheme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+             >
+               {actualTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+             </button>
           </div>
         </div>
 

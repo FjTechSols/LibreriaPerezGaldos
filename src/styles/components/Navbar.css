@@ -253,6 +253,130 @@
   min-width: 20px;
 }
 
+/* Navigation Dropdown */
+.nav-dropdown-container {
+  position: relative;
+}
+
+.nav-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #374151;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-dropdown-btn:hover,
+.nav-dropdown-btn.active {
+  color: #2563eb;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 1rem); /* Increased gap slightly */
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  overflow: hidden;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-dropdown-container:hover .nav-dropdown-menu,
+.nav-dropdown-container.open .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Invisible bridge to prevent menu closing when moving cursor */
+.nav-dropdown-container::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 1rem;
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: white;
+  border: none;
+  text-align: left;
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-dropdown-item:hover {
+  background: #f8fafc;
+  color: #2563eb;
+  padding-left: 1.5rem; /* Subtle movement effect */
+}
+
+.nav-dropdown-icon {
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+
+.nav-dropdown-item:hover .nav-dropdown-icon {
+  color: #2563eb;
+}
+
+.dark-mode .nav-dropdown-btn {
+  color: #e2e8f0;
+}
+
+.dark-mode .nav-dropdown-btn:hover,
+.dark-mode .nav-dropdown-btn.active {
+  color: #60a5fa;
+}
+
+.dark-mode .nav-dropdown-menu {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .nav-dropdown-item {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark-mode .nav-dropdown-item:hover {
+  background: #334155;
+  color: #60a5fa;
+}
+
+.dark-mode .nav-dropdown-icon {
+  color: #64748b;
+}
+
+.dark-mode .nav-dropdown-item:hover .nav-dropdown-icon {
+  color: #60a5fa;
+}
+
 .user-menu {
   display: flex;
   align-items: center;

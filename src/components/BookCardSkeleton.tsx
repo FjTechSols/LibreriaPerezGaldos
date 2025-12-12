@@ -20,7 +20,7 @@ export function BookCardSkeleton() {
         }
         .skeleton-image {
             width: 100%;
-            height: 320px;
+            height: 250px;
             background: #e0e0e0;
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
@@ -48,11 +48,11 @@ export function BookCardSkeleton() {
             100% { background-position: -200% 0; }
         }
         /* Dark mode overrides */
-        :global(.dark-mode) .skeleton-image,
-        :global(.dark-mode) .skeleton-text,
-        :global(.dark-mode) .skeleton-button {
-             background: #334155;
-             background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+        .dark-mode .skeleton-image,
+        .dark-mode .skeleton-text,
+        .dark-mode .skeleton-button {
+             background: #1e293b; /* Match bg-secondary */
+             background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
              background-size: 200% 100%;
         }
       `}</style>

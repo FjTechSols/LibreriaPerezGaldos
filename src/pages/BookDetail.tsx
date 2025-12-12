@@ -16,6 +16,7 @@ import {
   Review,
   getBookAverageRating
 } from '../services/reviewService';
+import { NotFound } from '../components/NotFound';
 import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
@@ -90,19 +91,7 @@ export function BookDetail() {
   }
 
   if (!book) {
-    return (
-      <div className="book-detail">
-        <div className="container">
-          <div className="not-found">
-            <h1>{t('bookNotFound')}</h1>
-            <Link to="/catalogo" className="back-link">
-              <ArrowLeft size={20} />
-              {t('backToCatalog')}
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    return <NotFound type="book" />;
   }
 
   const handleAddToCart = () => {
@@ -240,7 +229,7 @@ export function BookDetail() {
               <div className="meta-item">
                 <span className="meta-label">Stock:</span>
                 <span className={`meta-value ${book.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                  {book.stock > 0 ? `${book.stock} ${language === 'es' ? 'disponibles' : language === 'en' ? 'available' : 'disponibles'}` : t('outOfStock')}
+                  {book.stock > 0 ? `${book.stock} ${book.stock === 1 ? t('available_singular') : t('available')}` : t('outOfStock')}
                 </span>
               </div>
             </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Sparkles, Tag } from 'lucide-react';
 import { BookCard } from '../components/BookCard';
+import { BookCardSkeleton } from '../components/BookCardSkeleton';
 import { useLanguage } from '../context/LanguageContext';
 import { obtenerLibros } from '../services/libroService';
 import '../styles/pages/Home.css';
@@ -16,12 +17,23 @@ export function Home() {
   useEffect(() => {
     const loadBooks = async () => {
       try {
-        // Cargar los primeros libros disponibles (Pagina 1, 12 items)
-        const { data: allBooks } = await obtenerLibros(1, 12);
+        // Cargar secciones específicas desde la base de datos
+        // 10 libros, solo en stock, ordenados por actualización (para reflejar cambios de curation)
+        const commonFilters = { 
+          availability: 'inStock' as const, 
+          sortBy: 'updated' as const, 
+          sortOrder: 'desc' as const 
+        };
 
-        setFeaturedBooks(allBooks.slice(0, 4));
-        setNewBooks(allBooks.slice(4, 8));
-        setSaleBooks(allBooks.slice(8, 12));
+        const [featured, newRelease, sale] = await Promise.all([
+          obtenerLibros(1, 10, { ...commonFilters, featured: true }),
+          obtenerLibros(1, 10, { ...commonFilters, isNew: true }),
+          obtenerLibros(1, 10, { ...commonFilters, isOnSale: true })
+        ]);
+
+        setFeaturedBooks(featured.data);
+        setNewBooks(newRelease.data);
+        setSaleBooks(sale.data);
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {
@@ -75,7 +87,9 @@ export function Home() {
           </div>
           <div className="books-grid">
             {loading ? (
-              <p>Cargando libros...</p>
+              Array.from({ length: 4 }).map((_, i) => (
+                <BookCardSkeleton key={i} />
+              ))
             ) : featuredBooks.length > 0 ? (
               featuredBooks.map(book => (
                 <BookCard key={book.id} book={book} />
@@ -100,7 +114,9 @@ export function Home() {
           </div>
           <div className="books-grid">
             {loading ? (
-              <p>Cargando libros...</p>
+              Array.from({ length: 4 }).map((_, i) => (
+                <BookCardSkeleton key={i} />
+              ))
             ) : newBooks.length > 0 ? (
               newBooks.map(book => (
                 <BookCard key={book.id} book={book} />

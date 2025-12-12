@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import {
   Building2, Mail, Phone, Globe, FileText, DollarSign,
   Truck, Bell, Database, Shield, Settings as SettingsIcon,
-  Package, CreditCard, Download, HardDrive, Check, MapPin
+  Package, CreditCard, Download, HardDrive, Check, MapPin,
+  Home, LayoutDashboard, X
 } from 'lucide-react';
+
 import { GestionUbicaciones } from '../components/GestionUbicaciones';
 import { GestionUsuariosAdmin } from '../components/GestionUsuariosAdmin';
 import {
@@ -20,6 +23,7 @@ import {
 import '../styles/pages/AdminSettings.css';
 
 export function AdminSettings() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const {
     settings,
@@ -184,7 +188,18 @@ export function AdminSettings() {
         <div className="settings-header">
           <h1>Configuración del Sistema</h1>
           <p>Administración general de la librería</p>
+          <div className="settings-actions">
+            <button onClick={() => navigate('/')} className="btn-nav">
+              <Home size={18} />
+              Volver a página web
+            </button>
+            <button onClick={() => navigate('/admin')} className="btn-nav">
+              <LayoutDashboard size={18} />
+              Volver a admin panel
+            </button>
+          </div>
         </div>
+
 
         {saveSuccess && (
           <div className="alert alert-success">

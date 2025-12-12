@@ -39,7 +39,7 @@ export function GestionISBN() {
     });
 
     try {
-      const resultado = await buscarLibroPorTituloAutor(libro.title, libro.author);
+      const resultado = await buscarLibroPorTituloAutor(libro.title, libro.author, libro.publicationYear, libro.publisher);
 
       if (resultado && resultado.isbn) {
         setIsbnResults(prev => new Map(prev).set(libro.id, resultado.isbn));
@@ -182,7 +182,8 @@ export function GestionISBN() {
                     <div className="book-details">
                       <h4 className="book-title">{libro.title}</h4>
                       <p className="book-author">{libro.author}</p>
-                      <p className="book-code">Código: {libro.code}</p>
+                      <p className="book-publisher">{libro.publisher}</p>
+                      <p className="book-code">Año: {libro.publicationYear || 'N/A'} | Código: {libro.code}</p>
                     </div>
                   </div>
                   <div className="isbn-status">

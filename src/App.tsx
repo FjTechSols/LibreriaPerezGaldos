@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -30,12 +30,22 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import EmailVerification from './pages/EmailVerification';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { RouteTransitionProvider } from './context/RouteTransitionContext';
+import { RouteTransitionLoader } from './components/RouteTransitionLoader';
+import { About } from './pages/About';
+import { Location } from './pages/Location';
+import { Contact } from './pages/Contact';
 
 function AppRoutes() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen flex flex-col">
       <ScrollToTop />
-      <Navbar />
+      <RouteTransitionLoader />
+      {!isAdminRoute && <Navbar />}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -51,6 +61,9 @@ function AppRoutes() {
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/cookies" element={<CookiesPolicy />} />
           <Route path="/verificacion-email" element={<EmailVerification />} />
+          <Route path="/nosotros" element={<About />} />
+          <Route path="/ubicacion" element={<Location />} />
+          <Route path="/contacto" element={<Contact />} />
           <Route
             path="/stripe-checkout"
             element={
@@ -99,10 +112,10 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }
@@ -110,21 +123,23 @@ function AppRoutes() {
 function App() {
   return (
     <Router>
-      <ThemeProvider>
-        <LanguageProvider>
-          <SettingsProvider>
-            <AuthProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <InvoiceProvider>
-                    <AppRoutes />
-                  </InvoiceProvider>
-                </WishlistProvider>
-              </CartProvider>
-            </AuthProvider>
-          </SettingsProvider>
-        </LanguageProvider>
-      </ThemeProvider>
+      <RouteTransitionProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <SettingsProvider>
+              <AuthProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <InvoiceProvider>
+                      <AppRoutes />
+                    </InvoiceProvider>
+                  </WishlistProvider>
+                </CartProvider>
+              </AuthProvider>
+            </SettingsProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </RouteTransitionProvider>
     </Router>
   );
 }

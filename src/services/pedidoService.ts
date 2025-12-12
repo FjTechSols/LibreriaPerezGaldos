@@ -312,7 +312,12 @@ export const obtenerLibros = async (filtro?: string): Promise<Libro[]> => {
     .order('titulo');
 
   if (filtro) {
-    query = query.or(`titulo.ilike.%${filtro}%,isbn.ilike.%${filtro}%`);
+    const isNumeric = /^\d+$/.test(filtro);
+    if (isNumeric) {
+       query = query.or(`id.eq.${filtro},titulo.ilike.%${filtro}%,isbn.ilike.%${filtro}%,legacy_id.ilike.%${filtro}%`);
+    } else {
+       query = query.or(`titulo.ilike.%${filtro}%,isbn.ilike.%${filtro}%,legacy_id.ilike.%${filtro}%`);
+    }
   }
 
   const { data, error } = await query.limit(50);

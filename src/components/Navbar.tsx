@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown, Sun, Moon, Monitor } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown, Sun, Moon, Monitor, Info, MapPin, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -164,7 +164,30 @@ export function Navbar() {
         </form>
 
         <div className="navbar-links desktop-only">
-          <Link to="/catalogo" className="nav-link">{t('catalog')}</Link>
+          <div className="nav-dropdown-container">
+            <button className="nav-dropdown-btn">
+              {t('catalog')}
+              <ChevronDown size={14} />
+            </button>
+            <div className="nav-dropdown-menu">
+              <Link to="/catalogo" className="nav-dropdown-item">
+                <BookOpen size={18} className="nav-dropdown-icon" />
+                Ver Todo el Catálogo
+              </Link>
+              <Link to="/nosotros" className="nav-dropdown-item">
+                <Info size={18} className="nav-dropdown-icon" />
+                Sobre Nosotros
+              </Link>
+              <Link to="/ubicacion" className="nav-dropdown-item">
+                <MapPin size={18} className="nav-dropdown-icon" />
+                Ubicación
+              </Link>
+              <Link to="/contacto" className="nav-dropdown-item">
+                <Mail size={18} className="nav-dropdown-icon" />
+                Contacto
+              </Link>
+            </div>
+          </div>
           <Link to="/wishlist" className="nav-link wishlist-link">
             <Heart size={20} />
             {wishlistItems.length > 0 && <span className="wishlist-badge">{wishlistItems.length}</span>}
@@ -270,6 +293,15 @@ export function Navbar() {
         <div className="mobile-menu">
           <Link to="/catalogo" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
             {t('catalog')}
+          </Link>
+          <Link to="/nosotros" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+            Sobre Nosotros
+          </Link>
+          <Link to="/ubicacion" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+            Ubicación
+          </Link>
+          <Link to="/contacto" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+            Contacto
           </Link>
           <Link to="/carrito" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
             {t('cart')} ({cartCount})

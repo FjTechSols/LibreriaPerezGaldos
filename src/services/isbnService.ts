@@ -32,9 +32,13 @@ export const buscarLibroPorISBN = async (isbn: string): Promise<ISBNBookData | n
 
     const bookInfo = data.items[0].volumeInfo;
 
+    const fullTitle = bookInfo.subtitle 
+      ? `${bookInfo.title}: ${bookInfo.subtitle}` 
+      : bookInfo.title;
+
     const bookData: ISBNBookData = {
       isbn: cleanISBN,
-      title: bookInfo.title || '',
+      title: fullTitle || '',
       authors: bookInfo.authors || [],
       publisher: bookInfo.publisher || '',
       publishedDate: bookInfo.publishedDate || '',
@@ -74,9 +78,13 @@ export const buscarLibrosOpenLibrary = async (isbn: string): Promise<ISBNBookDat
 
     const bookInfo = data[bookKey];
 
+    const fullTitle = bookInfo.subtitle 
+      ? `${bookInfo.title}: ${bookInfo.subtitle}` 
+      : bookInfo.title;
+
     const bookData: ISBNBookData = {
       isbn: cleanISBN,
-      title: bookInfo.title || '',
+      title: fullTitle || '',
       authors: bookInfo.authors?.map((a: any) => a.name) || [],
       publisher: bookInfo.publishers?.[0]?.name || '',
       publishedDate: bookInfo.publish_date || '',
@@ -104,9 +112,20 @@ export const buscarLibroPorISBNMultiple = async (isbn: string): Promise<ISBNBook
   return result;
 };
 
-export const buscarLibroPorTituloAutor = async (titulo: string, autor: string): Promise<ISBNBookData | null> => {
+export const buscarLibroPorTituloAutor = async (titulo: string, autor: string, anio?: number, editorial?: string): Promise<ISBNBookData | null> => {
   try {
-    const query = `intitle:${encodeURIComponent(titulo)}+inauthor:${encodeURIComponent(autor)}`;
+    let query = `intitle:${encodeURIComponent(titulo)}+inauthor:${encodeURIComponent(autor)}`;
+    
+    if (editorial) {
+      // Añadimos editorial para precisar más la edición
+      query += `+inpublisher:${encodeURIComponent(editorial)}`;
+    }
+
+    if (anio) {
+      // Añadimos el año a la búsqueda para refinar la edición
+      query += `+${anio}`;
+    }
+
     const response = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`
     );
@@ -127,9 +146,13 @@ export const buscarLibroPorTituloAutor = async (titulo: string, autor: string): 
     const isbn10 = bookInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier;
     const isbn = isbn13 || isbn10 || '';
 
+    const fullTitle = bookInfo.subtitle 
+      ? `${bookInfo.title}: ${bookInfo.subtitle}` 
+      : bookInfo.title;
+
     const bookData: ISBNBookData = {
       isbn: isbn.replace(/[-\s]/g, ''),
-      title: bookInfo.title || '',
+      title: fullTitle || '',
       authors: bookInfo.authors || [],
       publisher: bookInfo.publisher || '',
       publishedDate: bookInfo.publishedDate || '',

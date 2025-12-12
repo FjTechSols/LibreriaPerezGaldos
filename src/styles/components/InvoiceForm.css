@@ -277,41 +277,79 @@
 }
 
 /* Dark Mode Styles */
+
+/* Helper classes from refactor */
+.helper-text {
+  color: #64748b;
+}
+
+.search-input-with-icon {
+  padding-left: 2.5rem !important;
+}
+
+.search-icon {
+  color: #9ca3af;
+}
+
+.suggestion-title {
+  color: #1e293b;
+}
+
+.suggestion-subtitle,
+.no-results-text {
+  color: #64748b;
+}
+
+.items-list-header {
+  color: #1e293b;
+}
+
+/* Dark Mode Styles */
 .dark-mode .form-section {
   background: #0f172a;
-  border-color: #334155;
+  border-color: #475569; /* Lighter border */
 }
 
 .dark-mode .form-section h3 {
-  color: #f1f5f9;
+  color: #ffffff; /* White text */
 }
 
-.dark-mode .form-group label {
-  color: #cbd5e1;
+.dark-mode .form-group label,
+.dark-mode .toggle-label,
+.dark-mode label {
+  color: #cbd5e1 !important; /* Force light color for labels */
+}
+
+.dark-mode .helper-text {
+  color: #94a3b8; /* Lighter grey for helper */
 }
 
 .dark-mode .form-group input,
-.dark-mode .form-group textarea {
+.dark-mode .form-group textarea,
+.dark-mode .form-select,
+.dark-mode .search-input-with-icon {
   background: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
+  border-color: #475569;
+  color: #ffffff !important; /* Force white text */
 }
 
 .dark-mode .form-group input::placeholder,
 .dark-mode .form-group textarea::placeholder {
-  color: #64748b;
+  color: #94a3b8 !important; /* Lighter grey for placeholder */
+  opacity: 1; /* Firefox fix */
 }
 
 .dark-mode .form-group input:focus,
-.dark-mode .form-group textarea:focus {
+.dark-mode .form-group textarea:focus,
+.dark-mode .form-select:focus {
   border-color: #60a5fa;
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+  background: #0f172a;
+  color: #ffffff !important;
 }
 
-.dark-mode .form-select {
-  background: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
+.dark-mode .search-icon {
+  color: #cbd5e1; /* White/Light icon */
 }
 
 .dark-mode .error-message {
@@ -319,7 +357,11 @@
 }
 
 .dark-mode .items-list {
-  border-color: #334155;
+  border-color: #475569;
+}
+
+.dark-mode .items-list-header {
+  color: #ffffff;
 }
 
 .dark-mode .items-table thead {
@@ -327,12 +369,12 @@
 }
 
 .dark-mode .items-table th {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 
 .dark-mode .items-table td {
   border-top-color: #334155;
-  color: #e2e8f0;
+  color: #ffffff;
 }
 
 .dark-mode .btn-remove:hover {
@@ -341,11 +383,11 @@
 
 .dark-mode .invoice-summary {
   background: #0f172a;
-  border-color: #334155;
+  border-color: #475569;
 }
 
 .dark-mode .summary-row {
-  color: #e2e8f0;
+  color: #ffffff;
 }
 
 .dark-mode .btn-cancel {
@@ -361,14 +403,38 @@
 
 .dark-mode .autocomplete-suggestions {
   background: #1e293b;
-  border-color: #334155;
+  border-color: #475569;
 }
 
 .dark-mode .suggestion-item {
   border-bottom-color: #334155;
-  color: #e2e8f0;
+}
+
+.dark-mode .suggestion-title {
+  color: #ffffff;
+}
+
+.dark-mode .suggestion-subtitle,
+.dark-mode .no-results-text {
+  color: #94a3b8;
 }
 
 .dark-mode .suggestion-item:hover {
   background-color: #0f172a;
+}
+
+.dark-mode .btn-add-item {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.dark-mode .btn-add-item:hover:not(:disabled) {
+  background-color: #2563eb !important;
+}
+
+.dark-mode .btn-add-item:disabled {
+  background-color: #1e293b !important; /* Darker background for disabled */
+  color: #475569 !important; /* Dimmed text */
+  border: 1px solid #334155 !important;
+  opacity: 0.6;
 }

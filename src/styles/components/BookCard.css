@@ -26,6 +26,8 @@
   overflow: hidden;
   background: #f1f5f9;
   border-radius: 1rem 1rem 0 0;
+  height: 250px; /* Reduced from auto/default */
+  width: 100%;
 }
 
 .bookcard.grid .bookcard__image-container {
@@ -237,7 +239,7 @@
 }
 
 .bookcard__sale-price {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: #ef4444;
 }

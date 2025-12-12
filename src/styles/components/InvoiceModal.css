@@ -54,6 +54,7 @@
   padding: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
   background: white;
+  border-radius: 12px 12px 0 0;
 }
 
 .invoice-modal-header h2 {
@@ -85,4 +86,34 @@
   padding: 1.5rem;
   overflow-y: auto;
   background: white;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Dark Mode Styles */
+.dark-mode .invoice-modal-content {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .invoice-modal-header {
+  background: linear-gradient(135deg, #0e7490 0%, #0891b2 100%);
+  border-bottom-color: #334155;
+}
+
+.dark-mode .invoice-modal-header h2 {
+  color: #f1f5f9;
+}
+
+.dark-mode .modal-close-btn {
+  color: #e2e8f0;
+}
+
+.dark-mode .modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.dark-mode .invoice-modal-body {
+  background: #1e293b;
 }

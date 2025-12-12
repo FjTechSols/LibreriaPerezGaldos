@@ -731,3 +731,126 @@
     padding: 1rem;
   }
 }
+
+/* Dark Mode */
+.dark .book-detail {
+  background: #111827;
+}
+
+.dark .book-detail-content,
+.dark .book-details-tabs,
+.dark .book-meta,
+.dark .purchase-section,
+.dark .login-prompt,
+.dark .average-rating-display,
+.dark .spec-item,
+.dark .review-item {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.dark .book-title,
+.dark .current-price,
+.dark .spec-value,
+.dark .meta-value,
+.dark .reviewer-name,
+.dark .reviews-summary h3,
+.dark .description-content h3,
+.dark .book-specs h4,
+.dark .user-review-header h4 {
+  color: #f3f4f6;
+}
+
+.dark .book-author,
+.dark .meta-label,
+.dark .spec-label,
+.dark .quantity-label,
+.dark .description-content p,
+.dark .review-comment,
+.dark .review-date,
+.dark .login-prompt p,
+.dark .rating-details span {
+  color: #9ca3af;
+}
+
+.dark .meta-item,
+.dark .tabs-header {
+  border-color: #374151;
+}
+
+.dark .tabs-header {
+  background: #111827;
+}
+
+.dark .tab-btn {
+  color: #9ca3af;
+}
+
+.dark .tab-btn:hover:not(.active) {
+  background: #374151;
+  color: #f3f4f6;
+}
+
+.dark .tab-btn.active {
+  background: #1f2937;
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+.dark .quantity-select {
+  background: #374151;
+  color: #f3f4f6;
+  border-color: #4b5563;
+}
+
+.dark .wishlist-btn,
+.dark .share-btn {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .wishlist-btn:hover,
+.dark .share-btn:hover {
+  background: #374151;
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+.dark .not-found h1 {
+  color: #f3f4f6;
+}
+
+.dark .no-reviews {
+    color: #9ca3af;
+}
+
+.dark .user-review-card {
+    background: #1e3a8a; /* Dark blue background for user review */
+    border-color: #2563eb;
+}
+
+.dark .user-review-header h4 {
+    color: #93c5fd;
+}
+
+.dark .edit-review-btn,
+.dark .delete-review-btn {
+    background: #374151;
+    border-color: #4b5563;
+    color: #9ca3af;
+}
+
+.dark .edit-review-btn:hover {
+    background: #4b5563;
+    color: #60a5fa;
+}
+
+.dark .delete-review-btn:hover {
+    background: #451a1a;
+    color: #f87171;
+}
+
+.dark .meta-value.in-stock {
+    color: #34d399;
+}

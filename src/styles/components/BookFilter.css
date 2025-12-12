@@ -39,6 +39,34 @@
   border-color: #cbd5e1;
 }
 
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  color: #6b7280;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: #e2e8f0;
+  color: #f59e0b; /* Amber for sun, also looks ok for moon hover */
+  border-color: #cbd5e1;
+}
+
+.dark-mode .theme-toggle-btn:hover {
+  color: #fbbf24;
+}
+
 .view-toggle {
   display: flex;
   background: #f1f5f9;
@@ -244,4 +272,202 @@
   .view-toggle {
     align-self: center;
   }
+}
+
+/* Dark Mode Styles */
+.dark-mode .book-filter {
+  background: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .filter-toggle {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .filter-toggle:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+.dark-mode .view-toggle {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .view-btn {
+  color: #94a3b8;
+}
+
+.dark-mode .view-btn:hover:not(.active) {
+  color: #f1f5f9;
+}
+
+.dark-mode .view-btn.active {
+  background: #1e293b;
+  color: #60a5fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .sort-select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .sort-select:focus {
+  border-color: #60a5fa;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.dark-mode .theme-toggle-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.dark-mode .theme-toggle-btn:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+.dark-mode .filter-panel {
+  border-top-color: #334155;
+}
+
+.dark-mode .filter-label {
+  color: #e2e8f0;
+}
+
+.dark-mode .filter-select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .filter-select:focus {
+  border-color: #60a5fa;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.dark-mode .price-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .price-input:focus {
+  border-color: #60a5fa;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.dark-mode .price-separator {
+  color: #94a3b8;
+}
+
+.dark-mode .clear-filters-btn {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark Mode Styles */
+:global(.dark-mode) .book-filter {
+  background: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark-mode) .filter-toggle {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+:global(.dark-mode) .filter-toggle:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+:global(.dark-mode) .view-toggle {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+:global(.dark-mode) .view-btn {
+  color: #94a3b8;
+}
+
+:global(.dark-mode) .view-btn:hover:not(.active) {
+  color: #f1f5f9;
+}
+
+:global(.dark-mode) .view-btn.active {
+  background: #1e293b;
+  color: #60a5fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark-mode) .sort-select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+:global(.dark-mode) .sort-select:focus {
+  border-color: #60a5fa;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+:global(.dark-mode) .theme-toggle-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+:global(.dark-mode) .theme-toggle-btn:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+:global(.dark-mode) .filter-panel {
+  border-top-color: #334155;
+}
+
+:global(.dark-mode) .filter-label {
+  color: #e2e8f0;
+}
+
+:global(.dark-mode) .filter-select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+:global(.dark-mode) .filter-select:focus {
+  border-color: #60a5fa;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+:global(.dark-mode) .price-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+:global(.dark-mode) .price-input:focus {
+  border-color: #60a5fa;
+  background: #1e293b;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+:global(.dark-mode) .price-separator {
+  color: #94a3b8;
+}
+
+:global(.dark-mode) .clear-filters-btn {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }

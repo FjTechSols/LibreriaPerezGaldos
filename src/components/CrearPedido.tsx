@@ -7,12 +7,10 @@ import {
   ShoppingCart,
   User,
   MapPin,
-  Truck,
   CreditCard,
 } from "lucide-react";
-import { Usuario, Libro, Cliente } from "../types";
+import { Libro, Cliente } from "../types";
 import {
-  obtenerUsuarios,
   obtenerLibros,
   crearPedido,
   calcularTotalesPedido,
@@ -46,10 +44,11 @@ export default function CrearPedido({
 }: CrearPedidoProps) {
   const { user } = useAuth();
   const { formatPrice } = useSettings();
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [libros, setLibros] = useState<Libro[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // ... (rest of the component state)
 
   const [clienteSearch, setClienteSearch] = useState("");
   const [clienteSeleccionado, setClienteSeleccionado] =
@@ -88,11 +87,12 @@ export default function CrearPedido({
 
   useEffect(() => {
     if (isOpen) {
-      cargarUsuarios();
       cargarClientes();
       cargarLibros();
     }
   }, [isOpen]);
+
+  // ... (useEffects for filtering)
 
   useEffect(() => {
     if (clienteSearch.trim()) {
@@ -113,23 +113,28 @@ export default function CrearPedido({
     }
   }, [clienteSearch, clientes]);
 
+  // Debounced search effect
   useEffect(() => {
-    if (libroSearch.trim()) {
-      const filtered = libros.filter(
-        (libro) =>
-          (libro.titulo || "")
-            .toLowerCase()
-            .includes(libroSearch.toLowerCase()) ||
-          (libro.isbn || "")
-            .toLowerCase()
-            .includes(libroSearch.toLowerCase()) ||
-          (libro.autor || "").toLowerCase().includes(libroSearch.toLowerCase())
-      );
-      setFilteredLibros(filtered);
-    } else {
-      setFilteredLibros(libros);
-    }
-  }, [libroSearch, libros]);
+    const searchBooks = async () => {
+      setLoading(true); // Using loading state for feedback if desired, or verify if it conflicts with main loading
+      // Ideally we would have a separate loading state for search but 'loading' blocks the whole form. 
+      // Let's rely on state updates.
+      try {
+        const data = await obtenerLibros(libroSearch);
+        setFilteredLibros(data);
+      } catch (error) {
+        console.error("Error searching books:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      searchBooks();
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [libroSearch]); // Removed 'libros' dependency as we search server-side now
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -151,11 +156,6 @@ export default function CrearPedido({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const cargarUsuarios = async () => {
-    const data = await obtenerUsuarios();
-    setUsuarios(data);
-  };
-
   const cargarClientes = async () => {
     try {
       const data = await getClientes();
@@ -169,6 +169,8 @@ export default function CrearPedido({
     const data = await obtenerLibros();
     setLibros(data);
   };
+
+  // ... (handlers)
 
   const handleSelectCliente = (cliente: Cliente) => {
     setClienteSeleccionado(cliente);
@@ -269,8 +271,6 @@ export default function CrearPedido({
       const lineasTexto = datosPegados.split("\n").filter((l) => l.trim());
       let clienteInfo = "";
       let direccion = "";
-      let telefono = "";
-      let email = "";
       let productosTexto: string[] = [];
       let metodoPagoTexto = "";
       let transportistaTexto = "";
@@ -292,12 +292,12 @@ export default function CrearPedido({
           lineaLower.includes("telefono:") ||
           lineaLower.includes("tel:")
         ) {
-          telefono = linea.split(":")[1]?.trim() || "";
+          // Teléfono detectado pero no usado por ahora
         } else if (
           lineaLower.includes("email:") ||
           lineaLower.includes("correo:")
         ) {
-          email = linea.split(":")[1]?.trim() || "";
+          // Email detectado pero no usado por ahora
         } else if (
           lineaLower.includes("método de pago:") ||
           lineaLower.includes("metodo de pago:") ||
@@ -540,85 +540,29 @@ export default function CrearPedido({
               </h3>
             </div>
 
-            <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+            <div className="mode-selector">
               <button
                 type="button"
                 onClick={() => setModoEntrada("manual")}
-                className={
-                  modoEntrada === "manual" ? "btn-mode active" : "btn-mode"
-                }
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  border:
-                    modoEntrada === "manual"
-                      ? "2px solid var(--primary-color)"
-                      : "2px solid #e5e7eb",
-                  borderRadius: "8px",
-                  background: modoEntrada === "manual" ? "#eff6ff" : "white",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  color:
-                    modoEntrada === "manual"
-                      ? "var(--primary-color)"
-                      : "#6b7280",
-                }}
+                className={`btn-mode ${modoEntrada === "manual" ? "active" : ""}`}
               >
                 ✍️ Entrada Manual
               </button>
               <button
                 type="button"
                 onClick={() => setModoEntrada("pegar")}
-                className={
-                  modoEntrada === "pegar" ? "btn-mode active" : "btn-mode"
-                }
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  border:
-                    modoEntrada === "pegar"
-                      ? "2px solid var(--primary-color)"
-                      : "2px solid #e5e7eb",
-                  borderRadius: "8px",
-                  background: modoEntrada === "pegar" ? "#eff6ff" : "white",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  color:
-                    modoEntrada === "pegar"
-                      ? "var(--primary-color)"
-                      : "#6b7280",
-                }}
+                className={`btn-mode ${modoEntrada === "pegar" ? "active" : ""}`}
               >
                 📋 Pegar Datos de Plataforma
               </button>
             </div>
 
             {modoEntrada === "pegar" && (
-              <div
-                style={{
-                  background: "#f9fafb",
-                  padding: "1.5rem",
-                  borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
-                }}
-              >
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "0.5rem",
-                    fontWeight: 600,
-                    color: "#374151",
-                  }}
-                >
+              <div className="paste-section">
+                <label className="paste-label">
                   Pega aquí toda la información del pedido
                 </label>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#6b7280",
-                    marginBottom: "1rem",
-                  }}
-                >
+                <p className="paste-help-text">
                   Copia y pega toda la información del pedido de la plataforma
                   externa. El sistema intentará extraer automáticamente los
                   datos.
@@ -626,31 +570,18 @@ export default function CrearPedido({
                 <textarea
                   value={datosPegados}
                   onChange={(e) => setDatosPegados(e.target.value)}
-                  className="form-input"
+                  className="form-input paste-textarea"
                   rows={12}
                   placeholder="Ejemplo:&#10;Cliente: Juan Pérez&#10;Dirección: Calle Mayor 123, Madrid&#10;Teléfono: 600123456&#10;Email: juan@ejemplo.com&#10;Método de Pago: Tarjeta&#10;Transportista: GLS&#10;Tracking: 123456789&#10;&#10;Productos:&#10;2 - Don Quijote de la Mancha - 25.50€&#10;1 - Cien años de soledad - 18.99€&#10;&#10;Observaciones: Entregar en horario de mañana"
-                  style={{
-                    width: "100%",
-                    fontFamily: "monospace",
-                    fontSize: "0.9rem",
-                  }}
                 />
                 <button
                   type="button"
                   onClick={parsearDatosPegados}
-                  className="btn-primary"
-                  style={{ marginTop: "1rem", width: "100%" }}
+                  className="btn-analyze"
                 >
                   🔍 Analizar y Rellenar Formulario
                 </button>
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "#6b7280",
-                    marginTop: "0.75rem",
-                    fontStyle: "italic",
-                  }}
-                >
+                <p className="paste-tip">
                   Tip: Formatos reconocidos para productos: "2 - Título del
                   libro - 25.50€" o "Producto: Título del libro"
                 </p>
@@ -939,22 +870,11 @@ export default function CrearPedido({
                                   className="suggestion-item"
                                   onClick={() => handleSelectLibro(libro)}
                                 >
-                                  <div
-                                    style={{
-                                      fontWeight: 500,
-                                      color: "#1e293b",
-                                    }}
-                                  >
+                                  <div className="suggestion-title">
                                     {libro.titulo}
                                   </div>
-                                  <div
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      color: "#64748b",
-                                      marginTop: "0.125rem",
-                                    }}
-                                  >
-                                    {libro.autor} • ISBN: {libro.isbn} •{" "}
+                                  <div className="suggestion-subtitle">
+                                    {libro.autor} • Code: {(libro as any).legacy_id || libro.id} • ISBN: {libro.isbn} •{" "}
                                     {formatPrice(libro.precio)} • Stock:{" "}
                                     {libro.stock || 0}
                                   </div>

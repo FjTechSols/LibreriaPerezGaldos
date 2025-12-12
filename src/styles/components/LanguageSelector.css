@@ -111,3 +111,42 @@
     right: -1rem;
   }
 }
+
+/* Dark Mode support */
+.dark-mode .language-selector-button {
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .language-selector-button:hover {
+  background: #1e293b;
+  border-color: #475569;
+  color: #60a5fa;
+}
+
+.dark-mode .language-dropdown {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .language-option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+.dark-mode .language-option .language-name {
+  color: #e2e8f0;
+}
+
+.dark-mode .language-option:hover {
+  background: #0f172a;
+}
+
+.dark-mode .language-option.active {
+  background: #334155;
+}
+
+.dark-mode .language-check {
+  color: #4ade80;
+}

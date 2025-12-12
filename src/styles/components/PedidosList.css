@@ -20,7 +20,7 @@
 }
 
 .pedidos-stats .stat-card {
-  background: white;
+  background: var(--bg-secondary);
   padding: 1.25rem;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -37,8 +37,8 @@
 }
 
 .pedidos-stats .stat-card.total {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
 }
 
 .pedidos-stats .stat-card.pendiente {
@@ -89,7 +89,7 @@
 .pedidos-stats .stat-label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-secondary);
   order: 1;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .pedidos-stats .stat-card.total .stat-value {
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .pedidos-filters {
@@ -128,11 +128,14 @@
 .filter-input,
 .filter-select {
   padding: 0.625rem 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.875rem;
   transition: all 0.2s;
   flex: 1;
+  background: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
 }
 
 .filter-input:focus,
@@ -143,7 +146,7 @@
 }
 
 .pedidos-table {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 12px;
   overflow-x: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -155,11 +158,11 @@
   grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 100px 130px 120px 180px;
   gap: 0.75rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--bg-tertiary);
   font-weight: 600;
   font-size: 0.8125rem;
-  color: #475569;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-color);
   min-width: 1000px;
 }
 
@@ -168,14 +171,15 @@
   grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 100px 130px 120px 180px;
   gap: 0.75rem;
   padding: 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
   align-items: center;
   transition: background 0.15s;
   min-width: 1000px;
+  color: var(--text-primary);
 }
 
 .pedidos-table .table-row:hover {
-  background: #fafbfc;
+  background: var(--bg-hover);
 }
 
 .pedido-numero {
@@ -183,7 +187,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .pedido-usuario .usuario-info {
@@ -194,16 +198,16 @@
 
 .usuario-nombre {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .usuario-email {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .pedido-fecha {
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -502,4 +506,35 @@
   .pedidos-stats .stat-label {
     font-size: 0.75rem;
   }
+}
+
+/* Dark Mode Overrides for Status Cards */
+.dark-mode .pedidos-stats .stat-card.pendiente {
+  background: rgba(234, 88, 12, 0.1);
+  border-color: rgba(234, 88, 12, 0.2);
+}
+
+.dark-mode .pedidos-stats .stat-card.procesando {
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+.dark-mode .pedidos-stats .stat-card.enviado {
+  background: rgba(147, 51, 234, 0.1);
+  border-color: rgba(147, 51, 234, 0.2);
+}
+
+.dark-mode .pedidos-stats .stat-card.completado {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.dark-mode .pedidos-stats .stat-card.ventas {
+  background: rgba(13, 148, 136, 0.1);
+  border-color: rgba(13, 148, 136, 0.2);
+}
+
+.dark-mode .pedidos-stats .stat-card.total {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.2);
 }

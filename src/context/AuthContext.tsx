@@ -7,6 +7,7 @@ import {
   obtenerRolPrincipal,
   Rol
 } from '../services/rolesService';
+import { Loader } from '../components/Loader';
 
 interface ExtendedUser extends User {
   roles?: Rol[];
@@ -27,6 +28,10 @@ const AuthContext = createContext<ExtendedAuthState | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // Only show splash on true initial load (not on navigation)
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem('hasLoadedBefore');
+  });
 
   useEffect(() => {
     checkUser();
@@ -48,16 +53,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkUser = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        await loadUserData(session.user.id);
+      const isInitialLoad = !sessionStorage.getItem('hasLoadedBefore');
+      
+      // Start minimum timer only on initial load (3 seconds)
+      const timerPromise = isInitialLoad 
+        ? new Promise(resolve => setTimeout(resolve, 3000))
+        : Promise.resolve();
+      
+      // Start auth check
+      const authCheckPromise = supabase.auth.getSession();
+      
+      // Process auth immediately when done
+      const sessionData = await authCheckPromise;
+      if (sessionData.data.session?.user) {
+        await loadUserData(sessionData.data.session.user.id);
       }
+      
+      // Auth is ready, allow app to mount (fetching data in background)
+      setLoading(false);
+
+      // Wait for timer to finish before hiding splash
+      await timerPromise;
+      setShowSplash(false);
+      
+      // Mark that we've loaded at least once
+      sessionStorage.setItem('hasLoadedBefore', 'true');
+
     } catch (error) {
       console.error('Error checking user session:', error);
       setUser(null);
-    } finally {
       setLoading(false);
+      setShowSplash(false);
     }
   };
 
@@ -92,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: roleType,
         roles,
         permisos,
-        rolPrincipal
+        rolPrincipal: rolPrincipal || undefined
       });
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -213,21 +239,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        fontSize: '1.125rem',
-        color: '#64748b'
-      }}>
-        Cargando...
-      </div>
-    );
-  }
-
   const hasPermission = (permiso: string): boolean => {
     if (!user) return false;
     return user.permisos?.includes(permiso) || false;
@@ -241,6 +252,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = hasRole('admin') || hasRole('super_admin');
   const isSuperAdmin = hasRole('super_admin');
 
+  // Render overlay if splash is active
+  // But also block children if loading (auth) is true?
+  // If loading is true, we must NOT render children because ProtectedRoute needs auth state.
+  // But checkUser sets loading=false early.
+  // So 'children' will render.
+  
   return (
     <AuthContext.Provider value={{
       user,
@@ -253,7 +270,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin,
       isSuperAdmin
     }}>
-      {children}
+      {showSplash && <Loader />}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

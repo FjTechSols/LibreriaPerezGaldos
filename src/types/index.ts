@@ -155,6 +155,8 @@ export interface PedidoDetalle {
   subtotal?: number;
   created_at?: string;
   libro?: Libro;
+  nombre_externo?: string;
+  url_externa?: string;
 }
 
 export interface Factura {
@@ -249,6 +251,7 @@ export interface Book {
   featured?: boolean;
   isNew?: boolean;
   isOnSale?: boolean;
+  contents?: string[];
 }
 
 export interface Review {

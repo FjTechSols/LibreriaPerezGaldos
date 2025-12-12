@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FileText, X, AlertCircle, Check, Receipt, Zap, Edit3 } from 'lucide-react';
 import { Pedido } from '../types';
-import { crearFactura, calcularTotalesFactura } from '../services/facturaService';
+import { useInvoice } from '../context/InvoiceContext';
 import { supabase } from '../lib/supabase';
 import '../styles/components/GenerarFacturaModal.css';
 
@@ -19,7 +19,7 @@ export default function GenerarFacturaModal({
   onOpenManualInvoice
 }: GenerarFacturaModalProps) {
   const [step, setStep] = useState<'select-type' | 'select-order' | 'form-electronic'>('select-type');
-  const [tipoFactura, setTipoFactura] = useState<'manual' | 'pedido' | 'electronica' | null>(null);
+  // const [tipoFactura, setTipoFactura] = useState<'manual' | 'pedido' | 'electronica' | null>(null);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function GenerarFacturaModal({
   useEffect(() => {
     if (isOpen) {
       setStep('select-type');
-      setTipoFactura(null);
+      // setTipoFactura(null);
       setPedidoSeleccionado(null);
       setSearchTerm('');
     }
@@ -84,21 +84,66 @@ export default function GenerarFacturaModal({
     setPedidos(pedidosSinFactura);
   };
 
+  const { createInvoice } = useInvoice();
+
   const handleGenerarFactura = async () => {
     if (!pedidoSeleccionado) {
       alert('Debe seleccionar un pedido');
       return;
     }
 
+    const pedido = pedidos.find(p => p.id === pedidoSeleccionado);
+    if (!pedido) return;
+
     setLoading(true);
 
     try {
-      const result = await crearFactura({
-        pedido_id: pedidoSeleccionado
+      // Mapear datos del pedido a InvoiceFormData
+      
+      // 1. Determinar datos del cliente (Prioridad: Cliente asociado > Usuario)
+      let customerName = 'Cliente General';
+      let customerAddress = 'Dirección no disponible';
+      let customerNif = '';
+
+      if (pedido.cliente) {
+        customerName = `${pedido.cliente.nombre} ${pedido.cliente.apellidos}`;
+        customerAddress = pedido.cliente.direccion || pedido.direccion_envio || '';
+        customerNif = pedido.cliente.nif || '';
+      } else if (pedido.usuario) {
+        customerName = pedido.usuario.username || pedido.usuario.email;
+        // Intentar obtener dirección del envío si no hay cliente estructurado
+        customerAddress = pedido.direccion_envio || '';
+      }
+
+      // 2. Mapear items
+      const items = (pedido.detalles || []).map(d => ({
+        book_id: d.libro_id.toString(),
+        book_title: d.libro?.titulo || d.nombre_externo || 'Libro desconocido',
+        quantity: d.cantidad,
+        unit_price: d.precio_unitario,
+        line_total: d.cantidad * d.precio_unitario
+      }));
+
+      // 3. Calcular Tasa de Impuesto (Inferida o Defecto)
+      // Si el pedido tiene IVA calculado, intentamos deducir la tasa, sino usamos 4% (libros) o 21%
+      let taxRate = 4; // Por defecto super-reducido para libros
+      if (pedido.subtotal && pedido.iva) {
+        taxRate = Math.round((pedido.iva / pedido.subtotal) * 100);
+      }
+
+      const result = await createInvoice({
+        customer_name: customerName,
+        customer_address: customerAddress,
+        customer_nif: customerNif,
+        tax_rate: taxRate,
+        payment_method: pedido.metodo_pago,
+        order_id: pedido.id.toString(),
+        items: items,
+        shipping_cost: 0 // Asumiendo que el envío está incluido o es aparte, pero InvoiceFormData tiene shipping_cost opcional
       });
 
       if (result) {
-        alert(`Factura ${result.numero_factura} generada correctamente`);
+        alert(`Factura ${result.invoice_number} generada correctamente`);
         onSuccess?.();
         onClose();
       } else {
@@ -133,7 +178,7 @@ export default function GenerarFacturaModal({
         <div
           className="factura-type-card"
           onClick={() => {
-            setTipoFactura('manual');
+            // setTipoFactura('manual');
             onClose();
             onOpenManualInvoice?.();
           }}
@@ -154,7 +199,7 @@ export default function GenerarFacturaModal({
         <div
           className="factura-type-card"
           onClick={() => {
-            setTipoFactura('pedido');
+            // setTipoFactura('pedido');
             setStep('select-order');
           }}
         >
@@ -174,7 +219,7 @@ export default function GenerarFacturaModal({
         <div
           className="factura-type-card electronic"
           onClick={() => {
-            setTipoFactura('electronica');
+            // setTipoFactura('electronica');
             setStep('form-electronic');
           }}
         >

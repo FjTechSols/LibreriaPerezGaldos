@@ -109,7 +109,7 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
         <div className="bookcard__meta">
           <span className="bookcard__category">{book.category}</span>
           <span className="bookcard__stock">
-            {book.stock > 0 ? `${book.stock} ${t('available')}` : t('outOfStock')}
+            {book.stock > 0 ? `${book.stock} ${book.stock === 1 ? t('available_singular') : t('available')}` : t('outOfStock')}
           </span>
         </div>
       </div>

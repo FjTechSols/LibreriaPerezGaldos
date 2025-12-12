@@ -50,9 +50,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     const fetchData = async () => {
       // Cargar libros
       try {
-        const libros = await obtenerLibros();
-        setBooks(libros);
-        setFilteredBooks(libros);
+        const response = await obtenerLibros();
+        setBooks(response.data);
+        setFilteredBooks(response.data);
       } catch (error) {
         console.error('Error loading books:', error);
       } finally {
@@ -92,7 +92,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       const filtered = books.filter(book =>
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.isbn.toLowerCase().includes(searchTerm.toLowerCase())
+        book.isbn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.id.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredBooks(filtered);
     } else {
@@ -298,7 +300,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
       <div className="form-section">
         <h3>Agregar libros a la factura</h3>
-        <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1rem' }}>
+        <p className="helper-text" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
           Escriba el título, autor o ISBN del libro. Seleccione de las sugerencias, ajuste cantidad y precio, luego haga clic en "Agregar a la lista".
         </p>
         
@@ -320,16 +322,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Buscar por título, autor o ISBN..."
-                  style={{ paddingLeft: '2.5rem' }}
+                  className="search-input-with-icon"
                 />
                 <Search 
                   size={18} 
+                  className="search-icon"
                   style={{ 
                     position: 'absolute', 
                     left: '0.75rem', 
                     top: '50%', 
                     transform: 'translateY(-50%)', 
-                    color: '#9ca3af',
                     pointerEvents: 'none'
                   }} 
                 />
@@ -344,14 +346,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                         className="suggestion-item"
                         onClick={() => handleSelectBook(book.id)}
                       >
-                        <div style={{ fontWeight: 500, color: '#1e293b' }}>{book.title}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.125rem' }}>
-                          {book.author} • ISBN: {book.isbn} • {formatCurrency(book.price)}
+                        <div className="suggestion-title" style={{ fontWeight: 500 }}>{book.title}</div>
+                        <div className="suggestion-subtitle" style={{ fontSize: '0.75rem', marginTop: '0.125rem' }}>
+                          {book.author} • Code: {book.code} • ISBN: {book.isbn} • {formatCurrency(book.price)}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div style={{ padding: '0.75rem', color: '#64748b', fontSize: '0.875rem' }}>
+                    <div className="no-results-text" style={{ padding: '0.75rem', fontSize: '0.875rem' }}>
                       No se encontraron libros
                     </div>
                   )}
@@ -398,7 +400,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
         {formData.items.length > 0 && (
           <div className="items-list" style={{ marginTop: '1.5rem' }}>
-            <div style={{ marginBottom: '0.75rem', fontWeight: 600, color: '#1e293b' }}>
+            <div className="items-list-header" style={{ marginBottom: '0.75rem', fontWeight: 600 }}>
               Libros agregados ({formData.items.length})
             </div>
             <table className="items-table">

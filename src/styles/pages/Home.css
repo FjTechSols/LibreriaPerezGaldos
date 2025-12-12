@@ -3,7 +3,7 @@
 }
 
 .hero {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #eff6ff 100%);
   padding: 4rem 0;
   position: relative;
   overflow: hidden;
@@ -117,11 +117,19 @@
 .new-section,
 .sale-section {
   padding: 4rem 0;
-  background: #fafafa;
+}
+
+/* Light mode - alternating pattern: subtle gradient, white, subtle gradient, white */
+.featured-section {
+  background: #ffffff; /* White */
 }
 
 .new-section {
-  background: white;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #eff6ff 100%); /* Subtle blue gradient matching hero */
+}
+
+.sale-section {
+  background: #ffffff; /* White */
 }
 
 .section-container {
