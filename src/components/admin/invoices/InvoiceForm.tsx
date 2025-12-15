@@ -125,28 +125,35 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
   // ... (keeping other effects) ...
   /* Removed client-side filtering effect */
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchTerm.trim()) {
-        try {
-          // Use server-side search to support ID, Legacy ID, ISBN and Title across all books
-          const results = await buscarLibros(searchTerm);
+  /* Removed client-side filtering effect */
+  const [advancedSearch, setAdvancedSearch] = useState(false);
+
+  const handleSearch = async () => {
+      if (!searchTerm.trim()) {
+          setFilteredBooks(books);
+          return;
+      }
+      
+      try {
+          const results = await buscarLibros(searchTerm, { searchFields: advancedSearch ? 'all' : 'code' });
           setFilteredBooks(results);
-          
-          // If the search looks like an exact ID match and we found it, selecting it automatically might be annoying if they are typing,
-          // so we keep it as a suggestion list.
-        } catch (error) {
+          setShowSuggestions(true);
+      } catch (error) {
           console.error('Error searching books:', error);
           setFilteredBooks([]);
-        }
-      } else {
-        // If search is empty, show default list (first loaded books)
-        setFilteredBooks(books);
       }
-    }, 300); // 300ms debounce
+  };
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, books]);
+  useEffect(() => {
+    // Initial load? No, wait for user search. 
+    // Just keep books array for fallback? 
+    // Actually we might not need to load ALL books initially if we rely on search.
+    // typically invoices need search. 
+    // Existing code loaded all books to `books` and `filteredBooks`. 
+    // We can keep that or optimization later.
+  }, []);
+
+  // Removed debounce effect.
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -449,38 +456,53 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
         
         <div className="add-item-form">
           <div className="form-grid">
-            <div className="form-group" ref={autocompleteRef} style={{ position: 'relative' }}>
+            <div className="form-group" ref={autocompleteRef} style={{ position: 'relative', flex: '1 1 300px' }}>
               <label>Buscar libro *</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setShowSuggestions(true);
-                    if (!e.target.value.trim()) {
-                      setSelectedBookId('');
-                      setUnitPrice(0);
-                    }
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  placeholder="Buscar por título, autor, ISBN o código..."
-                  className="search-input-with-icon"
-                />
-                <Search 
-                  size={18} 
-                  className="search-icon"
-                  style={{ 
-                    position: 'absolute', 
-                    left: '0.75rem', 
-                    top: '50%', 
-                    transform: 'translateY(-50%)', 
-                    pointerEvents: 'none'
-                  }} 
-                />
-              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div className="search-input-wrapper" style={{ position: 'relative', flexGrow: 1 }}>
+                    <Search className="search-icon" size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9ca3af' }} />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSearch();
+                          }
+                      }}
+                      onFocus={() => {
+                        if (filteredBooks.length > 0) setShowSuggestions(true);
+                      }}
+                      placeholder={advancedSearch ? "Título, Autor, ISBN, Código..." : "Introduzca el código del libro..."}
+                      className="form-input"
+                      autoComplete="off"
+                      style={{ paddingLeft: '2.5rem' }}
+                    />
+                 </div>
+                 <button 
+                  type="button" 
+                  onClick={handleSearch}
+                  className="action-btn"
+                  style={{ background: '#3b82f6', color: 'white', padding: '0 1rem', height: '42px', marginTop: '0', borderRadius: '0.375rem', fontWeight: 500 }}
+                 >
+                   Buscar
+                 </button>
+             </div>
+
+             <div style={{ marginTop: '0.5rem' }}>
+               <label className="flex items-center gap-2 cursor-pointer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                   <input 
+                     type="checkbox" 
+                     checked={advancedSearch} 
+                     onChange={(e) => setAdvancedSearch(e.target.checked)}
+                     style={{ width: 'auto', margin: 0 }}
+                   />
+                   <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Búsqueda avanzada (Título, Autor, ISBN)</span>
+               </label>
+             </div>
               
-              {showSuggestions && searchTerm.trim() && (
+             {showSuggestions && filteredBooks.length > 0 && (
                 <div className="autocomplete-suggestions">
                   {filteredBooks.length > 0 ? (
                     filteredBooks.slice(0, 10).map(book => (

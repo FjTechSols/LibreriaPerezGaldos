@@ -11,7 +11,7 @@ import GenerarFacturaModal from '../orders/GenerarFacturaDesdeped';
 
 export function InvoicesManager() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
-  const { formatPrice } = useSettings();
+  const { formatPrice, settings } = useSettings();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -56,8 +56,7 @@ export function InvoicesManager() {
         // We used useSettings() hook above.
         // Wait, I need to make sure settings is loaded.
         
-        const settingsContext = useSettings(); // Hook call, not value
-        const company = settingsContext.settings?.company || {
+        const company = settings?.company || {
             name: 'Librería', 
             address: '', 
             taxId: '', 

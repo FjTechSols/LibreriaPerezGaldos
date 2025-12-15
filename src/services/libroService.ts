@@ -639,18 +639,19 @@ export const buscarLibros = async (query: string): Promise<Book[]> => {
       // Non-numeric search: Standard fuzzy search
       const { data, error } = await supabase
         .from('libros')
-        .select('*, editoriales(id, nombre), categorias(id, nombre)')
+        .select('*')
         .eq('activo', true)
         .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
         .order('titulo', { ascending: true })
-        .limit(20); // Limit to 20 for performance
+        .limit(20);
 
         if (error) {
           console.error('Error al buscar libros:', error);
           return [];
         }
-    
-        return data ? data.map(mapLibroToBook) : [];
+
+        if (!data || data.length === 0) return [];
+        return await enrichBooks(data);
     }
   } catch (error) {
     console.error('Error inesperado al buscar libros:', error);
