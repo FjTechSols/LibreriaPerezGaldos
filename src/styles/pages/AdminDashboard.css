@@ -630,7 +630,6 @@
 
 /* Increased specificity to override generic styles */
 /* Default Modal Style (Light) */
-/* Default Modal Style (Light) */
 .admin-dashboard .modal {
   background-color: #ffffff; /* Fallback for transparency issues */
   background-color: var(--bg-secondary);
@@ -986,23 +985,202 @@
     width: 100%;
   }
 
-  .books-table .table-header,
-  .books-table .table-row {
-    grid-template-columns: 60px 60px 2fr 1fr 80px;
-    font-size: var(--font-size-xs);
+  .books-table .table-header {
+    display: none; /* Hide header on mobile */
   }
 
-  .book-publisher-cell,
-  .book-pages-cell,
-  .book-category-cell,
-  .book-price-cell,
-  .book-stock-cell {
-    display: none;
+  .books-table .table-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: var(--spacing-4);
+    gap: var(--spacing-3);
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-4);
+    background: var(--bg-secondary);
+  }
+
+  /* Cover - Top Left */
+  .book-cover {
+    width: 70px;
+    height: 100px;
+    grid-area: auto;
+    flex-shrink: 0;
+  }
+
+  /* Info Container - Right of Cover */
+  .book-info-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  /* We need to use nth-child selectors or ensuring structure matches */
+  /* Since checking structure is hard with CSS alone if not wrapped, we assume flat children */
+  /* Structure: 
+     1: Code
+     2: Cover
+     3: Title
+     4: Author
+     5: Publisher
+     6: Category
+     7: Pages
+     8: Price
+     9: Stock
+     10: Actions 
+  */
+  
+  .books-table .table-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: auto auto auto auto auto; /* Added extra row for Code */
+    grid-column-gap: var(--spacing-4);
+    grid-row-gap: var(--spacing-1);
   }
 
   .book-cover {
-    width: 40px;
-    height: 50px;
+    grid-row: 1 / 6; /* Span all rows */
+    grid-column: 1;
+    width: 80px;
+    height: 115px; /* Slightly taller */
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Code - Row 1 */
+  .book-code-cell {
+    grid-row: 1;
+    grid-column: 2;
+    display: block !important;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary); /* Muted color for code */
+    font-family: var(--font-family-mono);
+    margin-bottom: 0.1rem;
+  }
+
+  /* Title - Row 2 */
+  .book-title-cell {
+    grid-row: 2;
+    grid-column: 2;
+    font-size: var(--font-size-base);
+    font-weight: bold;
+    padding-right: 80px; /* Prevent overlap with action buttons */
+    line-height: var(--line-height-tight);
+    color: var(--text-primary);
+  }
+
+  /* Author - Row 3 */
+  .book-author-cell {
+    grid-row: 3;
+    grid-column: 2;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  /* Price - Row 4 */
+  .book-price-cell {
+    grid-row: 4;
+    grid-column: 2;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--primary-600);
+    text-align: left;
+    margin-top: 0.25rem;
+  }
+
+  /* Stock - Row 5 (Full width bottom) */
+  .book-stock-cell {
+    grid-row: 5;
+    grid-column: 1 / -1; /* Full width bottom */
+    text-align: left;
+    display: flex !important; /* Force show */
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-tertiary);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    margin-top: 0.5rem;
+  }
+
+  /* Dark mode adjustments for cells */
+  .dark-mode .book-code-cell {
+    color: #94a3b8;
+  }
+  
+  .dark-mode .book-title-cell {
+    color: #f1f5f9;
+  }
+  
+  .dark-mode .book-author-cell {
+    color: #cbd5e1;
+  }
+  
+  .dark-mode .book-stock-cell {
+    background: rgba(30, 41, 59, 0.5);
+  }
+
+  /* Hide less important infos on mobile card to save space */
+  .book-publisher-cell,
+  .book-category-cell,
+  .book-pages-cell {
+    display: none;
+  }
+
+  .book-actions {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: end;
+    align-self: start;
+    position: absolute;
+    top: 3.5rem; /* Lowered to avoid code badge */
+    right: var(--spacing-4);
+  }
+} 
+
+/* Improve Filters on Mobile */
+@media (max-width: 768px) {
+  .invoice-filters,
+  .book-filters { 
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-search {
+    margin: 0 0 1rem 0 !important;
+    flex: none !important;
+  }
+  
+  .content-header > div:first-child {
+      margin-bottom: 1rem;
+  }
+  
+  /* Limpiar Filtros button full width */
+  .checkbox-filters-container .clean-filters-btn { 
+      width: 100%;
+      justify-content: center;
+      margin-top: 1rem;
+  }
+  
+  /* Fix Dark Mode Limpiar Filtros Visibility */
+  .dark-mode .clean-filters-btn {
+      color: #f87171;
+      border-color: #f87171;
+      background: rgba(239, 68, 68, 0.1); /* Subtle background for better visibility */
+  }
+
+  /* Title optimization */
+  .content-title {
+      font-size: 1.5rem;
   }
 }
 
@@ -1749,4 +1927,87 @@ html.dark-mode .create-book-modal,
 
 .dark-mode .stat-icon {
   color: white !important;
+}
+
+/* Filters Checkboxes Container */
+.checkbox-filters-container {
+  flex: 1 1 100%;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+  flex-wrap: wrap; /* Allow wrapping */
+}
+
+.clean-filters-btn {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clean-filters-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+  .checkbox-filters-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .clean-filters-btn {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+  
+  /* Create Book Modal - Mobile Search Optimization */
+  .search-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .isbn-search-container .search-input,
+  .isbn-search-container .search-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Responsive Form Grid for Create Book Modal */
+  .form-row-2,
+  .form-row-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Improve Touch Targets on Mobile */
+  .form-input, 
+  .form-select, 
+  .search-input {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 0.75rem !important;
+  }
+}
+
+/* Form Layout Classes */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }

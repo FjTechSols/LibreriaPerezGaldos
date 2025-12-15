@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
 import { supabase } from '../lib/supabase';
 import {
@@ -270,7 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin,
       isSuperAdmin
     }}>
-      {showSplash && <Loader />}
+      {(loading || showSplash) && <Loader />}
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -1,0 +1,11 @@
+-- ==============================================================================
+-- SCRIPT DE RESETEO DE LIBROS
+-- ==============================================================================
+-- ADVERTENCIA: Este comando borrará TODOS los registros de la tabla 'libros'.
+-- Usamos 'CASCADE' para eliminar también dependencias (ej: autores vinculados, detalles de pedidos).
+-- 'RESTART IDENTITY' reinicia el contador de IDs a 1.
+-- ==============================================================================
+TRUNCATE TABLE libros RESTART IDENTITY CASCADE;
+-- Nota: 'legacy_id' es una columna de texto/número que viene del archivo, 
+-- por lo que no tiene un contador interno en la base de datos que necesite reinicio.
+-- El comando anterior se encarga de todo el reseteo necesario.

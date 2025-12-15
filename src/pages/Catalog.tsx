@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BookCard } from '../components/BookCard';
 import { SearchBar } from '../components/SearchBar';
@@ -26,7 +26,7 @@ export function Catalog() {
   const [filters, setFilters] = useState<FilterState>({
     category: searchParams.get('category') || 'Todos',
     priceRange: [0, 1000],
-    availability: 'all',
+    availability: 'inStock', /* Default: Hide Out of Stock */
     sortBy: 'title',
     sortOrder: 'asc'
   });
@@ -56,7 +56,10 @@ export function Catalog() {
             maxPrice: filters.priceRange[1],
             availability: filters.availability,
             sortBy: filters.sortBy,
-            sortOrder: filters.sortOrder
+            sortOrder: filters.sortOrder,
+            featured: filters.featured,
+            isOnSale: filters.onSale, // Mapped correctly to service interface
+            isNew: filters.isNew
         };
 
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, serviceFilters);
@@ -159,9 +162,12 @@ export function Catalog() {
                         setFilters({
                           category: 'Todos',
                           priceRange: [0, 1000],
-                          availability: 'all',
+                          availability: 'inStock',
                           sortBy: 'title',
-                          sortOrder: 'asc'
+                          sortOrder: 'asc',
+                          featured: false,
+                          onSale: false,
+                          isNew: false
                         });
                         // Also clear search param if needed, or simple reset filters locally
                       }}

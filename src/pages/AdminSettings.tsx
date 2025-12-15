@@ -5,12 +5,12 @@ import { useSettings } from '../context/SettingsContext';
 import {
   Building2, Mail, Phone, Globe, FileText, DollarSign,
   Truck, Bell, Database, Shield, Settings as SettingsIcon,
-  Package, CreditCard, Download, HardDrive, Check, MapPin,
+  Package, Download, HardDrive, Check, MapPin,
   Home, LayoutDashboard, X
 } from 'lucide-react';
 
-import { GestionUbicaciones } from '../components/GestionUbicaciones';
-import { GestionUsuariosAdmin } from '../components/GestionUsuariosAdmin';
+import { GestionUbicaciones } from '../components/admin/books/GestionUbicaciones';
+import { GestionUsuariosAdmin } from '../components/admin/clients/GestionUsuariosAdmin';
 import {
   exportLibrosToCSV,
   exportCategoriasToCSV,
@@ -24,7 +24,7 @@ import '../styles/pages/AdminSettings.css';
 
 export function AdminSettings() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { } = useAuth();
   const {
     settings,
     loading,
@@ -36,7 +36,12 @@ export function AdminSettings() {
   } = useSettings();
 
   const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
-  const [isExporting, setIsExporting] = useState(false);
+  const [exportState, setExportState] = useState<{ isExporting: boolean; type: string | null; progress: number; total: number }>({
+    isExporting: false,
+    type: null,
+    progress: 0,
+    total: 0
+  });
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -160,14 +165,16 @@ export function AdminSettings() {
     }
   };
 
-  const handleExport = async (exportFunction: () => Promise<void>, name: string) => {
-    setIsExporting(true);
+  const handleExport = async (exportFunction: (onProgress: (c: number, t: number) => void) => Promise<void>, name: string) => {
+    setExportState({ isExporting: true, type: name, progress: 0, total: 0 });
     try {
-      await exportFunction();
+      await exportFunction((current, total) => {
+         setExportState(prev => ({ ...prev, progress: current, total }));
+      });
     } catch (error) {
       console.error(`Error exportando ${name}:`, error);
     } finally {
-      setIsExporting(false);
+      setExportState({ isExporting: false, type: null, progress: 0, total: 0 });
     }
   };
 
@@ -711,117 +718,55 @@ export function AdminSettings() {
                   </div>
 
                   <div className="backup-grid">
-                    <div className="backup-card">
-                      <div className="backup-card-header">
-                        <Database size={32} />
-                        <h3>Todos los Libros</h3>
-                      </div>
-                      <p>Exportar catálogo completo de libros (internos y externos)</p>
-                      <button
-                        onClick={() => handleExport(exportLibrosToCSV, 'Libros')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
-
-                    <div className="backup-card">
-                      <div className="backup-card-header">
-                        <Package size={32} />
-                        <h3>Categorías</h3>
-                      </div>
-                      <p>Exportar todas las categorías de libros</p>
-                      <button
-                        onClick={() => handleExport(exportCategoriasToCSV, 'Categorías')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
-
-                    <div className="backup-card">
-                      <div className="backup-card-header">
-                        <FileText size={32} />
-                        <h3>Facturas</h3>
-                      </div>
-                      <p>Exportar todas las facturas con líneas de detalle</p>
-                      <button
-                        onClick={() => handleExport(exportFacturasToCSV, 'Facturas')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
-
-                    <div className="backup-card">
-                      <div className="backup-card-header">
-                        <Truck size={32} />
-                        <h3>Pedidos</h3>
-                      </div>
-                      <p>Exportar todos los pedidos con líneas de detalle</p>
-                      <button
-                        onClick={() => handleExport(exportPedidosToCSV, 'Pedidos')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
-
-                    <div className="backup-card iberlibro">
-                      <div className="backup-card-header">
-                        <Globe size={32} />
-                        <h3>Iberlibro</h3>
-                      </div>
-                      <p>Exportar solo libros de Iberlibro</p>
-                      <button
-                        onClick={() => handleExport(exportIberlibroToCSV, 'Iberlibro')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
-
-                    <div className="backup-card uniliber">
-                      <div className="backup-card-header">
-                        <Globe size={32} />
-                        <h3>Uniliber</h3>
-                      </div>
-                      <p>Exportar solo libros de Uniliber</p>
-                      <button
-                        onClick={() => handleExport(exportUniliberToCSV, 'Uniliber')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
-
-                    <div className="backup-card">
-                      <div className="backup-card-header">
-                        <Building2 size={32} />
-                        <h3>Clientes</h3>
-                      </div>
-                      <p>Exportar base de datos de clientes</p>
-                      <button
-                        onClick={() => handleExport(exportClientesToCSV, 'Clientes')}
-                        disabled={isExporting}
-                        className="btn-primary"
-                      >
-                        <Download size={18} />
-                        {isExporting ? 'Exportando...' : 'Descargar CSV'}
-                      </button>
-                    </div>
+                    {[
+                        { title: 'Todos los Libros', icon: Database, desc: 'Exportar catálogo completo de libros', fn: exportLibrosToCSV, id: 'Libros' },
+                        { title: 'Categorías', icon: Package, desc: 'Exportar todas las categorías', fn: exportCategoriasToCSV, id: 'Categorías' },
+                        { title: 'Facturas', icon: FileText, desc: 'Exportar facturas con detalles', fn: exportFacturasToCSV, id: 'Facturas' },
+                        { title: 'Pedidos', icon: Truck, desc: 'Exportar pedidos con detalles', fn: exportPedidosToCSV, id: 'Pedidos' },
+                        { title: 'Iberlibro', icon: Globe, desc: 'Exportar libros de Iberlibro', fn: exportIberlibroToCSV, id: 'Iberlibro', className: 'iberlibro' },
+                        { title: 'Uniliber', icon: Globe, desc: 'Exportar libros de Uniliber', fn: exportUniliberToCSV, id: 'Uniliber', className: 'uniliber' },
+                        { title: 'Clientes', icon: Building2, desc: 'Exportar base de clientes', fn: exportClientesToCSV, id: 'Clientes' }
+                    ].map((item) => (
+                        <div key={item.id} className={`backup-card ${item.className || ''}`}>
+                            <div className="backup-card-header">
+                                <item.icon size={32} />
+                                <h3>{item.title}</h3>
+                            </div>
+                            <p>{item.desc}</p>
+                            <button
+                                onClick={() => handleExport(item.fn, item.id)}
+                                disabled={exportState.isExporting}
+                                className="btn-primary"
+                            >
+                                <Download size={18} />
+                                {exportState.isExporting && exportState.type === item.id ? 'Exportando...' : 'Descargar CSV'}
+                            </button>
+                            {exportState.isExporting && exportState.type === item.id && (
+                                <div style={{ marginTop: '10px', width: '100%' }}>
+                                    {exportState.total > 0 ? (
+                                        <>
+                                            <div style={{ width: '100%', background: '#eee', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
+                                                <div style={{
+                                                    width: `${(exportState.progress / exportState.total) * 100}%`,
+                                                    height: '100%',
+                                                    background: '#22c55e',
+                                                    transition: 'width 0.3s ease'
+                                                }} />
+                                            </div>
+                                            <div style={{ fontSize: '10px', marginTop: '2px', textAlign: 'right', color: '#666' }}>
+                                                {exportState.progress.toLocaleString()} / {exportState.total.toLocaleString()}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--primary-color)' }}>
+                                            <span>Exportando...</span>
+                                            <strong>{exportState.progress.toLocaleString()} registros</strong>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
                   </div>
 
                   <div className="info-box" style={{ marginTop: '2rem' }}>

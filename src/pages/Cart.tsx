@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, CreditCard, AlertCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -66,7 +66,8 @@ export function Cart() {
         ciudad: checkoutData.ciudad,
         codigo_postal: checkoutData.codigo_postal,
         provincia: checkoutData.provincia,
-        pais: checkoutData.pais
+        pais: checkoutData.pais,
+        tipo: 'particular'
       });
 
       const direccionCompleta = `${checkoutData.direccion}, ${checkoutData.codigo_postal} ${checkoutData.ciudad}, ${checkoutData.provincia}, ${checkoutData.pais}`;

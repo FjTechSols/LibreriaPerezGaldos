@@ -1,0 +1,1241 @@
+[2025-12-15T09:53:21.137Z] 🚀 Starting Force Cleanup of Non-Standard Categories...
+[2025-12-15T09:53:26.052Z] ✅ Identified 51 standard categories to PROTECT.
+[2025-12-15T09:53:27.003Z] ⚠️ Found 7146 categories to DELETE.
+[2025-12-15T09:53:36.443Z]   ❌ Error unlinking books for 'Geografía-memorias': canceling statement due to statement timeout
+[2025-12-15T09:53:37.165Z]   ❌ Error unlinking books for 'Botánica': canceling statement due to statement timeout
+[2025-12-15T09:53:47.828Z]   ❌ Failed to delete 'Botánica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:47.870Z]   ❌ Failed to delete 'Geografía-memorias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:47.935Z]   ❌ Error unlinking books for 'Biología': canceling statement due to statement timeout
+[2025-12-15T09:53:48.447Z]   ❌ Error unlinking books for 'Literatura': canceling statement due to statement timeout
+[2025-12-15T09:53:48.450Z]   ❌ Error unlinking books for 'Física': canceling statement due to statement timeout
+[2025-12-15T09:53:48.790Z]   ❌ Error unlinking books for 'Antropología': canceling statement due to statement timeout
+[2025-12-15T09:53:50.546Z]   ❌ Error unlinking books for 'Lingüística': canceling statement due to statement timeout
+[2025-12-15T09:53:50.577Z]   ❌ Error unlinking books for 'Ciencias naturales': canceling statement due to statement timeout
+[2025-12-15T09:53:50.733Z]   ❌ Error unlinking books for 'Memorias': canceling statement due to statement timeout
+[2025-12-15T09:53:53.738Z]   ❌ Error unlinking books for 'Literatura búlgara': canceling statement due to statement timeout
+[2025-12-15T09:53:53.781Z]   ❌ Failed to delete 'Biología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:53.796Z]   ❌ Failed to delete 'Antropología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:53.967Z]   ❌ Failed to delete 'Literatura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:53.994Z]   ❌ Failed to delete 'Literatura búlgara': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:53.996Z]   ❌ Failed to delete 'Lingüística': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:53:56.202Z]   ❌ Error unlinking books for 'Humor': canceling statement due to statement timeout
+[2025-12-15T09:53:59.382Z]   ❌ Error unlinking books for 'Astrología': canceling statement due to statement timeout
+[2025-12-15T09:53:59.897Z]   ❌ Error unlinking books for 'Ensayo': canceling statement due to statement timeout
+[2025-12-15T09:54:00.424Z]   ❌ Error unlinking books for 'Medicina': canceling statement due to statement timeout
+[2025-12-15T09:54:00.594Z]   ❌ Failed to delete 'Humor': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:00.751Z]   ❌ Failed to delete 'Ciencias naturales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:01.358Z]   ❌ Failed to delete 'Física': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:01.690Z]   ❌ Error unlinking books for 'Filología': canceling statement due to statement timeout
+[2025-12-15T09:54:02.924Z]   ❌ Error unlinking books for 'Ciencias': canceling statement due to statement timeout
+[2025-12-15T09:54:02.986Z]   ❌ Error unlinking books for 'Crítica literaria': canceling statement due to statement timeout
+[2025-12-15T09:54:02.998Z]   ❌ Error unlinking books for 'Cuento': canceling statement due to statement timeout
+[2025-12-15T09:54:03.674Z]   ❌ Failed to delete 'Memorias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:05.165Z]   ❌ Failed to delete 'Filología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:05.455Z]   ❌ Failed to delete 'Cuento': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:13.572Z]   ❌ Error unlinking books for 'Química': canceling statement due to statement timeout
+[2025-12-15T09:54:13.818Z]   ❌ Error unlinking books for 'Agricultura': canceling statement due to statement timeout
+[2025-12-15T09:54:13.822Z]   ❌ Error unlinking books for 'Novela': canceling statement due to statement timeout
+[2025-12-15T09:54:13.841Z]   ❌ Error unlinking books for 'Ciencia': canceling statement due to statement timeout
+[2025-12-15T09:54:13.843Z]   ❌ Error unlinking books for 'Geografía': canceling statement due to statement timeout
+[2025-12-15T09:54:13.847Z]   ❌ Error unlinking books for 'Arquitectura': canceling statement due to statement timeout
+[2025-12-15T09:54:13.848Z]   ❌ Error unlinking books for 'Zoología': canceling statement due to statement timeout
+[2025-12-15T09:54:13.927Z]   ❌ Error unlinking books for 'Biografía': canceling statement due to statement timeout
+[2025-12-15T09:54:14.186Z]   ❌ Failed to delete 'Astrología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.189Z]   ❌ Failed to delete 'Crítica literaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.197Z]   ❌ Failed to delete 'Química': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.240Z]   ❌ Failed to delete 'Agricultura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.250Z]   ❌ Failed to delete 'Medicina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.294Z]   ❌ Failed to delete 'Ciencias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.344Z]   ❌ Error unlinking books for 'Guerra civil': canceling statement due to statement timeout
+[2025-12-15T09:54:14.496Z]   ❌ Failed to delete 'Biografía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.516Z]   ❌ Failed to delete 'Guerra civil': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.539Z]   ❌ Failed to delete 'Zoología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.671Z]   ❌ Failed to delete 'Geografía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.721Z]   ❌ Failed to delete 'Ensayo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.730Z]   ❌ Failed to delete 'Arquitectura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:14.786Z]   ❌ Failed to delete 'Ciencia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:15.259Z]   ❌ Failed to delete 'Novela': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:22.226Z]   ❌ Error unlinking books for 'Relatos': canceling statement due to statement timeout
+[2025-12-15T09:54:22.965Z]   ❌ Error unlinking books for 'Militaria': canceling statement due to statement timeout
+[2025-12-15T09:54:23.267Z]   ❌ Error unlinking books for 'Ecología': canceling statement due to statement timeout
+[2025-12-15T09:54:24.141Z]   ❌ Failed to delete 'Militaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:24.164Z]   ❌ Failed to delete 'Relatos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:24.525Z]   ❌ Failed to delete 'Ecología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:31.663Z]   ❌ Error unlinking books for 'Matemáticas': canceling statement due to statement timeout
+[2025-12-15T09:54:32.148Z]   ❌ Failed to delete 'Matemáticas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:55.788Z]   ❌ Error unlinking books for 'Medicina natural': canceling statement due to statement timeout
+[2025-12-15T09:54:55.792Z]   ❌ Error unlinking books for 'Sociología': canceling statement due to statement timeout
+[2025-12-15T09:54:55.977Z]   ❌ Error unlinking books for 'Naturaleza': canceling statement due to statement timeout
+[2025-12-15T09:54:55.979Z]   ❌ Error unlinking books for 'Esoterismo': canceling statement due to statement timeout
+[2025-12-15T09:54:56.002Z]   ❌ Error unlinking books for 'Deporte': canceling statement due to statement timeout
+[2025-12-15T09:54:56.005Z]   ❌ Error unlinking books for 'Lingüística francesa': canceling statement due to statement timeout
+[2025-12-15T09:54:56.016Z]   ❌ Failed to delete 'Sociología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:57.377Z]   ❌ Failed to delete 'Lingüística francesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:58.354Z]   ❌ Failed to delete 'Medicina natural': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:54:59.992Z]   ❌ Failed to delete 'Cocina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:00.040Z]   ❌ Failed to delete 'Naturaleza': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:00.159Z]   ❌ Failed to delete 'Deporte': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:02.823Z]   ❌ Error unlinking books for 'Narrativa hispánica': canceling statement due to statement timeout
+[2025-12-15T09:55:03.119Z]   ❌ Error unlinking books for 'Esayo-2ª g. m': canceling statement due to statement timeout
+[2025-12-15T09:55:03.959Z]   ❌ Error unlinking books for 'Novela española': canceling statement due to statement timeout
+[2025-12-15T09:55:04.296Z]   ❌ Error unlinking books for 'Teología pastoral': canceling statement due to statement timeout
+[2025-12-15T09:55:06.751Z]   ❌ Failed to delete 'Esoterismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:06.757Z]   ❌ Failed to delete 'Narrativa hispánica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:07.097Z]   ❌ Error unlinking books for 'Pedagogía': canceling statement due to statement timeout
+[2025-12-15T09:55:07.251Z]   ❌ Error unlinking books for 'Narrativa': canceling statement due to statement timeout
+[2025-12-15T09:55:07.253Z]   ❌ Error unlinking books for 'Literatura hispánica': canceling statement due to statement timeout
+[2025-12-15T09:55:07.263Z]   ❌ Error unlinking books for 'Literatura francesa': canceling statement due to statement timeout
+[2025-12-15T09:55:07.308Z]   ❌ Failed to delete 'Esayo-2ª g. m': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:07.913Z]   ❌ Failed to delete 'Narrativa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:07.935Z]   ❌ Failed to delete 'Teología pastoral': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:07.963Z]   ❌ Failed to delete 'Literatura francesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:08.270Z]   ❌ Failed to delete 'Novela española': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:08.285Z]   ❌ Failed to delete 'Literatura hispánica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:08.332Z]   ❌ Failed to delete 'Pedagogía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:08.685Z]   ❌ Error unlinking books for 'Folklore': canceling statement due to statement timeout
+[2025-12-15T09:55:09.134Z]   ❌ Failed to delete 'Folklore': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:15.403Z]   ❌ Error unlinking books for 'Novela italiana': canceling statement due to statement timeout
+[2025-12-15T09:55:15.822Z]   ❌ Failed to delete 'Novela italiana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:25.377Z]   ❌ Error unlinking books for 'Tearía literaria': canceling statement due to statement timeout
+[2025-12-15T09:55:25.413Z]   ❌ Error unlinking books for 'Memorias-conversaciones': canceling statement due to statement timeout
+[2025-12-15T09:55:25.583Z]   ❌ Failed to delete 'Memorias-conversaciones': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:26.004Z]   ❌ Failed to delete 'Tearía literaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:28.262Z]   ❌ Error unlinking books for 'Musica': canceling statement due to statement timeout
+[2025-12-15T09:55:28.468Z]   ❌ Error unlinking books for 'Poesia': canceling statement due to statement timeout
+[2025-12-15T09:55:28.546Z]   ❌ Failed to delete 'Poesia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:28.580Z]   ❌ Failed to delete 'Musica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:30.273Z]   ❌ Failed to delete 'Filosofía(1)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:39.633Z]   ❌ Error unlinking books for 'Educación-humor-familia': canceling statement due to statement timeout
+[2025-12-15T09:55:39.642Z]   ❌ Error unlinking books for 'Sociología civil': canceling statement due to statement timeout
+[2025-12-15T09:55:39.885Z]   ❌ Failed to delete 'Educación-humor-familia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:39.915Z]   ❌ Failed to delete 'Sociología civil': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:40.969Z]   ❌ Error unlinking books for 'Literatura en lengua inglesa': canceling statement due to statement timeout
+[2025-12-15T09:55:41.065Z]   ❌ Failed to delete 'Literatura en lengua inglesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:55:41.216Z]   ❌ Error unlinking books for 'Sexualidad': canceling statement due to statement timeout
+[2025-12-15T09:55:41.341Z]   ❌ Failed to delete 'Sexualidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:00.912Z]   ❌ Error unlinking books for 'General': canceling statement due to statement timeout
+[2025-12-15T09:56:01.161Z]   ❌ Error unlinking books for 'Gramática': canceling statement due to statement timeout
+[2025-12-15T09:56:01.204Z]   ❌ Error unlinking books for 'Arquitectura naval': canceling statement due to statement timeout
+[2025-12-15T09:56:01.213Z]   ❌ Error unlinking books for 'Taquigrafía': canceling statement due to statement timeout
+[2025-12-15T09:56:01.215Z]   ❌ Error unlinking books for 'Educación': canceling statement due to statement timeout
+[2025-12-15T09:56:01.235Z]   ❌ Error unlinking books for 'Diccionario': canceling statement due to statement timeout
+[2025-12-15T09:56:01.238Z]   ❌ Failed to delete 'General': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:01.239Z]   ❌ Error unlinking books for 'Literatura rusa': canceling statement due to statement timeout
+[2025-12-15T09:56:01.241Z]   ❌ Error unlinking books for 'Empresa': canceling statement due to statement timeout
+[2025-12-15T09:56:01.339Z]   ❌ Failed to delete 'Educación': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:01.360Z]   ❌ Failed to delete 'Diccionario': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:01.393Z]   ❌ Failed to delete 'Literatura rusa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:01.753Z]   ❌ Failed to delete 'Gramática': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:02.062Z]   ❌ Failed to delete 'Taquigrafía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:02.089Z]   ❌ Failed to delete 'Empresa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:02.098Z]   ❌ Failed to delete 'Arquitectura naval': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:07.146Z]   ❌ Error unlinking books for 'Entrevistas': canceling statement due to statement timeout
+[2025-12-15T09:56:07.862Z]   ❌ Failed to delete 'Entrevistas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:07.985Z]   ❌ Error unlinking books for 'Guerra de áfrica': canceling statement due to statement timeout
+[2025-12-15T09:56:08.298Z]   ❌ Failed to delete 'Guerra de áfrica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:19.414Z]   ❌ Error unlinking books for 'Apicultura': canceling statement due to statement timeout
+[2025-12-15T09:56:19.504Z]   ❌ Error unlinking books for 'Discurso': canceling statement due to statement timeout
+[2025-12-15T09:56:19.668Z]   ❌ Failed to delete 'Apicultura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:19.766Z]   ❌ Failed to delete 'Discurso': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:29.423Z]   ❌ Error unlinking books for 'Cómic': canceling statement due to statement timeout
+[2025-12-15T09:56:29.940Z]   ❌ Error unlinking books for 'Toros': canceling statement due to statement timeout
+[2025-12-15T09:56:29.943Z]   ❌ Error unlinking books for 'Autoayuda': canceling statement due to statement timeout
+[2025-12-15T09:56:31.016Z]   ❌ Failed to delete 'Toros': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:31.036Z]   ❌ Failed to delete 'Cómic': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:31.134Z]   ❌ Failed to delete 'Autoayuda': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:40.462Z]   ❌ Error unlinking books for 'Narrativa de humor': canceling statement due to statement timeout
+[2025-12-15T09:56:40.470Z]   ❌ Error unlinking books for 'Revistas': canceling statement due to statement timeout
+[2025-12-15T09:56:40.938Z]   ❌ Failed to delete 'Revistas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:41.019Z]   ❌ Failed to delete 'Narrativa de humor': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:52.715Z]   ❌ Failed to delete 'Novela catalana': <!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US"> <!--<![endif]-->
+<head>
+
+<title> | 500: Internal server error</title>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/main.css" />
+</head>
+<body>
+<div id="cf-wrapper">
+    <div id="cf-error-details" class="p-0">
+        <header class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-8">
+            <h1 class="inline-block sm:block sm:mb-2 font-light text-60 lg:text-4xl text-black-dark leading-tight mr-2">
+                <span class="inline-block">Internal server error</span>
+                <span class="code-label">Error code 500</span>
+            </h1>
+            <div>
+                Visit <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_500&utm_campaign=weaihscsaqxadxjgsfbt.supabase.co" target="_blank" rel="noopener noreferrer">cloudflare.com</a> for more information.
+            </div>
+            <div class="mt-3">2025-12-15 09:56:52 UTC</div>
+        </header>
+        <div class="my-8 bg-gradient-gray">
+            <div class="w-240 lg:w-full mx-auto">
+                <div class="clearfix md:px-8">
+                    <div id="cf-browser-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+    
+    <span class="cf-icon-browser block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+    
+  </div>
+  <span class="md:block w-full truncate">You</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+  
+    Browser
+  
+  </h3>
+  
+  <span class="leading-1.3 text-2xl text-green-success">Working</span>
+  
+</div>
+                    <div id="cf-cloudflare-status" class="cf-error-source relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+    <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_500&#38;utm_campaign=weaihscsaqxadxjgsfbt.supabase.co" target="_blank" rel="noopener noreferrer">
+    <span class="cf-icon-cloud block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-error w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+    </a>
+  </div>
+  <span class="md:block w-full truncate">Madrid</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+  <a href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_500&utm_campaign=weaihscsaqxadxjgsfbt.supabase.co" target="_blank" rel="noopener noreferrer">
+    Cloudflare
+  </a>
+  </h3>
+  
+  <span class="leading-1.3 text-2xl text-red-error">Error</span>
+  
+</div>
+                    <div id="cf-host-status" class=" relative w-1/3 md:w-full py-15 md:p-0 md:py-8 md:text-left md:border-solid md:border-0 md:border-b md:border-gray-400 overflow-hidden float-left md:float-none text-center">
+  <div class="relative mb-10 md:m-0">
+    
+    <span class="cf-icon-server block md:hidden h-20 bg-center bg-no-repeat"></span>
+    <span class="cf-icon-ok w-12 h-12 absolute left-1/2 md:left-auto md:right-0 md:top-0 -ml-6 -bottom-4"></span>
+    
+  </div>
+  <span class="md:block w-full truncate">weaihscsaqxadxjgsfbt.supabase.co</span>
+  <h3 class="md:inline-block mt-3 md:mt-0 text-2xl text-gray-600 font-light leading-1.3">
+  
+    Host
+  
+  </h3>
+  
+  <span class="leading-1.3 text-2xl text-green-success">Working</span>
+  
+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-240 lg:w-full mx-auto mb-8 lg:px-8">
+            <div class="clearfix">
+                <div class="w-1/2 md:w-full float-left pr-6 md:pb-10 md:pr-0 leading-relaxed">
+                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What happened?</h2>
+                    <p>There is an internal server error on Cloudflare's network.</p>
+                </div>
+                <div class="w-1/2 md:w-full float-left leading-relaxed">
+                    <h2 class="text-3xl font-normal leading-1.3 mb-4">What can I do?</h2>
+                    <p class="mb-6">Please try again in a few minutes.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+    <p class="text-13">
+      <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">9ae512d5d93f0327</strong></span>
+      <span class="cf-footer-separator sm:hidden">&bull;</span>
+      <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+        Your IP:
+        <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+        <span class="hidden" id="cf-footer-ip">93.156.192.137</span>
+        <span class="cf-footer-separator sm:hidden">&bull;</span>
+      </span>
+      <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing?utm_source=errorcode_500&#38;utm_campaign=weaihscsaqxadxjgsfbt.supabase.co" id="brand_link" target="_blank">Cloudflare</a></span>
+      
+    </p>
+    <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+  </div><!-- /.error-footer -->
+
+    </div>
+</div>
+</body>
+</html>
+[2025-12-15T09:56:55.671Z]   ❌ Error unlinking books for 'Filosofia de la ciencia': canceling statement due to statement timeout
+[2025-12-15T09:56:55.702Z]   ❌ Error unlinking books for 'Guía': canceling statement due to statement timeout
+[2025-12-15T09:56:55.871Z]   ❌ Failed to delete 'Guía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:56.149Z]   ❌ Failed to delete 'Filosofia de la ciencia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:56.303Z]   ❌ Error unlinking books for 'Lingüistica': canceling statement due to statement timeout
+[2025-12-15T09:56:56.513Z]   ❌ Failed to delete 'Lingüistica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:56:57.464Z]   ❌ Error unlinking books for 'Teología pastoral.(25)': canceling statement due to statement timeout
+[2025-12-15T09:56:57.562Z]   ❌ Failed to delete 'Teología pastoral.(25)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:03.654Z]   ❌ Error unlinking books for 'Literatura en lengua portuguesa. novela y cuento.(821.134.3-3)': canceling statement due to statement timeout
+[2025-12-15T09:57:03.860Z]   ❌ Failed to delete 'Literatura en lengua portuguesa. novela y cuento.(821.134.3-3)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:04.233Z]   ❌ Error unlinking books for 'Sociología.(316)': canceling statement due to statement timeout
+[2025-12-15T09:57:04.356Z]   ❌ Failed to delete 'Sociología.(316)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:14.777Z]   ❌ Error unlinking books for 'Narrativa hispánica-toros': canceling statement due to statement timeout
+[2025-12-15T09:57:14.780Z]   ❌ Error unlinking books for 'Literatura mística': canceling statement due to statement timeout
+[2025-12-15T09:57:15.196Z]   ❌ Failed to delete 'Literatura mística': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:15.611Z]   ❌ Failed to delete 'Narrativa hispánica-toros': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:15.617Z]   ❌ Error unlinking books for 'Ética': canceling statement due to statement timeout
+[2025-12-15T09:57:15.914Z]   ❌ Error unlinking books for 'Psicologia': canceling statement due to statement timeout
+[2025-12-15T09:57:16.012Z]   ❌ Failed to delete 'Ética': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:16.452Z]   ❌ Failed to delete 'Psicologia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:27.987Z]   ❌ Error unlinking books for 'Grecia': canceling statement due to statement timeout
+[2025-12-15T09:57:28.374Z]   ❌ Error unlinking books for 'Crítica': canceling statement due to statement timeout
+[2025-12-15T09:57:28.629Z]   ❌ Failed to delete 'Crítica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:28.644Z]   ❌ Failed to delete 'Grecia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:30.725Z]   ❌ Error unlinking books for 'Literatura española. novela y cuento.(821.134.2-3)': canceling statement due to statement timeout
+[2025-12-15T09:57:30.826Z]   ❌ Failed to delete 'Literatura española. novela y cuento.(821.134.2-3)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:36.564Z]   ❌ Error unlinking books for 'Filologia latina': canceling statement due to statement timeout
+[2025-12-15T09:57:37.475Z]   ❌ Error unlinking books for 'Biografías.(929)': canceling statement due to statement timeout
+[2025-12-15T09:57:37.671Z]   ❌ Failed to delete 'Filologia latina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:37.807Z]   ❌ Failed to delete 'Biografías.(929)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:37.808Z]    Processed 500/7146...
+[2025-12-15T09:57:46.441Z]   ❌ Error unlinking books for 'Literatura húngara': canceling statement due to statement timeout
+[2025-12-15T09:57:46.444Z]   ❌ Error unlinking books for 'Catálogos-hidrología': canceling statement due to statement timeout
+[2025-12-15T09:57:46.604Z]   ❌ Failed to delete 'Literatura húngara': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:46.688Z]   ❌ Failed to delete 'Catálogos-hidrología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:56.216Z]   ❌ Error unlinking books for 'Espiritulidad': canceling statement due to statement timeout
+[2025-12-15T09:57:56.218Z]   ❌ Error unlinking books for 'Enciclopedias': canceling statement due to statement timeout
+[2025-12-15T09:57:56.238Z]   ❌ Error unlinking books for 'Novela gráfica': canceling statement due to statement timeout
+[2025-12-15T09:57:56.835Z]   ❌ Error unlinking books for 'Diseño': canceling statement due to statement timeout
+[2025-12-15T09:57:57.686Z]   ❌ Failed to delete 'Espiritulidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:57.707Z]   ❌ Failed to delete 'Novela gráfica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:57:58.030Z]   ❌ Failed to delete 'Diseño': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:18.384Z]   ❌ Failed to delete 'Enciclopedias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:18.730Z]   ❌ Error unlinking books for 'Gestión': canceling statement due to statement timeout
+[2025-12-15T09:58:18.906Z]   ❌ Error unlinking books for 'España': canceling statement due to statement timeout
+[2025-12-15T09:58:19.388Z]   ❌ Error unlinking books for 'Meteorología': canceling statement due to statement timeout
+[2025-12-15T09:58:19.424Z]   ❌ Error unlinking books for 'Revista cultural': canceling statement due to statement timeout
+[2025-12-15T09:58:19.432Z]   ❌ Error unlinking books for 'Urbanismo': canceling statement due to statement timeout
+[2025-12-15T09:58:20.331Z]   ❌ Failed to delete 'España': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:20.389Z]   ❌ Failed to delete 'Revista cultural': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:20.516Z]   ❌ Failed to delete 'Gestión': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:20.615Z]   ❌ Failed to delete 'Urbanismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:20.699Z]   ❌ Failed to delete 'Meteorología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:25.972Z]   ❌ Error unlinking books for 'Biografías-matemáticas': canceling statement due to statement timeout
+[2025-12-15T09:58:26.108Z]   ❌ Failed to delete 'Biografías-matemáticas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:26.154Z]   ❌ Error unlinking books for 'Ensayo-sociología': canceling statement due to statement timeout
+[2025-12-15T09:58:26.243Z]   ❌ Failed to delete 'Ensayo-sociología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:35.349Z]   ❌ Error unlinking books for 'Literatura-ensayo': canceling statement due to statement timeout
+[2025-12-15T09:58:35.353Z]   ❌ Error unlinking books for 'Crítica literaria-latín': canceling statement due to statement timeout
+[2025-12-15T09:58:36.278Z]   ❌ Failed to delete 'Crítica literaria-latín': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:36.313Z]   ❌ Failed to delete 'Literatura-ensayo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:45.580Z]   ❌ Error unlinking books for 'Física-guerra': canceling statement due to statement timeout
+[2025-12-15T09:58:45.635Z]   ❌ Error unlinking books for 'Biografías-monarquía': canceling statement due to statement timeout
+[2025-12-15T09:58:45.680Z]   ❌ Failed to delete 'Física-guerra': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:45.710Z]   ❌ Failed to delete 'Biografías-monarquía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:50.180Z]   ❌ Error unlinking books for 'Literatura española': canceling statement due to statement timeout
+[2025-12-15T09:58:52.411Z]   ❌ Failed to delete 'Literatura española': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:53.811Z]   ❌ Error unlinking books for 'Periodismo': canceling statement due to statement timeout
+[2025-12-15T09:58:53.867Z]   ❌ Error unlinking books for 'Guías': canceling statement due to statement timeout
+[2025-12-15T09:58:53.947Z]   ❌ Error unlinking books for 'Literatura alemana': canceling statement due to statement timeout
+[2025-12-15T09:58:56.601Z]   ❌ Failed to delete 'Periodismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:57.215Z]   ❌ Failed to delete 'Guías': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:57.643Z]   ❌ Failed to delete 'Literatura alemana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:58:58.683Z]   ❌ Error unlinking books for 'Biografías': canceling statement due to statement timeout
+[2025-12-15T09:59:00.024Z]   ❌ Failed to delete 'Biografías': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:13.930Z]   ❌ Error unlinking books for 'Ganadería': canceling statement due to statement timeout
+[2025-12-15T09:59:13.937Z]   ❌ Error unlinking books for 'Novela documental': canceling statement due to statement timeout
+[2025-12-15T09:59:13.984Z]   ❌ Error unlinking books for 'Biografías-literatura': canceling statement due to statement timeout
+[2025-12-15T09:59:14.387Z]   ❌ Failed to delete 'Ganadería': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:14.450Z]   ❌ Error unlinking books for 'Literatura latina': canceling statement due to statement timeout
+[2025-12-15T09:59:14.542Z]   ❌ Failed to delete 'Novela documental': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:14.543Z]   ❌ Error unlinking books for 'Pintura': canceling statement due to statement timeout
+[2025-12-15T09:59:14.615Z]   ❌ Failed to delete 'Literatura latina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:14.834Z]   ❌ Failed to delete 'Biografías-literatura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:15.018Z]   ❌ Failed to delete 'Pintura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:15.192Z]   ❌ Error unlinking books for 'Geología': canceling statement due to statement timeout
+[2025-12-15T09:59:15.387Z]   ❌ Error unlinking books for 'Diccionarios': canceling statement due to statement timeout
+[2025-12-15T09:59:15.413Z]   ❌ Failed to delete 'Geología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:15.630Z]   ❌ Failed to delete 'Diccionarios': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:26.771Z]   ❌ Error unlinking books for 'Budismo': canceling statement due to statement timeout
+[2025-12-15T09:59:26.775Z]   ❌ Error unlinking books for 'Asistencia social': canceling statement due to statement timeout
+[2025-12-15T09:59:27.671Z]   ❌ Error unlinking books for 'Enseñanza': canceling statement due to statement timeout
+[2025-12-15T09:59:28.387Z]   ❌ Failed to delete 'Asistencia social': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:31.151Z]   ❌ Failed to delete 'Enseñanza': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:31.164Z]   ❌ Failed to delete 'Budismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:42.384Z]   ❌ Error unlinking books for 'Correspondencia': canceling statement due to statement timeout
+[2025-12-15T09:59:42.393Z]   ❌ Error unlinking books for 'Crítica literaria-mística': canceling statement due to statement timeout
+[2025-12-15T09:59:42.596Z]   ❌ Failed to delete 'Correspondencia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:42.625Z]   ❌ Failed to delete 'Crítica literaria-mística': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:52.699Z]   ❌ Error unlinking books for 'Ensayo-islam': canceling statement due to statement timeout
+[2025-12-15T09:59:52.795Z]   ❌ Error unlinking books for 'Zarzuela': canceling statement due to statement timeout
+[2025-12-15T09:59:53.466Z]   ❌ Failed to delete 'Ensayo-islam': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T09:59:53.874Z]   ❌ Failed to delete 'Zarzuela': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:00.759Z]   ❌ Error unlinking books for 'Hadas': canceling statement due to statement timeout
+[2025-12-15T10:00:02.945Z]   ❌ Failed to delete 'Hadas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:12.070Z]   ❌ Error unlinking books for 'Ocultismo': canceling statement due to statement timeout
+[2025-12-15T10:00:12.595Z]   ❌ Failed to delete 'Ocultismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:23.556Z]   ❌ Error unlinking books for 'Franquismo-mujer': canceling statement due to statement timeout
+[2025-12-15T10:00:24.489Z]   ❌ Failed to delete 'Franquismo-mujer': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:25.520Z]   ❌ Error unlinking books for 'Filosofia': canceling statement due to statement timeout
+[2025-12-15T10:00:25.716Z]   ❌ Failed to delete 'Filosofia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:34.939Z]   ❌ Error unlinking books for 'Sociología-oriente': canceling statement due to statement timeout
+[2025-12-15T10:00:39.226Z]   ❌ Error unlinking books for '2': canceling statement due to statement timeout
+[2025-12-15T10:00:39.244Z]   ❌ Failed to delete 'Sociología-oriente': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:39.280Z]   ❌ Error unlinking books for 'Narrativa portuguesa': canceling statement due to statement timeout
+[2025-12-15T10:00:39.288Z]   ❌ Error unlinking books for 'Contabilidad': canceling statement due to statement timeout
+[2025-12-15T10:00:39.323Z]   ❌ Failed to delete '2': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:39.386Z]   ❌ Failed to delete 'Narrativa portuguesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:39.430Z]   ❌ Failed to delete 'Contabilidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:43.311Z]   ❌ Error unlinking books for 'Literatura en lengua italiana': canceling statement due to statement timeout
+[2025-12-15T10:00:44.254Z]   ❌ Failed to delete 'Literatura en lengua italiana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:00:44.255Z]    Processed 1000/7146...
+[2025-12-15T10:01:05.281Z]   ❌ Error unlinking books for 'Salud': canceling statement due to statement timeout
+[2025-12-15T10:01:06.346Z]   ❌ Failed to delete 'Salud': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:01:18.620Z]   ❌ Error unlinking books for 'Literatura en lengua francesa': canceling statement due to statement timeout
+[2025-12-15T10:01:18.622Z]   ❌ Error unlinking books for 'Geografía de españa': canceling statement due to statement timeout
+[2025-12-15T10:01:19.098Z]   ❌ Failed to delete 'Literatura en lengua francesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:01:19.100Z]   ❌ Failed to delete 'Geografía de españa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:01:46.723Z]   ❌ Error unlinking books for 'Literatura en lengua alemana. novela y cuento.(821.112.2-3)': canceling statement due to statement timeout
+[2025-12-15T10:01:46.824Z]   ❌ Error unlinking books for 'Feminismo': canceling statement due to statement timeout
+[2025-12-15T10:01:46.835Z]   ❌ Failed to delete 'Literatura en lengua alemana. novela y cuento.(821.112.2-3)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:01:46.895Z]   ❌ Failed to delete 'Feminismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:01:58.510Z]   ❌ Error unlinking books for 'Astronomía': canceling statement due to statement timeout
+[2025-12-15T10:01:59.758Z]   ❌ Failed to delete 'Astronomía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:02:08.951Z]   ❌ Error unlinking books for 'Geografía-mapas': canceling statement due to statement timeout
+[2025-12-15T10:02:10.041Z]   ❌ Failed to delete 'Geografía-mapas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:02:11.616Z]   ❌ Error unlinking books for 'Economia': canceling statement due to statement timeout
+[2025-12-15T10:02:11.903Z]   ❌ Failed to delete 'Economia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:02:16.449Z]   ❌ Error unlinking books for 'Divulgación': canceling statement due to statement timeout
+[2025-12-15T10:02:17.040Z]   ❌ Failed to delete 'Divulgación': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:02:17.041Z]    Processed 1500/7146...
+[2025-12-15T10:02:27.252Z]   ❌ Error unlinking books for 'Antropología-folklore': canceling statement due to statement timeout
+[2025-12-15T10:02:28.593Z]   ❌ Failed to delete 'Antropología-folklore': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:02:55.711Z]   ❌ Error unlinking books for 'Teología dogmática.(23)': canceling statement due to statement timeout
+[2025-12-15T10:02:56.477Z]   ❌ Failed to delete 'Teología dogmática.(23)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:03:14.494Z]    Processed 2000/7146...
+[2025-12-15T10:03:37.831Z]   ❌ Error unlinking books for 'Literatura española. otros géneros.(821.134.2-4/-9)': canceling statement due to statement timeout
+[2025-12-15T10:03:38.587Z]   ❌ Failed to delete 'Literatura española. otros géneros.(821.134.2-4/-9)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:03:47.697Z]   ❌ Error unlinking books for 'Literatura en lengua francesa. otros géneros.(821.133.1-4/-9)': canceling statement due to statement timeout
+[2025-12-15T10:03:47.792Z]   ❌ Failed to delete 'Literatura en lengua francesa. otros géneros.(821.133.1-4/-9)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:03:54.237Z]   ❌ Error unlinking books for 'Banca': canceling statement due to statement timeout
+[2025-12-15T10:03:55.540Z]   ❌ Failed to delete 'Banca': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:05.374Z]   ❌ Error unlinking books for 'Ballet. fotografia': canceling statement due to statement timeout
+[2025-12-15T10:04:05.602Z]   ❌ Failed to delete 'Ballet. fotografia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:21.680Z]   ❌ Error unlinking books for 'Organización de mercados': canceling statement due to statement timeout
+[2025-12-15T10:04:21.844Z]   ❌ Error unlinking books for 'Cuidado del cuerpo': canceling statement due to statement timeout
+[2025-12-15T10:04:21.962Z]   ❌ Error unlinking books for 'Administración local': canceling statement due to statement timeout
+[2025-12-15T10:04:22.091Z]   ❌ Error unlinking books for 'Ictología': canceling statement due to statement timeout
+[2025-12-15T10:04:22.294Z]   ❌ Failed to delete 'Cuidado del cuerpo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:22.315Z]   ❌ Failed to delete 'Organización de mercados': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:22.388Z]   ❌ Failed to delete 'Ictología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:22.567Z]   ❌ Failed to delete 'Administración local': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:29.009Z]   ❌ Error unlinking books for 'Cuento. literatura en italiano': canceling statement due to statement timeout
+[2025-12-15T10:04:29.962Z]   ❌ Error unlinking books for 'Reportaje': canceling statement due to statement timeout
+[2025-12-15T10:04:33.142Z]   ❌ Failed to delete 'Cuento. literatura en italiano': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:33.171Z]   ❌ Failed to delete 'Reportaje': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:42.810Z]   ❌ Error unlinking books for 'Arqueologia botanica': canceling statement due to statement timeout
+[2025-12-15T10:04:42.879Z]   ❌ Error unlinking books for 'Narraciones, fábulas, leyendas': canceling statement due to statement timeout
+[2025-12-15T10:04:43.785Z]   ❌ Failed to delete 'Narraciones, fábulas, leyendas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:43.927Z]   ❌ Failed to delete 'Arqueologia botanica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:04:47.062Z]   ❌ Error unlinking books for 'Literatura uruguaya': canceling statement due to statement timeout
+[2025-12-15T10:04:47.548Z]   ❌ Failed to delete 'Literatura uruguaya': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:06.008Z]   ❌ Error unlinking books for 'Zoología marina': canceling statement due to statement timeout
+[2025-12-15T10:05:08.789Z]   ❌ Error unlinking books for 'Industria del mueble y afines': canceling statement due to statement timeout
+[2025-12-15T10:05:10.088Z]   ❌ Failed to delete 'Zoología marina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:10.618Z]   ❌ Failed to delete 'Industria del mueble y afines': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:14.613Z]   ❌ Error unlinking books for 'Nutrición. biografías': canceling statement due to statement timeout
+[2025-12-15T10:05:15.501Z]   ❌ Error unlinking books for 'Dibujo lineal y geométrico. dibujo técnico.(744)': canceling statement due to statement timeout
+[2025-12-15T10:05:15.609Z]   ❌ Failed to delete 'Nutrición. biografías': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:32.285Z]   ❌ Error unlinking books for 'Fuentes de energía': canceling statement due to statement timeout
+[2025-12-15T10:05:47.537Z]   ❌ Failed to delete 'Fuentes de energía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:48.212Z]   ❌ Error unlinking books for 'Geografía de colombia': canceling statement due to statement timeout
+[2025-12-15T10:05:52.838Z]   ❌ Error unlinking books for 'Coleccionismo': canceling statement due to statement timeout
+[2025-12-15T10:05:52.874Z]   ❌ Error unlinking books for 'Saurópsidos (reptiles)': canceling statement due to statement timeout
+[2025-12-15T10:05:54.620Z]   ❌ Failed to delete 'Geografía de colombia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:56.507Z]   ❌ Error unlinking books for 'Patología del aparato locomotor.(616.7)': canceling statement due to statement timeout
+[2025-12-15T10:05:57.150Z]   ❌ Error unlinking books for 'Inglés.(811.111)': canceling statement due to statement timeout
+[2025-12-15T10:05:57.336Z]   ❌ Failed to delete 'Patología del aparato locomotor.(616.7)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:57.392Z]   ❌ Failed to delete 'Inglés.(811.111)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:05:57.652Z]   ❌ Failed to delete 'Saurópsidos (reptiles)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:00.317Z]   ❌ Failed to delete 'Dibujo lineal y geométrico. dibujo técnico.(744)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:10.842Z]   ❌ Error unlinking books for 'Sexologia. mujer': canceling statement due to statement timeout
+[2025-12-15T10:06:10.854Z]   ❌ Error unlinking books for 'Literatura  argelina. novela y cuento': canceling statement due to statement timeout
+[2025-12-15T10:06:11.315Z]   ❌ Failed to delete 'Coleccionismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:12.256Z]   ❌ Failed to delete 'Sexologia. mujer': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:14.564Z]   ❌ Error unlinking books for 'Literatura en lengua inglesa policica': canceling statement due to statement timeout
+[2025-12-15T10:06:17.563Z]   ❌ Failed to delete 'Literatura  argelina. novela y cuento': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:20.049Z]   ❌ Failed to delete 'Literatura en lengua inglesa policica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:22.998Z]   ❌ Error unlinking books for 'Higiene de la alimentación. dietética.(613.2)': canceling statement due to statement timeout
+[2025-12-15T10:06:23.106Z]   ❌ Failed to delete 'Higiene de la alimentación. dietética.(613.2)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:26.266Z]   ❌ Error unlinking books for 'Manuales de tecnica agropecuaria': canceling statement due to statement timeout
+[2025-12-15T10:06:26.547Z]   ❌ Failed to delete 'Manuales de tecnica agropecuaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:39.473Z]   ❌ Error unlinking books for 'Mamíferos': canceling statement due to statement timeout
+[2025-12-15T10:06:39.897Z]   ❌ Failed to delete 'Mamíferos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:39.923Z]   ❌ Error unlinking books for 'Magia. brujeri­a. espiritismo': canceling statement due to statement timeout
+[2025-12-15T10:06:40.347Z]   ❌ Failed to delete 'Magia. brujeri­a. espiritismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:43.041Z]   ❌ Error unlinking books for 'Literatura colombiana': canceling statement due to statement timeout
+[2025-12-15T10:06:43.120Z]   ❌ Failed to delete 'Literatura colombiana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:47.134Z]   ❌ Error unlinking books for 'Probabilidad y estadística matemática': canceling statement due to statement timeout
+[2025-12-15T10:06:48.427Z]   ❌ Failed to delete 'Probabilidad y estadística matemática': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:06:57.751Z]   ❌ Error unlinking books for 'Museologia': canceling statement due to statement timeout
+[2025-12-15T10:06:57.854Z]   ❌ Failed to delete 'Museologia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:01.099Z]   ❌ Error unlinking books for 'Comi': canceling statement due to statement timeout
+[2025-12-15T10:07:05.690Z]   ❌ Error unlinking books for 'Sanidad pública': canceling statement due to statement timeout
+[2025-12-15T10:07:06.695Z]   ❌ Failed to delete 'Sanidad pública': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:14.176Z]   ❌ Failed to delete 'Comi': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:24.282Z]   ❌ Error unlinking books for 'Devocionario': canceling statement due to statement timeout
+[2025-12-15T10:07:24.450Z]   ❌ Error unlinking books for 'Cinematografia': canceling statement due to statement timeout
+[2025-12-15T10:07:24.846Z]   ❌ Failed to delete 'Devocionario': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:29.434Z]   ❌ Failed to delete 'Cinematografia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:30.812Z]   ❌ Error unlinking books for 'Estudio, conservación y protección de la naturaleza': canceling statement due to statement timeout
+[2025-12-15T10:07:31.283Z]   ❌ Failed to delete 'Estudio, conservación y protección de la naturaleza': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:32.067Z]   ❌ Error unlinking books for 'Estrellas': canceling statement due to statement timeout
+[2025-12-15T10:07:32.139Z]   ❌ Failed to delete 'Estrellas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:39.107Z]   ❌ Error unlinking books for 'Ciencias aplicadas': canceling statement due to statement timeout
+[2025-12-15T10:07:39.720Z]   ❌ Failed to delete 'Ciencias aplicadas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:39.720Z]    Processed 2500/7146...
+[2025-12-15T10:07:50.615Z]   ❌ Error unlinking books for 'Cientifico': canceling statement due to statement timeout
+[2025-12-15T10:07:50.815Z]   ❌ Failed to delete 'Cientifico': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:50.848Z]   ❌ Error unlinking books for 'Guías turística': canceling statement due to statement timeout
+[2025-12-15T10:07:50.953Z]   ❌ Failed to delete 'Guías turística': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:56.884Z]   ❌ Error unlinking books for 'Fotografia': canceling statement due to statement timeout
+[2025-12-15T10:07:56.973Z]   ❌ Failed to delete 'Fotografia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:57.332Z]   ❌ Error unlinking books for 'Geografía de asia.(915)': canceling statement due to statement timeout
+[2025-12-15T10:07:57.453Z]   ❌ Error unlinking books for 'Botanica': canceling statement due to statement timeout
+[2025-12-15T10:07:57.556Z]   ❌ Failed to delete 'Botanica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:07:57.709Z]   ❌ Failed to delete 'Geografía de asia.(915)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:08:13.042Z]   ❌ Error unlinking books for 'Literatura en  lengua hebrea': canceling statement due to statement timeout
+[2025-12-15T10:08:13.048Z]   ❌ Error unlinking books for 'Ensayo. tecnica comercial': canceling statement due to statement timeout
+[2025-12-15T10:08:20.634Z]   ❌ Failed to delete 'Ensayo. tecnica comercial': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:08:40.678Z]   ❌ Failed to delete 'Literatura en  lengua hebrea': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:08:49.351Z]   ❌ Error unlinking books for 'Solfeo': canceling statement due to statement timeout
+[2025-12-15T10:08:49.356Z]   ❌ Error unlinking books for 'Óptica': canceling statement due to statement timeout
+[2025-12-15T10:08:49.760Z]   ❌ Failed to delete 'Óptica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:08:49.764Z]   ❌ Failed to delete 'Solfeo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:08:57.891Z]   ❌ Error unlinking books for 'Viviendas en general': canceling statement due to statement timeout
+[2025-12-15T10:08:57.907Z]   ❌ Error unlinking books for 'Astronomía náutica': canceling statement due to statement timeout
+[2025-12-15T10:08:58.205Z]   ❌ Failed to delete 'Viviendas en general': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:08:58.207Z]   ❌ Failed to delete 'Astronomía náutica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:08.362Z]   ❌ Error unlinking books for 'Ciencia y técnica': canceling statement due to statement timeout
+[2025-12-15T10:09:08.364Z]   ❌ Error unlinking books for 'Teologia moral. teologia práctica.(24)': canceling statement due to statement timeout
+[2025-12-15T10:09:08.462Z]   ❌ Failed to delete 'Teologia moral. teologia práctica.(24)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:08.472Z]   ❌ Failed to delete 'Ciencia y técnica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:17.033Z]   ❌ Error unlinking books for 'Testigos de jehová': canceling statement due to statement timeout
+[2025-12-15T10:09:17.048Z]   ❌ Error unlinking books for 'Quimica industrial': canceling statement due to statement timeout
+[2025-12-15T10:09:17.170Z]   ❌ Failed to delete 'Quimica industrial': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:17.502Z]   ❌ Failed to delete 'Testigos de jehová': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:26.134Z]   ❌ Error unlinking books for 'Medicamentos. farmacologia. terapéutica fisica. toxicologia.(615)': canceling statement due to statement timeout
+[2025-12-15T10:09:26.255Z]   ❌ Failed to delete 'Medicamentos. farmacologia. terapéutica fisica. toxicologia.(615)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:26.307Z]   ❌ Error unlinking books for 'Comercio en general. relaciones económicas internacionales. economia(339); mundi': canceling statement due to statement timeout
+[2025-12-15T10:09:26.384Z]   ❌ Failed to delete 'Comercio en general. relaciones económicas internacionales. economia(339); mundi': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:36.050Z]   ❌ Error unlinking books for 'Bebidas alcohólicas': canceling statement due to statement timeout
+[2025-12-15T10:09:36.083Z]   ❌ Error unlinking books for 'Gramatica española': canceling statement due to statement timeout
+[2025-12-15T10:09:36.735Z]   ❌ Failed to delete 'Gramatica española': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:36.826Z]   ❌ Failed to delete 'Bebidas alcohólicas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:37.619Z]   ❌ Error unlinking books for 'Literartura española': canceling statement due to statement timeout
+[2025-12-15T10:09:37.865Z]   ❌ Failed to delete 'Literartura española': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:46.551Z]   ❌ Error unlinking books for 'Literartura': canceling statement due to statement timeout
+[2025-12-15T10:09:46.564Z]   ❌ Error unlinking books for 'Trabajo.(331); organización de empresas. técnica comercial.(658)': canceling statement due to statement timeout
+[2025-12-15T10:09:46.640Z]   ❌ Failed to delete 'Literartura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:46.641Z]   ❌ Failed to delete 'Trabajo.(331); organización de empresas. técnica comercial.(658)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:55.591Z]   ❌ Error unlinking books for 'Organización y gestión de la industria, el comercio y de las(65); comunicaciones': canceling statement due to statement timeout
+[2025-12-15T10:09:55.594Z]   ❌ Error unlinking books for 'Educación. enseñanza.(37); matemáticas.(51)': canceling statement due to statement timeout
+[2025-12-15T10:09:55.751Z]   ❌ Failed to delete 'Organización y gestión de la industria, el comercio y de las(65); comunicaciones': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:09:55.776Z]   ❌ Failed to delete 'Educación. enseñanza.(37); matemáticas.(51)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:19.612Z]   ❌ Error unlinking books for 'India histoia': canceling statement due to statement timeout
+[2025-12-15T10:10:19.660Z]   ❌ Error unlinking books for 'Ciencias ocultas. ocultismo.(133); arqueologia.(902)': canceling statement due to statement timeout
+[2025-12-15T10:10:25.583Z]   ❌ Error unlinking books for 'Politica. marruecos': canceling statement due to statement timeout
+[2025-12-15T10:10:25.653Z]   ❌ Failed to delete 'Ciencias ocultas. ocultismo.(133); arqueologia.(902)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:25.951Z]   ❌ Error unlinking books for 'Sagrada escritura': canceling statement due to statement timeout
+[2025-12-15T10:10:26.014Z]   ❌ Failed to delete 'Politica. marruecos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:27.525Z]   ❌ Failed to delete 'Sagrada escritura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:37.045Z]   ❌ Error unlinking books for 'Industria y oficios diversos.(67/68)': canceling statement due to statement timeout
+[2025-12-15T10:10:43.480Z]   ❌ Failed to delete 'India histoia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:43.724Z]   ❌ Failed to delete 'Industria y oficios diversos.(67/68)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:45.218Z]   ❌ Error unlinking books for 'Geografía de áfrica.(916)': canceling statement due to statement timeout
+[2025-12-15T10:10:45.250Z]   ❌ Error unlinking books for 'Biografía-periodismo': canceling statement due to statement timeout
+[2025-12-15T10:10:45.304Z]   ❌ Failed to delete 'Geografía de áfrica.(916)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:45.328Z]   ❌ Failed to delete 'Biografía-periodismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:45.329Z]    Processed 3000/7146...
+[2025-12-15T10:10:56.028Z]   ❌ Error unlinking books for 'Alimentos.(641); microbiología y micología industriales. bebidas. estimulantes.(': canceling statement due to statement timeout
+[2025-12-15T10:10:56.165Z]   ❌ Failed to delete 'Alimentos.(641); microbiología y micología industriales. bebidas. estimulantes.(': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:56.571Z]   ❌ Error unlinking books for 'Literatura colombiana. otros géneros.(821.134.286.1-4/-9)': canceling statement due to statement timeout
+[2025-12-15T10:10:56.822Z]   ❌ Error unlinking books for 'Teología dogmática': canceling statement due to statement timeout
+[2025-12-15T10:10:56.947Z]   ❌ Failed to delete 'Teología dogmática': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:10:56.986Z]   ❌ Failed to delete 'Literatura colombiana. otros géneros.(821.134.286.1-4/-9)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:03.224Z]   ❌ Error unlinking books for 'Cuidado del cuerpo.(613.4)': canceling statement due to statement timeout
+[2025-12-15T10:11:03.535Z]   ❌ Failed to delete 'Cuidado del cuerpo.(613.4)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:12.950Z]   ❌ Error unlinking books for '426': canceling statement due to statement timeout
+[2025-12-15T10:11:13.003Z]   ❌ Error unlinking books for 'Clasicos griegos': canceling statement due to statement timeout
+[2025-12-15T10:11:14.700Z]   ❌ Error unlinking books for 'Proverbios, dichos populares': canceling statement due to statement timeout
+[2025-12-15T10:11:21.326Z]   ❌ Error unlinking books for 'Metafísica especial.(122/129)': canceling statement due to statement timeout
+[2025-12-15T10:11:21.542Z]   ❌ Failed to delete '426': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:21.616Z]   ❌ Failed to delete 'Metafísica especial.(122/129)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:30.283Z]   ❌ Error unlinking books for 'Biog': canceling statement due to statement timeout
+[2025-12-15T10:11:30.565Z]   ❌ Error unlinking books for 'Reportajes y colección de artículos periodísticos': canceling statement due to statement timeout
+[2025-12-15T10:11:30.640Z]   ❌ Failed to delete 'Biog': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:30.872Z]   ❌ Failed to delete 'Clasicos griegos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:33.012Z]   ❌ Failed to delete 'Proverbios, dichos populares': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:33.024Z]   ❌ Failed to delete 'Reportajes y colección de artículos periodísticos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:39.682Z]   ❌ Error unlinking books for 'Higiene': canceling statement due to statement timeout
+[2025-12-15T10:11:39.744Z]   ❌ Error unlinking books for 'Portugués.(811.134.3)': canceling statement due to statement timeout
+[2025-12-15T10:11:39.755Z]   ❌ Error unlinking books for 'Novelas gráficas:': canceling statement due to statement timeout
+[2025-12-15T10:11:41.217Z]   ❌ Failed to delete 'Novelas gráficas:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:46.548Z]   ❌ Failed to delete 'Portugués.(811.134.3)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:46.637Z]   ❌ Failed to delete 'Higiene': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:47.551Z]   ❌ Error unlinking books for 'Teología moral. teología práctica.(24); literatura española. otros géneros.(821': canceling statement due to statement timeout
+[2025-12-15T10:11:47.693Z]   ❌ Failed to delete 'Teología moral. teología práctica.(24); literatura española. otros géneros.(821': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:48.056Z]   ❌ Error unlinking books for 'Misticismo': canceling statement due to statement timeout
+[2025-12-15T10:11:48.139Z]   ❌ Failed to delete 'Misticismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:59.406Z]   ❌ Error unlinking books for 'Textos clásicos': canceling statement due to statement timeout
+[2025-12-15T10:11:59.411Z]   ❌ Error unlinking books for 'Carruajes': canceling statement due to statement timeout
+[2025-12-15T10:11:59.529Z]   ❌ Failed to delete 'Textos clásicos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:11:59.765Z]   ❌ Failed to delete 'Carruajes': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:06.795Z]   ❌ Error unlinking books for 'Higiene del descanso': canceling statement due to statement timeout
+[2025-12-15T10:12:07.464Z]   ❌ Error unlinking books for 'Asa': canceling statement due to statement timeout
+[2025-12-15T10:12:11.858Z]   ❌ Failed to delete 'Higiene del descanso': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:11.870Z]   ❌ Failed to delete 'Asa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:30.750Z]   ❌ Error unlinking books for 'Muerte. funerales. ritos funerarios.(393); restos culturales de tiempos históric': canceling statement due to statement timeout
+[2025-12-15T10:12:37.830Z]   ❌ Error unlinking books for 'Teología dogmática.(23); organización de la educación y la enseñanza. institucio': canceling statement due to statement timeout
+[2025-12-15T10:12:38.692Z]   ❌ Error unlinking books for 'Bases de la educación. pedagogía': canceling statement due to statement timeout
+[2025-12-15T10:12:41.987Z]   ❌ Failed to delete 'Muerte. funerales. ritos funerarios.(393); restos culturales de tiempos históric': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:42.068Z]   ❌ Failed to delete 'Teología dogmática.(23); organización de la educación y la enseñanza. institucio': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:47.060Z]   ❌ Error unlinking books for 'Sociedad y cultura:': canceling statement due to statement timeout
+[2025-12-15T10:12:47.209Z]   ❌ Error unlinking books for 'Civilización, progreso y cultura en general.(008); iglesias cristianas. comunida': canceling statement due to statement timeout
+[2025-12-15T10:12:48.872Z]   ❌ Failed to delete 'Civilización, progreso y cultura en general.(008); iglesias cristianas. comunida': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:49.081Z]   ❌ Failed to delete 'Sociedad y cultura:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:49.362Z]   ❌ Failed to delete 'Bases de la educación. pedagogía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:54.488Z]   ❌ Error unlinking books for 'Metafísica': canceling statement due to statement timeout
+[2025-12-15T10:12:55.075Z]   ❌ Error unlinking books for 'Ética. moral.(17); teología pastoral.(25)': canceling statement due to statement timeout
+[2025-12-15T10:12:55.547Z]   ❌ Failed to delete 'Ética. moral.(17); teología pastoral.(25)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:12:59.800Z]   ❌ Failed to delete 'Metafísica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:00.460Z]   ❌ Error unlinking books for 'Teología natural': canceling statement due to statement timeout
+[2025-12-15T10:13:11.671Z]   ❌ Failed to delete 'Teología natural': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:12.231Z]   ❌ Error unlinking books for 'Ética. moral.(17); enseñanza secundaria.(373.5)': canceling statement due to statement timeout
+[2025-12-15T10:13:12.594Z]   ❌ Error unlinking books for 'Narrativa  andalucía': canceling statement due to statement timeout
+[2025-12-15T10:13:14.475Z]   ❌ Failed to delete 'Narrativa  andalucía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:19.829Z]   ❌ Error unlinking books for 'Sociología.(316); higiene. sanidad privada.(613)': canceling statement due to statement timeout
+[2025-12-15T10:13:19.843Z]   ❌ Error unlinking books for 'Iglesia cristiana en general. organización y liturgia.(26); educación. enseñanza': canceling statement due to statement timeout
+[2025-12-15T10:13:20.633Z]   ❌ Failed to delete 'Sociología.(316); higiene. sanidad privada.(613)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:20.653Z]   ❌ Failed to delete 'Iglesia cristiana en general. organización y liturgia.(26); educación. enseñanza': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:28.888Z]   ❌ Error unlinking books for 'Filosofía(1); antropología.(572)': canceling statement due to statement timeout
+[2025-12-15T10:13:29.302Z]   ❌ Failed to delete 'Filosofía(1); antropología.(572)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:29.979Z]   ❌ Error unlinking books for 'Iglesias cristianas': canceling statement due to statement timeout
+[2025-12-15T10:13:40.577Z]   ❌ Failed to delete 'Iglesia cristiana en general. organización y liturgia.(26); higiene. sanidad pri': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:40.662Z]   ❌ Failed to delete 'Ética. moral.(17); enseñanza secundaria.(373.5)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:41.185Z]   ❌ Failed to delete 'Iglesias cristianas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:44.787Z]   ❌ Error unlinking books for 'Teología dogmática.(23); teología pastoral.(25)': canceling statement due to statement timeout
+[2025-12-15T10:13:44.974Z]   ❌ Failed to delete 'Teología dogmática.(23); teología pastoral.(25)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:13:48.661Z]   ❌ Error unlinking books for 'Budismo.(294.3); literatura en lengua francesa. novela y cuento.(821.133.1-3)': canceling statement due to statement timeout
+[2025-12-15T10:13:49.168Z]   ❌ Failed to delete 'Budismo.(294.3); literatura en lengua francesa. novela y cuento.(821.133.1-3)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:12.268Z]   ❌ Error unlinking books for 'Feminismo.(141.72); teología pastoral.(25)': canceling statement due to statement timeout
+[2025-12-15T10:14:12.272Z]   ❌ Error unlinking books for 'Industria de la radio y la televisión': canceling statement due to statement timeout
+[2025-12-15T10:14:12.522Z]   ❌ Failed to delete 'Industria de la radio y la televisión': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:12.573Z]   ❌ Error unlinking books for 'La biblia': canceling statement due to statement timeout
+[2025-12-15T10:14:12.589Z]   ❌ Failed to delete 'Feminismo.(141.72); teología pastoral.(25)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:13.321Z]   ❌ Failed to delete 'La biblia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:18.257Z]   ❌ Error unlinking books for 'Literatura general': canceling statement due to statement timeout
+[2025-12-15T10:14:19.711Z]   ❌ Failed to delete 'Literatura general': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:19.785Z]   ❌ Error unlinking books for 'Otras literaturas': canceling statement due to statement timeout
+[2025-12-15T10:14:20.151Z]   ❌ Failed to delete 'Otras literaturas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:28.685Z]   ❌ Error unlinking books for 'Literatura en lengua francesa. otros géneros': canceling statement due to statement timeout
+[2025-12-15T10:14:29.249Z]   ❌ Error unlinking books for 'Teología moral. teología práctica.(24); higiene sexual.(613.88)': canceling statement due to statement timeout
+[2025-12-15T10:14:30.723Z]   ❌ Failed to delete 'Teología moral. teología práctica.(24); higiene sexual.(613.88)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:37.009Z]   ❌ Error unlinking books for 'Teología moral': canceling statement due to statement timeout
+[2025-12-15T10:14:37.048Z]   ❌ Error unlinking books for 'Cuestiones sociales y culturales': canceling statement due to statement timeout
+[2025-12-15T10:14:37.119Z]   ❌ Error unlinking books for 'Metafísica. ontología. cosmología.(11); el islam.(297)': canceling statement due to statement timeout
+[2025-12-15T10:14:37.138Z]   ❌ Error unlinking books for 'Ética. moral.(17); antropología.(572)': canceling statement due to statement timeout
+[2025-12-15T10:14:37.847Z]   ❌ Failed to delete 'Literatura en lengua francesa. otros géneros': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:38.930Z]   ❌ Failed to delete 'Teología moral': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:38.945Z]   ❌ Failed to delete 'Cuestiones sociales y culturales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:41.687Z]   ❌ Failed to delete 'Ética. moral.(17); antropología.(572)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:42.182Z]   ❌ Failed to delete 'Metafísica. ontología. cosmología.(11); el islam.(297)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:14:58.700Z]   ❌ Error unlinking books for 'Teología pastoral.(25); sociología.(316)': canceling statement due to statement timeout
+[2025-12-15T10:14:59.514Z]   ❌ Error unlinking books for 'Teología pastoral.(25); didáctica y metodología.(37.02)': canceling statement due to statement timeout
+[2025-12-15T10:15:01.107Z]   ❌ Failed to delete 'Teología pastoral.(25); sociología.(316)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:03.187Z]   ❌ Failed to delete 'Teología pastoral.(25); didáctica y metodología.(37.02)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:11.162Z]   ❌ Error unlinking books for 'Aritmética. teoría de los números.(511)': canceling statement due to statement timeout
+[2025-12-15T10:15:13.789Z]   ❌ Error unlinking books for 'Obras populares': canceling statement due to statement timeout
+[2025-12-15T10:15:14.880Z]   ❌ Failed to delete 'Obras populares': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:15.290Z]   ❌ Failed to delete 'Aritmética. teoría de los números.(511)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:16.518Z]   ❌ Error unlinking books for 'Ciencias ocultas': canceling statement due to statement timeout
+[2025-12-15T10:15:20.108Z]   ❌ Failed to delete 'Ciencias ocultas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:24.596Z]   ❌ Error unlinking books for 'Enseñanza secundaria.(373.5); física.(53); química.(54)': canceling statement due to statement timeout
+[2025-12-15T10:15:25.746Z]   ❌ Failed to delete 'Enseñanza secundaria.(373.5); física.(53); química.(54)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:35.678Z]   ❌ Error unlinking books for 'Biogafía': canceling statement due to statement timeout
+[2025-12-15T10:15:42.441Z]   ❌ Error unlinking books for 'Literatura griega clásica': canceling statement due to statement timeout
+[2025-12-15T10:15:45.520Z]   ❌ Failed to delete 'Biogafía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:45.795Z]   ❌ Failed to delete 'Literatura griega clásica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:15:59.272Z]   ❌ Error unlinking books for 'La biblia.(22); enseñanza secundaria.(373.5)': canceling statement due to statement timeout
+[2025-12-15T10:16:01.987Z]   ❌ Error unlinking books for 'Organización de empresas. técnica comercial.(658); sociología de la comunicación': canceling statement due to statement timeout
+[2025-12-15T10:16:08.328Z]   ❌ Error unlinking books for 'Organización de empresas': canceling statement due to statement timeout
+[2025-12-15T10:16:26.297Z]   ❌ Error unlinking books for 'Socioligia': canceling statement due to statement timeout
+[2025-12-15T10:16:26.958Z]   ❌ Failed to delete 'Organización de empresas. técnica comercial.(658); sociología de la comunicación': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:16:27.173Z]   ❌ Failed to delete 'Socioligia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:16:28.725Z]   ❌ Error unlinking books for 'Lexicología': canceling statement due to statement timeout
+[2025-12-15T10:16:36.793Z]   ❌ Error unlinking books for 'Literatura en lengua inglesa.  obras. sociologia': canceling statement due to statement timeout
+[2025-12-15T10:16:38.838Z]   ❌ Failed to delete 'Organización de empresas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:16:39.041Z]   ❌ Failed to delete 'Literatura en lengua inglesa.  obras. sociologia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:16:47.070Z]   ❌ Error unlinking books for 'Teología moral. teología práctica.(24); teología pastoral.(25); iglesia cristian': canceling statement due to statement timeout
+[2025-12-15T10:16:47.794Z]   ❌ Failed to delete 'Lexicología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:16:47.817Z]   ❌ Failed to delete 'Teología moral. teología práctica.(24); teología pastoral.(25); iglesia cristian': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:16:53.959Z]   ❌ Failed to delete 'La biblia.(22); enseñanza secundaria.(373.5)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:17:16.938Z]   ❌ Error unlinking books for 'Español': canceling statement due to statement timeout
+[2025-12-15T10:17:17.047Z]   ❌ Error unlinking books for 'Ciencia económica': canceling statement due to statement timeout
+[2025-12-15T10:17:20.074Z]   ❌ Failed to delete 'Ciencia económica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:17:20.235Z]   ❌ Failed to delete 'Español': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:17:20.236Z]    Processed 3500/7146...
+[2025-12-15T10:17:31.296Z]   ❌ Error unlinking books for 'Inglés': canceling statement due to statement timeout
+[2025-12-15T10:17:33.152Z]   ❌ Error unlinking books for 'Sociología de la comunicación': canceling statement due to statement timeout
+[2025-12-15T10:17:39.089Z]   ❌ Failed to delete 'Inglés': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:17:42.121Z]   ❌ Failed to delete 'Sociología de la comunicación': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:18:20.083Z]   ❌ Error unlinking books for 'Documentación en general': canceling statement due to statement timeout
+[2025-12-15T10:18:22.757Z]   ❌ Error unlinking books for 'Medicamentos. farmacología. terapéutica física. toxicología.  naturopatía. medicina popular.(615)': canceling statement due to statement timeout
+[2025-12-15T10:18:22.896Z]   ❌ Failed to delete 'Medicamentos. farmacología. terapéutica física. toxicología.  naturopatía. medicina popular.(615)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:18:23.022Z]   ❌ Failed to delete 'Documentación en general': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:19:21.144Z]   ❌ Error unlinking books for 'Literatura en lengua alemana': canceling statement due to statement timeout
+[2025-12-15T10:19:21.228Z]   ❌ Failed to delete 'Literatura en lengua alemana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:19:47.544Z]    Processed 4000/7146...
+[2025-12-15T10:20:25.626Z]   ❌ Failed to delete 'Geografia de los estados unidos': Timed out acquiring connection from connection pool.
+[2025-12-15T10:20:25.645Z]   ❌ Error unlinking books for 'Memorias periodisticas': Timed out acquiring connection from connection pool.
+[2025-12-15T10:20:33.308Z]   ❌ Failed to delete 'Memorias periodisticas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:20:58.576Z]   ❌ Error unlinking books for 'Usos y costumbres en la vida privada': canceling statement due to statement timeout
+[2025-12-15T10:20:58.586Z]   ❌ Error unlinking books for 'Zootecnia general': canceling statement due to statement timeout
+[2025-12-15T10:20:59.505Z]   ❌ Failed to delete 'Zootecnia general': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:20:59.759Z]   ❌ Failed to delete 'Usos y costumbres en la vida privada': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:09.772Z]   ❌ Failed to delete 'Moda. estética': <html>
+<head><title>500 Internal Server Error</title></head>
+<body>
+<center><h1>500 Internal Server Error</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>
+
+[2025-12-15T10:21:11.119Z]    Processed 4500/7146...
+[2025-12-15T10:21:20.786Z]   ❌ Error unlinking books for 'Bases de educacion': canceling statement due to statement timeout
+[2025-12-15T10:21:21.610Z]   ❌ Failed to delete 'Bases de educacion': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:32.843Z]   ❌ Error unlinking books for 'Ciencias naturakes': canceling statement due to statement timeout
+[2025-12-15T10:21:39.235Z]   ❌ Failed to delete 'Ciencias naturakes': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:50.260Z]   ❌ Error unlinking books for 'Geografía de castilla-la mancha': canceling statement due to statement timeout
+[2025-12-15T10:21:51.269Z]   ❌ Failed to delete 'Geografía de castilla-la mancha': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:56.233Z]   ❌ Error unlinking books for 'Juegos de pelota': canceling statement due to statement timeout
+[2025-12-15T10:21:56.276Z]   ❌ Error unlinking books for 'Corridas de toros': canceling statement due to statement timeout
+[2025-12-15T10:21:56.292Z]   ❌ Error unlinking books for 'Literatura peruana': canceling statement due to statement timeout
+[2025-12-15T10:21:56.568Z]   ❌ Failed to delete 'Juegos de pelota': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:58.545Z]   ❌ Failed to delete 'Literatura peruana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:58.567Z]   ❌ Failed to delete 'Corridas de toros': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:21:59.832Z]   ❌ Error unlinking books for 'Literatura mejicana': canceling statement due to statement timeout
+[2025-12-15T10:21:59.902Z]   ❌ Error unlinking books for 'Enseñanza primaria': canceling statement due to statement timeout
+[2025-12-15T10:22:00.101Z]   ❌ Failed to delete 'Enseñanza primaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:00.712Z]   ❌ Failed to delete 'Literatura mejicana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:16.763Z]   ❌ Error unlinking books for 'Arquietactura': canceling statement due to statement timeout
+[2025-12-15T10:22:16.797Z]   ❌ Error unlinking books for 'Trabajo social': canceling statement due to statement timeout
+[2025-12-15T10:22:17.415Z]   ❌ Failed to delete 'Arquietactura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:17.817Z]   ❌ Failed to delete 'Trabajo social': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:24.336Z]   ❌ Error unlinking books for 'Entomoligia': canceling statement due to statement timeout
+[2025-12-15T10:22:24.491Z]   ❌ Failed to delete 'Entomoligia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:37.279Z]   ❌ Error unlinking books for 'Litaratura en lengua inglesa': canceling statement due to statement timeout
+[2025-12-15T10:22:38.213Z]   ❌ Error unlinking books for 'Literatura en otras lenguas germánicas': canceling statement due to statement timeout
+[2025-12-15T10:22:39.107Z]   ❌ Error unlinking books for 'Ased': canceling statement due to statement timeout
+[2025-12-15T10:22:39.253Z]   ❌ Error unlinking books for 'Narraciones, fábulas, sagas, leyendas, chistes': canceling statement due to statement timeout
+[2025-12-15T10:22:39.271Z]   ❌ Error unlinking books for 'Táctica': canceling statement due to statement timeout
+[2025-12-15T10:22:46.264Z]   ❌ Error unlinking books for 'Novela corta': canceling statement due to statement timeout
+[2025-12-15T10:22:48.216Z]   ❌ Failed to delete 'Novela corta': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:48.228Z]   ❌ Failed to delete 'Táctica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:48.886Z]   ❌ Failed to delete 'Literatura en otras lenguas germánicas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:50.083Z]   ❌ Failed to delete 'Litaratura en lengua inglesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:50.981Z]   ❌ Failed to delete 'Ased': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:22:57.059Z]   ❌ Error unlinking books for 'Patologia mamaria': canceling statement due to statement timeout
+[2025-12-15T10:23:00.357Z]   ❌ Error unlinking books for 'Enseñanza secundaria': canceling statement due to statement timeout
+[2025-12-15T10:23:08.221Z]   ❌ Failed to delete 'Narraciones, fábulas, sagas, leyendas, chistes': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:08.487Z]   ❌ Failed to delete 'Enseñanza secundaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:10.397Z]   ❌ Failed to delete 'Patologia mamaria': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:19.870Z]   ❌ Error unlinking books for 'Ventas': canceling statement due to statement timeout
+[2025-12-15T10:23:20.480Z]   ❌ Failed to delete 'Ventas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:29.406Z]   ❌ Error unlinking books for 'Medios de comunicacion': canceling statement due to statement timeout
+[2025-12-15T10:23:29.547Z]   ❌ Failed to delete 'Medios de comunicacion': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:30.065Z]   ❌ Error unlinking books for 'Higiene de la alimentación': canceling statement due to statement timeout
+[2025-12-15T10:23:30.136Z]   ❌ Failed to delete 'Higiene de la alimentación': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:39.202Z]   ❌ Error unlinking books for 'Tiempo libre en el hogar': canceling statement due to statement timeout
+[2025-12-15T10:23:39.784Z]   ❌ Failed to delete 'Tiempo libre en el hogar': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:40.203Z]   ❌ Error unlinking books for 'Catalogo monedas': canceling statement due to statement timeout
+[2025-12-15T10:23:40.279Z]   ❌ Failed to delete 'Catalogo monedas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:47.064Z]   ❌ Error unlinking books for 'Ciudades': canceling statement due to statement timeout
+[2025-12-15T10:23:47.304Z]   ❌ Failed to delete 'Ciudades': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:23:55.850Z]   ❌ Error unlinking books for 'Ciudad': canceling statement due to statement timeout
+[2025-12-15T10:23:55.875Z]   ❌ Error unlinking books for 'Estetica': canceling statement due to statement timeout
+[2025-12-15T10:24:07.200Z]   ❌ Failed to delete 'Ciudad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:07.429Z]   ❌ Failed to delete 'Estetica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:22.079Z]   ❌ Error unlinking books for 'Embarazo': canceling statement due to statement timeout
+[2025-12-15T10:24:22.081Z]   ❌ Error unlinking books for 'Química orgánica': canceling statement due to statement timeout
+[2025-12-15T10:24:22.184Z]   ❌ Failed to delete 'Embarazo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:22.188Z]   ❌ Failed to delete 'Química orgánica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:22.189Z]    Processed 5000/7146...
+[2025-12-15T10:24:31.455Z]   ❌ Error unlinking books for 'Dibujos': canceling statement due to statement timeout
+[2025-12-15T10:24:31.560Z]   ❌ Failed to delete 'Dibujos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:31.563Z]   ❌ Error unlinking books for 'Estructuras políticas:': canceling statement due to statement timeout
+[2025-12-15T10:24:31.655Z]   ❌ Failed to delete 'Estructuras políticas:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:41.679Z]   ❌ Error unlinking books for 'Ficción': canceling statement due to statement timeout
+[2025-12-15T10:24:41.700Z]   ❌ Error unlinking books for 'Fitosanitario': canceling statement due to statement timeout
+[2025-12-15T10:24:42.000Z]   ❌ Failed to delete 'Fitosanitario': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:42.077Z]   ❌ Failed to delete 'Ficción': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:51.346Z]   ❌ Error unlinking books for 'Griegos': canceling statement due to statement timeout
+[2025-12-15T10:24:51.351Z]   ❌ Error unlinking books for 'Revistas medicina': canceling statement due to statement timeout
+[2025-12-15T10:24:51.499Z]   ❌ Failed to delete 'Revistas medicina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:24:51.581Z]   ❌ Failed to delete 'Griegos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:15.904Z]   ❌ Error unlinking books for 'Enseñanza': canceling statement due to statement timeout
+[2025-12-15T10:25:15.940Z]   ❌ Error unlinking books for 'Población y demografía': canceling statement due to statement timeout
+[2025-12-15T10:25:15.941Z]   ❌ Error unlinking books for 'Parapsicología': canceling statement due to statement timeout
+[2025-12-15T10:25:15.946Z]   ❌ Error unlinking books for 'Literatura oriental': canceling statement due to statement timeout
+[2025-12-15T10:25:15.948Z]   ❌ Error unlinking books for 'Contabilidad': canceling statement due to statement timeout
+[2025-12-15T10:25:16.443Z]   ❌ Failed to delete 'Literatura oriental': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:16.446Z]   ❌ Failed to delete 'Enseñanza': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:16.466Z]   ❌ Failed to delete 'Contabilidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:16.874Z]   ❌ Failed to delete 'Población y demografía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:17.021Z]   ❌ Failed to delete 'Parapsicología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:19.156Z]   ❌ Error unlinking books for 'Decoración': canceling statement due to statement timeout
+[2025-12-15T10:25:19.652Z]   ❌ Failed to delete 'Decoración': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:20.483Z]   ❌ Error unlinking books for 'Oficios': canceling statement due to statement timeout
+[2025-12-15T10:25:21.337Z]   ❌ Failed to delete 'Oficios': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:24.649Z]   ❌ Error unlinking books for 'Literatura en lengua francesa': canceling statement due to statement timeout
+[2025-12-15T10:25:25.227Z]   ❌ Failed to delete 'Literatura en lengua francesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:26.281Z]   ❌ Error unlinking books for 'Feminismo': canceling statement due to statement timeout
+[2025-12-15T10:25:27.336Z]   ❌ Failed to delete 'Feminismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:47.262Z]   ❌ Error unlinking books for 'Literatura argentina': canceling statement due to statement timeout
+[2025-12-15T10:25:47.651Z]   ❌ Error unlinking books for 'Economia': canceling statement due to statement timeout
+[2025-12-15T10:25:47.687Z]   ❌ Error unlinking books for 'Radiodifusión': canceling statement due to statement timeout
+[2025-12-15T10:25:47.952Z]   ❌ Error unlinking books for 'Divulgación científica': canceling statement due to statement timeout
+[2025-12-15T10:25:50.364Z]   ❌ Failed to delete 'Literatura argentina': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:25:55.755Z]   ❌ Error unlinking books for 'Agenda': canceling statement due to statement timeout
+[2025-12-15T10:25:55.864Z]   ❌ Error unlinking books for 'Cómics': canceling statement due to statement timeout
+[2025-12-15T10:26:02.022Z]   ❌ Failed to delete 'Divulgación científica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:16.631Z]   ❌ Error unlinking books for 'Aritmética': canceling statement due to statement timeout
+[2025-12-15T10:26:16.700Z]   ❌ Error unlinking books for 'Ceremonial': canceling statement due to statement timeout
+[2025-12-15T10:26:17.205Z]   ❌ Error unlinking books for 'Formación profesional': canceling statement due to statement timeout
+[2025-12-15T10:26:23.540Z]   ❌ Error unlinking books for 'Coches': canceling statement due to statement timeout
+[2025-12-15T10:26:24.020Z]   ❌ Failed to delete 'Aritmética': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:24.032Z]   ❌ Failed to delete 'Coches': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:24.162Z]   ❌ Failed to delete 'Formación profesional': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:24.360Z]   ❌ Failed to delete 'Radiodifusión': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:24.378Z]   ❌ Error unlinking books for 'Joyería': canceling statement due to statement timeout
+[2025-12-15T10:26:27.289Z]   ❌ Failed to delete 'Agenda': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:28.725Z]   ❌ Failed to delete 'Cómics': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:29.594Z]   ❌ Failed to delete 'Ceremonial': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:32.450Z]   ❌ Error unlinking books for 'Gimnasia': canceling statement due to statement timeout
+[2025-12-15T10:26:32.500Z]   ❌ Error unlinking books for 'Modelismo': canceling statement due to statement timeout
+[2025-12-15T10:26:39.948Z]   ❌ Failed to delete 'Joyería': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:43.034Z]   ❌ Error unlinking books for 'Administración pública': canceling statement due to statement timeout
+[2025-12-15T10:26:43.684Z]   ❌ Failed to delete 'Modelismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:44.345Z]   ❌ Failed to delete 'Administración pública': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:47.648Z]   ❌ Failed to delete 'Economia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:26:47.714Z]   ❌ Error unlinking books for 'Náutica': canceling statement due to statement timeout
+[2025-12-15T10:26:51.343Z]   ❌ Error unlinking books for 'Sanidad': canceling statement due to statement timeout
+[2025-12-15T10:26:51.377Z]   ❌ Error unlinking books for 'Farmacología': canceling statement due to statement timeout
+[2025-12-15T10:27:00.402Z]   ❌ Error unlinking books for 'Finanzas': canceling statement due to statement timeout
+[2025-12-15T10:27:01.582Z]   ❌ Failed to delete 'Farmacología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:01.726Z]   ❌ Failed to delete 'Náutica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:01.758Z]   ❌ Failed to delete 'Gimnasia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:01.795Z]   ❌ Error unlinking books for 'Comic': Timed out acquiring connection from connection pool.
+[2025-12-15T10:27:01.896Z]   ❌ Failed to delete 'Sanidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:01.932Z]   ❌ Failed to delete 'Museos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:02.035Z]   ❌ Failed to delete 'Finanzas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:02.152Z]   ❌ Failed to delete 'Comic': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:11.299Z]   ❌ Error unlinking books for 'Literatura y estudios literarios': canceling statement due to statement timeout
+[2025-12-15T10:27:14.563Z]   ❌ Failed to delete 'Literatura y estudios literarios': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:27.017Z]   ❌ Error unlinking books for 'Pediatría': canceling statement due to statement timeout
+[2025-12-15T10:27:27.020Z]   ❌ Error unlinking books for 'Literatura egipcia': canceling statement due to statement timeout
+[2025-12-15T10:27:27.540Z]   ❌ Failed to delete 'Literatura egipcia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:29.487Z]   ❌ Failed to delete 'Pediatría': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:34.717Z]   ❌ Error unlinking books for 'Animales': canceling statement due to statement timeout
+[2025-12-15T10:27:34.840Z]   ❌ Error unlinking books for 'Literatura:': canceling statement due to statement timeout
+[2025-12-15T10:27:34.902Z]   ❌ Error unlinking books for 'Zen': canceling statement due to statement timeout
+[2025-12-15T10:27:34.991Z]   ❌ Failed to delete 'Literatura:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:35.023Z]   ❌ Failed to delete 'Animales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:35.142Z]   ❌ Failed to delete 'Zen': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:36.773Z]   ❌ Error unlinking books for 'Obra de misterio y suspense': canceling statement due to statement timeout
+[2025-12-15T10:27:36.905Z]   ❌ Failed to delete 'Obra de misterio y suspense': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:27:51.599Z]   ❌ Error unlinking books for 'Guías turísticas': canceling statement due to statement timeout
+[2025-12-15T10:27:51.644Z]   ❌ Error unlinking books for 'Trabajo.(331)': canceling statement due to statement timeout
+[2025-12-15T10:27:51.660Z]   ❌ Error unlinking books for 'Ensayos literarios': canceling statement due to statement timeout
+[2025-12-15T10:27:51.682Z]   ❌ Error unlinking books for 'Descubrimiento y exploración geográficas': canceling statement due to statement timeout
+[2025-12-15T10:27:55.647Z]   ❌ Error unlinking books for 'Demografía. estudios de la población.(314)': canceling statement due to statement timeout
+[2025-12-15T10:27:56.666Z]   ❌ Error unlinking books for 'Poema epico': canceling statement due to statement timeout
+[2025-12-15T10:28:05.637Z]   ❌ Failed to delete 'Ensayos literarios': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:15.077Z]   ❌ Failed to delete 'Guías turísticas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:16.609Z]   ❌ Failed to delete 'Descubrimiento y exploración geográficas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:24.504Z]   ❌ Error unlinking books for 'Cultivos específicos. cereales. forrajes.(633)': canceling statement due to statement timeout
+[2025-12-15T10:28:24.838Z]   ❌ Failed to delete 'Cultivos específicos. cereales. forrajes.(633)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:26.569Z]   ❌ Failed to delete 'Trabajo.(331)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:27.116Z]   ❌ Failed to delete 'Poema epico': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:27.562Z]   ❌ Failed to delete 'Demografía. estudios de la población.(314)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:33.729Z]   ❌ Error unlinking books for 'Documentación en general. producción documental. centros de documentación.(002)': canceling statement due to statement timeout
+[2025-12-15T10:28:33.906Z]   ❌ Failed to delete 'Documentación en general. producción documental. centros de documentación.(002)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:33.952Z]   ❌ Error unlinking books for 'Literatura española. otros géneros.(821.134.2-4/-9)': canceling statement due to statement timeout
+[2025-12-15T10:28:34.086Z]   ❌ Failed to delete 'Literatura española. otros géneros.(821.134.2-4/-9)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:45.350Z]   ❌ Error unlinking books for 'Pesca.(639.2)': canceling statement due to statement timeout
+[2025-12-15T10:28:45.371Z]   ❌ Error unlinking books for 'Nobleza.(929.7)': canceling statement due to statement timeout
+[2025-12-15T10:28:45.469Z]   ❌ Failed to delete 'Nobleza.(929.7)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:45.494Z]   ❌ Failed to delete 'Pesca.(639.2)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:45.847Z]   ❌ Error unlinking books for 'Políticas del gobierno central': canceling statement due to statement timeout
+[2025-12-15T10:28:46.059Z]   ❌ Failed to delete 'Políticas del gobierno central': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:48.999Z]   ❌ Error unlinking books for 'Prosa:': canceling statement due to statement timeout
+[2025-12-15T10:28:49.107Z]   ❌ Failed to delete 'Prosa:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:28:51.232Z]   ❌ Error unlinking books for 'Lenguas': canceling statement due to statement timeout
+[2025-12-15T10:28:51.395Z]   ❌ Failed to delete 'Lenguas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:29:15.678Z]   ❌ Error unlinking books for 'Otras literaturas': canceling statement due to statement timeout
+[2025-12-15T10:29:16.403Z]   ❌ Error unlinking books for 'Preescolar y jardín de infancia': canceling statement due to statement timeout
+[2025-12-15T10:29:17.079Z]   ❌ Error unlinking books for 'Género policíaco y de misterio': canceling statement due to statement timeout
+[2025-12-15T10:29:17.474Z]   ❌ Error unlinking books for 'Geologia': canceling statement due to statement timeout
+[2025-12-15T10:29:17.518Z]   ❌ Error unlinking books for 'Higiene': canceling statement due to statement timeout
+[2025-12-15T10:29:17.520Z]   ❌ Error unlinking books for 'Textos clásicos': canceling statement due to statement timeout
+[2025-12-15T10:29:17.705Z]   ❌ Error unlinking books for 'Sociedad y cultura:': canceling statement due to statement timeout
+[2025-12-15T10:29:24.150Z]   ❌ Error unlinking books for 'Humanidades.(009)': canceling statement due to statement timeout
+[2025-12-15T10:29:24.370Z]   ❌ Failed to delete 'Otras literaturas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:29:25.370Z]   ❌ Error unlinking books for 'Revista-erotica': canceling statement due to statement timeout
+[2025-12-15T10:29:32.262Z]   ❌ Failed to delete 'Textos clásicos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:29:34.271Z]   ❌ Failed to delete 'Sociedad y cultura:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:29:42.803Z]   ❌ Error unlinking books for 'Genealogía.(929.5)': canceling statement due to statement timeout
+[2025-12-15T10:29:43.840Z]   ❌ Failed to delete 'Humanidades.(009)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:29:49.238Z]   ❌ Failed to delete 'Revista-erotica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:29:51.587Z]   ❌ Failed to delete 'Genealogía.(929.5)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:03.795Z]   ❌ Error unlinking books for 'Comunicacion': canceling statement due to statement timeout
+[2025-12-15T10:30:03.810Z]   ❌ Failed to delete 'Higiene': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:15.405Z]   ❌ Failed to delete 'Geologia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:15.413Z]   ❌ Failed to delete 'Comunicacion': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:15.449Z]   ❌ Failed to delete 'Preescolar y jardín de infancia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:15.466Z]   ❌ Failed to delete 'Género policíaco y de misterio': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:24.730Z]   ❌ Error unlinking books for 'Geografía botánica. flora.(581.9)': canceling statement due to statement timeout
+[2025-12-15T10:30:24.810Z]   ❌ Failed to delete 'Geografía botánica. flora.(581.9)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:24.866Z]   ❌ Error unlinking books for 'Español': canceling statement due to statement timeout
+[2025-12-15T10:30:24.940Z]   ❌ Failed to delete 'Español': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:25.624Z]   ❌ Error unlinking books for 'Biblias': canceling statement due to statement timeout
+[2025-12-15T10:30:26.633Z]   ❌ Failed to delete 'Biblias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:26.633Z]    Processed 5500/7146...
+[2025-12-15T10:30:37.058Z]   ❌ Error unlinking books for 'Literatura en lengua alemana': canceling statement due to statement timeout
+[2025-12-15T10:30:37.121Z]   ❌ Error unlinking books for 'Diccionario ingles': canceling statement due to statement timeout
+[2025-12-15T10:30:37.885Z]   ❌ Failed to delete 'Diccionario ingles': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:38.007Z]   ❌ Failed to delete 'Literatura en lengua alemana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:44.780Z]   ❌ Error unlinking books for 'Trabajos manuales': canceling statement due to statement timeout
+[2025-12-15T10:30:44.834Z]   ❌ Error unlinking books for 'Táctica': canceling statement due to statement timeout
+[2025-12-15T10:30:44.884Z]   ❌ Failed to delete 'Trabajos manuales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:44.984Z]   ❌ Failed to delete 'Táctica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:55.021Z]   ❌ Error unlinking books for 'Vestimenta': canceling statement due to statement timeout
+[2025-12-15T10:30:55.040Z]   ❌ Error unlinking books for 'Matemáticas. textos escolares': canceling statement due to statement timeout
+[2025-12-15T10:30:55.469Z]   ❌ Failed to delete 'Matemáticas. textos escolares': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:30:55.653Z]   ❌ Failed to delete 'Vestimenta': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:31:08.300Z]   ❌ Error unlinking books for 'Homeopatía': canceling statement due to statement timeout
+[2025-12-15T10:31:08.365Z]   ❌ Error unlinking books for 'Anatomia': canceling statement due to statement timeout
+[2025-12-15T10:31:15.755Z]   ❌ Error unlinking books for 'Tauromaquia, toros': canceling statement due to statement timeout
+[2025-12-15T10:31:16.387Z]   ❌ Failed to delete 'Homeopatía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:31:17.525Z]   ❌ Error unlinking books for 'Diseño de muebles': canceling statement due to statement timeout
+[2025-12-15T10:31:24.453Z]   ❌ Error unlinking books for 'Organización de mercados': canceling statement due to statement timeout
+[2025-12-15T10:31:27.481Z]   ❌ Failed to delete 'Diseño de muebles': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:31:32.004Z]   ❌ Error unlinking books for 'Descripción geográfico-histórica de un territorio, una localidad': canceling statement due to statement timeout
+[2025-12-15T10:31:33.305Z]   ❌ Error unlinking books for 'Geografía de colombia': canceling statement due to statement timeout
+[2025-12-15T10:31:35.515Z]   ❌ Failed to delete 'Geografía de colombia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:31:41.999Z]   ❌ Error unlinking books for 'Edificios residenciales, edificios destinados al uso doméstico': canceling statement due to statement timeout
+[2025-12-15T10:31:42.012Z]   ❌ Error unlinking books for 'Silvicultura': canceling statement due to statement timeout
+[2025-12-15T10:31:42.599Z]   ❌ Failed to delete 'Descripción geográfico-histórica de un territorio, una localidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:31:43.883Z]   ❌ Failed to delete 'Tauromaquia, toros': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:31:43.969Z]   ❌ Failed to delete 'Organización de mercados': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:04.856Z]   ❌ Error unlinking books for 'Literatura anglosajona': canceling statement due to statement timeout
+[2025-12-15T10:32:05.743Z]   ❌ Error unlinking books for 'Literartura hipanoamericana': canceling statement due to statement timeout
+[2025-12-15T10:32:13.144Z]   ❌ Error unlinking books for 'Sabiduría y tradiciones': canceling statement due to statement timeout
+[2025-12-15T10:32:13.250Z]   ❌ Error unlinking books for 'Television': canceling statement due to statement timeout
+[2025-12-15T10:32:13.613Z]   ❌ Error unlinking books for 'Enfermedades infecciosas y contagiosas': Timed out acquiring connection from connection pool.
+[2025-12-15T10:32:15.953Z]   ❌ Error unlinking books for 'Dermatología': Timed out acquiring connection from connection pool.
+[2025-12-15T10:32:16.667Z]   ❌ Error unlinking books for 'Ong': Timed out acquiring connection from connection pool.
+[2025-12-15T10:32:20.908Z]   ❌ Error unlinking books for 'Juegos de azar': canceling statement due to statement timeout
+[2025-12-15T10:32:21.823Z]   ❌ Failed to delete 'Ong': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:21.826Z]   ❌ Failed to delete 'Aeronautica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:21.826Z]   ❌ Failed to delete 'Flora': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:21.911Z]   ❌ Failed to delete 'Juegos de azar': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:21.953Z]   ❌ Failed to delete 'Literatura en lengua sueca': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:21.991Z]   ❌ Error unlinking books for 'Geodesia': canceling statement due to statement timeout
+[2025-12-15T10:32:22.053Z]   ❌ Failed to delete 'Enfermedades infecciosas y contagiosas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.214Z]   ❌ Failed to delete 'Literartura hipanoamericana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.225Z]   ❌ Failed to delete 'Ecología general': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.227Z]   ❌ Failed to delete 'Geografía botánica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.244Z]   ❌ Failed to delete 'Silvicultura': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.252Z]   ❌ Failed to delete 'Edificios residenciales, edificios destinados al uso doméstico': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.266Z]   ❌ Failed to delete 'Sabiduría y tradiciones': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.274Z]   ❌ Failed to delete 'Dermatología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.275Z]   ❌ Failed to delete 'Television': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.287Z]   ❌ Failed to delete 'Geodesia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.294Z]   ❌ Failed to delete 'Literatura en lengua rusa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:22.699Z]   ❌ Failed to delete 'Literatura anglosajona': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:23.313Z]   ❌ Failed to delete 'Industrias gráficas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:26.675Z]   ❌ Failed to delete 'Anatomia': Timed out acquiring connection from connection pool.
+[2025-12-15T10:32:27.339Z]   ❌ Error unlinking books for 'Literatura venezolana': Timed out acquiring connection from connection pool.
+[2025-12-15T10:32:29.565Z]   ❌ Error unlinking books for 'Literatura vasca (en euskera)': canceling statement due to statement timeout
+[2025-12-15T10:32:30.097Z]   ❌ Error unlinking books for 'Geografía del principado de asturias': canceling statement due to statement timeout
+[2025-12-15T10:32:30.153Z]   ❌ Failed to delete 'Madera e industria de la madera': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:30.952Z]   ❌ Failed to delete 'Literatura vasca (en euskera)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:31.360Z]   ❌ Failed to delete 'Literatura venezolana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:31.921Z]   ❌ Failed to delete 'Geografía del principado de asturias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:32.319Z]   ❌ Failed to delete 'Literatura española dialectal': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:32.814Z]   ❌ Failed to delete 'Costumbres': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:39.657Z]   ❌ Error unlinking books for 'Construccion': canceling statement due to statement timeout
+[2025-12-15T10:32:40.039Z]   ❌ Error unlinking books for 'Técnica de los medios de transporte aéreo y espacial': canceling statement due to statement timeout
+[2025-12-15T10:32:40.177Z]   ❌ Failed to delete 'Construccion': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:40.547Z]   ❌ Failed to delete 'Técnica de los medios de transporte aéreo y espacial': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:53.741Z]   ❌ Error unlinking books for 'Literatura guatemalteca': canceling statement due to statement timeout
+[2025-12-15T10:32:54.272Z]   ❌ Error unlinking books for 'Climatologia': canceling statement due to statement timeout
+[2025-12-15T10:32:54.439Z]   ❌ Error unlinking books for 'Sociología de la familia y las relaciones sociales': canceling statement due to statement timeout
+[2025-12-15T10:32:54.470Z]   ❌ Failed to delete 'Literatura guatemalteca': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:54.791Z]   ❌ Failed to delete 'Sociología de la familia y las relaciones sociales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:54.975Z]   ❌ Error unlinking books for 'Estudios parapsicológicos': canceling statement due to statement timeout
+[2025-12-15T10:32:55.438Z]   ❌ Failed to delete 'Estudios parapsicológicos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:32:55.476Z]   ❌ Failed to delete 'Climatologia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:02.647Z]   ❌ Error unlinking books for 'Software': canceling statement due to statement timeout
+[2025-12-15T10:33:02.713Z]   ❌ Error unlinking books for 'Relaciones internacionales': canceling statement due to statement timeout
+[2025-12-15T10:33:03.980Z]   ❌ Failed to delete 'Relaciones internacionales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:03.995Z]   ❌ Failed to delete 'Software': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:13.548Z]   ❌ Error unlinking books for 'Literartura en lengua rusa': canceling statement due to statement timeout
+[2025-12-15T10:33:13.618Z]   ❌ Error unlinking books for 'Organización general de las fuerzas armadas': canceling statement due to statement timeout
+[2025-12-15T10:33:23.597Z]   ❌ Error unlinking books for 'Numerología': canceling statement due to statement timeout
+[2025-12-15T10:33:24.734Z]   ❌ Failed to delete 'Organización general de las fuerzas armadas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:26.383Z]   ❌ Error unlinking books for 'Literartura en lengua francesa': canceling statement due to statement timeout
+[2025-12-15T10:33:31.610Z]   ❌ Error unlinking books for 'Literatura dominicana': canceling statement due to statement timeout
+[2025-12-15T10:33:34.909Z]   ❌ Error unlinking books for 'Publicaciones seriadas': canceling statement due to statement timeout
+[2025-12-15T10:33:35.509Z]   ❌ Failed to delete 'Publicaciones seriadas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:35.545Z]   ❌ Failed to delete 'Numerología': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:46.959Z]   ❌ Failed to delete 'Literartura en lengua rusa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:48.551Z]   ❌ Failed to delete 'Literartura en lengua francesa': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:51.217Z]   ❌ Error unlinking books for 'Nacionalismo': canceling statement due to statement timeout
+[2025-12-15T10:33:53.428Z]   ❌ Error unlinking books for 'Universidad': canceling statement due to statement timeout
+[2025-12-15T10:33:53.806Z]   ❌ Error unlinking books for 'Organizaciones': canceling statement due to statement timeout
+[2025-12-15T10:33:54.928Z]   ❌ Failed to delete 'Universidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:33:59.081Z]   ❌ Failed to delete 'Nacionalismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:04.451Z]   ❌ Failed to delete 'Organizaciones': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:05.954Z]   ❌ Error unlinking books for 'Seguridad social': canceling statement due to statement timeout
+[2025-12-15T10:34:06.088Z]   ❌ Failed to delete 'Seguridad social': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:06.606Z]   ❌ Error unlinking books for 'Estadística de la población': canceling statement due to statement timeout
+[2025-12-15T10:34:16.595Z]   ❌ Error unlinking books for 'Idioma aleman': Timed out acquiring connection from connection pool.
+[2025-12-15T10:34:16.651Z]   ❌ Failed to delete 'Literatura dominicana': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:16.753Z]   ❌ Error unlinking books for 'Folclor': Timed out acquiring connection from connection pool.
+[2025-12-15T10:34:17.159Z]   ❌ Failed to delete 'Estadística de la población': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:18.227Z]   ❌ Error unlinking books for 'Literartura española': canceling statement due to statement timeout
+[2025-12-15T10:34:18.236Z]   ❌ Error unlinking books for 'Literatura paraguaya': canceling statement due to statement timeout
+[2025-12-15T10:34:18.397Z]   ❌ Failed to delete 'Literartura española': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:19.118Z]   ❌ Failed to delete 'Literatura paraguaya': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:19.447Z]   ❌ Failed to delete 'Folclor': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:19.653Z]   ❌ Failed to delete 'Idioma aleman': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:26.278Z]   ❌ Error unlinking books for 'Literatura búlgara, serbia y croata': canceling statement due to statement timeout
+[2025-12-15T10:34:26.585Z]   ❌ Failed to delete 'Literatura búlgara, serbia y croata': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:36.390Z]   ❌ Error unlinking books for 'Etnografia': canceling statement due to statement timeout
+[2025-12-15T10:34:36.398Z]   ❌ Error unlinking books for 'Cancionero popular': canceling statement due to statement timeout
+[2025-12-15T10:34:36.868Z]   ❌ Failed to delete 'Cancionero popular': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:36.874Z]   ❌ Failed to delete 'Etnografia': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:37.315Z]   ❌ Error unlinking books for 'Educación pedagogía': canceling statement due to statement timeout
+[2025-12-15T10:34:37.651Z]   ❌ Failed to delete 'Educación pedagogía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:48.857Z]   ❌ Error unlinking books for 'Psicologia en frances': canceling statement due to statement timeout
+[2025-12-15T10:34:48.892Z]   ❌ Error unlinking books for 'Universidades': canceling statement due to statement timeout
+[2025-12-15T10:34:49.408Z]   ❌ Failed to delete 'Psicologia en frances': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:50.619Z]   ❌ Failed to delete 'Universidades': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:56.604Z]   ❌ Error unlinking books for 'Español / castellano': canceling statement due to statement timeout
+[2025-12-15T10:34:56.668Z]   ❌ Error unlinking books for 'Investigación social y estadística': canceling statement due to statement timeout
+[2025-12-15T10:34:56.741Z]   ❌ Error unlinking books for 'Ventas': canceling statement due to statement timeout
+[2025-12-15T10:34:56.901Z]   ❌ Failed to delete 'Investigación social y estadística': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:57.067Z]   ❌ Failed to delete 'Ventas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:57.379Z]   ❌ Failed to delete 'Español / castellano': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:57.489Z]   ❌ Error unlinking books for 'Cultura popular': canceling statement due to statement timeout
+[2025-12-15T10:34:58.043Z]   ❌ Failed to delete 'Cultura popular': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:34:58.547Z]   ❌ Error unlinking books for 'Material didáctico': canceling statement due to statement timeout
+[2025-12-15T10:34:58.785Z]   ❌ Failed to delete 'Material didáctico': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:00.004Z]   ❌ Error unlinking books for 'Gestión y técnicas de gestión': canceling statement due to statement timeout
+[2025-12-15T10:35:00.092Z]   ❌ Failed to delete 'Gestión y técnicas de gestión': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:07.840Z]   ❌ Error unlinking books for 'Sistemas y estructuras económicas': canceling statement due to statement timeout
+[2025-12-15T10:35:12.027Z]   ❌ Failed to delete 'Sistemas y estructuras económicas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:41.325Z]   ❌ Error unlinking books for 'Madrid, comunidad de': canceling statement due to statement timeout
+[2025-12-15T10:35:46.872Z]   ❌ Error unlinking books for 'Estudios generales': canceling statement due to statement timeout
+[2025-12-15T10:35:48.515Z]   ❌ Failed to delete 'Estudios generales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:49.736Z]   ❌ Error unlinking books for 'Libros ilustrados, libros de actividades y material de aprendizaje temprano': canceling statement due to statement timeout
+[2025-12-15T10:35:52.112Z]   ❌ Error unlinking books for 'Informática:': canceling statement due to statement timeout
+[2025-12-15T10:35:52.214Z]   ❌ Failed to delete 'Madrid, comunidad de': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:56.989Z]   ❌ Error unlinking books for 'Neurología y neurofisiología clínicas': canceling statement due to statement timeout
+[2025-12-15T10:35:57.278Z]   ❌ Failed to delete 'Libros ilustrados, libros de actividades y material de aprendizaje temprano': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:57.946Z]   ❌ Failed to delete 'Informática:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:35:58.783Z]   ❌ Error unlinking books for 'Escuelas secundarias': canceling statement due to statement timeout
+[2025-12-15T10:36:00.409Z]   ❌ Failed to delete 'Neurología y neurofisiología clínicas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:00.962Z]   ❌ Error unlinking books for 'Formación industrial o vocacional': canceling statement due to statement timeout
+[2025-12-15T10:36:01.129Z]   ❌ Failed to delete 'Formación industrial o vocacional': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:01.440Z]   ❌ Error unlinking books for 'Consejos sobre carreras profesionales y cómo alcanzar el éxito': canceling statement due to statement timeout
+[2025-12-15T10:36:01.608Z]   ❌ Failed to delete 'Escuelas secundarias': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:02.692Z]   ❌ Error unlinking books for 'Historiografía': canceling statement due to statement timeout
+[2025-12-15T10:36:02.898Z]   ❌ Failed to delete 'Historiografía': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:16.045Z]   ❌ Error unlinking books for 'Espectáculos públicos, desfiles, festivales': canceling statement due to statement timeout
+[2025-12-15T10:36:16.049Z]   ❌ Error unlinking books for 'Mente, cuerpo y espíritu:': canceling statement due to statement timeout
+[2025-12-15T10:36:16.068Z]   ❌ Error unlinking books for 'Feminismo y teoría feminista': canceling statement due to statement timeout
+[2025-12-15T10:36:17.262Z]   ❌ Failed to delete 'Consejos sobre carreras profesionales y cómo alcanzar el éxito': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:17.366Z]   ❌ Error unlinking books for 'Geografía histórica': canceling statement due to statement timeout
+[2025-12-15T10:36:18.178Z]   ❌ Error unlinking books for 'Ministerio y actividad pastoral cristianas': canceling statement due to statement timeout
+[2025-12-15T10:36:20.853Z]   ❌ Failed to delete 'Geografía histórica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:20.859Z]   ❌ Failed to delete 'Feminismo y teoría feminista': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:20.862Z]   ❌ Failed to delete 'Mente, cuerpo y espíritu:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:20.866Z]   ❌ Failed to delete 'Espectáculos públicos, desfiles, festivales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:20.875Z]   ❌ Failed to delete 'Ministerio y actividad pastoral cristianas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:30.134Z]   ❌ Error unlinking books for '299': canceling statement due to statement timeout
+[2025-12-15T10:36:30.320Z]   ❌ Error unlinking books for '368': canceling statement due to statement timeout
+[2025-12-15T10:36:38.475Z]   ❌ Error unlinking books for '250': canceling statement due to statement timeout
+[2025-12-15T10:36:39.822Z]   ❌ Error unlinking books for '24.00': canceling statement due to statement timeout
+[2025-12-15T10:36:39.929Z]   ❌ Failed to delete '24.00': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:41.123Z]   ❌ Failed to delete '250': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:36:49.370Z]   ❌ Failed to delete '368': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:02.611Z]   ❌ Failed to delete '299': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:05.457Z]   ❌ Error unlinking books for '320': canceling statement due to statement timeout
+[2025-12-15T10:37:05.571Z]   ❌ Failed to delete '320': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:09.115Z]   ❌ Error unlinking books for '306': canceling statement due to statement timeout
+[2025-12-15T10:37:09.196Z]   ❌ Failed to delete '306': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:19.626Z]   ❌ Error unlinking books for 'Aerospacio': canceling statement due to statement timeout
+[2025-12-15T10:37:19.630Z]   ❌ Error unlinking books for 'Agnosticismo y ateísmo': canceling statement due to statement timeout
+[2025-12-15T10:37:19.812Z]   ❌ Failed to delete 'Aerospacio': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:19.824Z]   ❌ Failed to delete 'Agnosticismo y ateísmo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:19.824Z]    Processed 6000/7146...
+[2025-12-15T10:37:30.643Z]   ❌ Error unlinking books for 'Animales domésticos y mascotas': canceling statement due to statement timeout
+[2025-12-15T10:37:30.659Z]   ❌ Error unlinking books for 'Antropología.': canceling statement due to statement timeout
+[2025-12-15T10:37:30.926Z]   ❌ Failed to delete 'Animales domésticos y mascotas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:31.086Z]   ❌ Failed to delete 'Antropología.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:41.435Z]   ❌ Error unlinking books for 'Bricolaje.': canceling statement due to statement timeout
+[2025-12-15T10:37:41.443Z]   ❌ Error unlinking books for 'Automovilismo.': canceling statement due to statement timeout
+[2025-12-15T10:37:41.613Z]   ❌ Failed to delete 'Automovilismo.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:41.615Z]   ❌ Failed to delete 'Bricolaje.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:51.213Z]   ❌ Error unlinking books for 'Cervantina,': canceling statement due to statement timeout
+[2025-12-15T10:37:51.346Z]   ❌ Error unlinking books for 'Catalán': canceling statement due to statement timeout
+[2025-12-15T10:37:51.528Z]   ❌ Failed to delete 'Cervantina,': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:52.288Z]   ❌ Failed to delete 'Catalán': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:37:59.866Z]   ❌ Error unlinking books for 'Comunidades y monacatos cristianos': canceling statement due to statement timeout
+[2025-12-15T10:38:00.652Z]   ❌ Failed to delete 'Comunidades y monacatos cristianos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:10.015Z]   ❌ Error unlinking books for 'Cuento hispanoamericano,': canceling statement due to statement timeout
+[2025-12-15T10:38:10.045Z]   ❌ Error unlinking books for 'Creencias populares y saberes polémicos': canceling statement due to statement timeout
+[2025-12-15T10:38:22.769Z]   ❌ Error unlinking books for 'Cuidado de los ancianos': canceling statement due to statement timeout
+[2025-12-15T10:38:24.242Z]   ❌ Error unlinking books for 'Crítica literaria-madrid.': canceling statement due to statement timeout
+[2025-12-15T10:38:25.543Z]   ❌ Failed to delete 'Crítica literaria-madrid.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:34.029Z]   ❌ Error unlinking books for 'Cuestiones y procesos sociales': canceling statement due to statement timeout
+[2025-12-15T10:38:34.800Z]   ❌ Error unlinking books for 'Crítica literaria.': canceling statement due to statement timeout
+[2025-12-15T10:38:35.096Z]   ❌ Error unlinking books for 'Cuento.': canceling statement due to statement timeout
+[2025-12-15T10:38:35.119Z]   ❌ Error unlinking books for 'Crisis y desastres económicos y financieros': canceling statement due to statement timeout
+[2025-12-15T10:38:41.412Z]   ❌ Error unlinking books for 'Crítica lieraria.': canceling statement due to statement timeout
+[2025-12-15T10:38:48.034Z]   ❌ Failed to delete 'Crítica lieraria.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:48.383Z]   ❌ Failed to delete 'Cuestiones y procesos sociales': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:48.465Z]   ❌ Failed to delete 'Cuidado de los ancianos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:48.652Z]   ❌ Failed to delete 'Creencias populares y saberes polémicos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:48.888Z]   ❌ Failed to delete 'Crítica literaria.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:48.892Z]   ❌ Failed to delete 'Crisis y desastres económicos y financieros': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:49.648Z]   ❌ Failed to delete 'Cuento hispanoamericano,': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:49.725Z]   ❌ Failed to delete 'Cuento.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:50.829Z]   ❌ Error unlinking books for 'Contratación mercantil': canceling statement due to statement timeout
+[2025-12-15T10:38:51.055Z]   ❌ Failed to delete 'Contratación mercantil': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:38:52.093Z]   ❌ Error unlinking books for 'Cuestiones y debates religiosos': canceling statement due to statement timeout
+[2025-12-15T10:38:52.173Z]   ❌ Failed to delete 'Cuestiones y debates religiosos': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:00.243Z]   ❌ Error unlinking books for 'Cuestiones de higiene y seguridad': canceling statement due to statement timeout
+[2025-12-15T10:39:01.579Z]   ❌ Failed to delete 'Cuestiones de higiene y seguridad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:13.986Z]   ❌ Error unlinking books for 'Diccionario .': canceling statement due to statement timeout
+[2025-12-15T10:39:14.036Z]   ❌ Error unlinking books for 'Dibujo técnico.': canceling statement due to statement timeout
+[2025-12-15T10:39:14.082Z]   ❌ Failed to delete 'Diccionario .': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:14.177Z]   ❌ Failed to delete 'Dibujo técnico.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:17.154Z]   ❌ Error unlinking books for 'Destrezas de estudio y aprendizaje:': canceling statement due to statement timeout
+[2025-12-15T10:39:17.338Z]   ❌ Failed to delete 'Destrezas de estudio y aprendizaje:': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:25.526Z]   ❌ Error unlinking books for 'Dieta y nutrición': canceling statement due to statement timeout
+[2025-12-15T10:39:25.536Z]   ❌ Error unlinking books for 'Dictionary': canceling statement due to statement timeout
+[2025-12-15T10:39:25.616Z]   ❌ Failed to delete 'Dieta y nutrición': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:25.685Z]   ❌ Failed to delete 'Dictionary': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:34.473Z]   ❌ Error unlinking books for 'Electrónica.': canceling statement due to statement timeout
+[2025-12-15T10:39:34.520Z]   ❌ Error unlinking books for 'Enfermedades infectocontagiosas': canceling statement due to statement timeout
+[2025-12-15T10:39:38.947Z]   ❌ Error unlinking books for 'Ensayo.': canceling statement due to statement timeout
+[2025-12-15T10:39:38.991Z]   ❌ Error unlinking books for 'Enciclopedias y obras de consulta': canceling statement due to statement timeout
+[2025-12-15T10:39:40.019Z]   ❌ Error unlinking books for 'Empresa y gestión': canceling statement due to statement timeout
+[2025-12-15T10:39:49.174Z]   ❌ Error unlinking books for 'Enciclopedias.': canceling statement due to statement timeout
+[2025-12-15T10:39:49.200Z]   ❌ Error unlinking books for 'Embarazo, parto y cuidados del bebé': canceling statement due to statement timeout
+[2025-12-15T10:39:49.413Z]   ❌ Failed to delete 'Enciclopedias.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:53.795Z]   ❌ Failed to delete 'Enciclopedias y obras de consulta': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:39:57.217Z]   ❌ Failed to delete 'Electrónica.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:08.736Z]   ❌ Error unlinking books for 'Ensayp': canceling statement due to statement timeout
+[2025-12-15T10:40:11.769Z]   ❌ Error unlinking books for 'Ensayo actualidad': canceling statement due to statement timeout
+[2025-12-15T10:40:12.095Z]   ❌ Failed to delete 'Ensayo actualidad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:17.295Z]   ❌ Failed to delete 'Enfermedades infectocontagiosas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:19.285Z]   ❌ Failed to delete 'Ensayp': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:24.602Z]   ❌ Error unlinking books for 'Enología.': canceling statement due to statement timeout
+[2025-12-15T10:40:26.210Z]   ❌ Error unlinking books for 'Enseñanza de una materia específica': canceling statement due to statement timeout
+[2025-12-15T10:40:28.546Z]   ❌ Failed to delete 'Enseñanza.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:28.861Z]   ❌ Error unlinking books for 'Enfermería y servicios auxiliares': Timed out acquiring connection from connection pool.
+[2025-12-15T10:40:28.896Z]   ❌ Failed to delete 'Embarazo, parto y cuidados del bebé': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:29.740Z]   ❌ Failed to delete 'Enología.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:30.025Z]   ❌ Failed to delete 'Ensayo.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:30.311Z]   ❌ Failed to delete 'Enseñanza de una materia específica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:30.484Z]   ❌ Failed to delete 'Empresa y gestión': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:30.781Z]   ❌ Failed to delete 'Enfermería y servicios auxiliares': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:38.050Z]   ❌ Error unlinking books for 'Ensayo-segunda república.': canceling statement due to statement timeout
+[2025-12-15T10:40:38.073Z]   ❌ Error unlinking books for 'Epidemiología y estadística médica': canceling statement due to statement timeout
+[2025-12-15T10:40:40.158Z]   ❌ Failed to delete 'Epidemiología y estadística médica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:40.391Z]   ❌ Failed to delete 'Ensayo-segunda república.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:57.196Z]   ❌ Error unlinking books for 'Estudios y crítica sobre shakespeare': canceling statement due to statement timeout
+[2025-12-15T10:40:57.341Z]   ❌ Failed to delete 'Estudios y crítica sobre shakespeare': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:40:57.382Z]   ❌ Error unlinking books for 'Español.(811.134.2); lingüística. filología.(80)': canceling statement due to statement timeout
+[2025-12-15T10:40:57.515Z]   ❌ Failed to delete 'Español.(811.134.2); lingüística. filología.(80)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:06.767Z]   ❌ Error unlinking books for 'Excel': canceling statement due to statement timeout
+[2025-12-15T10:41:06.959Z]   ❌ Error unlinking books for 'Familia y relaciones': canceling statement due to statement timeout
+[2025-12-15T10:41:08.436Z]   ❌ Failed to delete 'Familia y relaciones': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:08.452Z]   ❌ Failed to delete 'Excel': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:18.459Z]   ❌ Error unlinking books for 'Geografía,': canceling statement due to statement timeout
+[2025-12-15T10:41:18.553Z]   ❌ Failed to delete 'Geografía,': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:18.682Z]   ❌ Error unlinking books for 'Geografía de guatemala': canceling statement due to statement timeout
+[2025-12-15T10:41:18.773Z]   ❌ Failed to delete 'Geografía de guatemala': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:18.774Z]    Processed 6500/7146...
+[2025-12-15T10:41:29.434Z]   ❌ Error unlinking books for 'Gramática y vocabulario': canceling statement due to statement timeout
+[2025-12-15T10:41:29.542Z]   ❌ Error unlinking books for 'Guías-canarias.': canceling statement due to statement timeout
+[2025-12-15T10:41:31.333Z]   ❌ Failed to delete 'Guías-canarias.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:31.338Z]   ❌ Failed to delete 'Gramática y vocabulario': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:41.779Z]   ❌ Error unlinking books for 'Ideologías religiosas y teocráticas': canceling statement due to statement timeout
+[2025-12-15T10:41:41.782Z]   ❌ Error unlinking books for 'Humor politico': canceling statement due to statement timeout
+[2025-12-15T10:41:41.971Z]   ❌ Failed to delete 'Humor politico': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:42.015Z]   ❌ Failed to delete 'Ideologías religiosas y teocráticas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:48.160Z]   ❌ Error unlinking books for 'Infantiles': canceling statement due to statement timeout
+[2025-12-15T10:41:48.474Z]   ❌ Failed to delete 'Infantiles': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:57.713Z]   ❌ Error unlinking books for 'Libro': canceling statement due to statement timeout
+[2025-12-15T10:41:57.755Z]   ❌ Error unlinking books for 'Juegos-cartas.': canceling statement due to statement timeout
+[2025-12-15T10:41:57.920Z]   ❌ Failed to delete 'Libro': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:41:57.990Z]   ❌ Failed to delete 'Juegos-cartas.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:06.754Z]   ❌ Error unlinking books for 'Literatura en lengua inglesa.': canceling statement due to statement timeout
+[2025-12-15T10:42:06.756Z]   ❌ Error unlinking books for 'Literatura americana.': canceling statement due to statement timeout
+[2025-12-15T10:42:06.840Z]   ❌ Failed to delete 'Literatura americana.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:07.059Z]   ❌ Failed to delete 'Literatura en lengua inglesa.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:10.827Z]   ❌ Error unlinking books for 'Literatura hispánica.': canceling statement due to statement timeout
+[2025-12-15T10:42:11.170Z]   ❌ Failed to delete 'Literatura hispánica.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:22.846Z]   ❌ Error unlinking books for 'Litertura hispánica.': canceling statement due to statement timeout
+[2025-12-15T10:42:22.848Z]   ❌ Error unlinking books for 'Literatura latina.': canceling statement due to statement timeout
+[2025-12-15T10:42:22.933Z]   ❌ Failed to delete 'Litertura hispánica.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:22.935Z]   ❌ Failed to delete 'Literatura latina.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:32.272Z]   ❌ Error unlinking books for 'Misión y evangelización cristianas': canceling statement due to statement timeout
+[2025-12-15T10:42:32.361Z]   ❌ Error unlinking books for 'Microbiología (no médica)': canceling statement due to statement timeout
+[2025-12-15T10:42:33.218Z]   ❌ Failed to delete 'Misión y evangelización cristianas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:33.973Z]   ❌ Failed to delete 'Microbiología (no médica)': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:45.891Z]   ❌ Error unlinking books for 'Métrica': canceling statement due to statement timeout
+[2025-12-15T10:42:45.982Z]   ❌ Error unlinking books for 'Mujeres-ensayo.': canceling statement due to statement timeout
+[2025-12-15T10:42:46.101Z]   ❌ Failed to delete 'Métrica': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:46.202Z]   ❌ Failed to delete 'Mujeres-ensayo.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:54.779Z]   ❌ Error unlinking books for 'Otras literaturas / francesas': canceling statement due to statement timeout
+[2025-12-15T10:42:54.806Z]   ❌ Error unlinking books for 'País vasco, comunidad autónoma del': canceling statement due to statement timeout
+[2025-12-15T10:42:54.887Z]   ❌ Failed to delete 'Otras literaturas / francesas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:42:55.553Z]   ❌ Failed to delete 'País vasco, comunidad autónoma del': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:04.185Z]   ❌ Error unlinking books for 'Probabilidad y estadística': canceling statement due to statement timeout
+[2025-12-15T10:43:04.228Z]   ❌ Error unlinking books for 'Polaco': canceling statement due to statement timeout
+[2025-12-15T10:43:04.302Z]   ❌ Failed to delete 'Polaco': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:04.304Z]   ❌ Failed to delete 'Probabilidad y estadística': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:12.953Z]   ❌ Error unlinking books for 'Recortables': canceling statement due to statement timeout
+[2025-12-15T10:43:12.961Z]   ❌ Error unlinking books for 'Relaciones interreligiosas': canceling statement due to statement timeout
+[2025-12-15T10:43:13.508Z]   ❌ Failed to delete 'Recortables': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:13.542Z]   ❌ Failed to delete 'Relaciones interreligiosas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:13.543Z]    Processed 7000/7146...
+[2025-12-15T10:43:22.780Z]   ❌ Error unlinking books for 'Servicios de policía y seguridad': canceling statement due to statement timeout
+[2025-12-15T10:43:22.785Z]   ❌ Error unlinking books for 'Solidaridad': canceling statement due to statement timeout
+[2025-12-15T10:43:22.896Z]   ❌ Failed to delete 'Servicios de policía y seguridad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:22.913Z]   ❌ Failed to delete 'Solidaridad': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:31.662Z]   ❌ Error unlinking books for 'Teatrp': canceling statement due to statement timeout
+[2025-12-15T10:43:31.690Z]   ❌ Error unlinking books for 'Teoría de la literatura.': canceling statement due to statement timeout
+[2025-12-15T10:43:31.973Z]   ❌ Failed to delete 'Teoría de la literatura.': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:31.980Z]   ❌ Failed to delete 'Teatrp': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:41.997Z]   ❌ Error unlinking books for 'Vida y práctica cristianas': canceling statement due to statement timeout
+[2025-12-15T10:43:41.999Z]   ❌ Error unlinking books for 'Vivienda y los sintecho/sinhogarismo': canceling statement due to statement timeout
+[2025-12-15T10:43:43.444Z]   ❌ Failed to delete 'Vivienda y los sintecho/sinhogarismo': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:43.629Z]   ❌ Failed to delete 'Vida y práctica cristianas': update or delete on table "categorias" violates foreign key constraint "libros_categoria_id_fkey" on table "libros"
+[2025-12-15T10:43:43.630Z] 🏁 Force Cleanup Done.

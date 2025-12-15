@@ -895,6 +895,8 @@
   padding: 1rem;
   flex-direction: column;
   gap: 1rem;
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
 }
 
 .mobile-link {

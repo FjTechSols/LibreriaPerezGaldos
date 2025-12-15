@@ -157,3 +157,59 @@
     font-size: 0.6875rem;
   }
 }
+
+/* Dark Mode Styles */
+.dark-mode .search-input {
+  background-color: #1e293b; /* Slate 800 */
+  border-color: #334155; /* Slate 700 */
+  color: #f1f5f9; /* Slate 100 */
+}
+
+.dark-mode .search-input::placeholder {
+  color: #94a3b8; /* Slate 400 */
+}
+
+.dark-mode .search-input:focus {
+  background-color: #1e293b;
+  border-color: #3b82f6; /* Blue 500 */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); 
+}
+
+.dark-mode .search-icon {
+  color: #94a3b8; /* Slate 400 */
+}
+
+.dark-mode .clear-btn {
+  color: #94a3b8;
+}
+
+.dark-mode .clear-btn:hover {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .suggestions {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); /* Stronger shadow for dark mode */
+}
+
+.dark-mode .suggestion-item {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .suggestion-item:hover {
+  background-color: #0f172a; /* Slate 900 - darker on hover */
+}
+
+.dark-mode .suggestion-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .suggestion-author {
+  color: #94a3b8;
+}
+
+.dark-mode .suggestion-price {
+  color: #60a5fa; /* Blue 400 */
+}

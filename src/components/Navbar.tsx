@@ -27,7 +27,7 @@ export function Navbar() {
   const { settings } = useSettings();
   const navigate = useNavigate();
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

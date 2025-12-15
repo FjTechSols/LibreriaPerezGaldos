@@ -41,12 +41,12 @@ export function ResetPassword() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError || !session) {
-          const { error: setError } = await supabase.auth.setSession({
+          const { error: authError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: hashParams.get('refresh_token') || ''
           });
 
-          if (setError) {
+          if (authError) {
             setError('Enlace inválido o expirado. Solicita un nuevo enlace de recuperación.');
           } else {
             setIsValidSession(true);

@@ -1,5 +1,5 @@
 export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado';
-export type TipoPedido = 'interno' | 'iberlibro' | 'conecta' | 'uniliber' | 'libreros_de_viejo';
+export type TipoPedido = 'interno' | 'iberlibro' | 'conecta' | 'uniliber' | 'libreros_de_viejo' | 'perez_galdos' | 'galeon';
 export type MetodoPago = 'tarjeta' | 'paypal' | 'transferencia' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'otro';
 export type TipoFactura = 'normal' | 'rectificativa';
@@ -36,6 +36,10 @@ export interface Cliente {
   nif?: string;
   notas?: string;
   activo?: boolean;
+  tipo?: 'particular' | 'empresa' | 'institucion';
+  persona_contacto?: string;
+  cargo?: string;
+  web?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -305,6 +309,9 @@ export interface FilterState {
   availability: 'all' | 'inStock' | 'outOfStock';
   sortBy: 'title' | 'price' | 'rating' | 'newest';
   sortOrder: 'asc' | 'desc';
+  featured?: boolean;
+  onSale?: boolean;
+  isNew?: boolean;
 }
 
 export interface Invoice {
@@ -324,6 +331,7 @@ export interface Invoice {
   items?: InvoiceItem[];
   created_at?: string;
   updated_at?: string;
+  language?: 'es' | 'en';
 }
 
 export interface InvoiceItem {
@@ -346,6 +354,7 @@ export interface InvoiceFormData {
   order_id?: string;
   items: InvoiceItem[];
   shipping_cost?: number;
+  language: 'es' | 'en';
 }
 
 export interface InvoiceContextType {

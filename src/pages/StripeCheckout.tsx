@@ -53,6 +53,10 @@ export default function StripeCheckout() {
         })),
       });
 
+      if (!nuevoPedido) {
+        throw new Error('No se pudo crear el pedido.');
+      }
+
       setPedidoId(nuevoPedido.id);
 
       const { clientSecret: secret } = await stripeService.createPaymentIntent(

@@ -367,91 +367,12 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .pedidos-table .table-header,
   .pedidos-table .table-row {
-    min-width: 900px;
+    min-width: 100%;
   }
 }
 
-@media (max-width: 1024px) {
-  .pedidos-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
-  .pedidos-stats .stat-card {
-    padding: 0.75rem;
-  }
-
-  .pedidos-stats .stat-value {
-    font-size: 1.25rem;
-  }
-
-  .pedidos-stats .stat-label {
-    font-size: 0.6875rem;
-  }
-
-  .pedidos-table .table-header {
-    display: none;
-  }
-
-  .pedidos-table .table-row {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding: 1rem;
-    min-width: auto;
-  }
-
-  .pedidos-table .table-row > * {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .pedidos-table .table-row > *::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #64748b;
-    font-size: 0.8125rem;
-  }
-
-  .pedido-numero::before {
-    content: "Nº Pedido:";
-  }
-
-  .pedido-usuario::before {
-    content: "Usuario:";
-  }
-
-  .pedido-fecha::before {
-    content: "Fecha:";
-  }
-
-  .pedido-estado::before {
-    content: "Estado:";
-  }
-
-  .pedido-total::before {
-    content: "Total:";
-  }
-
-  .pedido-pago::before {
-    content: "Pago:";
-  }
-
-  .pedido-transportista::before {
-    content: "Transportista:";
-  }
-
-  .pedido-acciones {
-    justify-content: flex-end;
-  }
-
-  .pedido-acciones::before {
-    content: none;
-  }
-}
+/* Legacy mobile block removed */
 
 @media (max-width: 768px) {
   .pedidos-list-container {
@@ -462,31 +383,21 @@
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
-
-  .pedidos-stats .stat-card {
-    padding: 0.75rem 0.5rem;
-  }
-
+  
+  /* Stack Filters */
   .pedidos-filters {
     flex-direction: column;
-    gap: 0.5rem;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .filter-group {
+    width: 100%;
   }
 
-  .filter-group,
+  .filter-input,
   .filter-select {
     width: 100%;
-    min-width: auto;
-  }
-
-  .pedido-usuario .usuario-info {
-    overflow: hidden;
-  }
-
-  .usuario-nombre,
-  .usuario-email {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 
@@ -494,21 +405,9 @@
   .pedidos-stats {
     grid-template-columns: 1fr;
   }
-
-  .pedidos-stats .stat-card {
-    padding: 1rem;
-  }
-
-  .pedidos-stats .stat-value {
-    font-size: 1.5rem;
-  }
-
-  .pedidos-stats .stat-label {
-    font-size: 0.75rem;
-  }
 }
 
-/* Dark Mode Overrides for Status Cards */
+/* Dark Mode Overrides */
 .dark-mode .pedidos-stats .stat-card.pendiente {
   background: rgba(234, 88, 12, 0.1);
   border-color: rgba(234, 88, 12, 0.2);
@@ -534,17 +433,16 @@
   border-color: rgba(13, 148, 136, 0.2);
 }
 
-
 .dark-mode .pedidos-stats .stat-card.total {
   background: rgba(148, 163, 184, 0.1);
   border-color: rgba(148, 163, 184, 0.2);
 }
 
+/* Dark Mode Text Colors */
 .dark-mode .pedido-pago,
 .dark-mode .pedido-transportista {
   color: #cbd5e1;
 }
-
 
 .dark-mode .pedidos-table .table-header {
   color: #cbd5e1;
@@ -577,15 +475,206 @@
   color: #64748b;
 }
 
-.dark-mode .pedidos-table {
-  background: #1e293b;
-  border-color: #334155;
+/* Dark Mode card background for mobile (overriding general table bg) */
+/* =========================================
+   MOBILE OPTIMIZATION (Unified Block)
+   ========================================= */
+
+@media (max-width: 1024px) {
+  /* 1. Statistics Cards Grid */
+  .pedidos-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .pedidos-stats .stat-card {
+    padding: 0.75rem;
+  }
+
+  .pedidos-stats .stat-value {
+    font-size: 1.25rem;
+  }
+
+  /* 2. Hide Traditional Table Header */
+  .pedidos-table .table-header {
+    display: none !important;
+  }
+
+  /* 3. Card-View Row Layout */
+  .pedidos-table .table-row {
+    display: grid !important;
+    grid-template-columns: 80px 1fr !important;
+    grid-template-rows: auto auto auto auto auto auto !important;
+    grid-template-areas: 
+      "num user"
+      "num date"
+      "pay pay"
+      "state state"
+      "total total"
+      "actions actions" !important;
+    gap: 0.75rem;
+    padding: 1.25rem !important;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    margin-bottom: 0.75rem;
+    position: relative;
+  }
+
+  /* Dark Mode specific for Cards */
+  .dark-mode .pedidos-table {
+    background: transparent !important;
+    border: none !important;
+  }
+    
+  .dark-mode .pedidos-table .table-row {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #f1f5f9 !important; /* Force text visibility */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+    
+  .dark-mode .pedido-acciones {
+    border-top-color: #334155 !important;
+  }
+
+  .dark-mode .pedido-usuario,
+  .dark-mode .usuario-nombre,
+  .dark-mode .pedido-total,
+  .dark-mode .pedido-pago {
+    color: #f1f5f9 !important;
+  }
+
+  .dark-mode .usuario-email,
+  .dark-mode .pedido-fecha {
+    color: #94a3b8 !important;
+  }
+
+  /* 4. Cell Layouts */
+
+  /* Icon & Number (Left Vertical) */
+  .pedido-numero {
+    grid-area: num;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+  
+  .pedido-numero svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-tertiary);
+  }
+
+  /* User & Date (Right Vertical) */
+  .pedido-usuario {
+    grid-area: user;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    justify-content: center;
+    text-align: right;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .usuario-info {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 0;
+  }
+  
+  .usuario-nombre {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  
+  .usuario-email {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pedido-fecha {
+    grid-area: date;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    width: 100%;
+    margin: -0.25rem 0 0 0;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    text-align: right;
+  }
+
+  /* Center Stack */
+  .pedido-pago {
+    grid-area: pay;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100%;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+  
+  .pedido-estado {
+    grid-area: state;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+
+  .pedido-total {
+    grid-area: total;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100%;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    padding-bottom: 0.5rem;
+  }
+  
+  .pedido-transportista { display: none !important; }
+
+  /* Actions (Bottom) */
+  .pedido-acciones {
+    grid-area: actions;
+    display: flex !important;
+    flex-direction: row;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .pedido-acciones .btn-accion, 
+  .pedido-acciones .estado-selector {
+    flex: 1;
+    height: 40px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Cleanup */
+  .pedidos-table .table-row > *::before { display: none !important; }
 }
 
 .dark-mode .pedidos-loading,
 .dark-mode .no-pedidos {
   color: #f1f5f9;
-  font-weight: 500;
 }
 
 .dark-mode .no-pedidos svg {

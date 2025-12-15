@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlertTriangle, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -22,7 +22,7 @@ export function ProtectedRoute({
   requireAdmin,
   requireSuperAdmin
 }: ProtectedRouteProps) {
-  const { isAuthenticated, hasPermission, hasRole, isAdmin, isSuperAdmin, user } = useAuth();
+  const { isAuthenticated, hasPermission, hasRole, isAdmin, isSuperAdmin } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

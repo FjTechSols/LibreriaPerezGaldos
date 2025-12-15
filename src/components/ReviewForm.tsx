@@ -16,7 +16,7 @@ interface ReviewFormProps {
 }
 
 export function ReviewForm({ libroId, existingReview, onSuccess, onCancel }: ReviewFormProps) {
-  const { t } = useLanguage();
+  const { } = useLanguage();
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState(existingReview?.comment || '');

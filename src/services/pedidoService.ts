@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Pedido, PedidoDetalle, EstadoPedido, Usuario, Libro } from '../types';
+import { Pedido, EstadoPedido, Usuario, Libro } from '../types';
 
 const IVA_RATE = 0.21;
 
@@ -305,29 +305,65 @@ export const obtenerUsuarios = async (): Promise<Usuario[]> => {
 };
 
 export const obtenerLibros = async (filtro?: string): Promise<Libro[]> => {
-  let query = supabase
-    .from('libros')
-    .select('*')
-    .eq('activo', true)
-    .order('titulo');
-
-  if (filtro) {
-    const isNumeric = /^\d+$/.test(filtro);
-    if (isNumeric) {
-       query = query.or(`id.eq.${filtro},titulo.ilike.%${filtro}%,isbn.ilike.%${filtro}%,legacy_id.ilike.%${filtro}%`);
-    } else {
-       query = query.or(`titulo.ilike.%${filtro}%,isbn.ilike.%${filtro}%,legacy_id.ilike.%${filtro}%`);
-    }
+  if (!filtro) {
+    const { data, error } = await supabase
+      .from('libros')
+      .select('*')
+      .eq('activo', true)
+      .order('titulo')
+      .limit(20); // Reduced limit for initial load optimization
+    
+    if (error) console.error('Error al obtener libros:', error);
+    return data || [];
   }
 
-  const { data, error } = await query.limit(50);
+  const isNumeric = /^\d+$/.test(filtro);
 
-  if (error) {
+  try {
+    if (isNumeric) {
+      // Parallel execution: Exact Match (Priority) + Fuzzy Search
+      const [exactMatch, fuzzyMatch] = await Promise.all([
+        // 1. Exact Priority Search (ID or Legacy ID)
+        supabase
+          .from('libros')
+          .select('*')
+          .eq('activo', true)
+          .or(`id.eq.${filtro},legacy_id.eq.${filtro}`),
+        
+        // 2. Standard Fuzzy Search (limit 20 to be faster)
+        supabase
+          .from('libros')
+          .select('*')
+          .eq('activo', true)
+          .or(`titulo.ilike.%${filtro}%,autor.ilike.%${filtro}%,isbn.ilike.%${filtro}%`)
+          .limit(20)
+      ]);
+
+      const exactData = exactMatch.data || [];
+      const fuzzyData = fuzzyMatch.data || [];
+
+      // Combine: Exact matches first, then fuzzy matches (filtering duplicates)
+      const exactIds = new Set(exactData.map(b => b.id));
+      const filteredFuzzy = fuzzyData.filter(b => !exactIds.has(b.id));
+
+      return [...exactData, ...filteredFuzzy];
+    } else {
+      // Non-numeric search: Standard fuzzy search
+      const { data, error } = await supabase
+        .from('libros')
+        .select('*')
+        .eq('activo', true)
+        .or(`titulo.ilike.%${filtro}%,autor.ilike.%${filtro}%,isbn.ilike.%${filtro}%,legacy_id.ilike.%${filtro}%`)
+        .order('titulo')
+        .limit(20);
+
+      if (error) throw error;
+      return data || [];
+    }
+  } catch (error) {
     console.error('Error al obtener libros:', error);
     return [];
   }
-
-  return data || [];
 };
 
 export const obtenerEstadisticasPedidos = async () => {

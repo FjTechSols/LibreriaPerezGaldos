@@ -90,6 +90,9 @@ export interface LibroFilters {
    maxPages?: number;
    startYear?: number;
    endYear?: number;
+   searchMode?: 'default' | 'full'; 
+   titulo?: string;
+   autor?: string;
  }
 
  export const obtenerLibros = async (
@@ -100,45 +103,81 @@ export interface LibroFilters {
    try {
      let query = supabase
        .from('libros')
-       .select('*, editoriales(id, nombre), categorias(id, nombre), libros_contenidos(titulo, numero_volumen)', { count: 'exact' })
+       // Removed Joins to prevent massive timeout on deep pagination (page 15k+)
+       // We only fetch the core table now. The UI will have to rely on IDs or we fetch details separately if needed.
+       .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
        .eq('activo', true);
 
      // Apply Filters
      if (filters) {
        if (filters.search) {
-         // Search in multiple columns using OR syntax
-         // Note: legacy_id is text, isbn is text
          const searchTerm = filters.search.trim();
          const isNumeric = /^\d+$/.test(searchTerm);
-         
-         if (isNumeric) {
-             query = query.or(`id.eq.${searchTerm},titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,isbn.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
+         const isFullSearch = filters.searchMode === 'full';
+         if (isFullSearch) {
+            // Full Search: ID, LegacyID, Title, Author, ISBN, Editorial
+            let orClause = `legacy_id.ilike.%${searchTerm}%,titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,isbn.ilike.%${searchTerm}%`;
+
+            if (isNumeric) {
+                // If numeric, check ID too
+                orClause += `,id.eq.${searchTerm}`;
+            }
+
+            // Search by Editorial (Two-step process: Get IDs -> Filter Books)
+            // Note: We do this only if not numeric, or if numeric has editorial name results (unlikely but possible)
+            // To be efficient, we do a parallel non-blocking fetch or just await it. 
+            // Given the async nature, we'll await.
+            const { data: edData } = await supabase
+                .from('editoriales')
+                .select('id')
+                .ilike('nombre', `%${searchTerm}%`);
+            
+            if (edData && edData.length > 0) {
+                const edIds = edData.map(e => e.id).join(',');
+                orClause += `,editorial_id.in.(${edIds})`;
+            }
+
+            query = query.or(orClause);
+
          } else {
-             // Using a robust ILIKE query for search
-             query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,isbn.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
+             // Default Search: ID (Code) and Legacy ID ONLY - Optimized
+             if (isNumeric) {
+                 // Use prefix match for legacy_id (faster than cleaning wildcard) or exact if typically full code
+                 // Converting leading wildcard to prefix-only or exact match to prevent timeout
+                 query = query.or(`id.eq.${searchTerm},legacy_id.ilike.${searchTerm}%`);
+             } else {
+                 query = query.ilike('legacy_id', `${searchTerm}%`);
+             }
          }
        }
 
-       if (filters.category && filters.category !== 'Todos') {
-         // Assuming category maps to categoria_id or we need to join categories. 
-         // Since the original code implied 'Categoria X', let's stick to simple logic or assume input is ID if possible.
-         // However, the previous client-side code used `book.category === filters.category`.
-         // MapLibroToBook does: category: libro.categoria_id ? `Categoría ${libro.categoria_id}` : 'General'
-         // This implies we need to filter by categoria_id. 
-         // If filter is "Categoría 1", we parse "1". If "General", we look for null ?? 
-         // Lets try to be smart. If the filter string matches "Categoría X", extract X.
-         if (filters.category.startsWith('Categoría ')) {
-             const catId = parseInt(filters.category.replace('Categoría ', ''));
-             if (!isNaN(catId)) {
-                 query = query.eq('categoria_id', catId);
+        if (filters.category && filters.category !== 'Todos') {
+             // Resolve Category Name to ID
+             // Optimisation: We could cache this or pass ID from UI, but for now we look it up.
+             const { data: catData, error: catError } = await supabase
+                 .from('categorias')
+                 .select('id')
+                 .eq('nombre', filters.category)
+                 .maybeSingle();
+             
+             if (catData && !catError) {
+                 query = query.eq('categoria_id', catData.id);
+             } else {
+                 // If category name doesn't exist (shouldn't happen with dropdown), return empty or handle legacy
+                 // Fallback for legacy "Categoría X" format just in case
+                 if (filters.category.startsWith('Categoría ')) {
+                      const catId = parseInt(filters.category.replace('Categoría ', ''));
+                      if (!isNaN(catId)) {
+                          query = query.eq('categoria_id', catId);
+                      }
+                 } else {
+                     // If name not found and not legacy format, force no results?
+                     // For now, let's assume if not found, it might be a text mismatch so we search nothing?
+                     // Or better, 0 results.
+                     query = query.eq('id', -1); // Impossible ID
+                 }
              }
-         } else if (filters.category === 'General') {
-             // query = query.is('categoria_id', null); // Or whatever 'General' means in DB
-             // For safety, if we can't parse it easily without a category table map, we might skip or improving filtering later.
-             // Let's assume the user selects IDs or names we can map. 
-             // Ideally we should have a `categorias` table.
-         }
-       }
+        }
 
        if (filters.minPrice !== undefined) {
          query = query.gte('precio', filters.minPrice);
@@ -225,11 +264,19 @@ export interface LibroFilters {
            default:
              query = query.order('titulo', { ascending: true });
          }
-       } else {
-          query = query.order('titulo', { ascending: true });
-       }
+         } else {
+             // Only default sort by title if NOT searching.
+             // When searching (especially by code), we want matches fast, order matters less.
+             // Sorting by title forces DB to process all matches before returning page 1.
+             if (!filters.search) {
+                query = query.order('titulo', { ascending: true });
+             }
+        }
      } else {
-        query = query.order('titulo', { ascending: true });
+         // No filters at all (initial load?) -> Sort by title
+         if (!filters || !(filters as any).search) {
+             query = query.order('titulo', { ascending: true });
+         }
      }
 
      // Pagination
@@ -243,6 +290,34 @@ export interface LibroFilters {
      if (error) {
        console.error('Error al obtener libros:', error);
        return { data: [], count: 0 };
+     }
+
+     // Client-Side Join to avoid DB Timeout on deep pagination
+     // We fetch the names only for the resulting page (12-20 items), not the whole sorted set
+     if (data && data.length > 0) {
+         const editorialIds = Array.from(new Set(data.map(b => b.editorial_id).filter(id => id)));
+         const categoryIds = Array.from(new Set(data.map(b => b.categoria_id).filter(id => id)));
+
+         const promises = [];
+         
+         if (editorialIds.length > 0) {
+             promises.push(supabase.from('editoriales').select('id, nombre').in('id', editorialIds));
+         } else promises.push(Promise.resolve({ data: [] }));
+
+         if (categoryIds.length > 0) {
+             promises.push(supabase.from('categorias').select('id, nombre').in('id', categoryIds));
+         } else promises.push(Promise.resolve({ data: [] }));
+
+         const [edResult, catResult] = await Promise.all(promises);
+         
+         const edMap = new Map(edResult.data?.map((e: any) => [e.id, e]) || []);
+         const catMap = new Map(catResult.data?.map((c: any) => [c.id, c]) || []);
+
+         // Attach to data
+         (data as any[]).forEach(book => {
+             if (book.editorial_id) book.editoriales = edMap.get(book.editorial_id);
+             if (book.categoria_id) book.categorias = catMap.get(book.categoria_id);
+         });
      }
 
      return {
@@ -528,29 +603,55 @@ export const eliminarLibro = async (id: number): Promise<boolean> => {
 
 export const buscarLibros = async (query: string): Promise<Book[]> => {
   try {
-    let supabaseQuery = supabase
-      .from('libros')
-      .select('*, editoriales(id, nombre), categorias(id, nombre)')
-      .eq('activo', true)
-      .order('titulo', { ascending: true });
-
     const isNumeric = /^\d+$/.test(query);
+    
     if (isNumeric) {
-      // If numeric, search by ID matches EXACTLY or title/isbn/code matches partially
-      // We interpret query as ID if numeric
-      supabaseQuery = supabaseQuery.or(`id.eq.${query},titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`);
+      // Parallel execution: Exact Match (Priority) + Fuzzy Search
+      const [exactMatch, fuzzyMatch] = await Promise.all([
+        // 1. Exact Priority Search (ID or Legacy ID)
+        supabase
+          .from('libros')
+          .select('*, editoriales(id, nombre), categorias(id, nombre)')
+          .eq('activo', true)
+          .or(`id.eq.${query},legacy_id.eq.${query}`),
+        
+        // 2. Standard Fuzzy Search (limit 20 to be faster)
+        supabase
+          .from('libros')
+          .select('*, editoriales(id, nombre), categorias(id, nombre)')
+          .eq('activo', true)
+          .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
+          .order('titulo', { ascending: true })
+          .limit(20)
+      ]);
+
+      const exactData = exactMatch.data || [];
+      const fuzzyData = fuzzyMatch.data || [];
+
+      // Combine: Exact matches first, then fuzzy matches (filtering duplicates)
+      const exactIds = new Set(exactData.map(b => b.id));
+      const filteredFuzzy = fuzzyData.filter(b => !exactIds.has(b.id));
+
+      const combinedResults = [...exactData, ...filteredFuzzy];
+      return combinedResults.map(mapLibroToBook);
+
     } else {
-       supabaseQuery = supabaseQuery.or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`);
+      // Non-numeric search: Standard fuzzy search
+      const { data, error } = await supabase
+        .from('libros')
+        .select('*, editoriales(id, nombre), categorias(id, nombre)')
+        .eq('activo', true)
+        .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
+        .order('titulo', { ascending: true })
+        .limit(20); // Limit to 20 for performance
+
+        if (error) {
+          console.error('Error al buscar libros:', error);
+          return [];
+        }
+    
+        return data ? data.map(mapLibroToBook) : [];
     }
-
-    const { data, error } = await supabaseQuery;
-
-    if (error) {
-      console.error('Error al buscar libros:', error);
-      return [];
-    }
-
-    return data ? data.map(mapLibroToBook) : [];
   } catch (error) {
     console.error('Error inesperado al buscar libros:', error);
     return [];
@@ -605,16 +706,18 @@ export const obtenerEstadisticasLibros = async (): Promise<{
   sinStock: number;
 }> => {
   try {
+    // Obtener total de libros activos (Estimado para rendimiento)
     // Obtener total de libros activos
     const { count: total, error: errorTotal } = await supabase
       .from('libros')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('activo', true);
 
     // Obtener libros con stock > 0
+    // Obtener libros con stock > 0
     const { count: enStock, error: errorStock } = await supabase
       .from('libros')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('activo', true)
       .gt('stock', 0);
 

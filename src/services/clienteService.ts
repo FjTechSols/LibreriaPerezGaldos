@@ -14,15 +14,25 @@ export interface ClienteFormData {
   nif?: string;
   notas?: string;
   activo?: boolean;
+  tipo: 'particular' | 'empresa' | 'institucion';
+  persona_contacto?: string;
+  cargo?: string;
+  web?: string;
 }
 
-export const getClientes = async (): Promise<Cliente[]> => {
+export const getClientes = async (tipo?: string): Promise<Cliente[]> => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('clientes')
       .select('*')
       .order('apellidos', { ascending: true })
       .order('nombre', { ascending: true });
+
+    if (tipo && tipo !== 'all') {
+      query = query.eq('tipo', tipo);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching clients:', error);
@@ -72,7 +82,11 @@ export const crearCliente = async (clienteData: ClienteFormData): Promise<Client
         pais: clienteData.pais || 'España',
         nif: clienteData.nif || null,
         notas: clienteData.notas || null,
-        activo: clienteData.activo !== undefined ? clienteData.activo : true
+        activo: clienteData.activo !== undefined ? clienteData.activo : true,
+        tipo: clienteData.tipo || 'particular',
+        persona_contacto: clienteData.persona_contacto || null,
+        cargo: clienteData.cargo || null,
+        web: clienteData.web || null
       })
       .select()
       .single();
@@ -105,6 +119,10 @@ export const actualizarCliente = async (id: string, clienteData: Partial<Cliente
     if (clienteData.nif !== undefined) updateData.nif = clienteData.nif || null;
     if (clienteData.notas !== undefined) updateData.notas = clienteData.notas || null;
     if (clienteData.activo !== undefined) updateData.activo = clienteData.activo;
+    if (clienteData.tipo !== undefined) updateData.tipo = clienteData.tipo;
+    if (clienteData.persona_contacto !== undefined) updateData.persona_contacto = clienteData.persona_contacto || null;
+    if (clienteData.cargo !== undefined) updateData.cargo = clienteData.cargo || null;
+    if (clienteData.web !== undefined) updateData.web = clienteData.web || null;
 
     const { data, error } = await supabase
       .from('clientes')
@@ -165,16 +183,22 @@ export const desactivarCliente = async (id: string): Promise<Cliente | null> => 
   }
 };
 
-export const buscarClientes = async (query: string): Promise<Cliente[]> => {
+export const buscarClientes = async (query: string, tipo?: string): Promise<Cliente[]> => {
   try {
-    const { data, error } = await supabase
+    let queryBuilder = supabase
       .from('clientes')
       .select('*')
-      .or(`nombre.ilike.%${query}%,apellidos.ilike.%${query}%,email.ilike.%${query}%,nif.ilike.%${query}%`)
+      .or(`nombre.ilike.%${query}%,apellidos.ilike.%${query}%,email.ilike.%${query}%,nif.ilike.%${query}%,telefono.ilike.%${query}%,persona_contacto.ilike.%${query}%,cargo.ilike.%${query}%`)
       .eq('activo', true)
       .order('apellidos', { ascending: true })
       .order('nombre', { ascending: true })
       .limit(50);
+
+    if (tipo && tipo !== 'all') {
+      queryBuilder = queryBuilder.eq('tipo', tipo);
+    }
+
+    const { data, error } = await queryBuilder;
 
     if (error) {
       console.error('Error searching clients:', error);

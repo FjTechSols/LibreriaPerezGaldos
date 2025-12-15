@@ -49,7 +49,7 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
   };
 
   return (
-    <Link to={`/libro/${book.id}`} className={`bookcard ${viewMode === 'list' ? 'bookcard--list' : ''}`}>
+    <Link to={`/libro/${book.id}`} className={`bookcard bookcard--${viewMode}`}>
       <div className="bookcard__image-container">
         {/* Blurred background for premium feel on low-res images */}
         <div 
@@ -76,16 +76,18 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
           <Heart size={24} fill={isInWishlist(book.id) ? 'currentColor' : 'none'} strokeWidth={2} />
         </button>
 
-        <div className="bookcard__overlay">
-          <button
-            onClick={handleAddToCart}
-            disabled={book.stock === 0}
-            className="bookcard__add-to-cart-btn"
-          >
-            <ShoppingCart size={16} />
-            {book.stock === 0 ? t('outOfStock') : t('addToCart')}
-          </button>
-        </div>
+        {viewMode === 'grid' && (
+          <div className="bookcard__overlay">
+            <button
+              onClick={handleAddToCart}
+              disabled={book.stock === 0}
+              className="bookcard__add-to-cart-btn"
+            >
+              <ShoppingCart size={16} />
+              {book.stock === 0 ? t('outOfStock') : t('addToCart')}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bookcard__info">
@@ -113,7 +115,20 @@ export function BookCard({ book, viewMode = 'grid' }: BookCardProps) {
         </div>
 
         {viewMode === 'list' && (
-          <p className="bookcard__description">{book.description?.substring(0, 120)}...</p>
+          <>
+            <p className="bookcard__description">{book.description?.substring(0, 150)}...</p>
+            
+            <div className="bookcard__list-actions">
+               <button
+                onClick={handleAddToCart}
+                disabled={book.stock === 0}
+                className="bookcard__add-to-cart-btn bookcard__add-to-cart-btn--list"
+              >
+                <ShoppingCart size={16} />
+                {book.stock === 0 ? t('outOfStock') : t('addToCart')}
+              </button>
+            </div>
+          </>
         )}
 
         <div className="bookcard__meta">

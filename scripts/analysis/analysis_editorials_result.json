@@ -1,0 +1,18 @@
+{
+  "total": 59731,
+  "duplicatesCount": 0,
+  "potentialDuplicates": [],
+  "suspiciousCount": 2,
+  "suspiciousSample": [
+    {
+      "type": "Very Short Name",
+      "id": 13720,
+      "nombre": "?"
+    },
+    {
+      "type": "Very Short Name",
+      "id": 22700,
+      "nombre": "."
+    }
+  ]
+}

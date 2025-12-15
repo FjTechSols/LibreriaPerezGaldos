@@ -128,7 +128,8 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
 
       const subtotal = formData.items.reduce((sum, item) => sum + item.line_total, 0);
       const taxAmount = subtotal * (formData.tax_rate / 100);
-      const total = subtotal + taxAmount;
+      const shippingCost = formData.shipping_cost || 0;
+      const total = subtotal + taxAmount + shippingCost;
 
       const invoiceData = {
         invoice_number: invoiceNumber,
@@ -142,6 +143,8 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         tax_amount: taxAmount,
         total,
         payment_method: formData.payment_method || null,
+        // shipping_cost: shippingCost, // Commented out until DB migration provided
+        language: formData.language,
         order_id: formData.order_id || null
       };
 

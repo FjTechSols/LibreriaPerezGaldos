@@ -99,6 +99,8 @@ const translations: Record<Language, Record<string, string>> = {
     emptyWishlistMessage: 'Guarda tus libros favoritos aquí para más tarde.',
     moveToCart: 'Mover al Carrito',
     remove: 'Eliminar',
+    new: 'NUEVO',
+    sale: 'OFERTA',
   },
   en: {
     home: 'Home',
@@ -190,6 +192,8 @@ const translations: Record<Language, Record<string, string>> = {
     emptyWishlistMessage: 'Save your favorite books here for later.',
     moveToCart: 'Move to Cart',
     remove: 'Remove',
+    new: 'NEW',
+    sale: 'SALE',
   },
   fr: {
     home: 'Accueil',
@@ -281,6 +285,8 @@ const translations: Record<Language, Record<string, string>> = {
     emptyWishlistMessage: 'Enregistrez vos livres préférés ici pour plus tard.',
     moveToCart: 'Déplacer au Panier',
     remove: 'Supprimer',
+    new: 'NOUVEAU',
+    sale: 'OFFRE',
   },
 };
 

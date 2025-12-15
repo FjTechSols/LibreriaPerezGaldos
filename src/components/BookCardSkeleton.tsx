@@ -1,4 +1,3 @@
-import React from 'react';
 import '../styles/components/BookCard.css'; // Reusing card styles for container
 
 export function BookCardSkeleton() {

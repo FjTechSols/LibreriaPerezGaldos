@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Star, ArrowLeft, Bookmark, Share2, Truck, Edit, Trash2 } from 'lucide-react';
 import { obtenerLibroPorId } from '../services/libroService';

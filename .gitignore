@@ -29,10 +29,17 @@ dist-ssr
 
 # User requested exclusions
 docs/
-scripts/
+
 supabase/
 
 # Temporary & Layout files
 lint_output.txt
 construccion.html
 vercel-construccion.json
+
+# Large Data Files (Ignored to prevent git push errors)
+scripts/files/*.json
+scripts/files/*.txt
+scripts/files/*.jsonl
+scripts/gestion_libros/resultados/*.json
+scripts/gestion_libros/resultados/*.txt
