@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { actualizarEstadoPedido } from '../../../services/pedidoService';
 import { crearFactura } from '../../../services/facturaService';
@@ -25,6 +25,7 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
 
 export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEditar }: PedidoDetalleProps) {
   const [generandoFactura, setGenerandoFactura] = useState(false);
+  const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
 
   if (!isOpen || !pedido) return null;
 
@@ -64,6 +65,172 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
       alert('Error al generar la factura');
     } finally {
       setGenerandoFactura(false);
+    }
+  };
+
+  const handleGenerarAlbaran = async () => {
+    setGenerandoAlbaran(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+
+      // Extract details from observations if possible (Heuristic)
+      let abeBooksId = '';
+      let estimatedDelivery = '7 - 20 días laborables';
+
+      if (pedido.observaciones) {
+        const obs = pedido.observaciones;
+        const abebooksMatch = obs.match(/(?:AbeBooks|Pedido AbeBooks|External ID)[:\s]+(\d+)/i);
+        if (abebooksMatch) abeBooksId = abebooksMatch[1];
+      }
+
+      // If not found in observations, try to look at legacy_id if typical length?
+      // Or just leave empty if not found.
+      if (!abeBooksId && pedido.legacy_id) abeBooksId = pedido.legacy_id.toString();
+
+      // Recipient Info
+      const recipientName = pedido.cliente 
+        ? `${pedido.cliente.nombre} ${pedido.cliente.apellidos}` 
+        : pedido.usuario?.username || 'Cliente';
+      
+      const direccion = pedido.direccion_envio || pedido.cliente?.direccion || '';
+      
+      // Parse multi-line address from single string if it contains commas or newlines
+      const addressLines = direccion.split(/[\n,]/).map(l => l.trim()).filter(l => l);
+
+      // Layout Constants
+      const leftMargin = 20;
+      let y = 30;
+
+      doc.setFontSize(11);
+      doc.text('Para:', leftMargin, y);
+      y += 6;
+      doc.setFont('helvetica', 'bold');
+      doc.text(recipientName, leftMargin, y);
+      y += 6;
+      doc.setFont('helvetica', 'normal');
+      
+      addressLines.forEach(line => {
+        doc.text(line, leftMargin, y);
+        y += 5;
+      });
+      
+      if (pedido.cliente?.telefono) {
+          doc.text(`Phone: ${pedido.cliente.telefono}`, leftMargin, y);
+          y += 5;
+      }
+
+      // Ensure some spacing before the title
+      y = Math.max(y + 10, 80);
+
+      // Title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Albarán de Envío', leftMargin, y);
+      y += 10;
+
+      // Order Info
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      // Phone again if strictly following example layout location? 
+      // Example put Phone under address. I did that above.
+
+      doc.text(`Nº de pedido: ${pedido.id}`, leftMargin, y);
+      y += 5;
+      if (abeBooksId) {
+        doc.text(`Nº de pedido AbeBooks: ${abeBooksId}`, leftMargin, y);
+        y += 5;
+      }
+      
+      const orderDate = pedido.fecha_pedido ? new Date(pedido.fecha_pedido) : new Date();
+      doc.text(`Tramitado: ${orderDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`, leftMargin, y);
+      y += 5;
+      doc.text(`Fecha estimada de entrega: ${estimatedDelivery}`, leftMargin, y);
+      y += 10;
+
+      // Divider
+      doc.setLineWidth(0.5);
+      doc.line(leftMargin, y, 190, y);
+      y += 5;
+
+      // Table Header
+      doc.setFont('helvetica', 'bold');
+      doc.text('Artículo', leftMargin, y);
+      doc.text('Autor', 50, y);
+      doc.text('Título', 100, y);
+      doc.text('Nº de referencia', 160, y); // SKU/Ref
+      y += 2;
+      doc.line(leftMargin, y, 190, y); // Small underline per row style? No, usually typical table.
+      y += 6;
+
+      // Items
+      doc.setFont('helvetica', 'normal');
+      pedido.detalles?.forEach((detalle, index) => {
+          doc.text((index + 1).toString(), leftMargin, y);
+          
+          let author = detalle.libro?.autor || '';
+          let title = detalle.libro?.titulo || detalle.nombre_externo || '';
+          let ref = detalle.libro?.codigo || detalle.libro?.legacy_id?.toString() || detalle.libro?.isbn || '';
+
+          // Truncate logic if too long?
+          if (author.length > 25) author = author.substring(0, 22) + '...';
+          if (title.length > 30) title = title.substring(0, 27) + '...';
+
+          doc.text(author, 50, y);
+          doc.text(title, 100, y);
+          doc.text(ref, 160, y);
+          
+          y += 6;
+          
+          // Description / Details below item
+          // The example shows detailed description below the item row.
+          // "Descripción:\n Infinita plus..."
+          if (detalle.libro?.descripcion || detalle.libro?.categoria || detalle.libro?.paginas) {
+              y += 2;
+              doc.setFontSize(9);
+              doc.text(`Descripción:`, leftMargin, y);
+              y += 4;
+              
+              const descText = [
+                 detalle.libro?.editorial ? `${detalle.libro.editorial?.nombre || ''}.` : '',
+                 detalle.libro?.categoria ? `${detalle.libro.categoria?.nombre || ''}.` : '',
+                 detalle.libro?.paginas ? `${detalle.libro.paginas} p.` : '',
+                 detalle.libro?.descripcion || ''
+              ].filter(Boolean).join(' ');
+
+              // Split text to fit width
+              const splitDesc = doc.splitTextToSize(descText, 170);
+              doc.text(splitDesc, leftMargin, y);
+              y += (splitDesc.length * 4) + 4;
+
+              // Line separator after item block
+              doc.setLineWidth(0.1);
+              doc.line(leftMargin, y, 190, y);
+              y += 6;
+
+              doc.setFontSize(10); // Reset font size
+          }
+      });
+      
+      // Footer Notes
+      y += 5;
+      doc.setFontSize(9);
+      doc.text('Por favor, guarde este albarán de envío para sus registros. Si tiene alguna pregunta relacionada', leftMargin, y);
+      y += 4;
+      doc.text('con su pedido, por favor póngase en contacto con la librería.', leftMargin, y);
+      
+      y += 8;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Atención: AbeBooks ha procesado el pago del pedido a través de la tarjeta de crédito del comprador.', leftMargin, y);
+
+      doc.save(`Albaran-${pedido.id}.pdf`);
+
+    } catch (error) {
+      console.error('Error generating Albaran PDS:', error);
+      alert('Error al generar el albarán PDF');
+    } finally {
+      setGenerandoAlbaran(false);
     }
   };
 
@@ -251,6 +418,28 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
         <div className="modal-footer">
           <button onClick={onClose} className="btn-cancelar">
             Cerrar
+          </button>
+
+          <button 
+             onClick={handleGenerarAlbaran} 
+             className="btn-generar-albaran"
+             disabled={generandoAlbaran}
+             style={{ 
+               backgroundColor: '#6b7280', 
+               color: 'white',
+               display: 'flex',
+               alignItems: 'center',
+               gap: '0.5rem',
+               padding: '0.75rem 1.5rem',
+               borderRadius: '0.5rem',
+               fontWeight: 600,
+               border: 'none',
+               cursor: 'pointer',
+               marginRight: '0.5rem'
+             }}
+          >
+             <Printer size={16} />
+             {generandoAlbaran ? 'Generando...' : 'Imprimir Albarán/Etiqueta'}
           </button>
 
           {tieneFactura ? (

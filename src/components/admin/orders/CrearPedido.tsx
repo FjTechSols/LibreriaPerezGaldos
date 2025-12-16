@@ -16,7 +16,7 @@ import {
   crearPedido,
   calcularTotalesPedido,
 } from "../../../services/pedidoService";
-import { obtenerLibros } from "../../../services/libroService";
+import { obtenerLibros, buscarLibros } from "../../../services/libroService";
 import { getClientes, crearCliente } from "../../../services/clienteService";
 import { useAuth } from "../../../context/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
@@ -67,7 +67,13 @@ export default function CrearPedido({
       apellidos: '',
       email: '',
       nif: '',
-      tipo: 'particular' as 'particular' | 'empresa' | 'institucion'
+      tipo: 'particular' as 'particular' | 'empresa' | 'institucion',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      codigo_postal: '',
+      provincia: '',
+      pais: ''
   });
 
   const [libroSearch, setLibroSearch] = useState("");
@@ -111,6 +117,7 @@ export default function CrearPedido({
   const [precioExterno, setPrecioExterno] = useState(0);
 
   const [modoEntrada, setModoEntrada] = useState<"manual" | "pegar">("manual");
+  const [plataformaOrigen, setPlataformaOrigen] = useState<'iberlibro' | 'uniliber' | null>(null);
   const [datosPegados, setDatosPegados] = useState("");
 
   useEffect(() => {
@@ -321,14 +328,267 @@ export default function CrearPedido({
     );
   };
 
-  const parsearDatosPegados = () => {
+  const parsearIberLibro = async (texto: string) => {
+    setLoading(true);
+    try {
+        const cleanText = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        
+        // --- 1. Extract Header Info (Client, Address, Phone, IDs) ---
+        let nombre = '';
+        let direccion = '';
+        let ciudad = '';
+        let cp = '';
+        let provincia = '';
+        let pais = '';
+        let telefono = '';
+        
+        let orderId = '';
+        let abeBooksId = '';
+        let fechaTramitado = '';
+        let fechaEstimada = '';
+
+        // Helper to find lines between start marker and end marker
+        const getLinesBetween = (startRegex: RegExp, endRegex: RegExp) => {
+             const startMatch = cleanText.match(startRegex);
+             if (!startMatch || typeof startMatch.index === 'undefined') return [];
+             const startIndex = startMatch.index + startMatch[0].length;
+             
+             const restText = cleanText.slice(startIndex);
+             const endMatch = restText.match(endRegex);
+             const endOffset = endMatch && typeof endMatch.index !== 'undefined' ? endMatch.index : restText.length;
+             
+             return restText.slice(0, endOffset).trim().split('\n').map(l => l.trim()).filter(Boolean);
+        };
+
+        // Parse "Para:" block for address
+        const addressBlockLines = getLinesBetween(/^Para:/m, /Albarán de Envío|Phone:|Nº de pedido:/m);
+        
+        if (addressBlockLines.length > 0) {
+            nombre = addressBlockLines[0]; // First line is name
+            const addressLines = addressBlockLines.slice(1);
+            direccion = addressLines.join(', '); // Full address string
+            
+            if (addressLines.length > 0) {
+               const last = addressLines[addressLines.length - 1];
+               if (last.match(/Spain|España/i)) pais = 'España';
+               else if (last.match(/France|Francia/i)) pais = 'Francia';
+               else pais = last; 
+            }
+ 
+            for (const line of addressLines) {
+                 const cpMatch = line.match(/\b\d{5}\b/);
+                 if (cpMatch) {
+                     cp = cpMatch[0];
+                     ciudad = line.replace(cp, '').trim(); 
+                     break;
+                 }
+            }
+        }
+
+        const phoneMatch = cleanText.match(/Phone:\s*([\d\s\-\+\(\)]+)/i);
+        if (phoneMatch) telefono = phoneMatch[1].trim();
+
+        const idMatch = cleanText.match(/Nº de pedido:\s*(\d+)/i);
+        if (idMatch) orderId = idMatch[1];
+
+        const abeIdMatch = cleanText.match(/Nº de pedido AbeBooks:\s*(\d+)/i);
+        if (abeIdMatch) abeBooksId = abeIdMatch[1];
+        
+        const tramitadoMatch = cleanText.match(/Tramitado:\s*([^\n]+)/i);
+        if (tramitadoMatch) fechaTramitado = tramitadoMatch[1].trim();
+
+        const estimadaMatch = cleanText.match(/Fecha estimada de entrega:\s*([^\n]+)/i);
+        if (estimadaMatch) fechaEstimada = estimadaMatch[1].trim();
+
+        // --- 2. Extract Items ---
+        const tempItems: { title: string, author: string, ref: string, quantity: number }[] = [];
+        
+        const splitByEst = cleanText.split(/Fecha estimada de entrega:[^\n]+\n/);
+        const contentAfterHeader = splitByEst.length > 1 ? splitByEst[1] : '';
+
+        const lines = contentAfterHeader.split('\n');
+        let descLines: string[] = [];
+        let capturingDesc = false;
+
+        for (const line of lines) {
+             const trimLine = line.trim();
+             if (!trimLine) continue;
+             if (trimLine.startsWith('________________')) continue;
+             if (trimLine.match(/^Artículo\s+Autor/)) continue; 
+             if (trimLine.startsWith('Por favor, guarde')) break; 
+
+             const itemMatch = trimLine.match(/^\d+\s+(.+)\s+(\d+)$/);
+             
+             if (itemMatch) {
+                 let author = '';
+                 let title = '';
+                 let ref = itemMatch[2];
+                 const middle = itemMatch[1];
+                 
+                 if (texto.includes('\t')) {
+                     const parts = trimLine.split('\t').filter(p => p.trim());
+                     if (parts.length >= 3) {
+                         author = parts[1] || '';
+                         title = parts[2] || '';
+                         ref = parts[parts.length-1] || ref;
+                     } else {
+                         title = middle;
+                     }
+                 } else {
+                     const gapSplit = middle.split(/\s{2,}/);
+                     if (gapSplit.length >= 2) {
+                         author = gapSplit[0];
+                         title = gapSplit[1];
+                     } else {
+                         title = middle;
+                     }
+                 }
+
+                 tempItems.push({
+                     title,
+                     author,
+                     ref, // Legacy Code
+                     quantity: 1
+                 });
+                 capturingDesc = false;
+             } else if (trimLine === 'Descripción:') {
+                 capturingDesc = true;
+             } else if (capturingDesc) {
+                 if (trimLine.match(/^Artículo\s+/)) {
+                     capturingDesc = false;
+                 } else {
+                     descLines.push(trimLine);
+                 }
+             }
+        }
+        
+        const description = descLines.join('\n');
+        
+        // --- 3. Resolve Items against DB (Async) ---
+        const finalItems: LineaPedido[] = [];
+
+        for (const item of tempItems) {
+            let foundBook: Libro | null = null;
+            if (item.ref) {
+                // Search by legacy code
+                // Note: buscarLibros returns fuzzy matches, we must filter for exact legacy_id if possible
+                const results = await buscarLibros(item.ref);
+                const exactMatch = results.find(b => b.code === item.ref);
+                
+                if (exactMatch) {
+                     // Map to component Libro type
+                     foundBook = {
+                        id: parseInt(exactMatch.id),
+                        titulo: exactMatch.title,
+                        autor: exactMatch.author,
+                        isbn: exactMatch.isbn || '',
+                        precio: exactMatch.price,
+                        stock: exactMatch.stock,
+                        imagen_url: exactMatch.coverImage,
+                        editorial: { id: 0, nombre: exactMatch.publisher }, 
+                        categoria_id: 0, 
+                        legacy_id: exactMatch.code
+                     } as any;
+                }
+            }
+
+            if (foundBook) {
+                // Internal Item
+                finalItems.push({
+                    id: `int-${Date.now()}-${finalItems.length}`,
+                    libro_id: foundBook.id,
+                    libro: foundBook,
+                    cantidad: item.quantity,
+                    precio_unitario: foundBook.precio, // Uses DB price
+                    es_externo: false
+                });
+            } else {
+                // External Item
+                finalItems.push({
+                     id: `ab-${Date.now()}-${finalItems.length}`,
+                     cantidad: item.quantity,
+                     precio_unitario: 0, 
+                     es_externo: true,
+                     nombre_externo: `${item.title}${item.author ? ' - ' + item.author : ''} (Ref: ${item.ref})`,
+                     url_externa: ''
+                });
+            }
+        }
+
+        // --- 4. Populate Form ---
+        let finalObservaciones = '';
+        if (abeBooksId) finalObservaciones += `AbeBooks ID: ${abeBooksId}\n`;
+        if (orderId) finalObservaciones += `Pedido Nº: ${orderId}\n`;
+        if (fechaTramitado) finalObservaciones += `Fecha: ${fechaTramitado}\n`;
+        if (fechaEstimada) finalObservaciones += `Entrega Estimada: ${fechaEstimada}\n`;
+        if (description) finalObservaciones += `\nDescripción:\n${description}`;
+
+        setClienteSearch('');
+        setManualClientData({
+            nombre: nombre || '',
+            apellidos: '',
+            email: '',
+            nif: '',
+            tipo: 'particular',
+            telefono: telefono,
+            direccion: direccion,
+            ciudad: ciudad,
+            codigo_postal: cp,
+            provincia: provincia,
+            pais: pais || 'España'
+        });
+        setDireccionEnvio(direccion);
+        setObservaciones(finalObservaciones);
+        setLineas(finalItems);
+
+        setDatosPegados("");
+        setPlataformaOrigen(null);
+        setClienteInputMode('manual');
+        setModoEntrada("manual");
+
+        setTimeout(() => setClienteInputMode('manual'), 100);
+        
+        const internalCount = finalItems.filter(i => !i.es_externo).length;
+        alert(`Datos de IberLibro procesados.\nCliente: ${nombre}\nItems: ${finalItems.length} (${internalCount} encontrados en catálogo)`);
+        
+    } catch (e: any) {
+        console.error('Error parsing IberLibro:', e);
+        alert('Error al procesar datos de IberLibro: ' + e.message);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const parsearDatosPegados = async () => {
     if (!datosPegados.trim()) {
       alert("Por favor, pega la información del pedido");
       return;
     }
 
+    if (plataformaOrigen === 'uniliber') {
+        parsearUniliber(datosPegados);
+        return;
+    }
+    
+    if (plataformaOrigen === 'iberlibro') {
+        await parsearIberLibro(datosPegados);
+        return;
+    }
+
+    // Lógica por defecto / Genérica (IberLibro u otros)
     try {
       const lineasTexto = datosPegados.split("\n").filter((l) => l.trim());
+      // ... (Rest of default logic existing in previous file)
+      // Since I am replacing the function, I must include the original logic here if I don't want to break 'Default' behavior if platform is null?
+      // But looking at UI, user must select platform now? 
+      // The original code handled generics. Let's keep the generic logic as fallback or "Other".
+      
+      // ... [The original logic body for generic parsing] ...
+      // To save tokens and avoid copy-pasting the massive block if not needed, 
+      // I will assume the user mainly uses the specific parsers now.
+      // But for safety, I will include a shortened version or the full original block if I can see it.
+      // I viewed the file, so I have the original block. I will restore it.
+      
       let clienteInfo = "";
       let direccion = "";
       let productosTexto: string[] = [];
@@ -469,23 +729,179 @@ export default function CrearPedido({
       setDatosPegados("");
 
       alert(
-        `Se han parseado ${nuevasLineas.length} producto(s). Revisa y ajusta los datos según sea necesario.`
+        `Se han parseado ${nuevasLineas.length} producto(s) (Formato Genérico).`
       );
     } catch (error) {
       console.error("Error al parsear datos:", error);
       alert(
-        "Error al procesar los datos pegados. Por favor, revisa el formato e intenta de nuevo."
+        "Error al procesar los datos pegados."
       );
     }
+  };
+
+  const parsearUniliber = async (texto: string) => {
+      setLoading(true);
+      try {
+          // Normalize line endings
+          const cleanText = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+          const extract = (regex: RegExp) => {
+              const match = cleanText.match(regex);
+              return match && match[1] ? match[1].trim() : '';
+          };
+
+          // Basic Fields (expecting colon/dot separator)
+          const nombre = extract(/Nombre\s*[:\.]\s*([^\n]+)/i);
+          const direccion = extract(/Direcci[óo]n\s*[:\.]\s*([^\n]+)/i);
+          const poblacion = extract(/Poblaci[óo]n\s*[:\.]\s*([^\n]+)/i);
+          const provincia = extract(/Provincia\s*[:\.]\s*([^\n]+)/i);
+          const cp = extract(/(?:C\.?\s*Postal|CP|Postal)\s*[:\.]\s*([^\n]+)/i);
+          const pais = extract(/Pa[íi]s\s*[:\.]\s*([^\n]+)/i);
+          const email = extract(/(?:Email|E-mail)\s*[:\.]\s*([^\n]+)/i);
+          const telefono = extract(/Tel[ée]fono\s*[:\.]\s*([^\n]+)/i);
+          const movil = extract(/M[óo]vil\s*[:\.]\s*([^\n]+)/i);
+          const referencia = extract(/Referencia\s*[:\.]\s*([^\n]+)/i);
+
+          // Price extraction (handling "Precio total: X" or "Precio total\nX")
+          let precioTotal = 0;
+          const precioMatch = cleanText.match(/Precio\s*total(?:[:\.]\s*|\s*\n\s*)([\d.,]+)/i);
+          if (precioMatch && precioMatch[1]) {
+             precioTotal = parseFloat(precioMatch[1].replace(',', '.'));
+          }
+
+          // Title/Author/Description Heuristic
+          // everything before "Precio total" and after "Referencia"
+          let titulo = '';
+          let autor = '';
+          let descripcionLines: string[] = [];
+
+          const parts = cleanText.split(/Precio\s*total/i);
+          if (parts.length > 0) {
+              let contentBlock = parts[0];
+              // If Referencia exists, take content after it
+              if (referencia) {
+                  const refSplit = contentBlock.split(/Referencia\s*[:\.]\s*[^\n]+\n?/i);
+                  if (refSplit.length > 1) contentBlock = refSplit[1];
+              }
+
+              // Split lines and exclude keys
+              const lines = contentBlock.split('\n').map(l => l.trim()).filter(l => l);
+              const infoLines = lines.filter(l => !l.match(/^(?:Nombre|Direcci|Poblaci|Provincia|Pa[íi]s|Email|Tel|M[óo]vil|Referencia)/i));
+              
+              if (infoLines.length > 0) {
+                  titulo = infoLines[0]; // Assume first line is title
+                  if (infoLines.length > 1) autor = infoLines[1]; // Second is author
+                  if (infoLines.length > 2) descripcionLines = infoLines.slice(2);
+              }
+          }
+
+          // Set Client Data
+          setClienteSearch(''); // Clear search input
+          setManualClientData({
+              nombre: nombre || '',
+              apellidos: '',
+              email: email || '',
+              nif: '',
+              tipo: 'particular',
+              telefono: movil || telefono || '',
+              direccion: direccion || '',
+              ciudad: poblacion || '',
+              codigo_postal: cp || '',
+              provincia: provincia || '',
+              pais: pais || 'España'
+          });
+          setDireccionEnvio(`${direccion}, ${cp} ${poblacion}, ${provincia}`);
+          
+          // Set Description
+          const descripcion = descripcionLines.join('\n').trim();
+          if (descripcion) setObservaciones(descripcion);
+
+          // --- Book Lookup by Ref ---
+          const items: LineaPedido[] = [];
+          let foundBook: Libro | null = null;
+          
+          if (referencia) {
+               const results = await buscarLibros(referencia);
+               const exactMatch = results.find(b => b.code === referencia);
+               
+               if (exactMatch) {
+                    foundBook = {
+                       id: parseInt(exactMatch.id),
+                       titulo: exactMatch.title,
+                       autor: exactMatch.author,
+                       isbn: exactMatch.isbn || '',
+                       precio: exactMatch.price,
+                       stock: exactMatch.stock,
+                       imagen_url: exactMatch.coverImage,
+                       editorial: { id: 0, nombre: exactMatch.publisher }, 
+                       categoria_id: 0, 
+                       legacy_id: exactMatch.code
+                    } as any;
+               }
+          }
+
+          // Set Line Item
+          if (foundBook) {
+              items.push({
+                   id: `int-uni-${Date.now()}`,
+                   libro_id: foundBook.id,
+                   libro: foundBook,
+                   cantidad: 1,
+                   precio_unitario: foundBook.precio, 
+                   es_externo: false
+              });
+          } else if (titulo) {
+             items.push({
+                id: `uni-${Date.now()}`,
+                cantidad: 1,
+                precio_unitario: precioTotal > 0 ? precioTotal : 0, 
+                es_externo: true,
+                nombre_externo: `${titulo} ${autor ? '- ' + autor : ''} (Ref: ${referencia})`,
+                url_externa: ''
+             });
+          }
+
+          setLineas(items);
+          setDatosPegados("");
+          setClienteInputMode('manual');
+          setModoEntrada("manual");
+          
+          // Force manual mode with delay to ensure UI update after re-render
+          setTimeout(() => {
+              setClienteInputMode('manual');
+          }, 100);
+
+          const foundMsg = foundBook ? `\n📕 Libro encontrado en catálogo: ${foundBook.titulo}` : '';
+          alert(`Datos de Uniliber procesados.\nCliente detectado: "${nombre}"${foundMsg}`); 
+
+      } catch (err) {
+          console.error(err);
+          alert("Error al procesar datos de Uniliber.");
+      } finally {
+          setLoading(false);
+      }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check for unparsed data
+    if (modoEntrada === 'pegar' && datosPegados.trim().length > 0) {
+        alert("⚠️ Has pegado datos pero no los has analizado.\n\nPor favor, haz clic en el botón 'Analizar y Rellenar Formulario' (icono de lupa) que está debajo del cuadro de texto para procesar los datos antes de guardar.");
+        return;
+    }
+
     let finalClienteId = clienteSeleccionado?.id;
+    let effectiveMode = clienteInputMode;
+
+    // Robustez: Si estamos en search pero tenemos datos manuales cargados (e.g. desde pegar) y no hay cliente seleccionado,
+    // asumimos que el usuario quiere crear el cliente manual.
+    if (effectiveMode === 'search' && !finalClienteId && manualClientData.nombre.trim()) {
+        effectiveMode = 'manual';
+    }
 
     // Handle Manual Client Creation
-    if (clienteInputMode === 'manual') {
+    if (effectiveMode === 'manual') {
         if (!manualClientData.nombre.trim()) {
             alert("El nombre del cliente es obligatorio");
             return;
@@ -517,7 +933,7 @@ export default function CrearPedido({
         }
     } else {
         if (!finalClienteId) {
-            alert("Debe seleccionar un cliente");
+            alert(`Debe seleccionar un cliente (Modo: ${clienteInputMode}, Manual: "${manualClientData.nombre}")`);
             return;
         }
     }
@@ -586,7 +1002,19 @@ export default function CrearPedido({
     setClienteSearch("");
     setClienteSeleccionado(null);
     setClienteInputMode('search');
-    setManualClientData({ nombre: '', apellidos: '', email: '', nif: '', tipo: 'particular' });
+    setManualClientData({ 
+        nombre: '', 
+        apellidos: '', 
+        email: '', 
+        nif: '', 
+        tipo: 'particular',
+        telefono: '',
+        direccion: '',
+        ciudad: '',
+        codigo_postal: '',
+        provincia: '',
+        pais: ''
+    });
     setSaveClient(true);
     setTipo("perez_galdos");
     setMetodoPago("tarjeta");
@@ -660,34 +1088,84 @@ export default function CrearPedido({
 
             {modoEntrada === "pegar" && (
               <div className="paste-section">
-                <label className="paste-label">
-                  Pega aquí toda la información del pedido
-                </label>
-                <p className="paste-help-text">
-                  Copia y pega toda la información del pedido de la plataforma
-                  externa. El sistema intentará extraer automáticamente los
-                  datos.
-                </p>
-                <textarea
-                  value={datosPegados}
-                  onChange={(e) => setDatosPegados(e.target.value)}
-                  className="form-input paste-textarea"
-                  rows={12}
-                  placeholder="Ejemplo:&#10;Cliente: Juan Pérez&#10;Dirección: Calle Mayor 123, Madrid&#10;Teléfono: 600123456&#10;Email: juan@ejemplo.com&#10;Método de Pago: Tarjeta&#10;Transportista: GLS&#10;Tracking: 123456789&#10;&#10;Productos:&#10;2 - Don Quijote de la Mancha - 25.50€&#10;1 - Cien años de soledad - 18.99€&#10;&#10;Observaciones: Entregar en horario de mañana"
-                />
-                <button
-                  type="button"
-                  onClick={parsearDatosPegados}
-                  className="btn-analyze"
-                >
-                  🔍 Analizar y Rellenar Formulario
-                </button>
-                <p className="paste-tip">
-                  Tip: Formatos reconocidos para productos: "2 - Título del
-                  libro - 25.50€" o "Producto: Título del libro"
-                </p>
+                {!plataformaOrigen ? (
+                    <div className="platform-selector" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', margin: '2rem 0' }}>
+                        <button 
+                            type="button" 
+                            onClick={() => setPlataformaOrigen('iberlibro')}
+                            className="btn-platform"
+                            style={{ 
+                                padding: '1rem 2rem', 
+                                border: '2px solid var(--border-color)', 
+                                borderRadius: '0.5rem', 
+                                background: 'var(--bg-secondary)',
+                                cursor: 'pointer',
+                                fontSize: '1.1rem',
+                                fontWeight: 500
+                            }}
+                        >
+                            📚 IberLibro
+                        </button>
+                        <button 
+                            type="button" 
+                            onClick={() => setPlataformaOrigen('uniliber')}
+                            className="btn-platform"
+                             style={{ 
+                                padding: '1rem 2rem', 
+                                border: '2px solid var(--border-color)', 
+                                borderRadius: '0.5rem', 
+                                background: 'var(--bg-secondary)',
+                                cursor: 'pointer',
+                                fontSize: '1.1rem',
+                                fontWeight: 500
+                            }}
+                        >
+                            📖 Uniliber
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <button 
+                                type="button" 
+                                onClick={() => setPlataformaOrigen(null)}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                            >
+                                ← Volver
+                            </button>
+                            <span className="badge" style={{ background: '#e0e7ff', color: '#3730a3', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>
+                                {plataformaOrigen === 'iberlibro' ? 'IberLibro' : 'Uniliber'}
+                            </span>
+                        </div>
+
+                        <label className="paste-label">
+                          Pega aquí los datos del pedido de {plataformaOrigen === 'iberlibro' ? 'IberLibro' : 'Uniliber'}
+                        </label>
+                        <p className="paste-help-text">
+                          Copia y pega toda la información del pedido de la plataforma. El sistema intentará extraer automáticamente los datos.
+                        </p>
+                        <textarea
+                          value={datosPegados}
+                          onChange={(e) => setDatosPegados(e.target.value)}
+                          className="form-input paste-textarea"
+                          rows={12}
+                          placeholder={plataformaOrigen === 'iberlibro' 
+                            ? "Ejemplo IberLibro:...\nCliente: Juan..." 
+                            : "Ejemplo Uniliber:...\nPedido N:..."}
+                        />
+                        <button
+                          type="button"
+                          onClick={parsearDatosPegados}
+                          className="btn-parse"
+                        >
+                          <Search size={18} />
+                          Analizar y Rellenar Formulario
+                        </button>
+                    </>
+                )}
               </div>
             )}
+
           </div>
 
           {modoEntrada === "manual" && (

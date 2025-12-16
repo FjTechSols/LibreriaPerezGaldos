@@ -25,10 +25,10 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function checkSchema() {
-    console.log("Checking 'libros' table columns...");
+    console.log("Checking 'pedido_detalles' table columns...");
     // We can't query information_schema easily via client-js unless expose it.
     // So we just fetch one row and print keys.
-    const { data, error } = await supabase.from('libros').select('*').limit(1);
+    const { data, error } = await supabase.from('pedido_detalles').select('*').limit(1);
     
     if (error) {
         console.error("Error:", error);

@@ -12,8 +12,8 @@ import GenerarFacturaModal from '../orders/GenerarFacturaDesdeped';
 export function InvoicesManager() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
   const { formatPrice, settings } = useSettings();
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const { actualTheme } = useTheme();
+  const isDark = actualTheme === 'dark';
 
   // State
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false); // Manual Invoice Form
