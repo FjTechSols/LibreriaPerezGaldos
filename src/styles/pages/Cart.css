@@ -529,3 +529,97 @@
     max-height: 95vh;
   }
 }
+
+/* Dark Mode Overrides */
+.dark-mode .cart {
+  background: #0f172a;
+}
+
+.dark-mode .cart-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .empty-cart-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .empty-cart-subtitle {
+  color: #94a3b8;
+}
+
+.dark-mode .cart-item {
+  background: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .item-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .item-title:hover {
+  color: #60a5fa;
+}
+
+.dark-mode .item-author {
+  color: #94a3b8;
+}
+
+.dark-mode .unit-price, 
+.dark-mode .total-price, 
+.dark-mode .quantity {
+  color: #f1f5f9;
+}
+
+.dark-mode .quantity-controls {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .quantity-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .quantity-btn:not(:disabled):hover {
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+.dark-mode .summary-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .summary-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .summary-row {
+  color: #e2e8f0;
+}
+
+.dark-mode .summary-divider {
+  border-top-color: #334155;
+}
+
+.dark-mode .total-row {
+  color: #f1f5f9;
+}
+
+.dark-mode .back-link {
+  color: #60a5fa;
+}
+
+.dark-mode .back-link:hover {
+  background: rgba(96, 165, 250, 0.1);
+}
+
+
+.dark-mode .checkout-modal {
+  background: #1e293b;
+}
+
+.dark-mode .shop-btn {
+  color: white !important;
+}

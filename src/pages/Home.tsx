@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, TrendingUp, Sparkles, Tag } from 'lucide-react';
+import { ArrowRight, TrendingUp, Sparkles, Tag, MessageCircle } from 'lucide-react';
 import { BookCard } from '../components/BookCard';
 import { BookCardSkeleton } from '../components/BookCardSkeleton';
 import { useLanguage } from '../context/LanguageContext';
@@ -144,6 +144,18 @@ export function Home() {
               <p>No hay novedades disponibles.</p>
             )}
           </div>
+        </div>
+      </section>
+
+      <section className="request-book-section">
+        <div className="section-container request-book-container">
+          <div className="request-book-content">
+            <h3>{t('cantFindBook')}</h3>
+            <p>{t('contactUsHelper')}</p>
+          </div>
+          <Link to="/contacto" className="request-book-btn">
+            {t('contactBtn')} <MessageCircle size={20} />
+          </Link>
         </div>
       </section>
 

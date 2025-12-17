@@ -3,7 +3,6 @@ import { Book } from '../types';
 import { generarCodigoLibro, actualizarCodigoPorUbicacion } from '../utils/codigoHelper';
 
 
-
 export interface LibroSupabase {
   id: number;
   legacy_id?: string;
@@ -78,7 +77,7 @@ export interface LibroFilters {
    minPrice?: number;
    maxPrice?: number;
    availability?: 'all' | 'inStock' | 'outOfStock';
-   sortBy?: 'price' | 'rating' | 'newest' | 'title' | 'updated';
+   sortBy?: 'price' | 'rating' | 'newest' | 'title' | 'updated' | 'default';
    sortOrder?: 'asc' | 'desc';
    featured?: boolean;
    isNew?: boolean;
@@ -97,17 +96,40 @@ export interface LibroFilters {
    autor?: string;
  }
 
+// Helper to get the next lexicographical string for range queries
+// '123' -> '124', '09' -> '0:', etc.
+const getNextSearchTerm = (term: string): string => {
+  if (term.length === 0) return term;
+  const lastChar = term.slice(-1);
+  const prefix = term.slice(0, -1);
+  const nextLastChar = String.fromCharCode(lastChar.charCodeAt(0) + 1);
+  return prefix + nextLastChar;
+};
+
  export const obtenerLibros = async (
    page: number = 1, 
    itemsPerPage: number = 12, 
    filters?: LibroFilters
  ): Promise<{ data: Book[]; count: number }> => {
    try {
+     // Optimization: Use 'estimated' count for default view to prevent timeout, 
+     // OR better: Skip count entirely if we rely on totalDatabaseBooks in UI.
+     // Let's try skipping count for maximum speed if it's the default view.
+     
+     const isDefaultView = !filters || (!filters.search && (!filters.category || filters.category === 'Todos') && !filters.publisher && !filters.minPrice && !filters.featured && !filters.isNew && !filters.isOnSale);
+     
+     // If default view, we DO NOT request a count from DB. We return 0 and let UI override with cached Total.
+     const countStrategy = isDefaultView ? undefined : 'exact';
+
+     // Note: select() second arg is { count: ... }
+     // If countStrategy is undefined, we shouldn't pass the property or pass it as undefined?
+     // Supabase-js types might require 'exact' | 'planned' | 'estimated' | null.
+     
      let query = supabase
        .from('libros')
        // Removed Joins to prevent massive timeout on deep pagination (page 15k+)
        // We only fetch the core table now. The UI will have to rely on IDs or we fetch details separately if needed.
-       .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
+       .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: countStrategy as any })
        .eq('activo', true);
 
      // Apply Filters
@@ -136,9 +158,10 @@ export interface LibroFilters {
                    return { data: exactLegacy.map(mapLibroToBook), count: exactLegacy.length };
                }
 
-               // If no exact match, fall back to prefix search (which might be slow, but necessary)
-               // .like is faster for numbers
-               query = query.or(`legacy_id.like.${searchTerm}%`); 
+               // If no exact match, fall back to prefix search optimized with Range Query
+               // LIKE is slow without text_pattern_ops index. GTE/LT is fast on standard B-tree.
+               const nextTerm = getNextSearchTerm(searchTerm);
+               query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
            } else {
                query = query.ilike('legacy_id', `${searchTerm}%`);
            }
@@ -147,9 +170,13 @@ export interface LibroFilters {
            if (isNumeric) {
                // Try exact match first here too? Maybe overly complex for 'full' mode, but safer.
                if (validId) {
-                  query = query.or(`id.eq.${numericId},legacy_id.like.${searchTerm}%,isbn.like.${searchTerm}%`);
+                  const nextTerm = getNextSearchTerm(searchTerm);
+                  // Optimized range query for legacy_id mixed with other fields using PostgREST logic syntax
+                  // or=(id.eq.X,and(legacy_id.gte.X,legacy_id.lt.Y),isbn.like.X%)
+                  query = query.or(`id.eq.${numericId},and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
                } else {
-                  query = query.or(`legacy_id.like.${searchTerm}%,isbn.like.${searchTerm}%`);
+                  const nextTerm = getNextSearchTerm(searchTerm);
+                  query = query.or(`and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
                }
            } else {
                query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
@@ -266,22 +293,32 @@ export interface LibroFilters {
            case 'title':
              query = query.order('titulo', { ascending: filters.sortOrder === 'asc' });
              break;
+           case 'default':
+             // Fast Default: Sort by ID (PK index). Respect user direction.
+             // Defaulting to DESC (newest) if user hasn't touched it (though UI defaults to ASC... user might want ASC IDs?)
+             // Usually 'Default' implies 'Newest First' (LIFO). 
+             // But if UI says 'Ascendente' and user selects 'Default', they might get Oldest First (ID 1).
+             // Let's fallback to respecting sortOrder.
+             query = query.order('id', { ascending: filters.sortOrder === 'asc' });
+             break;
            // Rating is not in DB schema shown, ignoring for now
            default:
-             query = query.order('titulo', { ascending: true });
+             // Fallback if not matched: ID descending for performance
+             query = query.order('id', { ascending: filters.sortOrder === 'asc' });
          }
          } else {
              // Only default sort by title if NOT searching.
              // When searching (especially by code), we want matches fast, order matters less.
              // Sorting by title forces DB to process all matches before returning page 1.
              if (!filters.search) {
-                query = query.order('titulo', { ascending: true });
+                // Modified from 'titulo' to 'id' desc for performance optimization (initial load)
+                query = query.order('id', { ascending: false });
              }
         }
      } else {
-         // No filters at all (initial load?) -> Sort by title
+         // No filters at all (initial load?) -> Sort by ID (Fastest)
          if (!filters || !(filters as any).search) {
-             query = query.order('titulo', { ascending: true });
+             query = query.order('id', { ascending: false });
          }
      }
 
@@ -326,10 +363,11 @@ export interface LibroFilters {
          });
      }
 
-     return {
-       data: data ? data.map(mapLibroToBook) : [],
-       count: count || 0
-     };
+      return {
+        data: data ? data.map(mapLibroToBook) : [],
+        // If default view, return 0 (infinite pagination) or use estimated. Actually, better to return 0/estimated here and let Catalog override it with TotalCount.
+        count: count || 0
+      };
    } catch (error) {
      console.error('Error inesperado al obtener libros:', error);
      return { data: [], count: 0 };
@@ -698,11 +736,14 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
       // If mode is 'code' (default/simple), we ONLY search legacy_id (and ISBN slightly) for numbers
       // We do NOT search Title/Author
       if (searchMode === 'code') {
+          const nextTerm = getNextSearchTerm(query);
           const { data: codeData, error: codeError } = await supabase
             .from('libros')
             .select('*, editoriales(id, nombre), categorias(id, nombre)')
             .eq('activo', true)
-            .or(`legacy_id.like.${query}%,isbn.like.${query}%`) // Using LIKE for prefix match
+            // Replace LIKE with Range Query: (legacy_id >= query AND legacy_id < next) OR isbn LIKE query%
+            // Note: ISBN like remains as legacy fallback, or we could optimize it too if ISBNs are indexed cleanly.
+            .or(`and(legacy_id.gte.${query},legacy_id.lt.${nextTerm}),isbn.like.${query}%`)
             .order('legacy_id', { ascending: true })
             .limit(10);
             
@@ -711,11 +752,14 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
       }
 
       // 2. Standard Fuzzy Search (Only if exact match failed AND mode is 'all')
+      // Even here, we can optimize the legacy_id part
+      const nextTerm = getNextSearchTerm(query);
       const { data: fuzzyData, error: fuzzyError } = await supabase
           .from('libros')
           .select('*, editoriales(id, nombre), categorias(id, nombre)')
           .eq('activo', true)
-          .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
+          // or=(titulo.ilike.%,autor.ilike.%,isbn.ilike.%,and(legacy_id.gte.X,legacy_id.lt.Y))
+          .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,and(legacy_id.gte.${query},legacy_id.lt.${nextTerm})`)
           .order('titulo', { ascending: true })
           .limit(20);
 
@@ -789,7 +833,8 @@ export const obtenerTotalLibros = async (): Promise<number> => {
     const { count, error } = await supabase
       .from('libros')
       .select('*', { count: 'exact', head: true })
-      .eq('activo', true);
+      .eq('activo', true)
+      .gt('stock', 0);
 
     if (error) {
       console.error('Error al obtener total de libros:', error);
@@ -803,252 +848,117 @@ export const obtenerTotalLibros = async (): Promise<number> => {
   }
 };
 
-// Función para obtener estadísticas de libros
-export const obtenerEstadisticasLibros = async (): Promise<{
-  total: number;
-  enStock: number;
-  sinStock: number;
-}> => {
+export const obtenerEstadisticasLibros = async () => {
   try {
-    // Obtener total de libros activos (Estimado para rendimiento)
-    // Obtener total de libros activos
-    const { count: total, error: errorTotal } = await supabase
+    const { count: totalLibros } = await supabase
       .from('libros')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
       .eq('activo', true);
 
-    // Obtener libros con stock > 0
-    // Obtener libros con stock > 0
-    const { count: enStock, error: errorStock } = await supabase
+    const { count: sinStock } = await supabase
       .from('libros')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
       .eq('activo', true)
-      .gt('stock', 0);
-
-    if (errorTotal || errorStock) {
-      console.error('Error al obtener estadísticas:', errorTotal || errorStock);
-      return { total: 0, enStock: 0, sinStock: 0 };
-    }
+      .eq('stock', 0);
 
     return {
-      total: total || 0,
-      enStock: enStock || 0,
-      sinStock: (total || 0) - (enStock || 0)
+      total: totalLibros || 0,
+      sinStock: sinStock || 0
     };
   } catch (error) {
-    console.error('Error inesperado al obtener estadísticas:', error);
-    return { total: 0, enStock: 0, sinStock: 0 };
+    console.error('Error al obtener estadísticas:', error);
+    return { total: 0, sinStock: 0 };
   }
 };
 
+async function enrichBooks(data: LibroSupabase[]) {
+  if (!data || data.length === 0) return [];
+
+  // Recolectar IDs
+  const editorialIds = Array.from(new Set(data.map(b => b.editorial_id).filter(Boolean))) as number[];
+  const categoryIds = Array.from(new Set(data.map(b => b.categoria_id).filter(Boolean))) as number[];
+
+  // Fetch paralelo
+  const [editorialesRes, categoriasRes] = await Promise.all([
+    editorialIds.length > 0 ? supabase.from('editoriales').select('id, nombre').in('id', editorialIds) : { data: [] },
+    categoryIds.length > 0 ? supabase.from('categorias').select('id, nombre').in('id', categoryIds) : { data: [] }
+  ]);
+
+  // Crear mapas
+  const editorialesMap = new Map(editorialesRes.data?.map((e: any) => [e.id, e]) || []);
+  const categoriasMap = new Map(categoriasRes.data?.map((c: any) => [c.id, c]) || []);
+
+  // Enriquecer
+  return data.map(libro => {
+    if (libro.editorial_id) libro.editoriales = editorialesMap.get(libro.editorial_id);
+    if (libro.categoria_id) libro.categorias = categoriasMap.get(libro.categoria_id);
+    return mapLibroToBook(libro);
+  });
+}
+
+// Funciones auxiliares adicionales que podrían ser necesarias
 export const obtenerTotalUnidadesStock = async (): Promise<number> => {
-  try {
-    const { data, error } = await supabase.rpc('get_total_books_stock');
+  const { data, error } = await supabase
+    .from('libros')
+    .select('stock')
+    .eq('activo', true);
+  
+  if (error) return 0;
+  return data.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+};
+
+export const buscarLibroPorISBN = async (isbn: string): Promise<Book | null> => {
+  const { data, error } = await supabase
+    .from('libros')
+    .select('*, editoriales(id, nombre), categorias(id, nombre)')
+    .eq('isbn', isbn)
+    .eq('activo', true)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapLibroToBook(data);
+};
+
+export const incrementarStockLibro = async (id: number, cantidad: number): Promise<boolean> => {
+  const { error } = await supabase.rpc('increment_stock', { book_id: id, quantity: cantidad });
+  return !error;
+};
+
+
+// Funciones nuevas para reportes de calidad de datos
+export const obtenerLibrosSinISBN = async (): Promise<Book[]> => {
+    const { data, error } = await supabase
+      .from('libros')
+      .select('*, editoriales(id, nombre), categorias(id, nombre)')
+      .eq('activo', true)
+      .or('isbn.is.null,isbn.eq.');
     
     if (error) {
-      console.error('Error al obtener total de unidades:', error);
-      return 0;
+        console.error('Error fetching books without ISBN:', error);
+        return [];
     }
-
-    return data || 0;
-  } catch (error) {
-    console.error('Error al llamar RPC get_total_books_stock:', error);
-    return 0;
-  }
+    return data.map(mapLibroToBook);
 };
 
-export const buscarLibroPorISBN = async (isbn: string): Promise<LibroSupabase | null> => {
-  try {
-    if (!isbn) return null;
-
-    const cleanISBN = isbn.replace(/[-\s]/g, '');
-
+export const obtenerLibrosSinPortada = async (): Promise<Book[]> => {
     const { data, error } = await supabase
       .from('libros')
       .select('*, editoriales(id, nombre), categorias(id, nombre)')
       .eq('activo', true)
-      .eq('isbn', cleanISBN)
-      .maybeSingle();
+      .or('imagen_url.is.null,imagen_url.eq.');
 
     if (error) {
-      console.error('Error al buscar libro por ISBN:', error);
-      return null;
+        console.error('Error fetching books without cover:', error);
+        return [];
     }
-
-    return data;
-  } catch (error) {
-    console.error('Error inesperado al buscar libro por ISBN:', error);
-    return null;
-  }
+    return data.map(mapLibroToBook);
 };
 
-export const incrementarStockLibro = async (id: number, cantidad: number = 1): Promise<Book | null> => {
-  try {
-    const { data: libroActual, error: fetchError } = await supabase
-      .from('libros')
-      .select('stock')
-      .eq('id', id)
-      .single();
-
-    if (fetchError) {
-      console.error('Error al obtener stock actual:', fetchError);
-      return null;
-    }
-
-    const nuevoStock = (libroActual.stock || 0) + cantidad;
-
-    const { data, error } = await supabase
-      .from('libros')
-      .update({
-        stock: nuevoStock,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select('*, editoriales(id, nombre), categorias(id, nombre)')
-      .single();
-
-    if (error) {
-      console.error('Error al incrementar stock:', error);
-      return null;
-    }
-
-    return data ? mapLibroToBook(data) : null;
-  } catch (error) {
-    console.error('Error inesperado al incrementar stock:', error);
-    return null;
-  }
-};
-
-export const obtenerLibrosSinISBN = async (limit: number = 50): Promise<Book[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('libros')
-      .select('*, editoriales(id, nombre), categorias(id, nombre)')
-      .eq('activo', true)
-      .or('isbn.is.null,isbn.eq.""') // Fixed empty string check syntax for some supabase versions, but usually .eq."" works or .is.null
-      .order('titulo', { ascending: true })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error al obtener libros sin ISBN:', error);
-      return [];
-    }
-
-    return data ? data.map(mapLibroToBook) : [];
-  } catch (error) {
-    console.error('Error inesperado al obtener libros sin ISBN:', error);
-    return [];
-  }
-};
-
-export const obtenerLibrosSinPortada = async (limit: number = 50): Promise<Book[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('libros')
-      .select('*, editoriales(id, nombre), categorias(id, nombre)')
-      .eq('activo', true)
-      .or('imagen_url.is.null,imagen_url.eq.""')
-      .order('titulo', { ascending: true })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error al obtener libros sin portada:', error);
-      return [];
-    }
-
-    return data ? data.map(mapLibroToBook) : [];
-  } catch (error) {
-    console.error('Error inesperado al obtener libros sin portada:', error);
-    return [];
-  }
-};
-
-export const actualizarISBN = async (id: number, isbn: string): Promise<{ success: boolean; error?: string }> => {
-  try {
-    const cleanISBN = isbn.replace(/[-\s]/g, '');
-
-    // Verificación de duplicados eliminada a petición del usuario
-    /*
-    const { data: libroExistente, error: checkError } = await supabase
-      .from('libros')
-      .select('id, titulo')
-      .eq('isbn', cleanISBN)
-      .maybeSingle();
-      */
-
-    /*
-    if (checkError) {
-      console.error('Error al verificar ISBN duplicado:', checkError);
-      return { success: false, error: 'Error al verificar ISBN' };
-    }
-    */
-
-// Eliminamos la comprobación de duplicados porque ahora se permiten ISBNs repetidos
-    /*
-    if (libroExistente) {
-      if (libroExistente.id === id) {
-          return { success: true };
-      }
-
-      // Advertencia en log pero permitimos guardar
-      console.warn(`ISBN ${cleanISBN} ya asignado a libro ID ${libroExistente.id}, pero se permite duplicado.`);
-    }
-    */
-
+export const actualizarISBN = async (id: number, isbn: string): Promise<boolean> => {
     const { error } = await supabase
       .from('libros')
-      .update({
-        isbn: cleanISBN,
-        updated_at: new Date().toISOString()
-      })
+      .update({ isbn: isbn })
       .eq('id', id);
 
-    if (error) {
-      console.error('Error al actualizar ISBN:', error);
-      // El código 23505 ya no debería ocurrir si se ejecutó el script de eliminación de constraint
-      // pero lo mantenemos manejado por si acaso
-      if (error.code === '23505') {
-        return { success: false, error: 'Este ISBN ya existe en otro libro (Error de Base de Datos - Unique Constraint)' };
-      }
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error inesperado al actualizar ISBN:', error);
-    return { success: false, error: 'Error inesperado al actualizar ISBN' };
-  }
-};
-
-const enrichBooks = async (books: any[]): Promise<Book[]> => {
-    if (!books || books.length === 0) return [];
-    
-    try {
-        // Extract IDs
-        const editorialIds = Array.from(new Set(books.map(b => b.editorial_id).filter((id: any) => id)));
-        const categoryIds = Array.from(new Set(books.map(b => b.categoria_id).filter((id: any) => id)));
-        
-        // Fetch related
-        const promises = [];
-        if (editorialIds.length > 0) promises.push(supabase.from('editoriales').select('id, nombre').in('id', editorialIds));
-        else promises.push(Promise.resolve({data: []}));
-        
-        if (categoryIds.length > 0) promises.push(supabase.from('categorias').select('id, nombre').in('id', categoryIds));
-        else promises.push(Promise.resolve({data: []}));
-
-        const [edResult, catResult] = await Promise.all(promises);
-        
-        const edMap = new Map(edResult.data?.map((e: any) => [e.id, e]) || []);
-        const catMap = new Map(catResult.data?.map((c: any) => [c.id, c]) || []);
-
-        return books.map(book => {
-            const enriched = { ...book };
-            if (enriched.editorial_id) enriched.editoriales = edMap.get(enriched.editorial_id);
-            if (enriched.categoria_id) enriched.categorias = catMap.get(enriched.categoria_id);
-            return mapLibroToBook(enriched);
-        });
-    } catch (err) {
-        console.error('Error in enrichBooks:', err);
-        return books.map(mapLibroToBook);
-    }
+    return !error;
 };

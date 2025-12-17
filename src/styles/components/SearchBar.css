@@ -11,7 +11,7 @@
 
 .search-icon {
   position: absolute;
-  right: 1rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: #64748b;
@@ -21,7 +21,7 @@
 
 .search-input {
   width: 100%;
-  padding: 1rem 3rem 1rem 1rem;
+  padding: 1rem 3rem 1rem 3.5rem !important;
   border: 2px solid #e2e8f0;
   border-radius: 2rem;
   font-size: 1rem;
@@ -38,7 +38,7 @@
 
 .clear-btn {
   position: absolute;
-  right: 3rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -127,16 +127,17 @@
 
 @media (max-width: 768px) {
   .search-input {
-    padding: 0.875rem 2.5rem 0.875rem 0.75rem;
+    padding: 0.875rem 2.5rem 0.875rem 2.5rem;
     font-size: 0.875rem;
   }
 
   .search-icon {
-    right: 0.75rem;
+    left: 0.75rem;
+    right: auto;
   }
 
   .clear-btn {
-    right: 2.5rem;
+    right: 0.75rem;
   }
 
   .suggestion-item {
@@ -162,11 +163,11 @@
 .dark-mode .search-input {
   background-color: #1e293b; /* Slate 800 */
   border-color: #334155; /* Slate 700 */
-  color: #f1f5f9; /* Slate 100 */
+  color: #f1f5f9 !important; /* Slate 100 */
 }
 
 .dark-mode .search-input::placeholder {
-  color: #94a3b8; /* Slate 400 */
+  color: #94a3b8 !important; /* Slate 400 */
 }
 
 .dark-mode .search-input:focus {
@@ -176,7 +177,7 @@
 }
 
 .dark-mode .search-icon {
-  color: #94a3b8; /* Slate 400 */
+  color: #94a3b8 !important; /* Slate 400 */
 }
 
 .dark-mode .clear-btn {

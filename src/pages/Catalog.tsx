@@ -27,7 +27,7 @@ export function Catalog() {
     category: searchParams.get('category') || 'Todos',
     priceRange: [0, 1000],
     availability: 'inStock', /* Default: Hide Out of Stock */
-    sortBy: 'title',
+    sortBy: 'default',
     sortOrder: 'asc'
   });
 
@@ -70,7 +70,18 @@ export function Catalog() {
         
         if (!controller.signal.aborted) {
             setBooks(data);
-            setTotalFilteredBooks(count);
+            
+            // If default view (no search/filters), override local count with accurate total count
+            // This fixes the "1001" estimate limit issue while keeping load fast.
+            const isDefaultView = !filters.category || filters.category === 'Todos';
+            const searchTerm = searchParams.get('search');
+            const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale;
+            
+            if (isTrulyDefault && totalDatabaseBooks > 0) {
+                 setTotalFilteredBooks(totalDatabaseBooks);
+            } else {
+                 setTotalFilteredBooks(count);
+            }
         }
         
       } catch (error) {
@@ -90,6 +101,18 @@ export function Catalog() {
         controller.abort();
     };
   }, [currentPage, itemsPerPage, filters, searchParams]);
+
+  // Sync total filtered with total database when default view is active and DB count updates
+  // This handles the case where books load faster than the total count, or vice versa.
+  useEffect(() => {
+     const isDefaultView = !filters.category || filters.category === 'Todos';
+     const searchTerm = searchParams.get('search');
+     const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale;
+
+     if (isTrulyDefault && totalDatabaseBooks > 0) {
+         setTotalFilteredBooks(totalDatabaseBooks);
+     }
+  }, [totalDatabaseBooks, filters, searchParams]);
 
   const handleFiltersChange = (newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -177,7 +200,7 @@ export function Catalog() {
                           category: 'Todos',
                           priceRange: [0, 1000],
                           availability: 'inStock',
-                          sortBy: 'title',
+                          sortBy: 'default',
                           sortOrder: 'asc',
                           featured: false,
                           onSale: false,

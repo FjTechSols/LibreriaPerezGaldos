@@ -59,7 +59,7 @@
 
 .search-icon {
   position: absolute;
-  right: 1rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: #64748b;
@@ -68,7 +68,7 @@
 
 .search-input {
   width: 100%;
-  padding: 0.75rem 3rem 0.75rem 1rem;
+  padding: 0.75rem 3rem 0.75rem 3.5rem !important;
   border: 2px solid #e2e8f0;
   border-radius: 2rem;
   font-size: 1rem;
@@ -85,7 +85,7 @@
 
 .clear-search-btn {
   position: absolute;
-  right: 3rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -692,7 +692,7 @@
 .dark-mode .search-input {
   background: #1e293b;
   border-color: #334155;
-  color: #e2e8f0;
+  color: #e2e8f0 !important;
 }
 
 .dark-mode .search-input:focus {
@@ -701,7 +701,7 @@
 }
 
 .dark-mode .search-icon {
-  color: #94a3b8;
+  color: #94a3b8 !important;
 }
 
 .dark-mode .clear-search-btn {
@@ -978,15 +978,16 @@
 
   .search-input {
     font-size: 0.875rem;
-    padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+    padding: 0.625rem 2.5rem 0.625rem 2.5rem;
   }
 
   .search-icon {
-    right: 0.75rem;
+    left: 0.75rem;
+    right: auto;
   }
 
   .clear-search-btn {
-    right: 2.5rem;
+    right: 0.75rem;
   }
 
   .search-suggestions {

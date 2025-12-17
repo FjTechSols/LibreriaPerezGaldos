@@ -52,21 +52,21 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
         <div className="Book-Filter__controls-center">
              <button
                 className={`Book-Filter__quick-btn ${filters.featured ? 'active' : ''}`}
-                onClick={() => onFiltersChange({ featured: !filters.featured })}
+                onClick={() => onFiltersChange({ featured: !filters.featured, onSale: false, isNew: false })}
                 title={language === 'es' ? 'Destacados' : 'Featured'}
               >
                 {language === 'es' ? 'Destacados' : 'Featured'}
               </button>
               <button
                 className={`Book-Filter__quick-btn ${filters.onSale ? 'active' : ''}`}
-                onClick={() => onFiltersChange({ onSale: !filters.onSale })}
+                onClick={() => onFiltersChange({ onSale: !filters.onSale, featured: false, isNew: false })}
                 title={language === 'es' ? 'Ofertas' : 'Offers'}
               >
                 {language === 'es' ? 'Ofertas' : 'Offers'}
               </button>
               <button
                 className={`Book-Filter__quick-btn ${filters.isNew ? 'active' : ''}`}
-                onClick={() => onFiltersChange({ isNew: !filters.isNew })}
+                onClick={() => onFiltersChange({ isNew: !filters.isNew, featured: false, onSale: false })}
                 title={language === 'es' ? 'Novedades' : 'New Arrivals'}
               >
                  {language === 'es' ? 'Novedades' : 'New'}
@@ -79,6 +79,7 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
             onChange={(e) => onFiltersChange({ sortBy: e.target.value as FilterState['sortBy'] })}
             className="Book-Filter__sort-select"
           >
+            <option value="default">{language === 'es' ? 'Por defecto' : language === 'en' ? 'Default' : 'Par défaut'}</option>
             <option value="title">{language === 'es' ? 'Título' : language === 'en' ? 'Title' : 'Titre'}</option>
             <option value="price">{language === 'es' ? 'Precio' : language === 'en' ? 'Price' : 'Prix'}</option>
             <option value="rating">{language === 'es' ? 'Valoración' : language === 'en' ? 'Rating' : 'Évaluation'}</option>
@@ -145,7 +146,7 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
               category: 'Todos',
               availability: 'inStock',
               priceRange: [0, 1000],
-              sortBy: 'title',
+              sortBy: 'default',
               sortOrder: 'asc'
             })}
             className="Book-Filter__btn-clear"

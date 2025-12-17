@@ -307,7 +307,7 @@ export interface FilterState {
   category: string;
   priceRange: [number, number];
   availability: 'all' | 'inStock' | 'outOfStock';
-  sortBy: 'title' | 'price' | 'rating' | 'newest';
+  sortBy: 'default' | 'title' | 'price' | 'rating' | 'newest';
   sortOrder: 'asc' | 'desc';
   featured?: boolean;
   onSale?: boolean;

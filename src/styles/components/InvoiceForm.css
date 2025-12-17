@@ -328,9 +328,15 @@
 .dark-mode .form-group textarea,
 .dark-mode .form-select,
 .dark-mode .search-input-with-icon {
-  background: #1e293b;
-  border-color: #475569;
-  color: #ffffff !important; /* Force white text */
+  background-color: #0f172a !important; /* Force darker background */
+  border: 1px solid #64748b !important; /* Force visible border */
+  color: #f1f5f9 !important; /* Force white text */
+}
+
+/* Ensure placeholder is also visible */
+.dark-mode .form-group input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
 }
 
 .dark-mode .form-group input::placeholder,

@@ -47,9 +47,9 @@ export const Location = () => {
                   <Clock className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
                     <h3>Horario</h3>
-                    <p>Lunes a Viernes: 10:00 - 14:00 y 17:00 - 20:30</p>
-                    <p>Sábados: 11:00 - 14:30 y 17:00 - 20:30</p>
-                    <p>Domingos y Festivos: 11:00 - 14:30 y 17:00 - 20:30</p>
+                    <p>Lunes a Viernes: 10:30 - 20:30</p>
+                    <p>Sábados: 10:30 - 14:30</p>
+                    <p>Domingos: Consultar apertura</p>
                   </div>
                 </div>
 
@@ -86,7 +86,7 @@ export const Location = () => {
               <p className="location-subtitle">Nuestra nueva aventura literaria</p>
             </div>
             <a 
-              href="https://www.google.com/maps/search/?api=1&query=Calle+Sagasta+7+Madrid" 
+              href="https://maps.app.goo.gl/Z3W3J9Hg6LSgyQ6v9" 
               target="_blank" 
               rel="noopener noreferrer"
               className="maps-profile-btn"
@@ -113,9 +113,9 @@ export const Location = () => {
                   <Clock className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
                     <h3>Horario</h3>
-                    <p>Lunes a Viernes: 10:30 - 14:30 y 17:00 - 21:00</p>
-                    <p>Sábados: 11:00 - 14:30 y 17:30 - 21:00</p>
-                    <p>Domingos y Festivos: 11:00 - 14:30 y 17:30 - 21:00</p>
+                    <p>Lunes a Viernes: 11:00 - 14:30 y 17:00 - 20:30</p>
+                    <p>Sábados: 11:00 - 14:30</p>
+                    <p>Domingos: Cerrado</p>
                   </div>
                 </div>
 

@@ -13,11 +13,19 @@ export const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate form submission
+    
+    // Construct mailto link
+    const subject = encodeURIComponent(`${formData.subject} - Contacto Web`);
+    const body = encodeURIComponent(`Nombre: ${formData.name}\nEmail: ${formData.email}\n\nMensaje:\n${formData.message}`);
+    
+    // Open email client
+    window.location.href = `mailto:info@perezgaldos.com?subject=${subject}&body=${body}`;
+
+    // Show success state
     setTimeout(() => {
       setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1000);
+    }, 500);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -47,12 +55,45 @@ export const Contact = () => {
                   Si tienes alguna duda sobre un libro, un pedido o simplemente quieres saludarnos, completa el formulario y te responderemos lo antes posible.
                 </p>
                 
-                <div className="contact-info-list" style={{ marginTop: '2rem' }}>
-                   <p>También puedes escribirnos directamente a:</p>
-                   <a href="mailto:libreria@perezgaldos.com" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', color: 'var(--primary-600)' }}>
-                     <Mail size={20} />
-                     libreria@perezgaldos.com
-                   </a>
+                <div className="contact-info-group">
+                   
+                   {/* Email */}
+                   <div className="contact-method">
+                     <h3 className="contact-method-title">Correo Electrónico:</h3>
+                     <a href="mailto:info@perezgaldos.com" className="contact-link email-link">
+                       <Mail size={20} />
+                       info@perezgaldos.com
+                     </a>
+                   </div>
+
+                   {/* Phone */}
+                   <div className="contact-method">
+                      <h3 className="contact-method-title">Teléfonos:</h3>
+                      <div className="contact-details-list">
+                        <a href="tel:+34915312640" className="contact-link">
+                          <span className="contact-label">Pérez Galdós:</span> +34 91 531 26 40
+                        </a>
+                         <a href="tel:+34911234567" className="contact-link">
+                          <span className="contact-label">El Galeón:</span> +34 91 123 45 67
+                        </a>
+                      </div>
+                   </div>
+
+                   {/* Addresses */}
+                   <div className="contact-method">
+                      <h3 className="contact-method-title">Direcciones:</h3>
+                      <div className="contact-details-list">
+                        <div className="contact-address-item">
+                          <span className="contact-label">Librería Pérez Galdós</span>
+                          <p className="contact-address">Calle Hortaleza 5, 28004 Madrid</p>
+                        </div>
+                        <div className="contact-address-item">
+                          <span className="contact-label">Librería El Galeón</span>
+                          <p className="contact-address">Calle Sagasta 7, 28004 Madrid</p>
+                        </div>
+                      </div>
+                   </div>
+
                 </div>
               </section>
             </div>

@@ -98,7 +98,13 @@ export function GestionUbicaciones() {
   return (
     <div className="gestion-ubicaciones">
       <div className="header-section">
-        <h3><MapPin size={24} /> Gestión de Ubicaciones</h3>
+        <div className="header-title">
+          <MapPin size={32} />
+          <div>
+            <h2>Gestión de Ubicaciones</h2>
+            <p>Administra las ubicaciones físicas de los libros en el almacén</p>
+          </div>
+        </div>
         {!isCreating && (
           <button
             className="btn-primary"

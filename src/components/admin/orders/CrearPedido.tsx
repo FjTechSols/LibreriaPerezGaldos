@@ -983,7 +983,50 @@ export default function CrearPedido({
       });
 
       if (pedido) {
-        alert(`Pedido #${pedido.id} creado correctamente`);
+        // --- Email Notification Logic ---
+        const clientEmail = (clienteSeleccionado?.email || manualClientData.email || '').trim();
+        const storeEmail = 'pedidos@perezgaldos.com';
+        const clientName = clienteSeleccionado ? `${clienteSeleccionado.nombre} ${clienteSeleccionado.apellidos || ''}` : `${manualClientData.nombre} ${manualClientData.apellidos}`;
+        
+        // Construct Item List string for body
+        const itemsList = lineas.map(l => {
+             const title = l.es_externo ? l.nombre_externo : (l.libro?.titulo || 'Libro sin título');
+             return `- ${title} (x${l.cantidad}) - ${formatPrice(l.precio_unitario)}`;
+        }).join('\n');
+
+        const subject = encodeURIComponent(`Confirmación Pedido #${pedido.id} - Librería Pérez Galdós`);
+        
+        let bodyRaw = `Estimado/a ${clientName},\n\n`;
+        bodyRaw += `Su pedido #${pedido.id} ha sido registrado correctamente.\n\n`;
+        bodyRaw += `DETALLES DEL PEDIDO:\n`;
+        bodyRaw += `--------------------------------\n`;
+        bodyRaw += `${itemsList}\n`;
+        bodyRaw += `--------------------------------\n`;
+        bodyRaw += `Total: ${formatPrice(total)}\n\n`; // 'total' is available from component scope
+        
+        if (direccionEnvio) bodyRaw += `Dirección de Envío:\n${direccionEnvio}\n\n`;
+        if (transportista) bodyRaw += `Transportista: ${transportista}\n`;
+        if (tracking) bodyRaw += `Seguimiento: ${tracking}\n`;
+        
+        bodyRaw += `\nGracias por su confianza.\n\nLibrería Pérez Galdós\nhttps://perezgaldos.com`;
+
+        const body = encodeURIComponent(bodyRaw);
+
+        // Determine Mailto URL
+        // Priority: Send TO Client, BCC Store.
+        // If no Client Email, Send TO Store (Log).
+        let mailtoUrl = '';
+        if (clientEmail) {
+             mailtoUrl = `mailto:${clientEmail}?bcc=${storeEmail}&subject=${subject}&body=${body}`;
+             alert(`Pedido #${pedido.id} creado correctamente.\n\nSe abrirá su gestor de correo para enviar la confirmación al cliente y a la tienda.`);
+        } else {
+             mailtoUrl = `mailto:${storeEmail}?subject=${subject} (Sin Email Cliente)&body=${body}`;
+             alert(`Pedido #${pedido.id} creado.\n\nEl cliente NO tiene email. Se abrirá correo para enviar copia a la tienda.`);
+        }
+
+        // Trigger Mailto
+        window.location.href = mailtoUrl;
+
         resetForm();
         onSuccess();
         onClose();
@@ -1420,6 +1463,7 @@ export default function CrearPedido({
                       <option value="">Seleccione...</option>
                       <option value="MRW">MRW</option>
                       <option value="GLS">GLS</option>
+                      <option value="Correos">Correos</option>
                       <option value="Otro">Otro</option>
                     </select>
                   </div>

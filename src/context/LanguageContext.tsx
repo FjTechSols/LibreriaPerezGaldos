@@ -39,6 +39,9 @@ const translations: Record<Language, Record<string, string>> = {
     newToLibrary: '¿Nuevo en nuestra librería?',
     joinCommunity: 'Únete a nuestra comunidad de lectores y disfruta de beneficios exclusivos, descuentos especiales y recomendaciones personalizadas.',
     registerFree: 'Registrarse Gratis',
+    cantFindBook: '¿No encuentras el libro que buscas?',
+    contactUsHelper: 'Contáctanos y haremos todo lo posible por conseguirlo para ti.',
+    contactBtn: 'Contactar Ahora',
 
     loginTitle: 'Iniciar Sesión',
     loginSubtitle: 'Accede a tu cuenta para continuar con tu experiencia de lectura',
@@ -132,6 +135,9 @@ const translations: Record<Language, Record<string, string>> = {
     newToLibrary: 'New to our bookstore?',
     joinCommunity: 'Join our community of readers and enjoy exclusive benefits, special discounts and personalized recommendations.',
     registerFree: 'Register Free',
+    cantFindBook: "Can't find the book you're looking for?",
+    contactUsHelper: "Contact us and we'll do our best to get it for you.",
+    contactBtn: 'Contact Now',
 
     loginTitle: 'Login',
     loginSubtitle: 'Access your account to continue your reading experience',
@@ -225,6 +231,9 @@ const translations: Record<Language, Record<string, string>> = {
     newToLibrary: 'Nouveau dans notre librairie?',
     joinCommunity: 'Rejoignez notre communauté de lecteurs et profitez d\'avantages exclusifs, de réductions spéciales et de recommandations personnalisées.',
     registerFree: 'S\'inscrire Gratuitement',
+    cantFindBook: 'Vous ne trouvez pas le livre que vous cherchez ?',
+    contactUsHelper: 'Contactez-nous et nous ferons de notre mieux pour l\'obtenir pour vous.',
+    contactBtn: 'Contacter Maintenant',
 
     loginTitle: 'Connexion',
     loginSubtitle: 'Accédez à votre compte pour continuer votre expérience de lecture',
