@@ -179,6 +179,7 @@ export const obtenerTodosLosUsuariosConRoles = async (): Promise<UsuarioConRoles
     throw new Error('No authenticated session');
   }
 
+  // 1. Fetch Users (IDs, Emails, Metadata) from Edge Function
   const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-list-users`;
 
   const response = await fetch(apiUrl, {
@@ -195,7 +196,38 @@ export const obtenerTodosLosUsuariosConRoles = async (): Promise<UsuarioConRoles
   }
 
   const { users } = await response.json();
-  return users;
+
+  // 2. Fetch Fresh Roles from Database
+  const { data: userRoles, error: rolesError } = await supabase
+    .from('usuarios_roles')
+    .select('user_id, roles (*)')
+    .eq('activo', true);
+
+  if (rolesError) {
+      console.error('Error fetching fresh roles:', rolesError);
+      // Fallback to whatever EF returned if DB fails, but typically we want the DB truth
+  }
+
+  // 3. Merge Data
+  // We want to Replace the 'roles' array from EF with the one from DB
+  const mergedUsers: UsuarioConRoles[] = users.map((u: any) => {
+      // Find roles for this user in fresh DB fetch
+      const freshRolesRel = userRoles?.filter(ur => ur.user_id === u.id) || [];
+      const freshRoles = freshRolesRel.map(ur => (Array.isArray(ur.roles) ? ur.roles[0] : ur.roles)).filter(r => r && r.id) as unknown as Rol[];
+
+      // Determine main role (highest hierarchy)
+      // Sort by hierarchy (1 is highest/Top e.g. SuperAdmin)
+      const sortedRoles = [...freshRoles].sort((a, b) => a.nivel_jerarquia - b.nivel_jerarquia);
+      const mainRole = sortedRoles.length > 0 ? sortedRoles[0] : undefined;
+
+      return {
+          ...u,
+          roles: freshRoles,
+          rol_principal: mainRole
+      };
+  });
+
+  return mergedUsers;
 };
 
 export const crearUsuarioAdministrativo = async (
@@ -223,21 +255,60 @@ export const actualizarRolesUsuario = async (
   rolesIds: number[],
   asignadoPor: string | null
 ): Promise<void> => {
-  const { data: { session } } = await supabase.auth.getSession();
+  // 1. Get all available roles to know what to disable
+  const allRoles = await obtenerTodosLosRoles();
+  
+  // 2. Prepare operations
+  const operations = allRoles.map(async (rol) => {
+    const shouldHaveRole = rolesIds.includes(rol.id);
+    
+    // Check if relation exists
+    const { data: existingRel, error: fetchError } = await supabase
+        .from('usuarios_roles')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('rol_id', rol.id)
+        .maybeSingle(); // Use maybeSingle to avoid 406 error if multiple (shouldn't happen) or 0
 
-  if (!session) {
-    throw new Error('No authenticated session');
-  }
+    if (fetchError && fetchError.code !== 'PGRST116') {
+        // PGRST116 is JSON single error, maybeSingle handles it but let's be safe
+        console.error('Error checking role:', fetchError);
+        throw fetchError;
+    }
 
-  const { error } = await supabase.functions.invoke('admin-update-roles', {
-    body: {
-      userId,
-      rolesIds,
-      asignadoPor,
-    },
+    if (existingRel) {
+       // UPDATE
+       // If it exists, update usage
+       const { error } = await supabase
+        .from('usuarios_roles')
+        .update({
+          activo: shouldHaveRole, // True if selected, False if not
+          asignado_por: asignadoPor, // Update signer
+          updated_at: new Date().toISOString() // Assuming updated_at column exists
+        })
+        .eq('id', existingRel.id);
+
+       if (error) throw error;
+    } else {
+       // INSERT
+       if (shouldHaveRole) {
+           // Only insert if it should be active. NO need to insert "inactive" roles if they don't exist.
+           const { error } = await supabase
+            .from('usuarios_roles')
+            .insert({
+              user_id: userId,
+              rol_id: rol.id,
+              asignado_por: asignadoPor,
+              activo: true,
+              fecha_asignacion: new Date().toISOString()
+            });
+
+           if (error) throw error;
+       }
+    }
   });
 
-  if (error) throw error;
+  await Promise.all(operations);
 };
 
 export const eliminarUsuario = async (userId: string): Promise<void> => {

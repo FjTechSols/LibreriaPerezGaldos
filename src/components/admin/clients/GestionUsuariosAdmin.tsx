@@ -258,7 +258,13 @@ export function GestionUsuariosAdmin() {
             </tr>
           </thead>
           <tbody>
-            {usuarios.map(usuario => (
+            {usuarios
+              .filter(usuario =>
+                usuario.roles.some(r =>
+                  ['super_admin', 'admin', 'editor', 'visualizador'].includes(r.nombre)
+                )
+              )
+              .map(usuario => (
               <tr key={usuario.id}>
                 <td>
                   <div className="usuario-email">

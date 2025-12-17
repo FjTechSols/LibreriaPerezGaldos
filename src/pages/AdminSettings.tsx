@@ -24,7 +24,7 @@ import '../styles/pages/AdminSettings.css';
 
 export function AdminSettings() {
   const navigate = useNavigate();
-  const { } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const {
     settings,
     loading,
@@ -36,6 +36,7 @@ export function AdminSettings() {
   } = useSettings();
 
   const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
+
   const [exportState, setExportState] = useState<{ isExporting: boolean; type: string | null; progress: number; total: number }>({
     isExporting: false,
     type: null,
@@ -185,7 +186,8 @@ export function AdminSettings() {
     { id: 'system', label: 'Sistema', icon: SettingsIcon },
     { id: 'security', label: 'Seguridad', icon: Shield },
     { id: 'ubicaciones', label: 'Ubicaciones', icon: MapPin },
-    { id: 'usuarios', label: 'Usuarios Admin', icon: Shield },
+    // Only show Usuarios tab if Super Admin
+    ...(isSuperAdmin ? [{ id: 'usuarios', label: 'Usuarios Admin', icon: Shield }] : []),
     { id: 'backup', label: 'Copias de Seguridad', icon: HardDrive }
   ];
 
@@ -206,8 +208,7 @@ export function AdminSettings() {
             </button>
           </div>
         </div>
-
-
+        
         {saveSuccess && (
           <div className="alert alert-success">
             <Check size={20} />

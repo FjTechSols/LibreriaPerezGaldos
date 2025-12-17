@@ -116,25 +116,44 @@ export interface LibroFilters {
         const searchTerm = filters.search.trim();
         const isNumeric = /^\d+$/.test(searchTerm);
         
-        // Optimized Search Logic
-        if (isNumeric) {
-             const numericId = parseInt(searchTerm, 10);
-             // Robust check: Only query ID if it looks like a valid Postgres integer range and is parsed
-             const validId = !isNaN(numericId) && numericId < 2147483647; 
-             
-             if (validId) {
-                // If it's a valid number, we check BOTH ID and LegacyID (as string)
-                // We use Filter based composition instead of OR string to ensure type safety if possible, 
-                // but .or() string is the standard way. 
-                // We purposefully strip leading zeros for the ID Check: id.eq.4146
-                // AND keep strict string for LegacyID: legacy_id.ilike.0004146%
-                query = query.or(`id.eq.${numericId},legacy_id.ilike.${searchTerm}%`);
-             } else {
-                // If too large for ID or not valid int, only search legacy_id string
-                query = query.ilike('legacy_id', `${searchTerm}%`);
-             }
+        const numericId = parseInt(searchTerm, 10);
+        const validId = !isNaN(numericId) && numericId < 2147483647;
+
+        // Check search mode: 'default' means ONLY legacy_id (and id) search? 
+        if (filters.searchMode === 'default') {
+           // Strict Legacy Code Search
+           if (isNumeric) {
+               // STRATEGY: Try EXACT match first to avoid expensive LIKE scan
+               // If the user pasted a full code, this will hit immediately.
+               const { data: exactLegacy, error: exactError } = await supabase
+                  .from('libros')
+                  .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
+                  .eq('activo', true)
+                  .or(`legacy_id.eq.${searchTerm},id.eq.${numericId}`) // Check both Exact Legacy AND Exact ID
+                  .limit(5);
+
+               if (!exactError && exactLegacy && exactLegacy.length > 0) {
+                   return { data: exactLegacy.map(mapLibroToBook), count: exactLegacy.length };
+               }
+
+               // If no exact match, fall back to prefix search (which might be slow, but necessary)
+               // .like is faster for numbers
+               query = query.or(`legacy_id.like.${searchTerm}%`); 
+           } else {
+               query = query.ilike('legacy_id', `${searchTerm}%`);
+           }
         } else {
-             query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.${searchTerm}%`);
+           // Full Search Mode (Title, Author, ISBN, etc.)
+           if (isNumeric) {
+               // Try exact match first here too? Maybe overly complex for 'full' mode, but safer.
+               if (validId) {
+                  query = query.or(`id.eq.${numericId},legacy_id.like.${searchTerm}%,isbn.like.${searchTerm}%`);
+               } else {
+                  query = query.or(`legacy_id.like.${searchTerm}%,isbn.like.${searchTerm}%`);
+               }
+           } else {
+               query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
+           }
         }
       }
 
@@ -654,42 +673,73 @@ export const eliminarLibro = async (id: number): Promise<boolean> => {
   }
 };
 
-export const buscarLibros = async (query: string): Promise<Book[]> => {
+export const buscarLibros = async (query: string, options?: { searchFields?: 'code' | 'all' }): Promise<Book[]> => {
   try {
     const isNumeric = /^\d+$/.test(query);
-    
+    const searchMode = options?.searchFields || 'all'; // Default to all if not specified, but UI sends 'code' for default mode
+
     if (isNumeric) {
-      // Parallel execution: Exact Match (Priority) + Fuzzy Search
-      const [exactMatch, fuzzyMatch] = await Promise.all([
-        // 1. Exact Priority Search (ID or Legacy ID)
-        supabase
+      // 1. Exact Priority Search (ID or Legacy ID)
+      // Execute this FIRST to avoid timeout on heavy fuzzy search if exact match exists
+      const { data: exactData, error: exactError } = await supabase
           .from('libros')
           .select('*, editoriales(id, nombre), categorias(id, nombre)')
           .eq('activo', true)
-          .or(`id.eq.${query},legacy_id.eq.${query}`),
-        
-        // 2. Standard Fuzzy Search (limit 20 to be faster)
-        supabase
+          .or(`id.eq.${query},legacy_id.eq.${query}`)
+          .limit(1); // Optimisation: We only need one if it's exact
+
+      if (exactError) console.error('Error finding exact book:', exactError);
+      
+      // If exact match found, return immediately without running expensive fuzzy search
+      if (exactData && exactData.length > 0) {
+          return exactData.map(mapLibroToBook);
+      }
+      
+      // If mode is 'code' (default/simple), we ONLY search legacy_id (and ISBN slightly) for numbers
+      // We do NOT search Title/Author
+      if (searchMode === 'code') {
+          const { data: codeData, error: codeError } = await supabase
+            .from('libros')
+            .select('*, editoriales(id, nombre), categorias(id, nombre)')
+            .eq('activo', true)
+            .or(`legacy_id.like.${query}%,isbn.like.${query}%`) // Using LIKE for prefix match
+            .order('legacy_id', { ascending: true })
+            .limit(10);
+            
+          if (codeError) console.error('Error finding code books:', codeError);
+          return (codeData || []).map(mapLibroToBook);
+      }
+
+      // 2. Standard Fuzzy Search (Only if exact match failed AND mode is 'all')
+      const { data: fuzzyData, error: fuzzyError } = await supabase
           .from('libros')
           .select('*, editoriales(id, nombre), categorias(id, nombre)')
           .eq('activo', true)
           .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
           .order('titulo', { ascending: true })
-          .limit(20)
-      ]);
+          .limit(20);
 
-      const exactData = exactMatch.data || [];
-      const fuzzyData = fuzzyMatch.data || [];
+      if (fuzzyError) console.error('Error finding fuzzy books:', fuzzyError);
 
-      // Combine: Exact matches first, then fuzzy matches (filtering duplicates)
-      const exactIds = new Set(exactData.map(b => b.id));
-      const filteredFuzzy = fuzzyData.filter(b => !exactIds.has(b.id));
-
-      const combinedResults = [...exactData, ...filteredFuzzy];
-      return combinedResults.map(mapLibroToBook);
+      return (fuzzyData || []).map(mapLibroToBook);
 
     } else {
-      // Non-numeric search: Standard fuzzy search
+      // Non-numeric search
+      if (searchMode === 'code') {
+          // If mode is 'code' but query is not purely numeric, we still search legacy_id (alphanumeric legacy codes?)
+          // Or we assume user wants to find a code.
+          const { data: codeData, error: codeError } = await supabase
+            .from('libros')
+            .select('*, editoriales(id, nombre), categorias(id, nombre)')
+            .eq('activo', true)
+            .ilike('legacy_id', `${query}%`) // Using ILIKE for flexibility on non-numeric codes
+            .limit(10);
+            
+          if (codeError) console.error('Error finding code books (text):', codeError);
+          return (codeData || []).map(mapLibroToBook);
+      }
+
+      // Standard fuzzy search for 'all' mode
       const { data, error } = await supabase
         .from('libros')
         .select('*')
