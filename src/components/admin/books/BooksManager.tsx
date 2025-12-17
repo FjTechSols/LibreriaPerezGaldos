@@ -18,6 +18,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { Pagination } from '../../Pagination';
 import { BookTable } from './BookTable';
 import { BookForm } from './BookForm';
+import { BookSuccessModal } from './BookSuccessModal';
 
 // Import sub-tools if we want to render them as tabs inside Manager (Optional, but planned for future)
 // For now we focus on the Catalog section logic.
@@ -42,6 +43,7 @@ export function BooksManager() {
   // Book Form State
   const [isCreating, setIsCreating] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [createdBook, setCreatedBook] = useState<Book | null>(null); // For Success Modal
 
   // Filters State
   const [localSearchTerm, setLocalSearchTerm] = useState('');
@@ -173,15 +175,32 @@ export function BooksManager() {
           setIsCreating(false);
         }
       } else {
+        // Map Book interface (UI) to LibroSupabase interface (DB)
         const nuevo = await crearLibro({
-          ...bookData,
+          titulo: bookData.title,
+          autor: bookData.author,
           isbn: cleanISBN,
+          precio: bookData.price,
+          precio_original: bookData.originalPrice,
           stock: bookData.stock || 1,
-          activo: true
+          ubicacion: bookData.ubicacion,
+          descripcion: bookData.description,
+          imagen_url: bookData.coverImage,
+          paginas: bookData.pages,
+          anio: bookData.publicationYear,
+          // For now we don't strictly map category string to ID here unless we fetch it. 
+          // Assuming the system might handle it or we leave it null for now until that logic is polished.
+          // Fixing 'titulo' is priority.
+          notas: undefined, 
+          activo: true,
+          destacado: bookData.featured,
+          novedad: bookData.isNew,
+          oferta: bookData.isOnSale
         } as any, contents);
         
         if (nuevo) {
-          alert('Libro creado exitosamente.');
+          // Show Success Modal instead of Alert
+          setCreatedBook(nuevo);
           setRefreshTrigger(prev => prev + 1);
           setIsCreating(false);
         }
@@ -224,6 +243,28 @@ export function BooksManager() {
   };
 
   const totalPages = Math.ceil((filters.search || filters.category !== 'Todos' || filters.stockStatus !== 'all' ? filteredCount : totalBooks) / itemsPerPage);
+
+  const handleStockUpdate = async (book: Book, amount: number) => {
+    const action = amount > 0 ? "Aumentar" : "Reducir";
+    const symbol = amount > 0 ? "+1" : "-1";
+    // Check if confirming "cancelar" or "concelar" -> standard is Cancelar
+    const message = `¿${action} el stock del Libro (${book.title}, ${book.author}, ${book.code}) en ${symbol}? confirmar o cancelar`; 
+    
+    if (!confirm(message)) return;
+
+    try {
+        const updated = await incrementarStockLibro(parseInt(book.id), amount);
+        if (updated) {
+            // Optimistic update or refresh
+            setRefreshTrigger(prev => prev + 1);
+        } else {
+            alert('Error al actualizar el stock.');
+        }
+    } catch (e) {
+        console.error('Error updating stock:', e);
+        alert('Error inesperado.');
+    }
+  };
 
   return (
     <div className="books-manager">
@@ -272,14 +313,13 @@ export function BooksManager() {
         }}>
           {/* Top Row: Key Filters */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'flex-end' }}>
-             <div style={{ flex: '1 1 200px' }}>
+             <div style={{ flex: '0 1 auto' }}>
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Categoría</label>
                 <div className="relative">
                   <select 
                     value={filters.category}
                     onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                    className="form-select w-full h-10 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    style={{ paddingRight: '2rem' }}
+                    className="form-select w-full md:w-48 h-auto py-2.5 text-sm rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="Todos">Todas las categorías</option>
                     {dbCategories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -325,7 +365,7 @@ export function BooksManager() {
                         setLocalSearchTerm('');
                         setAdvancedMode(false);
                     }}
-                    className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-2"
+                    className="text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors px-3 py-2"
                  >
                     Limpiar Filtros
                  </button>
@@ -493,7 +533,8 @@ export function BooksManager() {
          <BookTable 
            books={books} 
            onEdit={setEditingBook} 
-           onDelete={handleDelete} 
+           onDelete={handleDelete}
+           onStockUpdate={handleStockUpdate}
          />
        )}
 
@@ -525,6 +566,14 @@ export function BooksManager() {
            initialData={editingBook}
            isCreating={false}
            ubicaciones={ubicaciones}
+         />
+       )}
+
+       {createdBook && (
+         <BookSuccessModal
+           isOpen={!!createdBook}
+           onClose={() => setCreatedBook(null)}
+           book={createdBook}
          />
        )}
     </div>

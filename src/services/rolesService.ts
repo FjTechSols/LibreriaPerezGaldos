@@ -87,6 +87,13 @@ export const obtenerRolesDeUsuario = async (userId: string): Promise<Rol[]> => {
   return data || [];
 };
 
+
+interface RolPrincipalResponse {
+  rol_nombre: string;
+  rol_display_name: string;
+  nivel_jerarquia: number;
+}
+
 export const obtenerRolPrincipal = async (userId: string): Promise<Rol | null> => {
   const { data, error } = await supabase
     .rpc('obtener_rol_principal', { usuario_id: userId })
@@ -99,10 +106,13 @@ export const obtenerRolPrincipal = async (userId: string): Promise<Rol | null> =
 
   if (!data) return null;
 
+  // Supabase returns 'any' or generic, but we cast to trusted interface
+  const rolData = data as RolPrincipalResponse;
+
   return {
-    nombre: data.rol_nombre,
-    display_name: data.rol_display_name,
-    nivel_jerarquia: data.nivel_jerarquia,
+    nombre: rolData.rol_nombre,
+    display_name: rolData.rol_display_name,
+    nivel_jerarquia: rolData.nivel_jerarquia,
   } as Rol;
 };
 
@@ -133,7 +143,7 @@ export const tienePermiso = async (userId: string, permisoCodigo: string): Promi
 export const asignarRolAUsuario = async (
   userId: string,
   rolId: number,
-  asignadoPor: string,
+  asignadoPor: string | null,
   notas?: string
 ): Promise<void> => {
   const { error } = await supabase
@@ -192,7 +202,7 @@ export const crearUsuarioAdministrativo = async (
   email: string,
   password: string,
   rolId: number,
-  asignadoPor: string,
+  asignadoPor: string | null,
   notas?: string
 ): Promise<string> => {
   const { data: newUser, error: signUpError } = await supabase.auth.signUp({
@@ -211,18 +221,23 @@ export const crearUsuarioAdministrativo = async (
 export const actualizarRolesUsuario = async (
   userId: string,
   rolesIds: number[],
-  asignadoPor: string
+  asignadoPor: string | null
 ): Promise<void> => {
-  const { error: deleteError } = await supabase
-    .from('usuarios_roles')
-    .update({ activo: false })
-    .eq('user_id', userId);
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (deleteError) throw deleteError;
-
-  for (const rolId of rolesIds) {
-    await asignarRolAUsuario(userId, rolId, asignadoPor);
+  if (!session) {
+    throw new Error('No authenticated session');
   }
+
+  const { error } = await supabase.functions.invoke('admin-update-roles', {
+    body: {
+      userId,
+      rolesIds,
+      asignadoPor,
+    },
+  });
+
+  if (error) throw error;
 };
 
 export const eliminarUsuario = async (userId: string): Promise<void> => {

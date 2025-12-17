@@ -25,7 +25,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     isbn: '',
     price: 0,
     originalPrice: undefined,
-    stock: 0,
+    stock: 1,
     ubicacion: '',
     category: '', // Changed to empty string initially
     description: '',
@@ -99,7 +99,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         isbn: '',
         price: 0,
         originalPrice: undefined,
-        stock: 0,
+        stock: 1,
         ubicacion: '',
         // category: categories[1], // Don't reset this if we want to keep the fetched default
         description: '',
@@ -393,6 +393,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                       }}
                       className="form-input no-spinner"
                       style={{ width: '100%' }}
+                      placeholder="10.00"
                     />
                 </div>
             </div>
@@ -410,7 +411,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                       {ubicaciones.map((u) => (
                         <option key={u.id} value={u.nombre}>{u.nombre}</option>
                       ))}
-                      <option value="almacen">Almacén General</option>
+
                     </select>
                 </div>
                 <div>

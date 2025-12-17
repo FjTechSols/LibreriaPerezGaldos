@@ -1,0 +1,37 @@
+[
+  {
+    "location": "Almacén",
+    "lastCode": "02292848",
+    "nextCode": "02292849"
+  },
+  {
+    "location": "Galeon",
+    "lastCode": "N0003546G",
+    "nextCode": "0003547G"
+  },
+  {
+    "location": "Hortaleza",
+    "lastCode": "V0001208H",
+    "nextCode": "0001209H"
+  },
+  {
+    "location": "Reina",
+    "lastCode": "V0067101R",
+    "nextCode": "0067102R"
+  },
+  {
+    "location": "Abebooks",
+    "lastCode": "Ninguno",
+    "nextCode": "1Ab"
+  },
+  {
+    "location": "General",
+    "lastCode": "Ninguno",
+    "nextCode": "1Gen"
+  },
+  {
+    "location": "UniLiber",
+    "lastCode": "Ninguno",
+    "nextCode": "1UL"
+  }
+]

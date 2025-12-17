@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase';
 import { Book } from '../types';
 import { generarCodigoLibro, actualizarCodigoPorUbicacion } from '../utils/codigoHelper';
 
+
+
 export interface LibroSupabase {
   id: number;
   legacy_id?: string;
@@ -110,46 +112,31 @@ export interface LibroFilters {
 
      // Apply Filters
      if (filters) {
-       if (filters.search) {
-         const searchTerm = filters.search.trim();
-         const isNumeric = /^\d+$/.test(searchTerm);
-         const isFullSearch = filters.searchMode === 'full';
-         if (isFullSearch) {
-            // Full Search: ID, LegacyID, Title, Author, ISBN, Editorial
-            let orClause = `legacy_id.ilike.%${searchTerm}%,titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,isbn.ilike.%${searchTerm}%`;
-
-            if (isNumeric) {
-                // If numeric, check ID too
-                orClause += `,id.eq.${searchTerm}`;
-            }
-
-            // Search by Editorial (Two-step process: Get IDs -> Filter Books)
-            // Note: We do this only if not numeric, or if numeric has editorial name results (unlikely but possible)
-            // To be efficient, we do a parallel non-blocking fetch or just await it. 
-            // Given the async nature, we'll await.
-            const { data: edData } = await supabase
-                .from('editoriales')
-                .select('id')
-                .ilike('nombre', `%${searchTerm}%`);
-            
-            if (edData && edData.length > 0) {
-                const edIds = edData.map(e => e.id).join(',');
-                orClause += `,editorial_id.in.(${edIds})`;
-            }
-
-            query = query.or(orClause);
-
-         } else {
-             // Default Search: ID (Code) and Legacy ID ONLY - Optimized
-             if (isNumeric) {
-                 // Use prefix match for legacy_id (faster than cleaning wildcard) or exact if typically full code
-                 // Converting leading wildcard to prefix-only or exact match to prevent timeout
-                 query = query.or(`id.eq.${searchTerm},legacy_id.ilike.${searchTerm}%`);
+      if (filters.search) {
+        const searchTerm = filters.search.trim();
+        const isNumeric = /^\d+$/.test(searchTerm);
+        
+        // Optimized Search Logic
+        if (isNumeric) {
+             const numericId = parseInt(searchTerm, 10);
+             // Robust check: Only query ID if it looks like a valid Postgres integer range and is parsed
+             const validId = !isNaN(numericId) && numericId < 2147483647; 
+             
+             if (validId) {
+                // If it's a valid number, we check BOTH ID and LegacyID (as string)
+                // We use Filter based composition instead of OR string to ensure type safety if possible, 
+                // but .or() string is the standard way. 
+                // We purposefully strip leading zeros for the ID Check: id.eq.4146
+                // AND keep strict string for LegacyID: legacy_id.ilike.0004146%
+                query = query.or(`id.eq.${numericId},legacy_id.ilike.${searchTerm}%`);
              } else {
-                 query = query.ilike('legacy_id', `${searchTerm}%`);
+                // If too large for ID or not valid int, only search legacy_id string
+                query = query.ilike('legacy_id', `${searchTerm}%`);
              }
-         }
-       }
+        } else {
+             query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.${searchTerm}%`);
+        }
+      }
 
         if (filters.category && filters.category !== 'Todos') {
              // Resolve Category Name to ID
@@ -381,7 +368,7 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
       .single();
 
     if (insertError || !libroTemp) {
-      console.error('Error al crear libro:', insertError);
+      console.error('Error al crear libro (Detalles):', JSON.stringify(insertError, null, 2));
       return null;
     }
 
@@ -404,10 +391,76 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
     }
 
     // Generar el código basado en el ID y la ubicación
+    // Helper to get suffix based on location
+    const obtenerSufijo = (ubicacion: string): string => {
+      // Normalización agresiva para coincidir con cualquier input
+      const normalizada = ubicacion.toLowerCase()
+        .trim()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // "almacén" -> "almacen"
+      
+      switch (normalizada) {
+        case 'almacen': return '';
+        case 'galeon': return 'G';
+        case 'hortaleza': return 'H';
+        case 'reina': return 'R';
+        case 'abebooks': return 'Ab';
+        case 'general': return 'Gen'; // Assumption: General -> Gen to differentiate
+        case 'uniliber': return 'UL'; // UniLiber suffix
+        case 'almacen general': return ''; // Assumption: Same as Almacen? Or 'AG'? 
+                                           // User said "Almacen General" in dropdown. 
+                                           // Usually "Almacen" is the main series.
+                                           // Let's assume Almacen General == Almacen (No suffix)
+        default: return ''; 
+      }
+    };
+
+    // New Universal Generator
+    const obtenerSiguienteCodigo = async (ubicacion: string): Promise<string> => {
+      const sufijo = obtenerSufijo(ubicacion);
+      
+      let query = supabase.from('libros').select('legacy_id');
+
+      if (sufijo) {
+        query = query.like('legacy_id', `%${sufijo}`);
+      } else {
+         query = query.like('legacy_id', '02%').lt('legacy_id', '02300000');
+      }
+
+      // Order and limit MUST be applied after filters to be effective on the whole dataset
+      query = query.order('legacy_id', { ascending: false }).limit(5);
+
+      const { data, error } = await query;
+      
+      if (error || !data || data.length === 0) {
+          console.warn(`No legacy codes found for ${ubicacion} (Suffix: ${sufijo}). using fallback 1.`);
+          return sufijo ? `1${sufijo}` : '02290000';
+      }
+
+      const lastCode = data[0].legacy_id;
+      const numbStr = lastCode.replace(/\D/g, ''); 
+      const num = parseInt(numbStr, 10);
+      
+      if (isNaN(num)) return sufijo ? `1${sufijo}` : '000001';
+
+      const nextNum = num + 1;
+      return `${nextNum.toString().padStart(numbStr.length, '0')}${sufijo}`;
+    };
+
+    // Generar el código basado en UNIVERSAL LEGACY LOGIC
     const ubicacion = libro.ubicacion || 'almacen';
-    const codigoGenerado = libro.legacy_id
-      ? actualizarCodigoPorUbicacion(libro.legacy_id, ubicacion)
-      : generarCodigoLibro(libroTemp.id, ubicacion);
+    let codigoGenerado: string;
+
+    if (libro.legacy_id) {
+       codigoGenerado = actualizarCodigoPorUbicacion(libro.legacy_id, ubicacion);
+    } else {
+       try {
+           const nextCode = await obtenerSiguienteCodigo(ubicacion);
+           codigoGenerado = nextCode;
+       } catch (e) {
+           console.error('Error generating universal code, fallback to ID', e);
+           codigoGenerado = generarCodigoLibro(libroTemp.id, ubicacion);
+       }
+    }
 
     // Actualizar el libro con el código generado
     const { data, error: updateError } = await supabase
@@ -915,4 +968,37 @@ export const actualizarISBN = async (id: number, isbn: string): Promise<{ succes
     console.error('Error inesperado al actualizar ISBN:', error);
     return { success: false, error: 'Error inesperado al actualizar ISBN' };
   }
+};
+
+const enrichBooks = async (books: any[]): Promise<Book[]> => {
+    if (!books || books.length === 0) return [];
+    
+    try {
+        // Extract IDs
+        const editorialIds = Array.from(new Set(books.map(b => b.editorial_id).filter((id: any) => id)));
+        const categoryIds = Array.from(new Set(books.map(b => b.categoria_id).filter((id: any) => id)));
+        
+        // Fetch related
+        const promises = [];
+        if (editorialIds.length > 0) promises.push(supabase.from('editoriales').select('id, nombre').in('id', editorialIds));
+        else promises.push(Promise.resolve({data: []}));
+        
+        if (categoryIds.length > 0) promises.push(supabase.from('categorias').select('id, nombre').in('id', categoryIds));
+        else promises.push(Promise.resolve({data: []}));
+
+        const [edResult, catResult] = await Promise.all(promises);
+        
+        const edMap = new Map(edResult.data?.map((e: any) => [e.id, e]) || []);
+        const catMap = new Map(catResult.data?.map((c: any) => [c.id, c]) || []);
+
+        return books.map(book => {
+            const enriched = { ...book };
+            if (enriched.editorial_id) enriched.editoriales = edMap.get(enriched.editorial_id);
+            if (enriched.categoria_id) enriched.categorias = catMap.get(enriched.categoria_id);
+            return mapLibroToBook(enriched);
+        });
+    } catch (err) {
+        console.error('Error in enrichBooks:', err);
+        return books.map(mapLibroToBook);
+    }
 };

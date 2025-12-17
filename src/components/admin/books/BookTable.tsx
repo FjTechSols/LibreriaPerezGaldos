@@ -1,13 +1,14 @@
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Plus, Minus } from 'lucide-react';
 import { Book } from '../../../types';
 
 interface BookTableProps {
   books: Book[];
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
+  onStockUpdate: (book: Book, amount: number) => void;
 }
 
-export function BookTable({ books, onEdit, onDelete }: BookTableProps) {
+export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableProps) {
   return (
     <div className="data-table books-table">
       <div className="table-header">
@@ -25,9 +26,9 @@ export function BookTable({ books, onEdit, onDelete }: BookTableProps) {
 
       {books.map(book => (
         <div key={book.id} className="table-row">
-          <span className="book-code-cell">{book.code}</span>
+          <span className="book-code-cell">{book.code || 'N/A'}</span>
           <div className="book-cover">
-            <img src={book.coverImage} alt={book.title} />
+            <img src={book.coverImage} alt={book.title || 'Sin Título'} />
             {(book.featured || book.isNew || book.isOnSale) && (
               <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.7rem' }}>
                 {book.featured && <span title="Destacado">📌</span>}
@@ -37,7 +38,7 @@ export function BookTable({ books, onEdit, onDelete }: BookTableProps) {
             )}
           </div>
           <span className="book-title-cell">
-            {book.title}
+            {book.title || 'N/A'}
             {(book.featured || book.isNew || book.isOnSale) && (
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.75rem' }}>
                 {book.featured && <span style={{ color: '#f59e0b' }} title="Destacado">📌</span>}
@@ -46,10 +47,10 @@ export function BookTable({ books, onEdit, onDelete }: BookTableProps) {
               </div>
             )}
           </span>
-          <span className="book-author-cell">{book.author}</span>
-          <span className="book-publisher-cell">{book.publisher}</span>
-          <span className="book-category-cell">{book.category}</span>
-          <span className="book-pages-cell">{book.pages}</span>
+          <span className="book-author-cell">{book.author || 'N/A'}</span>
+          <span className="book-publisher-cell">{book.publisher || 'N/A'}</span>
+          <span className="book-category-cell">{book.category || 'N/A'}</span>
+          <span className="book-pages-cell">{book.pages || 'N/A'}</span>
           <span className="book-price-cell">
             ${book.price}
             {book.isOnSale && book.originalPrice && (
@@ -62,6 +63,23 @@ export function BookTable({ books, onEdit, onDelete }: BookTableProps) {
             {book.stock}
           </span>
           <div className="book-actions">
+           <div className="stock-actions">
+              <button
+                  onClick={() => onStockUpdate(book, 1)}
+                  className="stock-btn increase"
+                  title="Aumentar Stock"
+              >
+                  <Plus size={16} />
+              </button>
+              <button
+                  onClick={() => onStockUpdate(book, -1)}
+                  className="stock-btn decrease"
+                  title="Reducir Stock"
+                  disabled={book.stock <= 0}
+              >
+                  <Minus size={16} />
+              </button>
+           </div>
             <button 
               onClick={() => onEdit(book)}
               className="edit-btn"

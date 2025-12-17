@@ -431,7 +431,7 @@
 /* Books Table */
 .books-table .table-header,
 .books-table .table-row {
-  grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 120px;
+  grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 200px; /* Increased last col from 120px to 200px */
   gap: var(--spacing-4);
 }
 
@@ -2010,4 +2010,84 @@ html.dark-mode .create-book-modal,
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+/* Stock Actions Buttons */
+.stock-actions {
+  display: flex;
+  gap: 0.5rem; /* Increased from 0.25rem */
+  margin-right: 1rem; /* Increased from 0.5rem */
+  border-right: 1px solid var(--border-color);
+  padding-right: 1rem; /* Increased from 0.5rem */
+}
+
+.stock-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-base);
+}
+
+/* Increase (+) Button */
+.stock-btn.increase {
+  background: #dcfce7; /* Green-100 */
+  color: #16a34a;      /* Green-600 */
+}
+
+.stock-btn.increase:hover {
+  background: #16a34a;
+  color: white;
+}
+
+/* Decrease (-) Button */
+.stock-btn.decrease {
+  background: #fee2e2; /* Red-100 */
+  color: #dc2626;      /* Red-600 */
+}
+
+.stock-btn.decrease:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.stock-btn.decrease:disabled {
+  background: #f3f4f6; /* Gray-100 */
+  color: #9ca3af;     /* Gray-400 */
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Dark Mode Overrides for Stock Buttons */
+.dark-mode .stock-actions {
+  border-right-color: #334155;
+}
+
+.dark-mode .stock-btn.increase {
+  background: rgba(22, 163, 74, 0.2); /* Green-600 with opacity */
+  color: #4ade80; /* Green-400 */
+}
+
+.dark-mode .stock-btn.increase:hover {
+  background: #16a34a; /* Green-600 */
+  color: white;
+}
+
+.dark-mode .stock-btn.decrease {
+  background: rgba(220, 38, 38, 0.2); /* Red-600 with opacity */
+  color: #f87171; /* Red-400 */
+}
+
+.dark-mode .stock-btn.decrease:hover {
+  background: #dc2626; /* Red-600 */
+  color: white;
+}
+
+.dark-mode .stock-btn.decrease:disabled {
+  background: #1e293b; /* Slate-800 */
+  color: #475569;      /* Slate-600 */
 }

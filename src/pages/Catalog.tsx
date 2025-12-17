@@ -45,6 +45,8 @@ export function Catalog() {
 
   // Main Fetch Effect
   useEffect(() => {
+    const controller = new AbortController();
+    
     const fetchBooks = async () => {
       setLoading(true);
       try {
@@ -58,24 +60,36 @@ export function Catalog() {
             sortBy: filters.sortBy,
             sortOrder: filters.sortOrder,
             featured: filters.featured,
-            isOnSale: filters.onSale, // Mapped correctly to service interface
+            isOnSale: filters.onSale, 
             isNew: filters.isNew
         };
 
+        // Pass signal to service if supported, otherwise just ignore result if aborted
+        // obtenerLibros currently doesn't support signal, so we rely on ignoring setting state.
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, serviceFilters);
         
-        setBooks(data);
-        setTotalFilteredBooks(count);
+        if (!controller.signal.aborted) {
+            setBooks(data);
+            setTotalFilteredBooks(count);
+        }
         
       } catch (error) {
-        console.error('Error loading books:', error);
+        if (!controller.signal.aborted) {
+            console.error('Error loading books:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+            setLoading(false);
+        }
       }
     };
 
     fetchBooks();
-  }, [currentPage, itemsPerPage, filters, searchParams]); // Dependencies
+
+    return () => {
+        controller.abort();
+    };
+  }, [currentPage, itemsPerPage, filters, searchParams]);
 
   const handleFiltersChange = (newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));

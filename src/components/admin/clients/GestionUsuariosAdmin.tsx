@@ -72,7 +72,7 @@ export function GestionUsuariosAdmin() {
         formData.email,
         formData.password,
         formData.rolId,
-        user?.id || '',
+        user?.id || null,
         formData.notas
       );
 
@@ -91,6 +91,25 @@ export function GestionUsuariosAdmin() {
     }
   };
 
+  const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
+
+  // Update selectedRoles when modal opens
+  useEffect(() => {
+    if (showEditModal && selectedUser) {
+      setSelectedRoles(selectedUser.roles.map(r => r.id));
+    }
+  }, [showEditModal, selectedUser]);
+
+  const handleCheckboxChange = (rolId: number) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(rolId)) {
+        return prev.filter(id => id !== rolId);
+      } else {
+        return [...prev, rolId];
+      }
+    });
+  };
+
   const handleActualizarRoles = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
@@ -99,16 +118,12 @@ export function GestionUsuariosAdmin() {
     setSuccess('');
 
     try {
-      const rolesSeleccionados = Array.from(
-        document.querySelectorAll<HTMLInputElement>('input[name="roles"]:checked')
-      ).map(input => parseInt(input.value));
-
-      if (rolesSeleccionados.length === 0) {
+      if (selectedRoles.length === 0) {
         setError('Debes seleccionar al menos un rol');
         return;
       }
 
-      await actualizarRolesUsuario(selectedUser.id, rolesSeleccionados, user?.id || '');
+      await actualizarRolesUsuario(selectedUser.id, selectedRoles, null);
       setSuccess('Roles actualizados exitosamente');
       setShowEditModal(false);
       setSelectedUser(null);
@@ -444,7 +459,8 @@ export function GestionUsuariosAdmin() {
                         type="checkbox"
                         name="roles"
                         value={rol.id}
-                        defaultChecked={selectedUser.roles.some(r => r.id === rol.id)}
+                        checked={selectedRoles.includes(rol.id)}
+                        onChange={() => handleCheckboxChange(rol.id)}
                       />
                       <div className="checkbox-content">
                         <strong>{rol.display_name}</strong>

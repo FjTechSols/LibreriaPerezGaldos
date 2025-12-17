@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Invoice, InvoiceFormData, InvoiceContextType, InvoiceItem } from '../types';
 import { supabase } from '../lib/supabase';
 
+import { useAuth } from './AuthContext';
+
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
 
 export const useInvoice = () => {
@@ -17,11 +19,17 @@ interface InvoiceProviderProps {
 }
 
 export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) => {
+  const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check local storage only if no user to show something, 
+    // BUT for admin data relying on RLS, better to wait for user.
+    // If we want to show cached data while loading, we can keep the LS check but triggering fetch is key.
+    
+    // Initial load from LS if available (optional for offline support but risk of stale data)
     const savedInvoices = localStorage.getItem('invoices');
     if (savedInvoices) {
       try {
@@ -32,28 +40,34 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         localStorage.removeItem('invoices');
       }
     }
-    fetchInvoices();
 
-    // Realtime subscription for invoices
-    const channel = supabase
-      .channel('invoices-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'facturas'
-        },
-        () => {
-          fetchInvoices();
-        }
-      )
-      .subscribe();
+    if (user) {
+        fetchInvoices();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+        // Realtime subscription for invoices - Only when user is logged in
+        const channel = supabase
+        .channel('invoices-db-changes')
+        .on(
+            'postgres_changes',
+            {
+            event: '*',
+            schema: 'public',
+            table: 'invoices' 
+            },
+            () => {
+            fetchInvoices();
+            }
+        )
+        .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    } else {
+        // If logged out, maybe clear invoices?
+        // setInvoices([]); 
+    }
+  }, [user]);
 
   useEffect(() => {
     if (invoices.length > 0) {

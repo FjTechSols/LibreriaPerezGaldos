@@ -374,6 +374,13 @@ export function AdminDashboard() {
             Volver a la Web
           </button>
           <button 
+             onClick={() => navigate('/admin/ajustes')}
+             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Sparkles size={18} /> {/* Reuse Sparkles or suggest Settings Icon if imported */}
+            Ajustes de Administrador
+          </button>
+          <button 
             onClick={logout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           >

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { actualizarEstadoPedido } from '../../../services/pedidoService';
-import { crearFactura } from '../../../services/facturaService';
+
+import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
 
 interface PedidoDetalleProps {
@@ -40,6 +41,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
     }
   };
 
+  const { createInvoice } = useInvoice();
+
   const handleGenerarFactura = async () => {
     if (!pedido.detalles || pedido.detalles.length === 0) {
       alert('El pedido no tiene detalles para facturar');
@@ -49,13 +52,42 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
     setGenerandoFactura(true);
 
     try {
-      const factura = await crearFactura({
-        pedido_id: pedido.id,
-        tipo: 'normal'
-      });
+      // Map Pedido details to InvoiceItems
+      const items = pedido.detalles.map(d => ({
+          book_id: d.libro_id.toString(),
+          book_title: d.libro?.titulo || d.nombre_externo || 'Producto',
+          quantity: d.cantidad,
+          unit_price: d.precio_unitario,
+          line_total: d.cantidad * d.precio_unitario
+      }));
 
-      if (factura) {
-        alert(`Factura ${factura.numero_factura} generada correctamente`);
+      // Map Pedido to InvoiceFormData
+      // Use client info or user info or defaults
+      const customerName = pedido.cliente 
+          ? `${pedido.cliente.nombre} ${pedido.cliente.apellidos}`.trim() 
+          : pedido.usuario?.username || 'Cliente General';
+          
+      const customerAddress = pedido.direccion_envio || pedido.cliente?.direccion || '';
+      const customerNif = pedido.cliente?.nif || '';
+      
+
+      
+      const formData = {
+          customer_name: customerName,
+          customer_address: customerAddress,
+          customer_nif: customerNif,
+          tax_rate: 21, // Default to 21% or fetch from somewhere?
+          payment_method: pedido.metodo_pago,
+          order_id: pedido.id.toString(),
+          items: items,
+          shipping_cost: 0, // Should be passed if available in Pedido
+          language: 'es' as 'es' | 'en'
+      };
+
+      const invoice = await createInvoice(formData);
+
+      if (invoice) {
+        alert(`Factura ${invoice.invoice_number} generada correctamente`);
         onRefresh();
       } else {
         alert('Error al generar la factura');
