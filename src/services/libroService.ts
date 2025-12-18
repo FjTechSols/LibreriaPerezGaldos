@@ -964,8 +964,71 @@ export const buscarLibroPorISBN = async (isbn: string): Promise<Book | null> => 
 };
 
 export const incrementarStockLibro = async (id: number, cantidad: number): Promise<boolean> => {
-  const { error } = await supabase.rpc('increment_stock', { book_id: id, quantity: cantidad });
-  return !error;
+  try {
+    // Fallback manual update since RPC might be missing
+    const { data: book, error: fetchError } = await supabase
+      .from('libros')
+      .select('stock')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !book) {
+      console.error('Error fetching book for stock update:', fetchError);
+      return false;
+    }
+
+    const currentStock = book.stock || 0;
+    const newStock = Math.max(0, currentStock + cantidad); // Prevent negative stock
+
+    const { error: updateError } = await supabase
+      .from('libros')
+      .update({ stock: newStock })
+      .eq('id', id);
+
+    if (updateError) {
+      console.error('Error updating stock manually:', updateError);
+      return false;
+    }
+
+    // Success - optionally return the new stock? Function signature says return boolean.
+    // The calling code might interpret result as Boolean or Object?
+    // In `handleCreateSubmit`: `const actualizado = await ...`
+    // `if (actualizado) { alert(... actualizado.stock) }`
+    // Wait, the original usage in `handleCreateSubmit` expects an OBJECT with `.stock`?
+    // Let's check `BooksManager.tsx` lines 173-175:
+    // `const actualizado = await incrementarStockLibro(...)`
+    // `if (actualizado) { alert(... actualizado.stock ...)`
+    // BUT the implementation I replaced (line 966) returned `Promise<boolean>`: `return !error;`
+    // THIS IS A CONTRADICTION.
+    // If usage expects object, the previous code was ALREADY wrong or signature was wrong?
+    // The previous code: `return !error;` (boolean).
+    // `handleCreateSubmit` code: `if (actualizado) { ... actualizado.stock }`.
+    // If boolean true is returned, `actualizado.stock` is undefined.
+    // So `alert` would say "undefined".
+    // But `handleStockUpdate` (the one failing now) checks `if (updated)`. Boolean is fine there.
+    
+    // I should probably fix the return type to return `{ stock: number } | null` or compatible?
+    // Or just fix `BooksManager.tsx` usage?
+    // The user issue is "gives error".
+    // If I change return to Boolean, I must ensure usages handle it.
+    // `handleStockUpdate` usage: `const updated = await ...; if (updated) ...`. Boolean is fine.
+    // `handleCreateSubmit` usage: accesses `.stock`. This is broken for boolean.
+    
+    // I will return the updated book object (or partial) if possible, or just the new stock?
+    // To match `handleCreateSubmit` expectation, I should return an object?
+    // But `incrementarStockLibro` signature says `Promise<boolean>`.
+    // I should change the signature to `Promise<{ stock: number } | null>` or `Promise<boolean | ...>`.
+    
+    // For now, I'll stick to Boolean to match the signature in the file I saw (line 966).
+    // AND I will fix `handleCreateSubmit` in `BooksManager.tsx` to not access `.stock` on a boolean.
+    // The user's specific issue is the Buttons (+/-), handled by `handleStockUpdate`.
+    // That function uses it as boolean.
+    
+    return true;
+  } catch (error) {
+    console.error('Exception updating stock:', error);
+    return false;
+  }
 };
 
 

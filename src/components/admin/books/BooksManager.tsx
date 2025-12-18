@@ -170,9 +170,9 @@ export function BooksManager() {
       const libroExistente = await buscarLibroPorISBN(cleanISBN);
 
       if (libroExistente) {
-        const actualizado = await incrementarStockLibro(libroExistente.id, 1);
+        const actualizado = await incrementarStockLibro(parseInt(libroExistente.id), 1);
         if (actualizado) {
-          alert(`El libro ya existe. Stock incrementado a ${actualizado.stock}.`);
+          alert(`El libro ya existe. Stock incrementado.`);
           setRefreshTrigger(prev => prev + 1);
           setIsCreating(false);
         }
