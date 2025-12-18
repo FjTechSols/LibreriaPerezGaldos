@@ -17,7 +17,14 @@ export function Catalog() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(settings.system.itemsPerPageCatalog);
+  const [itemsPerPage, setItemsPerPage] = useState(settings?.system?.itemsPerPageCatalog || 12);
+  
+  // Update itemsPerPage if settings load later
+  useEffect(() => {
+    if (settings?.system?.itemsPerPageCatalog) {
+      setItemsPerPage(settings.system.itemsPerPageCatalog);
+    }
+  }, [settings]);
   
   // Counts
   const [totalFilteredBooks, setTotalFilteredBooks] = useState(0);
@@ -77,8 +84,14 @@ export function Catalog() {
             const searchTerm = searchParams.get('search');
             const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale;
             
-            if (isTrulyDefault && totalDatabaseBooks > 0) {
-                 setTotalFilteredBooks(totalDatabaseBooks);
+            if (isTrulyDefault) {
+                // Only overwrite if totalDatabaseBooks is loaded (>0)
+                // If it's 0 (loading), we prefer to keep the current value or wait for the other effect to update it
+                if (totalDatabaseBooks > 0) {
+                     setTotalFilteredBooks(totalDatabaseBooks);
+                } 
+                // If totalDatabaseBooks is 0, we do NOTHING. We don't set it to count (0).
+                // This prevents the "0 found" flash on initial load.
             } else {
                  setTotalFilteredBooks(count);
             }
@@ -95,12 +108,14 @@ export function Catalog() {
       }
     };
 
+
+
     fetchBooks();
 
     return () => {
         controller.abort();
     };
-  }, [currentPage, itemsPerPage, filters, searchParams]);
+  }, [currentPage, itemsPerPage, filters, searchParams, totalDatabaseBooks]);
 
   // Sync total filtered with total database when default view is active and DB count updates
   // This handles the case where books load faster than the total count, or vice versa.

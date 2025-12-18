@@ -508,3 +508,194 @@
 .dark-mode .search-icon {
     color: #94a3b8;
 }
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  .metadata-container {
+    padding: 1rem;
+    border-radius: 0; /* Full width feel on small screens */
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .metadata-header {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Stack Header Actions */
+  .metadata-actions-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-wrapper {
+    max-width: 100%;
+  }
+
+  .metadata-actions-header > div:last-child {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  /* Target the specific container for Normalize/New buttons if it changes */
+  .metadata-actions-header > div[style*="flex"] {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 0.75rem !important;
+  }
+
+  .metadata-actions-header button {
+    width: 100%;
+    justify-content: center;
+    height: 44px; /* Better touch target */
+  }
+
+  /* Make Tabs Scrollable */
+  .metadata-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    /* Hide scrollbar */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .metadata-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Transform Table to Cards */
+  .metadata-table thead {
+    display: none;
+  }
+
+  .metadata-table tbody, 
+  .metadata-table tr, 
+  .metadata-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .metadata-table tr {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .metadata-table td {
+    padding: 0.5rem 0;
+    border-bottom: none;
+    text-align: left;
+  }
+
+  /* Specific Field Styling - Assuming Order: Name, Desc/Address/Phone, Actions */
+  
+  /* Row 1: Name (Bold, Title-like) */
+  .metadata-table td:first-child {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-bottom: 0.25rem;
+  }
+
+  /* Row 2+: Details (Gray text) */
+  .metadata-table td:not(:first-child):not(:last-child) {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding-top: 0;
+  }
+
+  /* Last Row: Actions (Border top, spaced out) */
+  .metadata-table td:last-child {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between; /* Spread buttons */
+  }
+
+  .action-buttons button {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+  }
+
+  /* Standardizer Mobile Overrides */
+  .columns-wrapper {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+  }
+
+  .standardizer-header {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 1rem !important;
+  }
+
+  .standardizer-header > div {
+      width: 100%;
+  }
+
+  .standardizer-header > div:last-child {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+  }
+
+  .standardizer-header button {
+      width: 100%;
+      justify-content: center;
+  }
+
+  /* Adjust height for stacked columns */
+  .column-list {
+      max-height: 300px !important;
+  }
+}
+
+/* Dark Mode Mobile Overrides */
+.dark-mode .metadata-table tr {
+    background-color: #1e293b !important; /* Slate 800 */
+    border: 1px solid #334155 !important;
+    box-shadow: none;
+}
+
+.dark-mode .metadata-table td:first-child {
+    color: #f1f5f9 !important; /* Force White for Title */
+}
+
+.dark-mode .metadata-table td {
+    color: #cbd5e1 !important; /* Light Gray for details */
+    border-bottom: none; /* Ensure no internal borders persist */
+}
+
+.dark-mode .metadata-table td:last-child {
+    border-top-color: #334155 !important;
+}
+
+.dark-mode .action-buttons button {
+    border-color: #475569;
+    color: #cbd5e1;
+}
+
+.dark-mode .action-buttons button:hover {
+    background-color: #334155;
+    color: white;
+}

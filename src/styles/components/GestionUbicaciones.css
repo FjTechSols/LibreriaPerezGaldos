@@ -299,10 +299,236 @@
   color: #f1f5f9;
 }
 
-.dark-mode .gestion-ubicaciones .header-title p {
-  color: #94a3b8;
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  /* Main Container Reset */
+  .gestion-ubicaciones {
+    padding: 1rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden;
+  }
+
+  /* Header Stack */
+  .gestion-ubicaciones .header-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  .gestion-ubicaciones .header-title {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .gestion-ubicaciones .header-title h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Button Reset */
+  .gestion-ubicaciones .btn-primary {
+    width: 100%;
+    justify-content: center;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  /* Table to Cards Transformation */
+  .gestion-ubicaciones .table-container {
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+  }
+
+  .gestion-ubicaciones .data-table,
+  .gestion-ubicaciones .data-table tbody,
+  .gestion-ubicaciones .data-table tr,
+  .gestion-ubicaciones .data-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .gestion-ubicaciones .data-table thead {
+    display: none;
+  }
+
+  /* Location Card */
+  .gestion-ubicaciones .data-table tr {
+    position: relative;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* If hovering on mobile, don't change bg */
+  .gestion-ubicaciones .data-table tr:hover {
+    background: var(--bg-secondary);
+  }
+  .dark-mode .gestion-ubicaciones .data-table tr:hover {
+    background: var(--bg-secondary);
+  }
+
+  /* Card Rows (Cells) */
+  .gestion-ubicaciones .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    text-align: right;
+    gap: 1rem;
+  }
+
+  /* 1. Name (Title) - Full Width, Centered, Top */
+  .gestion-ubicaciones .data-table .gu-col-name {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dark-mode .gestion-ubicaciones .data-table .gu-col-name {
+    color: #ffffff;
+  }
+
+  /* Hide label for Title */
+  .gestion-ubicaciones .data-table .gu-col-name:before {
+    content: none !important;
+    display: none;
+  }
+
+  /* 2. Description */
+  .gestion-ubicaciones .data-table .gu-col-desc {
+      justify-content: space-between;
+      order: 1;
+  }
+
+  /* 3. Status - Row with Label + Badge */
+  .gestion-ubicaciones .data-table .gu-col-status {
+    justify-content: space-between;
+    width: 100%;
+    order: 2; /* Status after Description */
+    position: relative; /* Ensure stacking context */
+  }
+
+  /* Reset any potential loose badge styles */
+  .gestion-ubicaciones .data-table .gu-col-status .badge {
+      font-size: 0.8rem;
+      position: static; /* Force static positioning if affected by global styles */
+      margin-left: auto; /* Push to right just in case */
+  }
+
+  /* 4. Actions - Reduce spacing */
+  /* 4. Actions - Reduce spacing */
+  /* 4. Actions - Reduce spacing */
+  /* 4. Actions - Reduce spacing */
+  .gestion-ubicaciones .data-table .gu-col-actions {
+    order: 3;
+    border-bottom: none;
+    justify-content: stretch;
+    padding-bottom: 0;
+    margin-top: 0;
+    padding-top: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .gestion-ubicaciones .data-table .gu-col-actions .action-buttons {
+      width: 100%;
+      display: flex;
+      gap: 0.5rem;
+  }
+  
+  .gestion-ubicaciones .data-table .gu-col-actions .action-buttons button {
+      flex: 1;
+      justify-content: center;
+  }
+
+  /* Labels (Pseudo-elements) */
+  .gestion-ubicaciones .data-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Specific Labels */
+  .gestion-ubicaciones .data-table .gu-col-desc:before { content: "Descripción"; }
+  .gestion-ubicaciones .data-table .gu-col-status:before { content: "Estado"; }
+  .gestion-ubicaciones .data-table .gu-col-actions:before { content: ""; display: none; }
+
+  /* Form Card Mobile */
+  .gestion-ubicaciones .form-card {
+    padding: 1rem;
+  }
+
+  .gestion-ubicaciones .form-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+  }
+  
+  .gestion-ubicaciones .form-actions button {
+      width: 100%;
+      justify-content: center;
+  }
+  
+  /* Edit Mode Overrides */
+  .gestion-ubicaciones .data-table tr:has(input) td {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.25rem;
+      text-align: left;
+      order: 0 !important; /* Reset order for inputs */
+  }
+  
+  .gestion-ubicaciones .data-table tr:has(input) td:before {
+      margin-bottom: 0.25rem;
+      content: attr(data-label) !important; /* Restore label in edit mode if needed, but we used manual labels above */
+  }
+  /* Restore Name label for Edit Mode specifically? 
+     Actually, in edit mode, the structure is different. 
+     We might need to check if 'input' exists. 
+     Let's keep it simple. If editing, it looks like a form. */
+
+  .gestion-ubicaciones .action-buttons {
+      width: 100%;
+      justify-content: flex-end;
+      gap: 0.5rem;
+  }
 }
 
-.dark-mode .gestion-ubicaciones .header-title svg {
-  color: #60a5fa;
+/* Desktop Safeguards (min-width: 769px) */
+@media (min-width: 769px) {
+  .gestion-ubicaciones .data-table .gu-col-status {
+    display: table-cell;
+    visibility: visible;
+    opacity: 1;
+  }
+  .gestion-ubicaciones .data-table .gu-col-status .badge {
+    display: inline-block;
+    visibility: visible;
+    opacity: 1;
+    position: static;
+  }
 }

@@ -8,6 +8,7 @@ import InvoiceTable from './InvoiceTable';
 import InvoiceModal from './InvoiceModal';
 import InvoiceDetailModal from './InvoiceDetailModal';
 import GenerarFacturaModal from '../orders/GenerarFacturaDesdeped';
+import DownloadInvoiceModal from './DownloadInvoiceModal';
 
 export function InvoicesManager() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
@@ -20,6 +21,10 @@ export function InvoicesManager() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isGenerarFacturaModalOpen, setIsGenerarFacturaModalOpen] = useState(false); // Choice/Orders
+  
+  // Download Modal State
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [invoiceToDownload, setInvoiceToDownload] = useState<Invoice | null>(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,7 +37,8 @@ export function InvoicesManager() {
   const handleCreateInvoice = async (formData: InvoiceFormData) => {
     const result = await createInvoice(formData);
     if (result) {
-      handleDownloadPDF(result, formData.language);
+      setInvoiceToDownload(result);
+      setIsDownloadModalOpen(true); // Offer download after create
       setIsInvoiceModalOpen(false);
     }
   };
@@ -46,7 +52,7 @@ export function InvoicesManager() {
     setIsDetailModalOpen(true);
   };
 
-  const handleDownloadPDF = async (invoice: Invoice, language: 'es' | 'en' = 'es') => {
+  const generatePDF = async (invoice: Invoice, language: 'es' | 'en' = 'es') => {
       // Logic copied from AdminDashboard.tsx
       try {
         const { jsPDF } = await import('jspdf');
@@ -64,7 +70,7 @@ export function InvoicesManager() {
             email: '' 
         };
 
-        const lang = language || invoice.language || 'es';
+        const lang = language;
         const t = {
           es: { title: 'FACTURA', date: 'Fecha', status: 'Estado', billTo: 'FACTURAR A:', nif: 'NIF', description: 'Descripción', qty: 'Cant.', unitPrice: 'Precio Unit.', total: 'Total', subtotal: 'Subtotal', tax: 'IVA', totalUpper: 'TOTAL' },
           en: { title: 'INVOICE', date: 'Date', status: 'Status', billTo: 'BILL TO:', nif: 'VAT ID', description: 'Description', qty: 'Qty', unitPrice: 'Unit Price', total: 'Total', subtotal: 'Subtotal', tax: 'VAT', totalUpper: 'TOTAL' }
@@ -126,6 +132,19 @@ export function InvoicesManager() {
         console.error('Error generating PDF:', error);
         alert('Error al generar el PDF');
       }
+  };
+
+  const handleDownloadPDF = (invoice: Invoice) => {
+    setInvoiceToDownload(invoice);
+    setIsDownloadModalOpen(true);
+  };
+
+  const handleConfirmDownload = (language: 'es' | 'en') => {
+    if (invoiceToDownload) {
+      generatePDF(invoiceToDownload, language);
+      setIsDownloadModalOpen(false);
+      setInvoiceToDownload(null);
+    }
   };
 
   // Stats
@@ -251,6 +270,13 @@ export function InvoicesManager() {
             setIsGenerarFacturaModalOpen(false);
             setIsInvoiceModalOpen(true);
           }}
+       />
+
+       <DownloadInvoiceModal 
+          isOpen={isDownloadModalOpen}
+          onClose={() => setIsDownloadModalOpen(false)}
+          onDownload={handleConfirmDownload}
+          invoiceNumber={invoiceToDownload?.invoice_number || ''}
        />
     </div>
   );

@@ -41,6 +41,38 @@ export interface LibroSupabase {
   }[];
 }
 
+export const obtenerOcrearEditorial = async (nombre: string): Promise<number | null> => {
+  if (!nombre) return null;
+  const nombreNormalizado = nombre.trim();
+  if (!nombreNormalizado) return null;
+
+  try {
+    // 1. Check if exists
+    const { data, error } = await supabase
+      .from('editoriales')
+      .select('id')
+      .ilike('nombre', nombreNormalizado)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data) return data.id;
+
+    // 2. Create if not exists
+    const { data: newData, error: createError } = await supabase
+      .from('editoriales')
+      .insert({ nombre: nombreNormalizado })
+      .select('id')
+      .single();
+
+    if (createError) throw createError;
+    return newData ? newData.id : null;
+  } catch (error) {
+    console.error('Error handling editorial:', error);
+    return null;
+  }
+};
+
+
 const DEFAULT_BOOK_COVER = 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=400';
 
 export const mapLibroToBook = (libro: LibroSupabase): Book => ({
@@ -106,273 +138,284 @@ const getNextSearchTerm = (term: string): string => {
   return prefix + nextLastChar;
 };
 
- export const obtenerLibros = async (
-   page: number = 1, 
-   itemsPerPage: number = 12, 
-   filters?: LibroFilters
- ): Promise<{ data: Book[]; count: number }> => {
-   try {
-     // Optimization: Use 'estimated' count for default view to prevent timeout, 
-     // OR better: Skip count entirely if we rely on totalDatabaseBooks in UI.
-     // Let's try skipping count for maximum speed if it's the default view.
-     
-     const isDefaultView = !filters || (!filters.search && (!filters.category || filters.category === 'Todos') && !filters.publisher && !filters.minPrice && !filters.featured && !filters.isNew && !filters.isOnSale);
-     
-     // If default view, we DO NOT request a count from DB. We return 0 and let UI override with cached Total.
-     const countStrategy = isDefaultView ? undefined : 'exact';
+export const obtenerLibros = async (
+  page: number = 1, 
+  itemsPerPage: number = 12, 
+  filters?: LibroFilters
+): Promise<{ data: Book[]; count: number }> => {
+  try {
+    // Optimization: Skip count entirely if it's the default view to prevent timeout.
+    // We rely on the cached 'totalDatabaseBooks' in the UI for the total count.
+    
+    // Check if filters are truly default
+    const isDefaultView = !filters || (
+        !filters.search && 
+        (!filters.category || filters.category === 'Todos') && 
+        !filters.publisher && 
+        (!filters.minPrice || filters.minPrice === 0) && // Allow 0 as default
+        (!filters.maxPrice || filters.maxPrice === 1000 || filters.maxPrice >= 1000000) && // Allow 1000 or high number as default
+        (!filters.availability || filters.availability === 'inStock') && // 'inStock' is our default view usually
+        !filters.featured && 
+        !filters.isNew && 
+        !filters.isOnSale && 
+        !filters.location && 
+        !filters.isbn
+    );
+    
+    // If default view, we DO NOT request a count from DB to save massive resources.
+    // The UI handles this by using the separately loaded total count.
+    const countStrategy = isDefaultView ? undefined : 'exact';
 
-     // Note: select() second arg is { count: ... }
-     // If countStrategy is undefined, we shouldn't pass the property or pass it as undefined?
-     // Supabase-js types might require 'exact' | 'planned' | 'estimated' | null.
-     
-     let query = supabase
-       .from('libros')
-       // Removed Joins to prevent massive timeout on deep pagination (page 15k+)
-       // We only fetch the core table now. The UI will have to rely on IDs or we fetch details separately if needed.
-       .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: countStrategy as any })
-       .eq('activo', true);
+    let query = supabase
+      .from('libros')
+      // Removed Joins to prevent massive timeout on deep pagination (page 15k+)
+      // We only fetch the core table now. The UI will have to rely on IDs or we fetch details separately if needed.
+      .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: countStrategy as any })
+      .eq('activo', true);
 
-     // Apply Filters
-     if (filters) {
-      if (filters.search) {
-        const searchTerm = filters.search.trim();
-        const isNumeric = /^\d+$/.test(searchTerm);
-        
-        const numericId = parseInt(searchTerm, 10);
-        const validId = !isNaN(numericId) && numericId < 2147483647;
+    // Apply Filters
+    if (filters) {
+     if (filters.search) {
+       const searchTerm = filters.search.trim();
+       const isNumeric = /^\d+$/.test(searchTerm);
+       
+       const numericId = parseInt(searchTerm, 10);
+       const validId = !isNaN(numericId) && numericId < 2147483647;
 
-        // Check search mode: 'default' means ONLY legacy_id (and id) search? 
-        if (filters.searchMode === 'default') {
-           // Strict Legacy Code Search
-           if (isNumeric) {
-               // STRATEGY: Try EXACT match first to avoid expensive LIKE scan
-               // If the user pasted a full code, this will hit immediately.
-               const { data: exactLegacy, error: exactError } = await supabase
-                  .from('libros')
-                  .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
-                  .eq('activo', true)
-                  .or(`legacy_id.eq.${searchTerm},id.eq.${numericId}`) // Check both Exact Legacy AND Exact ID
-                  .limit(5);
+       // Check search mode: 'default' means ONLY legacy_id (and id) search? 
+       if (filters.searchMode === 'default') {
+          // Strict Legacy Code Search
+          if (isNumeric) {
+              // STRATEGY: Try EXACT match first to avoid expensive LIKE scan
+              // If the user pasted a full code, this will hit immediately.
+              const { data: exactLegacy, error: exactError } = await supabase
+                 .from('libros')
+                 .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
+                 .eq('activo', true)
+                 .or(`legacy_id.eq.${searchTerm},id.eq.${numericId}`) // Check both Exact Legacy AND Exact ID
+                 .limit(5);
 
-               if (!exactError && exactLegacy && exactLegacy.length > 0) {
-                   return { data: exactLegacy.map(mapLibroToBook), count: exactLegacy.length };
-               }
+              if (!exactError && exactLegacy && exactLegacy.length > 0) {
+                  return { data: exactLegacy.map(mapLibroToBook), count: exactLegacy.length };
+              }
 
-               // If no exact match, fall back to prefix search optimized with Range Query
-               // LIKE is slow without text_pattern_ops index. GTE/LT is fast on standard B-tree.
-               const nextTerm = getNextSearchTerm(searchTerm);
-               query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
-           } else {
-               query = query.ilike('legacy_id', `${searchTerm}%`);
-           }
-        } else {
-           // Full Search Mode (Title, Author, ISBN, etc.)
-           if (isNumeric) {
-               // Try exact match first here too? Maybe overly complex for 'full' mode, but safer.
-               if (validId) {
-                  const nextTerm = getNextSearchTerm(searchTerm);
-                  // Optimized range query for legacy_id mixed with other fields using PostgREST logic syntax
-                  // or=(id.eq.X,and(legacy_id.gte.X,legacy_id.lt.Y),isbn.like.X%)
-                  query = query.or(`id.eq.${numericId},and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
-               } else {
-                  const nextTerm = getNextSearchTerm(searchTerm);
-                  query = query.or(`and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
-               }
-           } else {
-               query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
-           }
-        }
+              // If no exact match, fall back to prefix search optimized with Range Query
+              // LIKE is slow without text_pattern_ops index. GTE/LT is fast on standard B-tree.
+              const nextTerm = getNextSearchTerm(searchTerm);
+              query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
+          } else {
+              query = query.ilike('legacy_id', `${searchTerm}%`);
+          }
+       } else {
+          // Full Search Mode (Title, Author, ISBN, etc.)
+          if (isNumeric) {
+              // Try exact match first here too? Maybe overly complex for 'full' mode, but safer.
+              if (validId) {
+                 const nextTerm = getNextSearchTerm(searchTerm);
+                 // Optimized range query for legacy_id mixed with other fields using PostgREST logic syntax
+                 // or=(id.eq.X,and(legacy_id.gte.X,legacy_id.lt.Y),isbn.like.X%)
+                 query = query.or(`id.eq.${numericId},and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
+              } else {
+                 const nextTerm = getNextSearchTerm(searchTerm);
+                 query = query.or(`and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
+              }
+          } else {
+              query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
+          }
+       }
+     }
+
+       if (filters.category && filters.category !== 'Todos') {
+            // Resolve Category Name to ID
+            // Optimisation: We could cache this or pass ID from UI, but for now we look it up.
+            const { data: catData, error: catError } = await supabase
+                .from('categorias')
+                .select('id')
+                .eq('nombre', filters.category)
+                .maybeSingle();
+            
+            if (catData && !catError) {
+                query = query.eq('categoria_id', catData.id);
+            } else {
+                // If category name doesn't exist (shouldn't happen with dropdown), return empty or handle legacy
+                // Fallback for legacy "Categoría X" format just in case
+                if (filters.category.startsWith('Categoría ')) {
+                     const catId = parseInt(filters.category.replace('Categoría ', ''));
+                     if (!isNaN(catId)) {
+                         query = query.eq('categoria_id', catId);
+                     }
+                } else {
+                    // If name not found and not legacy format, force no results?
+                    // For now, let's assume if not found, it might be a text mismatch so we search nothing?
+                    // Or better, 0 results.
+                    query = query.eq('id', -1); // Impossible ID
+                }
+            }
+       }
+
+      // Optimize Price Filter: Only apply if meaningfully restrictive
+      if (filters.minPrice !== undefined && filters.minPrice > 0) {
+        query = query.gte('precio', filters.minPrice);
+      }
+      if (filters.maxPrice !== undefined && filters.maxPrice < 1000) {
+        // Assume 1000 is the slider max, so no need to filter if it's 1000+
+        query = query.lte('precio', filters.maxPrice);
       }
 
-        if (filters.category && filters.category !== 'Todos') {
-             // Resolve Category Name to ID
-             // Optimisation: We could cache this or pass ID from UI, but for now we look it up.
-             const { data: catData, error: catError } = await supabase
-                 .from('categorias')
-                 .select('id')
-                 .eq('nombre', filters.category)
-                 .maybeSingle();
-             
-             if (catData && !catError) {
-                 query = query.eq('categoria_id', catData.id);
-             } else {
-                 // If category name doesn't exist (shouldn't happen with dropdown), return empty or handle legacy
-                 // Fallback for legacy "Categoría X" format just in case
-                 if (filters.category.startsWith('Categoría ')) {
-                      const catId = parseInt(filters.category.replace('Categoría ', ''));
-                      if (!isNaN(catId)) {
-                          query = query.eq('categoria_id', catId);
-                      }
-                 } else {
-                     // If name not found and not legacy format, force no results?
-                     // For now, let's assume if not found, it might be a text mismatch so we search nothing?
-                     // Or better, 0 results.
-                     query = query.eq('id', -1); // Impossible ID
-                 }
-             }
-        }
+      if (filters.availability === 'inStock') {
+        query = query.gt('stock', 0);
+      } else if (filters.availability === 'outOfStock') {
+        query = query.eq('stock', 0);
+      }
+      
+       // Apply filters
+       if (filters.featured) query = query.eq('destacado', true);
+       if (filters.isNew) query = query.eq('novedad', true);
+       if (filters.isOnSale) query = query.eq('oferta', true);
 
-       if (filters.minPrice !== undefined) {
-         query = query.gte('precio', filters.minPrice);
-       }
-       if (filters.maxPrice !== undefined) {
-         query = query.lte('precio', filters.maxPrice);
+       // Cover status filter
+       if (filters.coverStatus === 'with_cover') {
+         query = query.neq('imagen_url', null).neq('imagen_url', '');
+       } else if (filters.coverStatus === 'without_cover') {
+         query = query.or('imagen_url.is.null,imagen_url.eq.');
        }
 
-       if (filters.availability === 'inStock') {
-         query = query.gt('stock', 0);
-       } else if (filters.availability === 'outOfStock') {
-         query = query.eq('stock', 0);
+       // Advanced Filters
+       if (filters.location) {
+           query = query.eq('ubicacion', filters.location);
        }
+
+       if (filters.isbn) {
+           // Remove dashes/spaces for flexible match if needed, but usually strict eq for specific field
+           const clean = filters.isbn.replace(/[-\s]/g, '');
+           query = query.ilike('isbn', `%${clean}%`); // partial match for convenience
+       }
+
+       if (filters.minPages !== undefined) query = query.gte('paginas', filters.minPages);
+       if (filters.maxPages !== undefined) query = query.lte('paginas', filters.maxPages);
        
-        // Apply filters
-        if (filters.featured) query = query.eq('destacado', true);
-        if (filters.isNew) query = query.eq('novedad', true);
-        if (filters.isOnSale) query = query.eq('oferta', true);
+       if (filters.startYear !== undefined) query = query.gte('anio', filters.startYear);
+       if (filters.endYear !== undefined) query = query.lte('anio', filters.endYear);
 
-        // Cover status filter
-        if (filters.coverStatus === 'with_cover') {
-          query = query.neq('imagen_url', null).neq('imagen_url', '');
-        } else if (filters.coverStatus === 'without_cover') {
-          query = query.or('imagen_url.is.null,imagen_url.eq.');
+       if (filters.publisher) {
+          // Filtering by related table is tricky with simple query builder without modifying the select to !inner
+          // But our select is: '*, editoriales(id, nombre)...'
+          // If we want to filter ONLY books with that publisher, we MUST use !inner join.
+          // However, modifying the top-level .select() might be cleaner.
+          // Let's rely on caching or strict ID if possible? No, user might type.
+          // NOTE: Supabase client 'query' object is mutable?
+          // Actually, we can't easily change the join type dynamically on the fly unless we rebuild the chain.
+          // Workaround: We can search `editorial_id` if we had it.
+          // If we only have text, we use `editoriales!inner(nombre)` syntax inside the filter?
+          // query = query.filter('editoriales.nombre', 'ilike', `%${filters.publisher}%`) NO, needs inner join
+          // Let's assume for now the user will select from a list if we implement that, 
+          // OR standard search covers publisher in "text search".
+          // If advanced filter is "Publisher Name", we might process it.
+          // Let's skip deep publisher filtering for now or use `editorial_id` if we pass that.
+          // Wait, I can try `!inner` in the initial select if I knew I needed it.
+          // But I don't want to break standard queries.
+          // Let's leave Publisher for now as "Use Search Bar". Or try to filter by ID if we get dropdown.
+          // Actually, `AdminDashboard` doesn't have editorial dropdown.
+          // I'll skip Publisher specific filter implementation inside this block for now to avoid breaking SQL 
+          // and suggest user uses General Search for Publisher name.
+       }
+
+       // Sorting
+      if (filters.sortBy) {
+        switch (filters.sortBy) {
+          case 'price':
+            query = query.order('precio', { ascending: filters.sortOrder === 'asc' });
+            break;
+          case 'newest':
+             // Assuming created_at or id implies newness
+            query = query.order('created_at', { ascending: filters.sortOrder === 'asc' });
+            break;
+          case 'updated':
+            query = query.order('updated_at', { ascending: filters.sortOrder === 'asc' });
+            break;
+          case 'title':
+            query = query.order('titulo', { ascending: filters.sortOrder === 'asc' });
+            break;
+          case 'default':
+            // Fast Default: Sort by ID (PK index). Respect user direction.
+            // Defaulting to DESC (newest) if user hasn't touched it (though UI defaults to ASC... user might want ASC IDs?)
+            // Usually 'Default' implies 'Newest First' (LIFO). 
+            // But if UI says 'Ascendente' and user selects 'Default', they might get Oldest First (ID 1).
+            // Let's fallback to respecting sortOrder.
+            query = query.order('id', { ascending: filters.sortOrder === 'asc' });
+            break;
+          // Rating is not in DB schema shown, ignoring for now
+          default:
+            // Fallback if not matched: ID descending for performance
+            query = query.order('id', { ascending: filters.sortOrder === 'asc' });
         }
-
-        // Advanced Filters
-        if (filters.location) {
-            query = query.eq('ubicacion', filters.location);
+        } else {
+            // Only default sort by title if NOT searching.
+            // When searching (especially by code), we want matches fast, order matters less.
+            // Sorting by title forces DB to process all matches before returning page 1.
+            if (!filters.search) {
+               // Modified from 'titulo' to 'id' desc for performance optimization (initial load)
+               query = query.order('id', { ascending: false });
+            }
+       }
+    } else {
+        // No filters at all (initial load?) -> Sort by ID (Fastest)
+        if (!filters || !(filters as any).search) {
+            query = query.order('id', { ascending: false });
         }
+    }
 
-        if (filters.isbn) {
-            // Remove dashes/spaces for flexible match if needed, but usually strict eq for specific field
-            const clean = filters.isbn.replace(/[-\s]/g, '');
-            query = query.ilike('isbn', `%${clean}%`); // partial match for convenience
-        }
+    // Pagination
+    const from = (page - 1) * itemsPerPage;
+    const to = from + itemsPerPage - 1;
+    
+    query = query.range(from, to);
 
-        if (filters.minPages !== undefined) query = query.gte('paginas', filters.minPages);
-        if (filters.maxPages !== undefined) query = query.lte('paginas', filters.maxPages);
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Error al obtener libros:', error);
+      return { data: [], count: 0 };
+    }
+
+    // Client-Side Join to avoid DB Timeout on deep pagination
+    // We fetch the names only for the resulting page (12-20 items), not the whole sorted set
+    if (data && data.length > 0) {
+        const editorialIds = Array.from(new Set(data.map(b => b.editorial_id).filter(id => id)));
+        const categoryIds = Array.from(new Set(data.map(b => b.categoria_id).filter(id => id)));
+
+        const promises = [];
         
-        if (filters.startYear !== undefined) query = query.gte('anio', filters.startYear);
-        if (filters.endYear !== undefined) query = query.lte('anio', filters.endYear);
+        if (editorialIds.length > 0) {
+            promises.push(supabase.from('editoriales').select('id, nombre').in('id', editorialIds));
+        } else promises.push(Promise.resolve({ data: [] }));
 
-        if (filters.publisher) {
-           // Filtering by related table is tricky with simple query builder without modifying the select to !inner
-           // But our select is: '*, editoriales(id, nombre)...'
-           // If we want to filter ONLY books with that publisher, we MUST use !inner join.
-           // However, modifying the top-level .select() might be cleaner.
-           // Let's rely on caching or strict ID if possible? No, user might type.
-           // NOTE: Supabase client 'query' object is mutable?
-           // Actually, we can't easily change the join type dynamically on the fly unless we rebuild the chain.
-           // Workaround: We can search `editorial_id` if we had it.
-           // If we only have text, we use `editoriales!inner(nombre)` syntax inside the filter?
-           // query = query.filter('editoriales.nombre', 'ilike', `%${filters.publisher}%`) NO, needs inner join
-           // Let's assume for now the user will select from a list if we implement that, 
-           // OR standard search covers publisher in "text search".
-           // If advanced filter is "Publisher Name", we might process it.
-           // Let's skip deep publisher filtering for now or use `editorial_id` if we pass that.
-           // Wait, I can try `!inner` in the initial select if I knew I needed it.
-           // But I don't want to break standard queries.
-           // Let's leave Publisher for now as "Use Search Bar". Or try to filter by ID if we get dropdown.
-           // Actually, `AdminDashboard` doesn't have editorial dropdown.
-           // I'll skip Publisher specific filter implementation inside this block for now to avoid breaking SQL 
-           // and suggest user uses General Search for Publisher name.
-        }
+        if (categoryIds.length > 0) {
+            promises.push(supabase.from('categorias').select('id, nombre').in('id', categoryIds));
+        } else promises.push(Promise.resolve({ data: [] }));
 
-        // Sorting
-       if (filters.sortBy) {
-         switch (filters.sortBy) {
-           case 'price':
-             query = query.order('precio', { ascending: filters.sortOrder === 'asc' });
-             break;
-           case 'newest':
-              // Assuming created_at or id implies newness
-             query = query.order('created_at', { ascending: filters.sortOrder === 'asc' });
-             break;
-           case 'updated':
-             query = query.order('updated_at', { ascending: filters.sortOrder === 'asc' });
-             break;
-           case 'title':
-             query = query.order('titulo', { ascending: filters.sortOrder === 'asc' });
-             break;
-           case 'default':
-             // Fast Default: Sort by ID (PK index). Respect user direction.
-             // Defaulting to DESC (newest) if user hasn't touched it (though UI defaults to ASC... user might want ASC IDs?)
-             // Usually 'Default' implies 'Newest First' (LIFO). 
-             // But if UI says 'Ascendente' and user selects 'Default', they might get Oldest First (ID 1).
-             // Let's fallback to respecting sortOrder.
-             query = query.order('id', { ascending: filters.sortOrder === 'asc' });
-             break;
-           // Rating is not in DB schema shown, ignoring for now
-           default:
-             // Fallback if not matched: ID descending for performance
-             query = query.order('id', { ascending: filters.sortOrder === 'asc' });
-         }
-         } else {
-             // Only default sort by title if NOT searching.
-             // When searching (especially by code), we want matches fast, order matters less.
-             // Sorting by title forces DB to process all matches before returning page 1.
-             if (!filters.search) {
-                // Modified from 'titulo' to 'id' desc for performance optimization (initial load)
-                query = query.order('id', { ascending: false });
-             }
-        }
-     } else {
-         // No filters at all (initial load?) -> Sort by ID (Fastest)
-         if (!filters || !(filters as any).search) {
-             query = query.order('id', { ascending: false });
-         }
-     }
+        const [edResult, catResult] = await Promise.all(promises);
+        
+        const edMap = new Map(edResult.data?.map((e: any) => [e.id, e]) || []);
+        const catMap = new Map(catResult.data?.map((c: any) => [c.id, c]) || []);
 
-     // Pagination
-     const from = (page - 1) * itemsPerPage;
-     const to = from + itemsPerPage - 1;
-     
-     query = query.range(from, to);
+        // Attach to data
+        (data as any[]).forEach(book => {
+            if (book.editorial_id) book.editoriales = edMap.get(book.editorial_id);
+            if (book.categoria_id) book.categorias = catMap.get(book.categoria_id);
+        });
+    }
 
-     const { data, error, count } = await query;
-
-     if (error) {
-       console.error('Error al obtener libros:', error);
-       return { data: [], count: 0 };
-     }
-
-     // Client-Side Join to avoid DB Timeout on deep pagination
-     // We fetch the names only for the resulting page (12-20 items), not the whole sorted set
-     if (data && data.length > 0) {
-         const editorialIds = Array.from(new Set(data.map(b => b.editorial_id).filter(id => id)));
-         const categoryIds = Array.from(new Set(data.map(b => b.categoria_id).filter(id => id)));
-
-         const promises = [];
-         
-         if (editorialIds.length > 0) {
-             promises.push(supabase.from('editoriales').select('id, nombre').in('id', editorialIds));
-         } else promises.push(Promise.resolve({ data: [] }));
-
-         if (categoryIds.length > 0) {
-             promises.push(supabase.from('categorias').select('id, nombre').in('id', categoryIds));
-         } else promises.push(Promise.resolve({ data: [] }));
-
-         const [edResult, catResult] = await Promise.all(promises);
-         
-         const edMap = new Map(edResult.data?.map((e: any) => [e.id, e]) || []);
-         const catMap = new Map(catResult.data?.map((c: any) => [c.id, c]) || []);
-
-         // Attach to data
-         (data as any[]).forEach(book => {
-             if (book.editorial_id) book.editoriales = edMap.get(book.editorial_id);
-             if (book.categoria_id) book.categorias = catMap.get(book.categoria_id);
-         });
-     }
-
-      return {
-        data: data ? data.map(mapLibroToBook) : [],
-        // If default view, return 0 (infinite pagination) or use estimated. Actually, better to return 0/estimated here and let Catalog override it with TotalCount.
-        count: count || 0
-      };
-   } catch (error) {
-     console.error('Error inesperado al obtener libros:', error);
-     return { data: [], count: 0 };
-   }
- };
+     return {
+       data: data ? data.map(mapLibroToBook) : [],
+       // If default view, return 0 (infinite pagination) or use estimated. Actually, better to return 0/estimated here and let Catalog override it with TotalCount.
+       count: count || 0
+     };
+  } catch (error) {
+    console.error('Error inesperado al obtener libros:', error);
+    return { data: [], count: 0 };
+  }
+};
 
 export const obtenerLibroPorId = async (id: string | number): Promise<Book | null> => {
   try {
@@ -863,11 +906,12 @@ export const obtenerEstadisticasLibros = async () => {
 
     return {
       total: totalLibros || 0,
-      sinStock: sinStock || 0
+      sinStock: sinStock || 0,
+      enStock: (totalLibros || 0) - (sinStock || 0)
     };
   } catch (error) {
     console.error('Error al obtener estadísticas:', error);
-    return { total: 0, sinStock: 0 };
+    return { total: 0, sinStock: 0, enStock: 0 };
   }
 };
 

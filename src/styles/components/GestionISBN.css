@@ -346,21 +346,41 @@
 }
 
 @media (max-width: 768px) {
+  .gestion-isbn-container {
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box; /* Fix width calculation */
+    overflow-x: hidden;
+  }
+
+  .isbn-card {
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .isbn-input {
+    width: 100%;
+    min-width: 0;
+  }
+
   .isbn-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
   }
 
   .isbn-actions {
     width: 100%;
     flex-direction: column;
+    gap: 0.75rem; /* Better spacing */
   }
 
   .btn-primary,
   .btn-secondary {
     width: 100%;
     justify-content: center;
+    height: 44px; /* Touch target */
   }
 
   .isbn-card-header {
@@ -370,14 +390,40 @@
 
   .book-info {
     width: 100%;
+    flex-direction: column; /* Stack image on top of details */
+    align-items: center; /* Center image */
+  }
+
+  .book-thumbnail {
+      width: 100px; /* Slightly larger on mobile center */
+      height: 150px;
+  }
+  
+  .book-details {
+      width: 100%;
+  }
+
+  /* Override inline grid for inputs */
+  .book-details > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Force all inputs to span full width in the new single col */
+  .book-details input {
+    grid-column: 1 / -1 !important;
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 
   .isbn-card-actions {
     flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .btn-search {
+  .btn-search, .btn-save {
     width: 100%;
+    justify-content: center;
+    height: 44px;
   }
 }
 

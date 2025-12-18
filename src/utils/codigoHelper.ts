@@ -113,6 +113,7 @@ export function validarCodigoUbicacion(codigo: string, ubicacion: string): boole
  * Si el código ya tiene un formato válido, lo mantiene
  * Si no, lo actualiza según la ubicación
  */
+// ...
 export function normalizarCodigo(codigo: string, ubicacion: string): string {
   if (!codigo) return '';
 
@@ -123,4 +124,24 @@ export function normalizarCodigo(codigo: string, ubicacion: string): string {
 
   // Si no es válido, actualizarlo
   return actualizarCodigoPorUbicacion(codigo, ubicacion);
+}
+
+/**
+ * Deduce la ubicación basada en el sufijo del código
+ */
+export function obtenerUbicacionPorCodigo(codigo: string): string | null {
+  if (!codigo) return null;
+  const c = codigo.trim();
+
+  // Check suffixes in specific order (longest first to avoid partial matches if any)
+  if (c.endsWith('Ab')) return 'Abebooks';
+  if (c.endsWith('G')) return 'Galeon';
+  if (c.endsWith('H')) return 'Hortaleza';
+  if (c.endsWith('R')) return 'Reina';
+  if (c.endsWith('UL')) return 'Uniliber'; // Assuming this exists based on previous file analysis
+  
+  // If no suffix and contains only digits, assume Almacen
+  if (/^\d+$/.test(c)) return 'Almacen';
+
+  return null; // Unknown format
 }

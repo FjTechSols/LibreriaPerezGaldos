@@ -1,0 +1,48 @@
+.books-manager-search {
+  flex: 1 1 300px;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.books-manager-search .search-input-wrapper {
+  position: relative;
+  flex-grow: 1;
+}
+
+.books-manager-search .admin-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.books-manager-search .admin-search-input {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+.books-manager-search .search-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  .books-manager-search {
+    flex-direction: column;
+    width: 100%;
+    flex: 1 1 100%;
+    align-items: stretch;
+  }
+
+  .books-manager-search .search-input-wrapper {
+    width: 100%;
+  }
+
+  .books-manager-search .search-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

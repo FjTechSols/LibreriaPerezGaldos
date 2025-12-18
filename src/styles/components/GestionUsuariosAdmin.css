@@ -338,6 +338,153 @@
   border-top: 1px solid var(--border-color);
 }
 
+/* Mobile Optimization - Clean Slate */
+@media (max-width: 768px) {
+  /* Main Container Reset */
+  .gestion-usuarios-admin {
+    padding: 1rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden;
+  }
+
+  /* Header Stack */
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  .header-title {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-title h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Button Reset */
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  /* Table to Card Transformation */
+  .usuarios-table-container {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      overflow: visible;
+      padding: 0;
+      margin: 0;
+  }
+
+  .usuarios-table, 
+  .usuarios-table tbody, 
+  .usuarios-table tr, 
+  .usuarios-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .usuarios-table thead {
+    display: none;
+  }
+
+  /* User Card */
+  .usuarios-table tr {
+    position: relative;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Card Rows (Cells) */
+  .usuarios-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    text-align: right;
+    gap: 0.5rem;
+  }
+
+  .usuarios-table td:last-child {
+    border-bottom: none;
+    justify-content: flex-end; /* Actions right aligned */
+    padding-bottom: 0;
+    margin-top: 0.5rem;
+  }
+
+  /* Labels (Pseudo-elements) */
+  .usuarios-table td:before {
+    content: attr(data-label); /* Ideal usage, but we hardcode for now based on index */
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    flex-shrink: 0; /* Prevent label squeeze */
+  }
+
+  .usuarios-table td:nth-of-type(1):before { content: "Email"; }
+  .usuarios-table td:nth-of-type(2):before { content: "Rol Principal"; }
+  .usuarios-table td:nth-of-type(3):before { content: "Roles Adicionales"; }
+  .usuarios-table td:nth-of-type(4):before { content: "Fecha Creación"; }
+
+  /* Content Handling */
+  .usuario-email {
+    justify-content: flex-end;
+    word-break: break-all;
+    font-size: 0.9rem;
+  }
+
+  .roles-list {
+      justify-content: flex-end;
+      align-items: center;
+      flex-wrap: wrap; 
+      gap: 0.5rem;
+  }
+
+  /* Role Badges */
+  .rol-badge, 
+  .rol-badge-small {
+      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+  }
+
+  /* Modals - Full Screen Mobile */
+  .modal-content {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+  }
+  
+  .modal-overlay {
+      padding: 0 !important;
+      align-items: flex-end;
+  }
+}
+
 /* Dark Mode Header Overrides */
 .dark-mode .header-title h2 {
   color: #f1f5f9;

@@ -9,8 +9,10 @@ import {
   incrementarStockLibro, 
   crearLibro, 
   actualizarLibro, 
-  eliminarLibro 
+  eliminarLibro,
+  obtenerOcrearEditorial
 } from '../../../services/libroService';
+import '../../../styles/components/BooksManager.css';
 import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
 import { getCategorias } from '../../../services/categoriaService';
 import { useSettings } from '../../../context/SettingsContext';
@@ -214,7 +216,41 @@ export function BooksManager() {
   const handleEditSubmit = async (bookData: Partial<Book>, contents: string[]) => {
     if (!editingBook) return;
     try {
-      const updated = await actualizarLibro(parseInt(editingBook.id), bookData as any, contents);
+      // Resolve Editorial ID if publisher name provided
+      let editorialId: number | null | undefined = undefined;
+      
+      if (bookData.publisher && bookData.publisher.trim().length > 0) {
+          // Import this function at the top if not already imported
+          editorialId = await obtenerOcrearEditorial(bookData.publisher);
+      } else if (bookData.publisher === '') {
+           // User explicitly cleared the field
+           editorialId = null;
+      }
+
+      // Map UI fields (Book) to DB fields (LibroSupabase)
+      const mappedUpdate = {
+        titulo: bookData.title,
+        autor: bookData.author,
+        isbn: bookData.isbn ? bookData.isbn.replace(/[-\s]/g, '') : null,
+        precio: bookData.price,
+        precio_original: bookData.originalPrice,
+        stock: bookData.stock,
+        ubicacion: bookData.ubicacion,
+        descripcion: bookData.description,
+        imagen_url: bookData.coverImage,
+        paginas: bookData.pages,
+        anio: bookData.publicationYear,
+        destacado: bookData.featured,
+        novedad: bookData.isNew,
+        oferta: bookData.isOnSale,
+        editorial_id: editorialId, // Add resolved ID here
+        // categoria_id would be similar, but let's stick to publisher focus for now or if bookData.category provides a name we need to resolve it too.
+        // bookData.category is string. 
+        // We probably should resolve category too if we want it to save.
+        // ...
+      };
+
+      const updated = await actualizarLibro(parseInt(editingBook.id), mappedUpdate as any, contents);
       if (updated) {
         alert('Libro actualizado.');
         setRefreshTrigger(prev => prev + 1);
@@ -279,9 +315,9 @@ export function BooksManager() {
             </p>
           </div>
           
-           <div className="admin-search" style={{ flex: '1 1 300px', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-             <div style={{ position: 'relative', flexGrow: 1 }}>
-                <Search className="admin-search-icon" size={20} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+           <div className="admin-search books-manager-search">
+             <div className="search-input-wrapper">
+                <Search className="admin-search-icon" size={20} />
                 <input
                   type="text"
                   placeholder={filters.searchMode ? "Buscar por Título, Autor, Editorial o ISBN..." : "Introduzca el código del libro..."}
@@ -289,10 +325,9 @@ export function BooksManager() {
                   onChange={(e) => setLocalSearchTerm(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="admin-search-input"
-                  style={{ width: '100%', paddingLeft: '2.5rem' }} 
                 />
              </div>
-             <button onClick={handleSearch} className="action-btn" style={{ background: 'var(--accent-color)', color: 'white' }}>
+             <button onClick={handleSearch} className="action-btn search-btn">
                Buscar
              </button>
            </div>

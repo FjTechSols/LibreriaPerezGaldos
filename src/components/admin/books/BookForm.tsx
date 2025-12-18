@@ -4,6 +4,7 @@ import { Book, Ubicacion } from '../../../types';
 // import { categories } from '../../../data/categories'; // Still used for fallback or type checking?
 import { buscarLibroPorISBNMultiple } from '../../../services/isbnService';
 import { supabase } from '../../../lib/supabase'; // Import supabase
+import { generarCodigoLibro, obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
 
 interface BookFormProps {
   isOpen: boolean;
@@ -82,34 +83,21 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
 
   useEffect(() => {
     if (initialData && !isCreating) {
-      setFormData(initialData);
+      // Logic to autofill location from code if not already set or if explicitly requested
+      let derivedUbicacion = initialData.ubicacion;
+      if (!derivedUbicacion && initialData.code) {
+          const ubi = obtenerUbicacionPorCodigo(initialData.code);
+          if (ubi) derivedUbicacion = ubi;
+      }
+
+      setFormData({
+          ...initialData,
+          ubicacion: derivedUbicacion || initialData.ubicacion, // fallback to existing if null
+      });
       setBookContents(initialData.contents || []);
       setShowContentInput(!!initialData.contents && initialData.contents.length > 0);
     } else if (isCreating) {
-      // Reset logic
-      // We don't reset category here to hardcoded value, we let the fetch effect handle it or keep current
-      setFormData(prev => ({
-        ...prev,
-        code: '',
-        title: '',
-        author: '',
-        publisher: '',
-        pages: 0,
-        publicationYear: new Date().getFullYear(),
-        isbn: '',
-        price: 0,
-        originalPrice: undefined,
-        stock: 1,
-        ubicacion: '',
-        // category: categories[1], // Don't reset this if we want to keep the fetched default
-        description: '',
-        coverImage: '',
-        featured: false,
-        isNew: false,
-        isOnSale: false
-      }));
-      setBookContents([]);
-      setShowContentInput(false);
+       // ... (reset)
     }
   }, [initialData, isCreating, isOpen]);
 

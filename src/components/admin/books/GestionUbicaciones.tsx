@@ -232,16 +232,16 @@ export function GestionUbicaciones() {
                       </>
                     ) : (
                       <>
-                        <td>
+                        <td className="gu-col-name">
                           <strong>{ubicacion.nombre}</strong>
                         </td>
-                        <td>{ubicacion.descripcion || '-'}</td>
-                        <td>
+                        <td className="gu-col-desc">{ubicacion.descripcion || '-'}</td>
+                        <td className="gu-col-status">
                           <span className={`badge ${ubicacion.activa ? 'badge-success' : 'badge-danger'}`}>
                             {ubicacion.activa ? 'Activa' : 'Inactiva'}
                           </span>
                         </td>
-                        <td>
+                        <td className="gu-col-actions">
                           <div className="action-buttons">
                             <button
                               className="btn-icon btn-primary"

@@ -10,7 +10,7 @@ interface BookTableProps {
 
 export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableProps) {
   return (
-    <div className="data-table books-table">
+    <div className="data-table admin-books-table">
       <div className="table-header">
         <span>Código</span>
         <span>Portada</span>
@@ -25,9 +25,9 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableP
       </div>
 
       {books.map(book => (
-        <div key={book.id} className="table-row">
-          <span className="book-code-cell">{book.code || 'N/A'}</span>
-          <div className="book-cover">
+        <div key={book.id} className="admin-book-row">
+          <span className="admin-book-code">{book.code || 'N/A'}</span>
+          <div className="admin-book-cover">
             <img src={book.coverImage} alt={book.title || 'Sin Título'} />
             {(book.featured || book.isNew || book.isOnSale) && (
               <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.7rem' }}>
@@ -37,7 +37,7 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableP
               </div>
             )}
           </div>
-          <span className="book-title-cell">
+          <span className="admin-book-title">
             {book.title || 'N/A'}
             {(book.featured || book.isNew || book.isOnSale) && (
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.75rem' }}>
@@ -47,11 +47,11 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableP
               </div>
             )}
           </span>
-          <span className="book-author-cell">{book.author || 'N/A'}</span>
-          <span className="book-publisher-cell">{book.publisher || 'N/A'}</span>
-          <span className="book-category-cell">{book.category || 'N/A'}</span>
-          <span className="book-pages-cell">{book.pages || 'N/A'}</span>
-          <span className="book-price-cell">
+          <span className="admin-book-author">{book.author || 'N/A'}</span>
+          <span className="admin-book-publisher">{book.publisher || 'N/A'}</span>
+          <span className="admin-book-category">{book.category || 'N/A'}</span>
+          <span className="admin-book-pages">{book.pages || 'N/A'}</span>
+          <span className="admin-book-price">
             ${book.price}
             {book.isOnSale && book.originalPrice && (
               <span style={{ display: 'block', fontSize: '0.75rem', color: '#9ca3af', textDecoration: 'line-through', marginTop: '0.25rem' }}>
@@ -59,11 +59,11 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableP
               </span>
             )}
           </span>
-          <span className={`book-stock-cell ${book.stock === 0 ? 'out-of-stock' : ''}`}>
+          <span className={`admin-book-stock ${book.stock === 0 ? 'out-of-stock' : ''}`}>
             {book.stock}
           </span>
-          <div className="book-actions">
-           <div className="stock-actions">
+          <div className="admin-book-actions">
+           <div className="admin-stock-actions">
               <button
                   onClick={() => onStockUpdate(book, 1)}
                   className="stock-btn increase"

@@ -392,15 +392,30 @@
 @media (max-width: 768px) {
   .factura-stats {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .factura-filters {
     flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
   }
 
   .filter-input,
   .filter-select {
     width: 100%;
+    min-width: 0;
+  }
+  
+  .btn-crear-factura {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .factura-table {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
   }
 
   .factura-table .table-header {
@@ -408,80 +423,128 @@
   }
 
   .factura-table .table-row {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-
-  .factura-table .table-row > span {
     display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "number status"
+      "date client"
+      "type total"
+      "sub iva"
+      "actions actions";
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    align-items: center;
   }
 
-  .factura-table .table-row > span::before {
-    content: attr(data-label);
-    font-weight: 600;
+  /* 1. Number */
+  .factura-table .table-row .factura-numero {
+    grid-area: number;
+    font-size: 1rem;
+    justify-self: start;
+  }
+
+  /* 8. Status (Moved to top right) */
+  .factura-table .table-row > span:nth-child(8) {
+    grid-area: status;
+    justify-self: end;
+  }
+
+  /* 2. Date */
+  .factura-table .table-row > span:nth-child(2) {
+    grid-area: date;
+    font-size: 0.875rem;
     color: #64748b;
+    display: flex;
+    gap: 0.25rem;
+  }
+  .factura-table .table-row > span:nth-child(2)::before {
+    content: '📅';
+    font-size: 0.8rem;
+  }
+
+  /* 3. Client */
+  .factura-table .table-row > span:nth-child(3) {
+    grid-area: client;
+    font-size: 0.875rem;
+    font-weight: 500;
+    justify-self: end;
+    text-align: right;
+    color: #334155;
+  }
+  
+  /* 4. Type */
+  .factura-table .table-row > span:nth-child(4) {
+    grid-area: type;
+    justify-self: start;
+  }
+
+  /* 7. Total (Big) */
+  .factura-table .table-row > span:nth-child(7) {
+    grid-area: total;
+    font-size: 1.25rem;
+    justify-self: end;
+  }
+
+  /* 5. Subtotal */
+  .factura-table .table-row > span:nth-child(5) {
+    grid-area: sub;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: flex;
+    gap: 0.25rem;
+  }
+  .factura-table .table-row > span:nth-child(5)::before {
+    content: 'Sub:';
+    font-weight: 600;
+  }
+
+  /* 6. IVA */
+  .factura-table .table-row > span:nth-child(6) {
+    grid-area: iva;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    justify-self: end;
+    display: flex;
+    gap: 0.25rem;
+  }
+  .factura-table .table-row > span:nth-child(6)::before {
+    content: 'IVA:';
+    font-weight: 600;
+  }
+
+  /* 9. Actions */
+  .factura-actions {
+    grid-area: actions;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .btn-action {
+    flex: 1; /* Stretch buttons */
+    padding: 0.75rem;
+    font-size: 1rem;
   }
 }
 
-.dark-mode .factura-stats .stat-card {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
-}
-
-.dark-mode .factura-stats .stat-label {
-  color: #cbd5e1 !important;
-}
-
-.dark-mode .factura-stats .stat-value {
-  color: #ffffff !important;
-}
-
-.dark-mode .factura-filters .filter-input,
-.dark-mode .factura-filters .filter-select {
+/* Ensure Dark Mode background for mobile cards */
+.dark-mode .factura-table .table-row {
   background-color: #1e293b;
   border-color: #334155;
-  color: #f1f5f9;
+  box-shadow: none;
 }
 
 .dark-mode .factura-table {
-  background-color: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .factura-table .table-header {
-  background-color: #0f172a;
-  border-bottom-color: #334155;
-  color: #cbd5e1;
-}
-
-.dark-mode .factura-table .table-row {
-  border-bottom-color: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .factura-table .table-row:hover {
-  background-color: #334155;
-}
-
-.dark-mode .factura-numero {
-  color: #f1f5f9;
-}
-
-.dark-mode .no-facturas {
-  color: #94a3b8;
-}
-
-/* Force text color for all spans in table rows */
-/* Fix actions layout */
-.factura-actions {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: nowrap;
+    background: transparent; 
 }
 
 /* Dark Mode Text Overrides */

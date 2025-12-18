@@ -428,14 +428,32 @@
   border-bottom: none;
 }
 
-/* Books Table */
-.books-table .table-header,
-.books-table .table-row {
-  grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 200px; /* Increased last col from 120px to 200px */
+/* Admin Books Table (Desktop) */
+.admin-books-table .table-header {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 200px;
   gap: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: var(--spacing-4);
 }
 
-.book-cover {
+.admin-books-table .admin-book-row {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 200px;
+  gap: var(--spacing-4);
+  
+  /* Separation updates */
+  padding: 1rem var(--spacing-6);
+  margin-bottom: 0.75rem; 
+  background: var(--bg-secondary); /* Give it a subtle bg */
+  border: 1px solid var(--border-color); /* Full border instead of just bottom */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.admin-book-cover {
   width: 50px;
   height: 65px;
   border-radius: var(--radius-sm);
@@ -444,13 +462,13 @@
   justify-self: center;
 }
 
-.book-cover img {
+.admin-book-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.book-code-cell {
+.admin-book-code {
   color: var(--primary-600);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-xs);
@@ -461,48 +479,48 @@
   text-align: center;
 }
 
-.book-title-cell {
+.admin-book-title {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
 }
 
-.book-author-cell,
-.book-publisher-cell,
-.book-category-cell {
+.admin-book-author,
+.admin-book-publisher,
+.admin-book-category {
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
 }
 
-.book-pages-cell,
-.book-price-cell {
+.admin-book-pages,
+.admin-book-price {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   font-size: var(--font-size-sm);
   text-align: center;
 }
 
-.book-stock-cell {
+.admin-book-stock {
   font-weight: var(--font-weight-semibold);
   color: var(--success-color);
   font-size: var(--font-size-sm);
   text-align: center;
 }
 
-.book-stock-cell.out-of-stock {
+.admin-book-stock.out-of-stock {
   color: var(--error-600);
 }
 
-.book-actions {
+.admin-book-actions {
   display: flex;
   gap: var(--spacing-2);
   justify-content: center;
 }
 
-.book-actions .edit-btn,
-.book-actions .delete-btn {
+.admin-book-actions .edit-btn,
+.admin-book-actions .delete-btn {
   width: 32px;
   height: 32px;
   border: none;
@@ -516,24 +534,68 @@
   flex-shrink: 0;
 }
 
-.book-actions .edit-btn {
+.admin-book-actions .edit-btn {
   background: var(--primary-100);
   color: var(--primary-600);
 }
 
-.book-actions .edit-btn:hover {
+.admin-book-actions .edit-btn:hover {
   background: var(--primary-600);
   color: white;
 }
 
-.book-actions .delete-btn {
+.admin-book-actions .delete-btn {
   background: var(--error-100);
   color: var(--error-600);
 }
 
-.book-actions .delete-btn:hover {
+.admin-book-actions .delete-btn:hover {
   background: var(--error-600);
   color: white;
+}
+
+/* Stock Actions */
+.admin-stock-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+.admin-stock-actions .stock-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-stock-actions .stock-btn.increase {
+  background: var(--success-100);
+  color: var(--success-700);
+}
+
+.admin-stock-actions .stock-btn.increase:hover {
+  background: var(--success-600);
+  color: white;
+}
+
+.admin-stock-actions .stock-btn.decrease {
+  background: var(--error-100);
+  color: var(--error-700);
+}
+
+.admin-stock-actions .stock-btn.decrease:hover {
+  background: var(--error-600);
+  color: white;
+}
+
+.admin-stock-actions .stock-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Invoices Table */
@@ -970,7 +1032,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -985,174 +1047,268 @@
     width: 100%;
   }
 
-  .books-table .table-header {
+  .admin-books-table .table-header {
     display: none; /* Hide header on mobile */
   }
 
-  .books-table .table-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    padding: var(--spacing-4);
-    gap: var(--spacing-3);
+  .admin-books-table .admin-book-row {
+    display: grid;
+    /* Col 1: Text info (fluid), Col 2: Image (fixed 100px) */
+    grid-template-columns: 1fr 100px;
+    /* Rows: Code | Title | Author | Price/Stock | Actions */
+    grid-template-rows: auto auto auto auto auto;
+    gap: 1rem;
+    
+    padding: 1.25rem;
     position: relative;
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--spacing-4);
+    border-radius: 12px;
+    margin-bottom: 1rem;
     background: var(--bg-secondary);
+    align-items: center; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
-  /* Cover - Top Left */
-  .book-cover {
-    width: 70px;
-    height: 100px;
-    grid-area: auto;
-    flex-shrink: 0;
-  }
-
-  /* Info Container - Right of Cover */
-  .book-info-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    flex: 1;
-    min-width: 120px;
-  }
-
-  /* We need to use nth-child selectors or ensuring structure matches */
-  /* Since checking structure is hard with CSS alone if not wrapped, we assume flat children */
-  /* Structure: 
-     1: Code
-     2: Cover
-     3: Title
-     4: Author
-     5: Publisher
-     6: Category
-     7: Pages
-     8: Price
-     9: Stock
-     10: Actions 
-  */
-  
-  .books-table .table-row {
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    grid-template-rows: auto auto auto auto auto; /* Added extra row for Code */
-    grid-column-gap: var(--spacing-4);
-    grid-row-gap: var(--spacing-1);
-  }
-
-  .book-cover {
-    grid-row: 1 / 6; /* Span all rows */
-    grid-column: 1;
-    width: 80px;
-    height: 115px; /* Slightly taller */
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-  }
-
-  /* Code - Row 1 */
-  .book-code-cell {
+  /* 1. TOP ROW: Code (Full Width or standard text) */
+  .admin-book-code {
+    grid-column: 1 / -1;
     grid-row: 1;
-    grid-column: 2;
+    width: 100%;
+    text-align: left;
     display: block !important;
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary); /* Muted color for code */
-    font-family: var(--font-family-mono);
-    margin-bottom: 0.1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0.5rem;
   }
 
-  /* Title - Row 2 */
-  .book-title-cell {
+  /* 2. MIDDLE RIGHT: Image (Spans Title & Author, Rows 2-3) */
+  .admin-book-cover {
+    grid-column: 2;
+    grid-row: 2 / 4; 
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    justify-self: end;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* 2. MIDDLE LEFT: Info (Rows 2-3) */
+  .admin-book-title {
+    grid-column: 1;
     grid-row: 2;
-    grid-column: 2;
-    font-size: var(--font-size-base);
-    font-weight: bold;
-    padding-right: 80px; /* Prevent overlap with action buttons */
-    line-height: var(--line-height-tight);
+    font-size: 1.05rem; /* Larger title */
+    font-weight: 600;
     color: var(--text-primary);
+    line-height: 1.3;
+    padding-right: var(--spacing-2);
+    align-self: end; 
+    margin-bottom: 0.25rem;
   }
 
-  /* Author - Row 3 */
-  .book-author-cell {
+  .admin-book-author {
+    grid-column: 1;
     grid-row: 3;
-    grid-column: 2;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
+    align-self: start; 
   }
 
-  /* Price - Row 4 */
-  .book-price-cell {
+  /* 3. PRICE & STOCK ROW (Row 4) */
+  .admin-book-price {
+    grid-column: 1;
     grid-row: 4;
+    font-size: 1.5rem; 
+    font-weight: 800;
+    color: var(--text-primary); 
+    text-align: left; 
+    align-self: center;
+  }
+
+  .admin-book-stock {
     grid-column: 2;
-    font-size: 1rem;
-    font-weight: bold;
-    color: var(--primary-600);
-    text-align: left;
-    margin-top: 0.25rem;
-  }
-
-  /* Stock - Row 5 (Full width bottom) */
-  .book-stock-cell {
-    grid-row: 5;
-    grid-column: 1 / -1; /* Full width bottom */
-    text-align: left;
-    display: flex !important; /* Force show */
+    grid-row: 4;
+    
+    display: flex !important;
     align-items: center;
-    gap: 0.5rem;
-    background: var(--bg-tertiary);
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--radius-md);
-    margin-top: 0.5rem;
+    justify-content: center;
+    
+    background: transparent;
+    padding: 0;
+    border: none;
+    font-size: 1.25rem; /* Larger stock number */
+    font-weight: bold;
+    color: #10b981; /* Success Green */
   }
 
-  /* Dark mode adjustments for cells */
-  .dark-mode .book-code-cell {
-    color: #94a3b8;
-  }
-  
-  .dark-mode .book-title-cell {
-    color: #f1f5f9;
-  }
-  
-  .dark-mode .book-author-cell {
-    color: #cbd5e1;
-  }
-  
-  .dark-mode .book-stock-cell {
-    background: rgba(30, 41, 59, 0.5);
+  /* 4. BOTTOM Row: Actions (Row 5) */
+  /* 4. BOTTOM Row: Actions (Row 5) - Unified Card Footer */
+  .admin-book-actions {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    
+    margin-top: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
   }
 
-  /* Hide less important infos on mobile card to save space */
-  .book-publisher-cell,
-  .book-category-cell,
-  .book-pages-cell {
+  /* Treat stock group as direct children for layout */
+  .admin-stock-actions {
+    display: contents;
+  }
+
+  /* Style ALL 4 buttons uniformly layout-wise */
+  .admin-book-actions button,
+  .admin-stock-actions button {
+    flex: 1; /* Equal width */
+    height: 44px; /* Big tappable target */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    width: auto !important; /* Reset fixed widths */
+    max-width: none !important;
+  }
+
+  /* 1. STOCK INCREASE (+) */
+  .admin-stock-actions .stock-btn.increase { 
+      background: rgba(16, 185, 129, 0.1); 
+      border-color: rgba(16, 185, 129, 0.3); 
+      color: #10b981; 
+  }
+  .admin-stock-actions .stock-btn.increase:active { background: rgba(16, 185, 129, 0.25); }
+
+  /* 2. STOCK DECREASE (-) */
+  .admin-stock-actions .stock-btn.decrease { 
+      background: rgba(239, 68, 68, 0.1); 
+      border-color: rgba(239, 68, 68, 0.3); 
+      color: #ef4444; 
+  }
+  .admin-stock-actions .stock-btn.decrease:active { background: rgba(239, 68, 68, 0.25); }
+
+  /* 3. EDIT (Pencil) */
+  .admin-book-actions > .edit-btn { 
+      background: rgba(59, 130, 246, 0.1); 
+      border-color: rgba(59, 130, 246, 0.3); 
+      color: #3b82f6; 
+  }
+  .admin-book-actions > .edit-btn:active { background: rgba(59, 130, 246, 0.25); }
+
+  /* 4. DELETE (Trash) */
+  .admin-book-actions > .delete-btn { 
+      background: rgba(239, 68, 68, 0.1); 
+      border-color: rgba(239, 68, 68, 0.3); 
+      color: #ef4444; 
+  }
+  .admin-book-actions > .delete-btn:active { background: rgba(239, 68, 68, 0.25); }
+
+  /* Hover states for Desktop/Mouse on Mobile */
+  .admin-book-actions button:hover {
+      filter: brightness(0.95);
+  }
+
+  /* Icons size */
+  .admin-book-actions svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Dark mode overrides: slightly brighter text, same bg strategy */
+  .dark-mode .admin-book-actions button,
+  .dark-mode .admin-stock-actions button {
+     box-shadow: none;
+  }
+  
+  .dark-mode .admin-stock-actions .stock-btn.increase { color: #34d399; border-color: rgba(52, 211, 153, 0.3); background: rgba(5, 150, 105, 0.15); }
+  .dark-mode .admin-stock-actions .stock-btn.decrease { color: #f87171; border-color: rgba(248, 113, 113, 0.3); background: rgba(220, 38, 38, 0.15); }
+  .dark-mode .admin-book-actions > .edit-btn { color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); background: rgba(37, 99, 235, 0.15); }
+  .dark-mode .admin-book-actions > .delete-btn { color: #f87171; border-color: rgba(248, 113, 113, 0.3); background: rgba(220, 38, 38, 0.15); }
+
+
+  /* Hide Desktop columns */
+  .admin-book-publisher,
+  .admin-book-category,
+  .admin-book-pages {
     display: none;
   }
 
-  .book-actions {
-    grid-row: 1;
-    grid-column: 2;
-    justify-self: end;
-    align-self: start;
-    position: absolute;
-    top: 3.5rem; /* Lowered to avoid code badge */
-    right: var(--spacing-4);
+  /* Dark mode adjustments for cells */
+  .dark-mode .admin-book-code {
+    color: #94a3b8;
+    background: rgba(30, 41, 59, 0.5);
+  }
+  
+  .dark-mode .admin-book-title {
+    color: #f1f5f9;
+  }
+  
+  .dark-mode .admin-book-author {
+    color: #cbd5e1;
+  }
+  
+  .dark-mode .admin-book-stock {
+    color: #34d399; /* Keep green for value */
   }
 } 
 
 /* Improve Filters on Mobile */
 @media (max-width: 768px) {
+  /* Improve Filters on Mobile */
   .invoice-filters,
-  .book-filters { 
+  .book-filters,
+  .filters-container { 
+    display: flex;
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+    height: auto !important;
   }
   
+  .filter-group {
+      width: 100%;
+  }
+  
+  /* Target the actual classes used in BooksManager */
   .filter-input,
-  .filter-select {
-    width: 100%;
+  .filter-select,
+  .filters-container select,
+  .filters-container input:not([type="checkbox"]),
+  .form-select,
+  .form-input {
+    width: 100% !important;
     min-width: 0;
+    height: 48px !important; /* Force taller inputs */
+    padding: 0 1rem !important; /* Force padding */
+    font-size: 1rem !important;
+    line-height: normal !important; /* Reset line-height to normal to center text */
+    background-color: var(--bg-tertiary);
+    border-radius: 8px !important;
+  }
+
+  /* Reset layout for checkboxes specifically */
+  .filters-container input[type="checkbox"] {
+      width: 20px !important;
+      height: 20px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+  }
+  
+  /* Reset line-height for textareas if any */
+  textarea.form-input {
+      line-height: 1.5 !important;
+      padding-top: 0.5rem !important;
   }
 
   .admin-search {
@@ -1167,6 +1323,7 @@
   /* Limpiar Filtros button full width */
   .checkbox-filters-container .clean-filters-btn { 
       width: 100%;
+      height: 48px;
       justify-content: center;
       margin-top: 1rem;
   }
@@ -1175,7 +1332,7 @@
   .dark-mode .clean-filters-btn {
       color: #f87171;
       border-color: #f87171;
-      background: rgba(239, 68, 68, 0.1); /* Subtle background for better visibility */
+      background: rgba(239, 68, 68, 0.1); 
   }
 
   /* Title optimization */
@@ -1458,27 +1615,27 @@
   background: #334155;
 }
 
-.dark-mode .book-code-cell {
+.dark-mode .admin-book-code {
   background: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
 }
 
-.dark-mode .book-title-cell {
+.dark-mode .admin-book-title {
   color: #f1f5f9;
 }
 
-.dark-mode .book-author-cell,
-.dark-mode .book-publisher-cell,
-.dark-mode .book-category-cell {
+.dark-mode .admin-book-author,
+.dark-mode .admin-book-publisher,
+.dark-mode .admin-book-category {
   color: #94a3b8;
 }
 
-.dark-mode .book-pages-cell,
-.dark-mode .book-price-cell {
+.dark-mode .admin-book-pages,
+.dark-mode .admin-book-price {
   color: #f1f5f9;
 }
 
-.dark-mode .book-stock-cell {
+.dark-mode .admin-book-stock {
   color: #34d399;
 }
 
