@@ -340,8 +340,21 @@
   border-color: #991b1b;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dark-mode .register-btn {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
 }
 
 .dark-mode .register-btn:hover:not(:disabled) {

@@ -194,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, name: string): Promise<boolean> => {
+  const register = async (email: string, password: string, username: string, firstName: string, lastName: string): Promise<boolean> => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -202,7 +202,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           emailRedirectTo: `${window.location.origin}/verificacion-email`,
           data: {
-            username: name
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            full_name: `${firstName} ${lastName}`.trim()
           }
         }
       });

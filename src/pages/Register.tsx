@@ -8,7 +8,9 @@ import '../styles/pages/Register.css';
 
 export function Register() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -44,13 +46,19 @@ export function Register() {
     }
 
     setIsLoading(true);
-    const success = await register(formData.email, formData.password, formData.name);
+    // Combine names for fallback if needed, or pass explicitly if register supports it
+    // We will update AuthContext to handle this better, but for now pass object or args
+    // Assuming we'll update register signature to: register(email, password, username, firstName, lastName)
+    // But currently it is (email, password, name).
+    // I'll send username as 'name' for now to match interface, but I need to update AuthContext first or simultaneously.
+    // Let's assume I'll update AuthContext to accept an object or more args.
+    const success = await register(formData.email, formData.password, formData.username, formData.firstName, formData.lastName);
     setIsLoading(false);
 
     if (success) {
       setRegistrationSuccess(true);
     } else {
-      setError('Este email ya está registrado o ha ocurrido un error');
+      setError('Este email o usuario ya está registrado o ha ocurrido un error');
     }
   };
 
@@ -61,32 +69,73 @@ export function Register() {
     }));
   };
 
+// Helper to get email provider URL
+  const getEmailProviderUrl = (email: string) => {
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!domain) return null;
+
+    if (domain.includes('gmail')) return 'https://mail.google.com';
+    if (domain.includes('outlook') || domain.includes('hotmail') || domain.includes('live')) return 'https://outlook.live.com';
+    if (domain.includes('yahoo')) return 'https://mail.yahoo.com';
+    if (domain.includes('proton') || domain.includes('pm.me')) return 'https://mail.proton.me';
+    if (domain.includes('icloud')) return 'https://www.icloud.com/mail';
+    
+    return null;
+  };
+
   if (registrationSuccess) {
+    const providerUrl = getEmailProviderUrl(formData.email);
+
     return (
       <div className="register">
         <div className="register-container">
           <div className="register-card">
             <div className="success-message-container">
               <div className="success-icon">✓</div>
-              <h1 className="register-title">¡Registro Exitoso!</h1>
+              <h1 className="register-title">¡Casi listo!</h1>
               <p className="success-message">
-                Hemos enviado un email de verificación a <strong>{formData.email}</strong>
+                Hemos enviado un email de confirmación a:<br/>
+                <strong>{formData.email}</strong>
               </p>
-              <p className="success-instructions">
-                Por favor, revisa tu bandeja de entrada y haz clic en el enlace de verificación para activar tu cuenta.
-              </p>
-              <div className="success-notice">
-                <p>
-                  ⚠️ No olvides revisar tu carpeta de spam si no ves el email en unos minutos.
+              
+              <div className="success-notice" style={{ background: '#eff6ff', borderColor: '#bfdbfe' }}>
+                <p style={{ color: '#1e40af', fontSize: '1rem' }}>
+                  <strong>Importante:</strong> Debes confirmar tu cuenta haciendo clic en el enlace que te enviamos antes de poder iniciar sesión.
                 </p>
               </div>
-              <button
+
+              {providerUrl && (
+                <a 
+                  href={providerUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-back-to-login"
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '0.5rem', 
+                    textDecoration: 'none',
+                    marginBottom: '1rem',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' // Green distinct from login blue
+                  }}
+                >
+                  <Mail size={20} />
+                  Abrir mi correo ({formData.email.split('@')[1]})
+                </a>
+              )}
+
+              <p className="success-instructions">
+                ¿No recibiste el correo? Revisa tu carpeta de Spam o Correo no deseado.
+              </p>
+            </div>
+             <button
                 onClick={() => navigate('/login')}
                 className="btn-back-to-login"
+                style={providerUrl ? { background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', marginTop: '0' } : {}}
               >
                 Volver al inicio de sesión
               </button>
-            </div>
           </div>
         </div>
       </div>
@@ -105,38 +154,76 @@ export function Register() {
           </div>
 
           <form onSubmit={handleSubmit} className="register-form">
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                <User size={16} />
-                {t('fullName')}
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="form-input"
-                placeholder="Tu nombre completo"
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="firstName" className="form-label">
+                  <User size={16} />
+                  Nombre *
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="Tu nombre"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="lastName" className="form-label">
+                  <User size={16} />
+                  Apellidos *
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="Tues apellidos"
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                <Mail size={16} />
-                {t('email')}
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="form-input"
-                placeholder="tu@email.com"
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="username" className="form-label">
+                  <User size={16} />
+                  Usuario *
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="Nombre de usuario"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  <Mail size={16} />
+                  {t('email')} *
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="tu@email.com"
+                />
+              </div>
             </div>
 
             <div className="form-group">
