@@ -237,17 +237,36 @@ export const crearUsuarioAdministrativo = async (
   asignadoPor: string | null,
   notas?: string
 ): Promise<string> => {
-  const { data: newUser, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error('No authenticated session');
+  }
+
+  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`;
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ 
+      email, 
+      password, 
+      rolId, 
+      notas 
+      // 'asignadoPor' is handled by the function using the caller's token
+    }),
   });
 
-  if (signUpError) throw signUpError;
-  if (!newUser.user) throw new Error('No se pudo crear el usuario');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create user');
+  }
 
-  await asignarRolAUsuario(newUser.user.id, rolId, asignadoPor, notas);
-
-  return newUser.user.id;
+  const data = await response.json();
+  return data.userId;
 };
 
 export const actualizarRolesUsuario = async (
