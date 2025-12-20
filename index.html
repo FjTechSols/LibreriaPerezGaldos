@@ -91,12 +91,12 @@
   <body class="min-h-screen text-white overflow-x-hidden font-sans">
     <!-- Animated Background -->
     <div class="fixed inset-0 -z-10 bg-slate-950">
-      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 animate-gradient-xy opacity-80"></div>
-      <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80');"></div>
+      <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-[2px]"></div>
     </div>
 
     <!-- Intro Animation Overlay -->
-    <div id="intro-overlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-1000">
+    <div id="intro-overlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 transition-opacity duration-1000">
       
       <!-- Step 1: Loading -->
       <div id="step-1" class="intro-step flex flex-col items-center gap-8">
@@ -157,8 +157,7 @@
 
     <!-- Main Content (Hidden Initially) -->
     <div id="main-content" class="opacity-0 transition-opacity duration-1000 min-h-screen flex items-center justify-center p-4">
-      <div class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden p-8 md:p-12 text-center relative border border-white/10" 
-           style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80'); background-size: cover; background-position: center;">
+      <div class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden p-8 md:p-12 text-center relative border border-white/10 bg-slate-900 shadow-slate-950/50">
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600"></div>
 
         <!-- Icon/Logo -->
