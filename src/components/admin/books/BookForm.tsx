@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Search, Trash2, Plus, Save } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
 // import { categories } from '../../../data/categories'; // Still used for fallback or type checking?
 import { buscarLibroPorISBNMultiple } from '../../../services/isbnService';
 import { supabase } from '../../../lib/supabase'; // Import supabase
-import { generarCodigoLibro, obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
+import { obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
 
 interface BookFormProps {
   isOpen: boolean;
@@ -96,8 +96,28 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
       });
       setBookContents(initialData.contents || []);
       setShowContentInput(!!initialData.contents && initialData.contents.length > 0);
-    } else if (isCreating) {
-       // ... (reset)
+    } else if (isCreating && isOpen) {
+       setFormData({
+        code: '',
+        title: '',
+        author: '',
+        publisher: '',
+        pages: 0,
+        publicationYear: new Date().getFullYear(),
+        isbn: '',
+        price: 0,
+        originalPrice: undefined,
+        stock: 1,
+        ubicacion: '',
+        category: '', 
+        description: '',
+        coverImage: '',
+        featured: false,
+        isNew: false,
+        isOnSale: false
+      });
+      setBookContents([]);
+      setShowContentInput(false);
     }
   }, [initialData, isCreating, isOpen]);
 
@@ -270,6 +290,20 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   style={{ width: '100%' }}
                 />
             </div>
+
+            {!isCreating && (
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>ISBN</label>
+                    <input
+                      type="text"
+                      placeholder="ISBN del libro"
+                      value={formData.isbn || ''}
+                      onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+                      className="form-input"
+                      style={{ width: '100%' }}
+                    />
+                </div>
+            )}
 
             <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Título *</label>

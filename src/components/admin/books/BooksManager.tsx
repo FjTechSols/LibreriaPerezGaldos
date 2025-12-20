@@ -10,7 +10,8 @@ import {
   crearLibro, 
   actualizarLibro, 
   eliminarLibro,
-  obtenerOcrearEditorial
+  obtenerOcrearEditorial,
+  obtenerCategoriaId
 } from '../../../services/libroService';
 import '../../../styles/components/BooksManager.css';
 import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
@@ -21,6 +22,7 @@ import { Pagination } from '../../Pagination';
 import { BookTable } from './BookTable';
 import { BookForm } from './BookForm';
 import { BookSuccessModal } from './BookSuccessModal';
+import { BookExistenceCheckModal } from './BookExistenceCheckModal';
 
 // Import sub-tools if we want to render them as tabs inside Manager (Optional, but planned for future)
 // For now we focus on the Catalog section logic.
@@ -42,9 +44,11 @@ export function BooksManager() {
   const [filteredCount, setFilteredCount] = useState(0);
   const [totalBooks, setTotalBooks] = useState(0);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCheckingExistence, setIsCheckingExistence] = useState(false);
   // Book Form State
   const [isCreating, setIsCreating] = useState(false);
-  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null); // Replaces editingBook
   const [createdBook, setCreatedBook] = useState<Book | null>(null); // For Success Modal
 
   // Filters State
@@ -132,7 +136,8 @@ export function BooksManager() {
           endYear: filters.endYear ? Number(filters.endYear) : undefined,
           isbn: filters.isbn || undefined,
           publisher: filters.publisher || undefined,
-          searchMode: filters.searchMode ? 'full' as const : 'default' as const
+          searchMode: filters.searchMode ? 'full' as const : 'default' as const,
+          forceCount: true
         };
 
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, queryFilters);
@@ -160,28 +165,49 @@ export function BooksManager() {
   };
 
   const handleCreateSubmit = async (bookData: Partial<Book>, contents: string[]) => {
-    if (!bookData.title || !bookData.author || !bookData.isbn || !bookData.price) {
-      alert('Por favor completa los campos requeridos.');
+    // Validation: Title, Price, Location, Category are mandatory. Author is usually expected but user didn't explicitly list it as mandatory, though typically it is.
+    // User said: "los pos que si son obligatorio son Titulo, Precio, Ubicacion y categoria"
+    if (!bookData.title || !bookData.price || !bookData.ubicacion || !bookData.category) {
+      alert('Por favor completa los campos obligatorios: Título, Precio, Ubicación y Categoría.');
       return;
     }
 
     try {
-      const cleanISBN = bookData.isbn.replace(/[-\s]/g, '');
-      const libroExistente = await buscarLibroPorISBN(cleanISBN);
+      // ISBN logic: Not mandatory. If empty, defaults to 'N/A'.
+      const rawISBN = bookData.isbn ? bookData.isbn.replace(/[-\s]/g, '') : '';
+      const finalISBN = rawISBN || 'N/A';
 
-      if (libroExistente) {
-        const actualizado = await incrementarStockLibro(parseInt(libroExistente.id), 1);
-        if (actualizado) {
-          alert(`El libro ya existe. Stock incrementado.`);
-          setRefreshTrigger(prev => prev + 1);
-          setIsCreating(false);
-        }
-      } else {
+      // Only check for existing book if we have a real ISBN
+      if (finalISBN !== 'N/A') {
+          const libroExistente = await buscarLibroPorISBN(finalISBN);
+
+          if (libroExistente) {
+            const actualizado = await incrementarStockLibro(parseInt(libroExistente.id), 1);
+            if (actualizado) {
+              alert(`El libro ya existe. Stock incrementado.`);
+              setRefreshTrigger(prev => prev + 1);
+              setIsModalOpen(false); // Close the modal
+              return;
+            }
+          }
+      }
+
+      // Resolve dependencies
+      let editorialId: number | null | undefined = undefined;
+      if (bookData.publisher && bookData.publisher.trim()) {
+         editorialId = await obtenerOcrearEditorial(bookData.publisher);
+      }
+
+      let categoriaId: number | null | undefined = undefined;
+      if (bookData.category && bookData.category.trim()) {
+          categoriaId = await obtenerCategoriaId(bookData.category);
+      }
+
         // Map Book interface (UI) to LibroSupabase interface (DB)
         const nuevo = await crearLibro({
           titulo: bookData.title,
-          autor: bookData.author,
-          isbn: cleanISBN,
+          autor: bookData.author || 'Anónimo', 
+          isbn: finalISBN,
           precio: bookData.price,
           precio_original: bookData.originalPrice,
           stock: bookData.stock || 1,
@@ -190,9 +216,9 @@ export function BooksManager() {
           imagen_url: bookData.coverImage,
           paginas: bookData.pages,
           anio: bookData.publicationYear,
-          // For now we don't strictly map category string to ID here unless we fetch it. 
-          // Assuming the system might handle it or we leave it null for now until that logic is polished.
-          // Fixing 'titulo' is priority.
+          categoria_id: categoriaId,
+          editorial_id: editorialId,
+          
           notas: undefined, 
           activo: true,
           destacado: bookData.featured,
@@ -204,9 +230,8 @@ export function BooksManager() {
           // Show Success Modal instead of Alert
           setCreatedBook(nuevo);
           setRefreshTrigger(prev => prev + 1);
-          setIsCreating(false);
+          setIsModalOpen(false); // Close the modal (resets form by unmounting)
         }
-      }
     } catch (e) {
       console.error('Error creating book:', e);
       alert('Error al crear el libro.');
@@ -214,7 +239,7 @@ export function BooksManager() {
   };
 
   const handleEditSubmit = async (bookData: Partial<Book>, contents: string[]) => {
-    if (!editingBook) return;
+    if (!selectedBook) return; // Use selectedBook instead of editingBook
     try {
       // Resolve Editorial ID if publisher name provided
       let editorialId: number | null | undefined = undefined;
@@ -250,11 +275,12 @@ export function BooksManager() {
         // ...
       };
 
-      const updated = await actualizarLibro(parseInt(editingBook.id), mappedUpdate as any, contents);
+      const updated = await actualizarLibro(parseInt(selectedBook.id), mappedUpdate as any, contents); // Use selectedBook
       if (updated) {
         alert('Libro actualizado.');
         setRefreshTrigger(prev => prev + 1);
-        setEditingBook(null);
+        setSelectedBook(null); // Clear selected book
+        setIsModalOpen(false); // Close the modal
       } else {
         throw new Error('No se pudo actualizar.');
       }
@@ -302,6 +328,10 @@ export function BooksManager() {
     }
   };
 
+  const loadBooks = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <div className="books-manager">
        {/* Header / Stats / Title */}
@@ -309,12 +339,30 @@ export function BooksManager() {
           <div style={{ flex: '0 0 auto' }}>
             <h2 className="content-title">Gestión de Libros</h2>
             <p className="content-subtitle">
-              {filteredCount === totalBooks 
-                ? `Total: ${totalBooks} libros`
-                : `${filteredCount} libros encontrados (de ${totalBooks} totales)`}
+              {(() => {
+                const hasActiveFilters = 
+                  filters.search !== '' ||
+                  filters.category !== 'Todos' ||
+                  filters.stockStatus !== 'all' ||
+                  filters.minPrice !== '' ||
+                  filters.maxPrice !== '' ||
+                  filters.featured ||
+                  filters.isNew ||
+                  filters.isOnSale ||
+                  filters.location !== '' ||
+                  filters.minPages !== '' ||
+                  filters.maxPages !== '' ||
+                  filters.startYear !== '' ||
+                  filters.endYear !== '' ||
+                  filters.isbn !== '' ||
+                  filters.publisher !== '';
+
+                return !hasActiveFilters
+                  ? `Total: ${totalBooks} libros`
+                  : `${filteredCount} libros encontrados (de ${totalBooks} totales)`;
+              })()}
             </p>
           </div>
-          
            <div className="admin-search books-manager-search">
              <div className="search-input-wrapper">
                 <Search className="admin-search-icon" size={20} />
@@ -332,9 +380,10 @@ export function BooksManager() {
              </button>
            </div>
            
-           <button onClick={() => setIsCreating(true)} className="action-btn primary">
+           <button onClick={() => setIsCheckingExistence(true)} className="action-btn primary">
              <Plus size={20} /> Nuevo Libro
            </button>
+           
        </div>
 
        {/* Filters */}
@@ -367,7 +416,7 @@ export function BooksManager() {
                  <select 
                     value={filters.stockStatus} 
                     onChange={(e) => setFilters(prev => ({...prev, stockStatus: e.target.value}))} 
-                    className="form-select w-full h-10 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="form-select w-full h-auto py-2 text-sm rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                  >
                    <option value="all">Todos</option>
                    <option value="inStock">En Stock</option>
@@ -390,7 +439,7 @@ export function BooksManager() {
                           coverStatus: 'all',
                           location: '',
                           minPages: '',
-                          maxPages: '',
+                        maxPages: '',
                           startYear: '',
                           endYear: '',
                           isbn: '',
@@ -446,7 +495,7 @@ export function BooksManager() {
                           placeholder="Buscar editorial..."
                           value={filters.publisher}
                           onChange={(e) => setFilters(prev => ({...prev, publisher: e.target.value}))}
-                          className="form-input w-full h-9 text-sm"
+                          className="form-input w-full h-10 text-sm"
                        />
                      </div>
                      <div>
@@ -454,7 +503,7 @@ export function BooksManager() {
                        <select 
                           value={filters.location}
                           onChange={(e) => setFilters(prev => ({...prev, location: e.target.value}))}
-                          className="form-select w-full h-10 text-sm rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                          className="form-select w-full h-auto py-2 text-sm rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                        >
                          <option value="">Todas</option>
                          {ubicaciones.map(u => <option key={u.id} value={u.nombre}>{u.nombre}</option>)}
@@ -472,14 +521,14 @@ export function BooksManager() {
                             placeholder="Min" 
                             value={filters.minPrice}
                             onChange={(e) => setFilters(prev => ({...prev, minPrice: e.target.value}))}
-                            className="form-input w-full h-9 text-sm"
+                            className="form-input w-full h-10 text-sm"
                           />
                           <input 
                             type="number" 
                             placeholder="Max" 
                             value={filters.maxPrice}
                             onChange={(e) => setFilters(prev => ({...prev, maxPrice: e.target.value}))}
-                            className="form-input w-full h-9 text-sm"
+                            className="form-input w-full h-10 text-sm"
                           />
                        </div>
                      </div>
@@ -491,14 +540,14 @@ export function BooksManager() {
                             placeholder="Min" 
                             value={filters.minPages}
                             onChange={(e) => setFilters(prev => ({...prev, minPages: e.target.value}))}
-                            className="form-input w-full h-9 text-sm"
+                            className="form-input w-full h-10 text-sm"
                           />
                           <input 
                             type="number" 
                             placeholder="Max" 
                             value={filters.maxPages}
                             onChange={(e) => setFilters(prev => ({...prev, maxPages: e.target.value}))}
-                            className="form-input w-full h-9 text-sm"
+                            className="form-input w-full h-10 text-sm"
                           />
                        </div>
                      </div>
@@ -513,14 +562,14 @@ export function BooksManager() {
                           placeholder="Desde" 
                           value={filters.startYear}
                           onChange={(e) => setFilters(prev => ({...prev, startYear: e.target.value}))}
-                          className="form-input w-full h-9 text-sm"
+                          className="form-input w-full h-10 text-sm"
                         />
                         <input 
                           type="number" 
                           placeholder="Hasta" 
                           value={filters.endYear}
                           onChange={(e) => setFilters(prev => ({...prev, endYear: e.target.value}))}
-                          className="form-input w-full h-9 text-sm"
+                          className="form-input w-full h-10 text-sm"
                         />
                      </div>
                   </div>
@@ -567,7 +616,11 @@ export function BooksManager() {
        ) : (
          <BookTable 
            books={books} 
-           onEdit={setEditingBook} 
+           onEdit={(book) => {
+             setSelectedBook(book);
+             setIsCreating(false);
+             setIsModalOpen(true);
+           }} 
            onDelete={handleDelete}
            onStockUpdate={handleStockUpdate}
          />
@@ -585,25 +638,42 @@ export function BooksManager() {
        />
 
        {/* Modals */}
-       <BookForm 
-         isOpen={isCreating}
-         onClose={() => setIsCreating(false)}
-         onSubmit={handleCreateSubmit}
-         isCreating={true}
-         ubicaciones={ubicaciones}
-       />
-       
-       {editingBook && (
-         <BookForm 
-           isOpen={!!editingBook}
-           onClose={() => setEditingBook(null)}
-           onSubmit={handleEditSubmit}
-           initialData={editingBook}
-           isCreating={false}
-           ubicaciones={ubicaciones}
-         />
-       )}
+       <BookForm
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setIsCreating(false);
+          setSelectedBook(null);
+        }}
+        onSubmit={isCreating ? handleCreateSubmit : handleEditSubmit}
+        initialData={selectedBook}
+        isCreating={isCreating}
+        ubicaciones={ubicaciones}
+      />
 
+      <BookExistenceCheckModal
+        isOpen={isCheckingExistence}
+        onClose={() => setIsCheckingExistence(false)}
+        onProceedToCreate={() => {
+          setIsCheckingExistence(false);
+          setIsCreating(true);
+          setSelectedBook(null);
+          setIsModalOpen(true);
+        }}
+        onProceedToEdit={(book) => {
+          setIsCheckingExistence(false);
+          setIsCreating(false);
+          setSelectedBook(book);
+          setIsModalOpen(true);
+        }}
+        onStockUpdated={() => {
+          loadBooks();
+          // Optional: Keep modal open or close?
+          // User request implies quick +1, maybe keep open to allow more checks or just seeing the result.
+          // But usually you might want to do it once. 
+          // Let's keep it open so they see the result, they can close manually.
+        }}
+      />
        {createdBook && (
          <BookSuccessModal
            isOpen={!!createdBook}

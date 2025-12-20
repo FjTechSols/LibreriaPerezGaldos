@@ -72,6 +72,26 @@ export const obtenerOcrearEditorial = async (nombre: string): Promise<number | n
   }
 };
 
+// Strict lookup only, as categories are fixed in the UI
+export const obtenerCategoriaId = async (nombre: string): Promise<number | null> => {
+  if (!nombre) return null;
+  const nombreNormalizado = nombre.trim();
+  
+  try {
+    const { data, error } = await supabase
+      .from('categorias')
+      .select('id')
+      .ilike('nombre', nombreNormalizado) // Use ilike for robustness even if select matches
+      .maybeSingle();
+
+    if (error) throw error;
+    return data ? data.id : null;
+  } catch (error) {
+    console.error('Error fetching category ID:', error);
+    return null;
+  }
+};
+
 
 const DEFAULT_BOOK_COVER = 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=400';
 
@@ -126,6 +146,7 @@ export interface LibroFilters {
    searchMode?: 'default' | 'full'; 
    titulo?: string;
    autor?: string;
+   forceCount?: boolean;
  }
 
 // Helper to get the next lexicographical string for range queries
@@ -136,6 +157,81 @@ const getNextSearchTerm = (term: string): string => {
   const prefix = term.slice(0, -1);
   const nextLastChar = String.fromCharCode(lastChar.charCodeAt(0) + 1);
   return prefix + nextLastChar;
+};
+
+// New function to check for book existence with simplified, targeted query
+export const verificarExistenciaLibro = async (
+    criteria: { code?: string; isbn?: string; title?: string; author?: string }
+): Promise<Book[]> => {
+    let query = supabase
+        .from('libros')
+        .select('*, editoriales(id, nombre), categorias(id, nombre)')
+        .eq('activo', true);
+
+    const conditions: string[] = [];
+
+    // Prioritize ID/Code search
+    if (criteria.code) {
+        // Match exact legacy_id OR id
+        // Note: criteria.code usually comes from user input.
+        conditions.push(`legacy_id.ilike.${criteria.code}`);
+        // If numeric, might be an ID too
+        if (/^\d+$/.test(criteria.code)) {
+             conditions.push(`id.eq.${criteria.code}`);
+        }
+    }
+
+    if (criteria.isbn) {
+        conditions.push(`isbn.ilike.${criteria.isbn}`);
+    }
+
+    // Title and Author
+    // Strategy: If both are present, we could check (Title AND Author).
+    // But usually in this modal, if user fills just Title, we search Title.
+    // If user fills Title and Author, current Modal logic passed ONLY ONE to 'search'.
+    // Here we can be smarter.
+    // If both title AND author provided, we might want to check for books matching BOTH.
+    // But let's stick to the user's input model:
+    // If I search Title "Tarzan", I want all Tarzans.
+    // The Modal allows filling multiple fields.
+    // Let's perform a smart check:
+    // If Code/ISBN -> High confidence match.
+    // Else -> Fuzzy Match Title/Author.
+    
+    // IMPORTANT FIX: The user's query failed on "El Regreso de Tarzán".
+    // We must ensure the 'ilike' works.
+    // Supabase `ilike` with `%` wildcard is needed for contains.
+
+    if (criteria.code || criteria.isbn) {
+       // If we have strong identifiers, use OR for them
+       if (conditions.length > 0) {
+           query = query.or(conditions.join(','));
+       }
+    } else {
+        // Weak identifiers (Title/Author)
+        // If both present, use AND logic? Or OR?
+        // User might fill Title: "Quijote" Author: "Cervantes". Should match book with Title="Quijote" AND Author="Cervantes".
+        
+        if (criteria.title && criteria.author) {
+             query = query.ilike('titulo', `%${criteria.title}%`).ilike('autor', `%${criteria.author}%`);
+        } else if (criteria.title) {
+             query = query.ilike('titulo', `%${criteria.title}%`);
+        } else if (criteria.author) {
+             query = query.ilike('autor', `%${criteria.author}%`);
+        }
+    }
+
+    // Default limit
+    query = query.limit(20);
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error verifying existence:', error);
+        return [];
+    }
+
+    return data ? data.map(mapLibroToBook) : [];
 };
 
 export const obtenerLibros = async (
@@ -159,7 +255,8 @@ export const obtenerLibros = async (
         !filters.isNew && 
         !filters.isOnSale && 
         !filters.location && 
-        !filters.isbn
+        !filters.isbn &&
+        !filters.forceCount
     );
     
     // If default view, we DO NOT request a count from DB to save massive resources.
