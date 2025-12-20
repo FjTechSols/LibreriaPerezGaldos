@@ -282,7 +282,7 @@
         } catch (err) {
           console.error(err);
           resultsArea.classList.remove("hidden");
-          let msg = "Error al conectar con la base de datos.";
+          let msg = "No hemos encontrado el libro especificado.";
           if (
             err.message === "Auth Error" ||
             SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY_HERE"
