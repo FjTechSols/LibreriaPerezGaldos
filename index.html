@@ -233,6 +233,7 @@
             .from("libros")
             .select("titulo, autor, stock, precio")
             .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%`)
+            .gt('stock', 0)
             .limit(5);
 
           if (error) {
