@@ -5,7 +5,6 @@ import {
   FileText, 
   LogOut, 
   Menu, 
-  X, 
   ShoppingBag, 
   DollarSign, 
   Barcode, 
@@ -16,7 +15,9 @@ import {
   Image as ImageIcon, 
   Home, 
   Book as BookIcon,
-  Tags
+  Tags,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 import { obtenerEstadisticasLibros, obtenerTotalUnidadesStock } from '../services/libroService';
@@ -32,6 +33,10 @@ import { InvoicesManager } from '../components/admin/invoices/InvoicesManager';
 import { OrdersManager } from '../components/admin/orders/OrdersManager';
 import { GestionClientes } from '../components/admin/clients/GestionClientes';
 import { MetadataManager } from '../components/admin/metadata/MetadataManager';
+
+// Dashboard Charts
+import { RevenueChart } from '../components/admin/dashboard/RevenueChart';
+import { CategoryChart } from '../components/admin/dashboard/CategoryChart';
 
 // Legacy / Specific Tools
 import { GestionISBN } from '../components/admin/books/GestionISBN';
@@ -55,6 +60,32 @@ export function AdminDashboard() {
   
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Sidebar collapse state with localStorage persistence
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('adminSidebarCollapsed');
+    return saved === 'true';
+  });
+
+  // Check if we're on mobile
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1024);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const newValue = !prev;
+      localStorage.setItem('adminSidebarCollapsed', String(newValue));
+      return newValue;
+    });
+  };
 
   // Dashboard Stats State
   const [totalBooks, setTotalBooks] = useState(0);
@@ -181,6 +212,17 @@ export function AdminDashboard() {
         </div>
       </div>
 
+      {/* Analytics Charts */}
+      <div className="charts-grid" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 'var(--spacing-6)',
+        marginBottom: 'var(--spacing-8)'
+      }}>
+        <RevenueChart />
+        <CategoryChart />
+      </div>
+
       <div className="company-info">
         <div className="company-header">
           <div className="company-logo">
@@ -231,167 +273,155 @@ export function AdminDashboard() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 lg:static dashboard-sidebar w-64 flex flex-col shadow-lg z-30 transition-transform duration-300 lg:translate-x-0 bg-white dark:bg-gray-800 ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3" style={{ borderColor: 'var(--border-color)' }}>
-          <div className="flex items-center gap-3">
+      <aside className={`dashboard-sidebar ${!isMobile && isSidebarCollapsed ? 'collapsed' : ''} ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        {/* Sidebar Header */}
+        <div className="sidebar-header">
+          <div className="sidebar-logo">
             <img 
               src="/Logo Exlibris Perez Galdos.png" 
-              alt="Logo Librería Pérez Galdós" 
-              className="h-10 w-auto"
+              alt="Logo" 
+              className="sidebar-logo-img"
             />
-            <span className="font-bold text-lg text-gray-900 dark:text-gray-100">Admin Panel</span>
+            {!isSidebarCollapsed && (
+              <span className="sidebar-title">Admin Panel</span>
+            )}
           </div>
           <button 
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={toggleSidebar}
+            className="sidebar-toggle"
+            title={isSidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
           >
-            <X size={20} />
+            {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        {/* Navigation */}
+        <nav className="sidebar-nav">
           <button
             onClick={() => handleSectionChange('dashboard')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'dashboard' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'dashboard' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Inicio' : ''}
           >
-            <Home size={18} />
-            Inicio
+            <Home size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Inicio</span>}
           </button>
+          
           <button
             onClick={() => handleSectionChange('books')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'books' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'books' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Catálogo' : ''}
           >
-            <BookIcon size={18} />
-            Catálogo
+            <BookIcon size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Catálogo</span>}
           </button>
+          
           <button
             onClick={() => handleSectionChange('invoices')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'invoices' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'invoices' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Facturas' : ''}
           >
-            <FileText size={18} />
-            Facturas
+            <FileText size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Facturas</span>}
           </button>
+          
           <button
             onClick={() => handleSectionChange('orders')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'orders' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'orders' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Pedidos' : ''}
           >
-            <ShoppingBag size={18} />
-            Pedidos
+            <ShoppingBag size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Pedidos</span>}
           </button>
+          
           <button
             onClick={() => handleSectionChange('clients')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'clients' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'clients' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Clientes' : ''}
           >
-            <UsersIcon size={18} />
-            Clientes
+            <UsersIcon size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Clientes</span>}
           </button>
           
           <button
             onClick={() => handleSectionChange('metadata')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'metadata' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'metadata' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Metadatos' : ''}
           >
-            <Tags size={18} />
-            Metadatos
+            <Tags size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Metadatos</span>}
           </button>
           
-          <div className="pt-4 pb-2">
-            <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Herramientas</p>
-          </div>
+          {!isSidebarCollapsed && (
+            <div className="sidebar-section-title">HERRAMIENTAS</div>
+          )}
           
           <button
             onClick={() => handleSectionChange('covers')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'covers' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'covers' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Buscar Portadas' : ''}
           >
-            <ImageIcon size={18} />
-            Buscar Portadas
+            <ImageIcon size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Buscar Portadas</span>}
           </button>
+          
           <button
             onClick={() => handleSectionChange('isbn')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'isbn' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'isbn' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Completar ISBNs' : ''}
           >
-            <Barcode size={18} />
-            Completar ISBNs
+            <Barcode size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Completar ISBNs</span>}
           </button>
+          
           <button
             onClick={() => handleSectionChange('titles')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              activeSection === 'titles' 
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
+            className={`nav-item ${activeSection === 'titles' ? 'active' : ''}`}
+            title={isSidebarCollapsed ? 'Corregir Títulos' : ''}
           >
-            <Sparkles size={18} />
-            Corregir Títulos
+            <Sparkles size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Corregir Títulos</span>}
           </button>
         </nav>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2" style={{ borderColor: 'var(--border-color)' }}>
+        {/* Footer */}
+        <div className="sidebar-footer">
           <button 
-             onClick={() => navigate('/')}
-             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            onClick={() => navigate('/')}
+            className="nav-item"
+            title={isSidebarCollapsed ? 'Volver a la Web' : ''}
           >
-            <ArrowLeft size={18} />
-            Volver a la Web
+            <ArrowLeft size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Volver a la Web</span>}
           </button>
+          
           <button 
-             onClick={() => navigate('/admin/ajustes')}
-             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            onClick={() => navigate('/admin/ajustes')}
+            className="nav-item"
+            title={isSidebarCollapsed ? 'Ajustes de Administrador' : ''}
           >
-            <Sparkles size={18} /> {/* Reuse Sparkles or suggest Settings Icon if imported */}
-            Ajustes de Administrador
+            <Sparkles size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Ajustes de Administrador</span>}
           </button>
+          
           <button 
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            className="nav-item logout-btn"
+            title={isSidebarCollapsed ? 'Cerrar Sesión' : ''}
           >
-            <LogOut size={18} />
-            Cerrar Sesión
+            <LogOut size={20} className="nav-item-icon" />
+            {!isSidebarCollapsed && <span className="nav-item-text">Cerrar Sesión</span>}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className={`dashboard-content-wrapper ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         {/* Top Header */}
         <header className="h-16 flex items-center justify-between px-6 shadow-sm z-10" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
           <div className="flex items-center gap-3">
@@ -433,7 +463,7 @@ export function AdminDashboard() {
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-auto p-6" style={{ background: 'var(--bg-tertiary)' }}>
-          <div className="max-w-7xl mx-auto">
+          <div className="w-full">
              {activeSection === 'dashboard' && renderDashboard()}
              {activeSection === 'books' && <BooksManager />}
              {activeSection === 'invoices' && <InvoicesManager />}

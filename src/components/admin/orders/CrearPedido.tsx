@@ -45,7 +45,7 @@ export default function CrearPedido({
   onSuccess,
 }: CrearPedidoProps) {
   const { user } = useAuth();
-  const { formatPrice } = useSettings();
+  const { formatPrice, settings } = useSettings();
   const [clientes, setClientes] = useState<Cliente[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -1075,11 +1075,13 @@ export default function CrearPedido({
     setPrecioExterno(0);
   };
 
+  const taxRate = settings.billing.taxRate / 100; // Convert percentage to decimal
   const { subtotal, iva, total } = calcularTotalesPedido(
     lineas.map((l) => ({
       cantidad: l.cantidad,
       precio_unitario: l.precio_unitario,
-    }))
+    })),
+    taxRate
   );
 
   if (!isOpen) return null;
@@ -1946,7 +1948,7 @@ export default function CrearPedido({
                       <span>{formatPrice(subtotal)}</span>
                     </div>
                     <div className="total-row">
-                      <span>IVA (21%):</span>
+                      <span>IVA ({settings.billing.taxRate}%):</span>
                       <span>{formatPrice(iva)}</span>
                     </div>
                     <div className="total-row final">

@@ -256,6 +256,11 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
+/* Light mode - ensure white background */
+:root:not(.dark-mode) .modal-content {
+  background-color: #ffffff !important;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

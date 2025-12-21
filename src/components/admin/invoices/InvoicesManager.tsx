@@ -67,7 +67,8 @@ export function InvoicesManager() {
             address: '', 
             taxId: '', 
             phone: '', 
-            email: '' 
+            email: '',
+            logo: ''
         };
 
         const lang = language;
@@ -76,6 +77,15 @@ export function InvoicesManager() {
           en: { title: 'INVOICE', date: 'Date', status: 'Status', billTo: 'BILL TO:', nif: 'VAT ID', description: 'Description', qty: 'Qty', unitPrice: 'Unit Price', total: 'Total', subtotal: 'Subtotal', tax: 'VAT', totalUpper: 'TOTAL' }
         }[lang];
   
+        // Add logo if available
+        if (company.logo) {
+          try {
+            doc.addImage(company.logo, 'PNG', 15, 10, 25, 25);
+          } catch (error) {
+            console.error('Error adding logo to PDF:', error);
+          }
+        }
+
         doc.setFontSize(20);
         doc.text(t.title, 105, 20, { align: 'center' });
   

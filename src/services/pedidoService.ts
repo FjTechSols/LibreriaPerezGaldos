@@ -30,12 +30,15 @@ export interface CalculoPedido {
   total: number;
 }
 
-export const calcularTotalesPedido = (detalles: { cantidad: number; precio_unitario: number }[]): CalculoPedido => {
+export const calcularTotalesPedido = (
+  detalles: { cantidad: number; precio_unitario: number }[],
+  taxRate: number = IVA_RATE
+): CalculoPedido => {
   const subtotal = detalles.reduce((sum, detalle) => {
     return sum + (detalle.cantidad * detalle.precio_unitario);
   }, 0);
 
-  const iva = subtotal * IVA_RATE;
+  const iva = subtotal * taxRate;
   const total = subtotal + iva;
 
   return {

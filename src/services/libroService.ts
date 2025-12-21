@@ -989,27 +989,39 @@ export const obtenerTotalLibros = async (): Promise<number> => {
 };
 
 export const obtenerEstadisticasLibros = async () => {
-  try {
-    const { count: totalLibros } = await supabase
-      .from('libros')
-      .select('*', { count: 'exact', head: true })
-      .eq('activo', true);
+    try {
+        // Ejecutar en paralelo para velocidad
+        const [totalRes, sinStockRes] = await Promise.all([
+            supabase
+                .from('libros')
+                .select('*', { count: 'exact', head: true })
+                .eq('activo', true),
+            supabase
+                .from('libros')
+                .select('*', { count: 'exact', head: true })
+                .eq('activo', true)
+                .eq('stock', 0)
+        ]);
 
-    const { count: sinStock } = await supabase
-      .from('libros')
-      .select('*', { count: 'exact', head: true })
-      .eq('activo', true)
-      .eq('stock', 0);
+        if (totalRes.error) console.error('Error fetching total books:', totalRes.error);
+        if (sinStockRes.error) console.error('Error fetching out of stock books:', sinStockRes.error);
 
-    return {
-      total: totalLibros || 0,
-      sinStock: sinStock || 0,
-      enStock: (totalLibros || 0) - (sinStock || 0)
-    };
-  } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
-    return { total: 0, sinStock: 0, enStock: 0 };
-  }
+        const total = totalRes.count || 0;
+        const sinStock = sinStockRes.count || 0;
+        
+        // Sanity check: Total cannot be less than sinStock. 
+        // If total fetch failed (0) but sinStock succeeded, use sinStock as minimum total?
+        const safeTotal = total < sinStock ? sinStock : total;
+
+        return {
+            total: safeTotal,
+            sinStock: sinStock,
+            enStock: safeTotal - sinStock
+        };
+    } catch (error) {
+        console.error('Error al obtener estadísticas:', error);
+        return { total: 0, sinStock: 0, enStock: 0 };
+    }
 };
 
 async function enrichBooks(data: LibroSupabase[]) {
@@ -1037,15 +1049,27 @@ async function enrichBooks(data: LibroSupabase[]) {
   });
 }
 
-// Funciones auxiliares adicionales que podrían ser necesarias
 export const obtenerTotalUnidadesStock = async (): Promise<number> => {
-  const { data, error } = await supabase
-    .from('libros')
-    .select('stock')
-    .eq('activo', true);
-  
-  if (error) return 0;
-  return data.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+    try {
+        // Optimization: Only fetch items with stock > 0
+        // This drastically reduces payload size (skipping 77k+ items with 0 stock)
+        const { data, error } = await supabase
+            .from('libros')
+            .select('stock')
+            .eq('activo', true)
+            .gt('stock', 0);
+        
+        if (error) {
+            console.error('Error fetching total stock units:', error);
+            return 0;
+        }
+
+        if (!data) return 0;
+        return data.reduce((acc, curr) => acc + (curr.stock || 0), 0);
+    } catch (error) {
+         console.error('Error in obtenerTotalUnidadesStock:', error);
+         return 0;
+    }
 };
 
 export const buscarLibroPorISBN = async (isbn: string): Promise<Book | null> => {

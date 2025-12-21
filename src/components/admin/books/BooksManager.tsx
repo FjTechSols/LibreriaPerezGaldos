@@ -612,8 +612,11 @@ export function BooksManager() {
 
        {/* Table */}
        {loading ? (
-         <div className="p-8 text-center text-gray-500">Cargando libros...</div>
-       ) : (
+         <div className="p-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="mt-4 text-gray-500 font-medium">Cargando catálogo...</p>
+         </div>
+       ) : books.length > 0 ? (
          <BookTable 
            books={books} 
            onEdit={(book) => {
@@ -624,6 +627,53 @@ export function BooksManager() {
            onDelete={handleDelete}
            onStockUpdate={handleStockUpdate}
          />
+       ) : (
+         <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+               <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">No se encontraron libros</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-8">
+               No hay resultados para los filtros seleccionados. Puede que el libro no esté registrado en la base de datos.
+            </p>
+            <div className="flex gap-4">
+               <button 
+                  onClick={() => {
+                     setFilters({
+                       search: '',
+                       category: 'Todos',
+                       minPrice: '',
+                       maxPrice: '',
+                       stockStatus: 'all',
+                       featured: false,
+                       isNew: false,
+                       isOnSale: false,
+                       coverStatus: 'all',
+                       location: '',
+                       minPages: '',
+                       maxPages: '',
+                       startYear: '',
+                       endYear: '',
+                       isbn: '',
+                       publisher: '',
+                       searchMode: false
+                     });
+                     setLocalSearchTerm('');
+                     setAdvancedMode(false);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+               >
+                  Limpiar Filtros
+               </button>
+               <button 
+                  onClick={() => setIsCheckingExistence(true)}
+                  className="action-btn primary"
+               >
+                  <Plus size={16} />
+                  Registrar Nuevo Libro
+               </button>
+            </div>
+         </div>
        )}
 
        {/* Pagination */}
