@@ -50,8 +50,8 @@ export default function StripeCheckout() {
         total,
         {
           pedido_id: orderId!.toString(),
-          cliente_email: state?.clientEmail,
-          cliente_nombre: state?.clientName,
+          cliente_email: state?.clientEmail || '',
+          cliente_nombre: state?.clientName || '',
         }
       );
 

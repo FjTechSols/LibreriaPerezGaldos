@@ -129,20 +129,13 @@ export function BarcodeScannerModal({ isOpen, onClose, onScanSuccess }: BarcodeS
         
         <div style={{ padding: '1.5rem' }}>
             {/* Viewfinder Area */}
-            <div 
-                id={regionId} 
-                style={{ 
-                    width: '100%', 
-                    minHeight: '250px', 
-                    background: '#000', 
-                    borderRadius: '8px', 
-                    overflow: 'hidden',
-                    marginBottom: '1rem',
-                    position: 'relative'
-                }}
-            >
+            <div style={{ position: 'relative', width: '100%', minHeight: '250px', borderRadius: '8px', overflow: 'hidden', marginBottom: '1rem', background: '#000' }}>
+                {/* 1. The Container for html5-qrcode (Must be empty of React children) */}
+                <div id={regionId} style={{ width: '100%', height: '100%' }}></div>
+
+                {/* 2. React-managed Placeholder Overlay */}
                 {!isScanning && !loading && !error && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', zIndex: 10, background: '#000' }}>
                         <Camera size={48} opacity={0.5} />
                     </div>
                 )}

@@ -15,7 +15,7 @@ export const sendInvoiceEmail = async (invoiceId: number): Promise<EmailResult> 
     }
 
     // Call the Edge Function 'send-invoice-email'
-    const { data, error } = await supabase.functions.invoke('send-invoice-email', {
+    const { error } = await supabase.functions.invoke('send-invoice-email', {
       body: { invoice_id: invoiceId },
     });
 
