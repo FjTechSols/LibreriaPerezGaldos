@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { X, Camera, RefreshCw } from 'lucide-react';
+import { Html5Qrcode, Html5QrcodeCameraScanConfig } from 'html5-qrcode';
+import { X, Camera } from 'lucide-react';
 
 interface BarcodeScannerModalProps {
   isOpen: boolean;
