@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { X, Search, Trash2, Plus, Save } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Search, Trash2, Plus, Save, Camera, ScanLine } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
 // import { categories } from '../../../data/categories'; // Still used for fallback or type checking?
 import { buscarLibroPorISBNMultiple } from '../../../services/isbnService';
 import { supabase } from '../../../lib/supabase'; // Import supabase
 import { obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
+import { BarcodeScannerModal } from './BarcodeScannerModal';
 
 interface BookFormProps {
   isOpen: boolean;
@@ -44,6 +45,70 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   // State for dynamic categories
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Scanner State
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const isbnInputRef = useRef<HTMLInputElement>(null);
+
+  const handleScanSuccess = (decodedText: string) => {
+    // EAN-13 sometimes needs cleaning or checking
+    // But usually it's just the number.
+    setFormData(prev => ({ ...prev, isbn: decodedText }));
+    // Automatically trigger search
+    // We can't call handleISBNSearch directly because it relies on state that might not be updated yet
+    // So we pass the text directly to a wrapper or effect.
+    // However, handleISBNSearch reads from formData.isbn.
+    // The safest way is to update state AND call a search function that accepts an argument.
+    
+    // Let's modify handleISBNSearch to accept optional argument or use a timeout effect.
+    // Or just create a specific function for this.
+    handleExplicitISBNSearch(decodedText);
+  };
+
+  const handleExplicitISBNSearch = async (isbn: string) => {
+      // Re-use logic from handleISBNSearch but with explicit value
+      setSearchingISBN(true);
+      try {
+        const bookData = await buscarLibroPorISBNMultiple(isbn);
+        if (bookData) {
+            setFormData(prev => ({
+                ...prev,
+                code: '',
+                title: bookData.title,
+                author: bookData.authors.join(', '),
+                publisher: bookData.publisher,
+                pages: bookData.pageCount,
+                publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : new Date().getFullYear(),
+                isbn: bookData.isbn,
+                category: bookData.categories[0] || (dbCategories.length > 0 ? dbCategories[0] : ''),
+                description: bookData.description,
+                coverImage: bookData.imageUrl,
+            }));
+             // Handle "Obra Completa"
+            if (bookData.title && /obra\s*completa|colecci[oó]n|estuche|pack|set/i.test(bookData.title)) {
+                setShowContentInput(true);
+                setBookContents(['']);
+            }
+            alert('Información encontrada!');
+        } else {
+            alert('No se encontró información. Puedes ingresarla manualmente.');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Error al buscar.');
+      } finally {
+        setSearchingISBN(false);
+      }
+  };
+
+  const handleUSBScanFocus = () => {
+      // Just focus the input and select text
+      if (isbnInputRef.current) {
+          isbnInputRef.current.focus();
+          isbnInputRef.current.select();
+      }
+      alert("Listo para escanear con USB. \n\n1. El cursor está en el campo ISBN.\n2. Dispara el lector.\n3. El formulario se rellenará automáticamente.");
+  };
 
   // Fetch categories from DB
   useEffect(() => {
@@ -226,6 +291,54 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
 
         {isCreating && (
           <div className="isbn-search-container">
+            {/* Scanner Options Row */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px dashed var(--border-color)' }}>
+                <button
+                    type="button"
+                    onClick={() => setIsScannerOpen(true)}
+                    style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '0.5rem',
+                        background: '#2563eb', 
+                        color: 'white', 
+                        border: 'none',
+                        padding: '0.75rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                        fontSize: '0.9rem'
+                    }}
+                >
+                    <Camera size={18} />
+                    Escanear con Cámara
+                </button>
+                 <button
+                    type="button"
+                    onClick={handleUSBScanFocus}
+                    style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '0.5rem',
+                        background: '#f1f5f9', 
+                        color: '#334155',
+                        border: '1px solid #cbd5e1',
+                        padding: '0.75rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                        fontSize: '0.9rem'
+                    }}
+                >
+                    <ScanLine size={18} />
+                    Escanear con USB
+                </button>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h4 style={{ margin: 0 }}>Gestión de ISBN</h4>
                 <button 
@@ -246,9 +359,11 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                     {showContentInput ? '✓ Es Obra Completa' : '+ Es Obra Completa?'}
                 </button>
             </div>
+
             <p>Ingresa el ISBN para buscar datos automáticos. También puedes escribirlo manualmente.</p>
             <div className="search-actions">
               <input
+                ref={isbnInputRef}
                 type="text"
                 className="search-input"
                 value={formData.isbn || ''}
@@ -578,6 +693,12 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
            </button>
         </div>
       </div>
+      
+      <BarcodeScannerModal 
+        isOpen={isScannerOpen} 
+        onClose={() => setIsScannerOpen(false)} 
+        onScanSuccess={handleScanSuccess} 
+      />
     </div>
   );
 }
