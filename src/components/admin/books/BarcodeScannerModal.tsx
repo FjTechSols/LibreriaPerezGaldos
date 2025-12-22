@@ -19,48 +19,59 @@ export function BarcodeScannerModal({ isOpen, onClose, onScanSuccess }: BarcodeS
 
   // Initial setup and camera listing
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
     if (isOpen) {
       setLoading(true);
       setError('');
-      
-      // Initialize instance
-      const html5QrCode = new Html5Qrcode(regionId);
-      scannerRef.current = html5QrCode;
 
-      Html5Qrcode.getCameras()
-        .then((devices) => {
-          if (devices && devices.length) {
-            setCameras(devices);
-            // Default to the last one (often the back camera on mobile) or the first one
-            setSelectedCameraId(devices[devices.length - 1].id);
-          } else {
-            setError('No se detectaron cámaras.');
-          }
-        })
-        .catch((err) => {
-          console.error("Error getting cameras", err);
-          let msg = "No se pudo acceder a la cámara.";
-          if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError' || err?.toString().includes('Permission')) {
-             msg = "permisos"; // Keyword for UI handler
-          }
-          setError(msg);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      // Small delay to ensure DOM element with regionId is mounted
+      timer = setTimeout(() => {
+        try {
+            const html5QrCode = new Html5Qrcode(regionId);
+            scannerRef.current = html5QrCode;
 
-      return () => {
-        if (scannerRef.current) {
-          if (scannerRef.current.isScanning) {
-            scannerRef.current.stop().catch(e => console.error("Error stopping scanner", e));
-          }
-          // The clear() method removes the element from DOM? No, clear() is for Scanner widget.
-          // For Html5Qrcode class, wait... stop() is enough generally. 
-          // But cleaning up the instance is good.
-          // Html5Qrcode doesn't have a 'destroy' method in same way, but stop() releases camera.
+            Html5Qrcode.getCameras()
+                .then((devices) => {
+                if (devices && devices.length) {
+                    setCameras(devices);
+                    // Default to the last one (often the back camera on mobile) or the first one
+                    setSelectedCameraId(devices[devices.length - 1].id);
+                } else {
+                    setError('No se detectaron cámaras.');
+                }
+                })
+                .catch((err) => {
+                console.error("Error getting cameras", err);
+                let msg = "No se pudo acceder a la cámara.";
+                // Check multiple error formats
+                const strErr = err?.toString() || '';
+                if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError' || strErr.includes('Permission') || strErr.includes('denied')) {
+                    msg = "permisos"; // Keyword for UI handler
+                }
+                setError(msg);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        } catch (e) {
+            console.error("Error creating Html5Qrcode instance", e);
+            setError("Error interno al inicializar el escáner.");
+            setLoading(false);
         }
-      };
+      }, 300);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (scannerRef.current) {
+        if (scannerRef.current.isScanning) {
+           scannerRef.current.stop().catch(e => console.error("Error stopping scanner", e));
+        }
+        // Clearing logic if needed
+        scannerRef.current = null;
+      }
+    };
   }, [isOpen]);
 
   const startScanning = async () => {
