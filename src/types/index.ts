@@ -1,5 +1,5 @@
-export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado';
-export type TipoPedido = 'interno' | 'iberlibro' | 'conecta' | 'uniliber' | 'libreros_de_viejo' | 'perez_galdos' | 'galeon';
+export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion';
+export type TipoPedido = 'interno' | 'iberlibro' | 'uniliber' | 'perez_galdos' | 'galeon';
 export type MetodoPago = 'tarjeta' | 'paypal' | 'transferencia' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'Correos' | 'Otro' | 'otro';
 export type TipoFactura = 'normal' | 'rectificativa';
@@ -178,6 +178,7 @@ export interface Factura {
   archivo_xml?: string;
   anulada?: boolean;
   motivo_anulacion?: string;
+  status?: 'Pendiente' | 'Pagada' | 'Anulada';
   created_at?: string;
   updated_at?: string;
   pedido?: Pedido;

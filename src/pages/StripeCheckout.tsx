@@ -1,25 +1,28 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { StripePaymentForm } from '../components/StripePaymentForm';
 import { getStripe } from '../lib/stripe';
 import { stripeService } from '../services/stripeService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { crearPedido, actualizarPedido } from '../services/pedidoService';
+import { confirmOrderAndDeductStock } from '../services/pedidoService';
 import { ArrowLeft } from 'lucide-react';
 import '../styles/components/StripePaymentForm.css';
 
 export default function StripeCheckout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
+  
+  // Extract state passed from Cart
+  const state = location.state as { orderId: number; clientEmail: string; clientName: string } | undefined;
+  const orderId = state?.orderId;
+
   const [clientSecret, setClientSecret] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [pedidoId, setPedidoId] = useState<number | null>(null);
-
-  const checkoutData = JSON.parse(localStorage.getItem('checkoutData') || '{}');
 
   useEffect(() => {
     if (!user || items.length === 0) {
@@ -27,44 +30,28 @@ export default function StripeCheckout() {
       return;
     }
 
-    if (!checkoutData.nombre) {
-      navigate('/carrito');
-      return;
+    if (!orderId) {
+       console.error("No Order ID found in state. Redirecting to cart.");
+       navigate('/carrito');
+       return;
     }
 
     initializePayment();
-  }, []);
+  }, [orderId]);
 
   const initializePayment = async () => {
     try {
       setIsLoading(true);
 
-      const nuevoPedido = await crearPedido({
-        usuario_id: user!.id,
-        cliente_id: undefined,
-        tipo: 'interno',
-        metodo_pago: 'tarjeta',
-        direccion_envio: `${checkoutData.direccion}, ${checkoutData.ciudad}, ${checkoutData.codigo_postal}, ${checkoutData.provincia}, ${checkoutData.pais}`,
-        observaciones: checkoutData.observaciones || '',
-        detalles: items.map(item => ({
-          libro_id: parseInt(item.book.id),
-          cantidad: item.quantity,
-          precio_unitario: item.book.price,
-        })),
-      });
-
-      if (!nuevoPedido) {
-        throw new Error('No se pudo crear el pedido.');
-      }
-
-      setPedidoId(nuevoPedido.id);
-
+      // We skip creating order here. It is already created in Cart.tsx
+      // We just create the payment intent using the existing orderId.
+      
       const { clientSecret: secret } = await stripeService.createPaymentIntent(
         total,
         {
-          pedido_id: nuevoPedido.id.toString(),
-          cliente_email: checkoutData.email,
-          cliente_nombre: `${checkoutData.nombre} ${checkoutData.apellidos}`,
+          pedido_id: orderId!.toString(),
+          cliente_email: state?.clientEmail,
+          cliente_nombre: state?.clientName,
         }
       );
 
@@ -79,23 +66,29 @@ export default function StripeCheckout() {
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
     try {
-      if (pedidoId) {
-        await actualizarPedido(pedidoId, {
-          estado: 'procesando',
-        });
-      }
+        if (!orderId) throw new Error("Order ID not found during success handling");
+
+        // Use the new ATOMIC function that deducts stock and confirms order
+        const result = await confirmOrderAndDeductStock(orderId);
+
+        if (!result.success) {
+            console.error("Stock deduction failed:", result.error);
+            // Alert user about the discrepancy but allow completion flow
+            alert("Pago recibido, pero hubo un error actualizando el stock. Por favor guarda este ID de pedido: " + orderId);
+        }
 
       clearCart();
-      localStorage.removeItem('checkoutData');
+      
       navigate('/pago-completado', {
         state: {
-          pedidoId,
+          pedidoId: orderId,
           paymentIntentId,
           total,
         },
       });
     } catch (err) {
       console.error('Error updating order:', err);
+      setError("Error al confirmar el pedido. Por favor contacte soporte.");
     }
   };
 

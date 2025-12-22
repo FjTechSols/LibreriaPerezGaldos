@@ -51,12 +51,12 @@ export function Cart() {
     setError(null);
 
     try {
-      if (checkoutData.metodo_pago === 'tarjeta') {
-        localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
-        navigate('/stripe-checkout');
-        return;
-      }
+      // Create Order IMMEDIATELY to prevent duplicates later
+      const direccionCompleta = `${checkoutData.direccion}, ${checkoutData.codigo_postal} ${checkoutData.ciudad}, ${checkoutData.provincia}, ${checkoutData.pais}`;
+      
+      let clienteId = undefined;
 
+      // Always create/find client first
       const cliente = await findOrCreateCliente({
         nombre: checkoutData.nombre,
         apellidos: checkoutData.apellidos,
@@ -69,8 +69,7 @@ export function Cart() {
         pais: checkoutData.pais,
         tipo: 'particular'
       });
-
-      const direccionCompleta = `${checkoutData.direccion}, ${checkoutData.codigo_postal} ${checkoutData.ciudad}, ${checkoutData.provincia}, ${checkoutData.pais}`;
+      clienteId = cliente.id;
 
       const detalles = items.map(item => ({
         libro_id: parseInt(item.book.id),
@@ -80,7 +79,7 @@ export function Cart() {
 
       const pedido = await crearPedido({
         usuario_id: user!.id,
-        cliente_id: cliente.id,
+        cliente_id: clienteId,
         tipo: 'interno',
         metodo_pago: checkoutData.metodo_pago,
         direccion_envio: direccionCompleta,
@@ -88,16 +87,32 @@ export function Cart() {
         detalles
       });
 
-      if (pedido) {
-        clearCart();
-        alert(`¡Pedido #${pedido.id} creado con éxito! Puede ver el estado en su panel de usuario.`);
-        navigate('/mi-cuenta');
-      } else {
-        setError('Error al crear el pedido. Por favor, intente nuevamente.');
+      if (!pedido) {
+        throw new Error('Error al crear el pedido inicial.');
       }
+
+      if (checkoutData.metodo_pago === 'tarjeta') {
+        // Pass the created Order ID to the checkout page
+        // We also pass client info just for the PaymentIntent metadata if needed, 
+        // but the order itself is already safely created in DB.
+        navigate('/stripe-checkout', { 
+            state: { 
+                orderId: pedido.id, 
+                clientEmail: checkoutData.email, 
+                clientName: `${checkoutData.nombre} ${checkoutData.apellidos}` 
+            } 
+        });
+        return;
+      }
+
+      // If internal/transfer method (not card), success immediately
+      clearCart();
+      alert(`¡Pedido #${pedido.id} creado con éxito! Puede ver el estado en su panel de usuario.`);
+      navigate('/mi-cuenta');
+
     } catch (err) {
       console.error('Error in checkout:', err);
-      setError('Error inesperado al procesar el pedido.');
+      setError('Error inesperado al procesar el pedido. Inténtelo de nuevo.');
     } finally {
       setIsProcessing(false);
     }

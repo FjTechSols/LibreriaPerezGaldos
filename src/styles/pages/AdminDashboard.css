@@ -1347,12 +1347,14 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  background: transparent;
 }
 
 .company-logo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  background: transparent;
 }
 
 .company-details {

@@ -35,8 +35,11 @@ import { GestionClientes } from '../components/admin/clients/GestionClientes';
 import { MetadataManager } from '../components/admin/metadata/MetadataManager';
 
 // Dashboard Charts
+// Dashboard Charts
 import { RevenueChart } from '../components/admin/dashboard/RevenueChart';
 import { CategoryChart } from '../components/admin/dashboard/CategoryChart';
+import { OrderStatusChart } from '../components/admin/dashboard/OrderStatusChart';
+import { TopSellingBooksChart } from '../components/admin/dashboard/TopSellingBooksChart';
 
 // Legacy / Specific Tools
 import { GestionISBN } from '../components/admin/books/GestionISBN';
@@ -221,6 +224,8 @@ export function AdminDashboard() {
       }}>
         <RevenueChart />
         <CategoryChart />
+        <OrderStatusChart />
+        <TopSellingBooksChart />
       </div>
 
       <div className="company-info">

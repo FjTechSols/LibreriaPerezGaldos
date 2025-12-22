@@ -11,14 +11,15 @@ interface PedidosListProps {
   refreshTrigger?: number;
 }
 
-const ESTADOS: EstadoPedido[] = ['pendiente', 'procesando', 'enviado', 'completado', 'cancelado'];
+const ESTADOS: EstadoPedido[] = ['pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
 
 const ESTADO_COLORES: Record<EstadoPedido, string> = {
   pendiente: 'amarillo',
   procesando: 'azul',
   enviado: 'morado',
   completado: 'verde',
-  cancelado: 'rojo'
+  cancelado: 'rojo',
+  devolucion: 'gris'
 };
 
 const ESTADO_LABELS: Record<EstadoPedido, string> = {
@@ -26,7 +27,8 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
   procesando: 'Procesando',
   enviado: 'Enviado',
   completado: 'Completado',
-  cancelado: 'Cancelado'
+  cancelado: 'Cancelado',
+  devolucion: 'Devolución'
 };
 
 export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosListProps) {
@@ -113,6 +115,16 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
             <span className="stat-value">{estadisticas.completados}</span>
           </div>
 
+          <div className="stat-card devolucion">
+            <span className="stat-label">Devoluciones</span>
+            <span className="stat-value">{estadisticas.devoluciones}</span>
+          </div>
+
+          <div className="stat-card devolucion">
+            <span className="stat-label">Devoluciones</span>
+            <span className="stat-value">{estadisticas.devoluciones}</span>
+          </div>
+
           <div className="stat-card ventas">
             <span className="stat-label">Ventas Totales</span>
             <span className="stat-value">{formatPrice(estadisticas.totalVentas)}</span>
@@ -152,6 +164,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           <span>Usuario</span>
           <span>Fecha</span>
           <span>Estado</span>
+          <span>Tipo</span>
           <span>Total</span>
           <span>Método de Pago</span>
           <span>Transportista</span>
@@ -185,6 +198,11 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
               <span className={`estado-badge ${ESTADO_COLORES[pedido.estado || 'pendiente']}`}>
                 {ESTADO_LABELS[pedido.estado || 'pendiente']}
               </span>
+            </span>
+            <span className="pedido-tipo">
+               <span className="badge-tipo">
+                  {pedido.tipo?.replace('_', ' ') || '-'}
+               </span>
             </span>
             <span className="pedido-total">
               {formatPrice(pedido.total || 0)}

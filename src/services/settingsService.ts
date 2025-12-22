@@ -249,7 +249,7 @@ class SettingsService {
         email: 'libreria@perezgaldos.com',
         website: 'www.perezgaldos.es',
         taxId: 'B12345678',
-        logo: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=200'
+        logo: '/Logo Exlibris Perez Galdos.png'
       },
       billing: {
         currency: 'EUR',

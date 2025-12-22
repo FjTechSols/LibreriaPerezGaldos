@@ -994,12 +994,10 @@ export const obtenerEstadisticasLibros = async () => {
         const [totalRes, sinStockRes] = await Promise.all([
             supabase
                 .from('libros')
-                .select('*', { count: 'exact', head: true })
-                .eq('activo', true),
+                .select('*', { count: 'exact', head: true }),
             supabase
                 .from('libros')
                 .select('*', { count: 'exact', head: true })
-                .eq('activo', true)
                 .eq('stock', 0)
         ]);
 
@@ -1051,13 +1049,21 @@ async function enrichBooks(data: LibroSupabase[]) {
 
 export const obtenerTotalUnidadesStock = async (): Promise<number> => {
     try {
-        // Optimization: Only fetch items with stock > 0
-        // This drastically reduces payload size (skipping 77k+ items with 0 stock)
+        // Try to use the server-side RPC mechanism first (more efficient, no limits)
+        const { data: rpcData, error: rpcError } = await supabase.rpc('get_total_stock_units');
+        
+        if (!rpcError && typeof rpcData === 'number') {
+            return rpcData;
+        }
+
+        // Fallback: Client-side calculation (limited by max rows, usually 1000)
+        // Only fetch items with stock > 0 and try to get as many as possible
         const { data, error } = await supabase
             .from('libros')
             .select('stock')
             .eq('activo', true)
-            .gt('stock', 0);
+            .gt('stock', 0)
+            .limit(1000000); // Attempt to fetch up to 1M items
         
         if (error) {
             console.error('Error fetching total stock units:', error);

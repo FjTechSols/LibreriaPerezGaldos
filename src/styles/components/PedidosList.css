@@ -77,6 +77,15 @@
   color: #16a34a;
 }
 
+.pedidos-stats .stat-card.devolucion {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.pedidos-stats .stat-card.devolucion .stat-value {
+  color: #475569;
+}
+
 .pedidos-stats .stat-card.ventas {
   background: #f0fdfa;
   border: 1px solid #99f6e4;
@@ -155,7 +164,7 @@
 
 .pedidos-table .table-header {
   display: grid;
-  grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 100px 130px 120px 180px;
+  grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 120px 100px 130px 120px 180px;
   gap: 0.75rem;
   padding: 1rem;
   background: var(--bg-tertiary);
@@ -163,18 +172,18 @@
   font-size: 0.8125rem;
   color: var(--text-secondary);
   border-bottom: 2px solid var(--border-color);
-  min-width: 1000px;
+  min-width: 1100px;
 }
 
 .pedidos-table .table-row {
   display: grid;
-  grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 100px 130px 120px 180px;
+  grid-template-columns: 100px minmax(150px, 1fr) 100px 120px 120px 100px 130px 120px 180px;
   gap: 0.75rem;
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
   transition: background 0.15s;
-  min-width: 1000px;
+  min-width: 1100px;
   color: var(--text-primary);
 }
 
@@ -243,6 +252,11 @@
 .estado-badge.rojo {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.estado-badge.gris {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .pedido-total {
@@ -326,6 +340,12 @@
   background: #fee2e2;
   color: #991b1b;
   border-color: #ef4444;
+}
+
+.estado-selector.gris {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #94a3b8;
 }
 
 .estado-selector:hover {
@@ -426,6 +446,11 @@
 .dark-mode .pedidos-stats .stat-card.completado {
   background: rgba(22, 163, 74, 0.1);
   border-color: rgba(22, 163, 74, 0.2);
+}
+
+.dark-mode .pedidos-stats .stat-card.devolucion {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.2);
 }
 
 .dark-mode .pedidos-stats .stat-card.ventas {
@@ -679,4 +704,20 @@
 
 .dark-mode .no-pedidos svg {
   color: #cbd5e1;
+}
+
+.badge-tipo {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.dark-mode .badge-tipo {
+  background: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
 }

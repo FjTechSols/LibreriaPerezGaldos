@@ -14,14 +14,15 @@ interface PedidoDetalleProps {
   onEditar?: () => void;
 }
 
-const ESTADOS: EstadoPedido[] = ['pendiente', 'procesando', 'enviado', 'completado', 'cancelado'];
+const ESTADOS: EstadoPedido[] = ['pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
 
 const ESTADO_LABELS: Record<EstadoPedido, string> = {
   pendiente: 'Pendiente',
   procesando: 'Procesando',
   enviado: 'Enviado',
   completado: 'Completado',
-  cancelado: 'Cancelado'
+  cancelado: 'Cancelado',
+  devolucion: 'Devolución'
 };
 
 export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEditar }: PedidoDetalleProps) {
@@ -340,6 +341,18 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                     </option>
                   ))}
                 </select>
+              </div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-card-header">
+                <Package size={20} />
+                <h3>Tipo</h3>
+              </div>
+              <div className="info-card-body">
+                <span className="info-principal uppercase px-2 py-1 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-700">
+                  {pedido.tipo?.replace('_', ' ') || '-'}
+                </span>
               </div>
             </div>
 

@@ -189,11 +189,90 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
   }
 };
 
+// Wrapper for Force Deduction RPC
+export const deductStockForce = async (pedidoId: number): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { data, error } = await supabase.rpc('deduct_stock_force', {
+      p_pedido_id: pedidoId
+    });
+
+    if (error) throw error;
+    return { success: data as boolean };
+  } catch (err: any) {
+    console.error('Error deductStockForce:', err);
+    return { success: false, error: err.message };
+  }
+};
+
+// Wrapper for Restoration RPC
+export const restoreStockForce = async (pedidoId: number): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { data, error } = await supabase.rpc('restore_stock_force', {
+      p_pedido_id: pedidoId
+    });
+
+    if (error) throw error;
+    return { success: data as boolean };
+  } catch (err: any) {
+    console.error('Error restoreStockForce:', err);
+    return { success: false, error: err.message };
+  }
+};
+
 export const actualizarEstadoPedido = async (
   id: number,
   estado: EstadoPedido
 ): Promise<boolean> => {
   try {
+      const { data: currentOrder } = await supabase
+          .from('pedidos')
+          .select('estado, tipo')
+          .eq('id', id)
+          .single();
+      
+      if (!currentOrder) throw new Error("Pedido no encontrado");
+
+      // LOGIC 1: Stock Deduction for Manual Orders (when moving to 'enviado')
+      // Web orders ('interno') are assumed deducted at creation.
+      // Manual orders ('perez_galdos', etc) are deducted only when shipped.
+      if (estado === 'enviado' && currentOrder.tipo !== 'interno') {
+          // Avoid double deduction if already shipped/completed
+          if (currentOrder.estado !== 'enviado' && currentOrder.estado !== 'completado') {
+               const res = await deductStockForce(id);
+               if (!res.success) {
+                   alert("Error al descontar stock (insuficiente): " + res.error);
+                   return false;
+               }
+          }
+      }
+
+      // LOGIC 2: Stock Restoration for Returns ('devolucion')
+      if (estado === 'devolucion') {
+           // We assume we only restore if it was previously deducted.
+           // For Web: Always deducted.
+           // For Manual: Deducted only if state was >= 'enviado'.
+           // To be safe and simple per user request: "en caso de que el cliente lo devuelva... reintegrado".
+           // We will try to restore.
+           // Ideally we should check if it WAS deducted.
+           // Heuristic: If Manual and state < enviado (e.g. pendiente), it was NOT deducted, so NO restore.
+           
+           let shouldRestore = true;
+           if (currentOrder.tipo !== 'interno') {
+               // Manual Order
+               if (currentOrder.estado === 'pendiente' || currentOrder.estado === 'procesando') {
+                   shouldRestore = false; // Never deducted
+               }
+           }
+           
+           if (shouldRestore) {
+               const res = await restoreStockForce(id);
+               if (!res.success) {
+                    alert("Error al restaurar stock: " + res.error);
+                    return false;
+               }
+           }
+      }
+
     const { error } = await supabase
       .from('pedidos')
       .update({ estado })
@@ -243,6 +322,24 @@ export const actualizarPedido = async (
   } catch (error) {
     console.error('Error en actualizarPedido:', error);
     return false;
+  }
+};
+
+export const confirmOrderAndDeductStock = async (pedidoId: number): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { data, error } = await supabase.rpc('confirm_order_and_deduct_stock', {
+      p_pedido_id: pedidoId
+    });
+
+    if (error) {
+      console.error('Error RPC confirm_order_and_deduct_stock:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: data as boolean };
+  } catch (err) {
+    console.error('Exception in confirmOrderAndDeductStock:', err);
+    return { success: false, error: 'Error inesperado al confirmar pedido' };
   }
 };
 
@@ -386,10 +483,46 @@ export const obtenerEstadisticasPedidos = async () => {
     enviados: pedidos.filter(p => p.estado === 'enviado').length,
     completados: pedidos.filter(p => p.estado === 'completado').length,
     cancelados: pedidos.filter(p => p.estado === 'cancelado').length,
+    devoluciones: pedidos.filter(p => p.estado === 'devolucion').length,
     totalVentas: pedidos
-      .filter(p => p.estado !== 'cancelado')
+      .filter(p => p.estado !== 'cancelado' && p.estado !== 'devolucion')
       .reduce((sum, p) => sum + (p.total || 0), 0)
   };
 
   return estadisticas;
+};
+
+export const obtenerLibrosMasVendidos = async (): Promise<{ titulo: string; cantidad: number }[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('pedido_detalles')
+      .select(`
+        cantidad,
+        libro:libros (
+          titulo
+        ),
+        nombre_externo
+      `);
+
+    if (error) throw error;
+
+    const ventasPorLibro = new Map<string, number>();
+
+    data?.forEach((detalle: any) => {
+      // Prioritize internal book title, fallback to external name, or "Unknown"
+      const titulo = detalle.libro?.titulo || detalle.nombre_externo || 'Producto desconocido';
+      const current = ventasPorLibro.get(titulo) || 0;
+      ventasPorLibro.set(titulo, current + detalle.cantidad);
+    });
+
+    // Convert to array, sort, and slice
+    return Array.from(ventasPorLibro.entries())
+      .map(([titulo, cantidad]) => ({ titulo, cantidad }))
+      .sort((a, b) => b.cantidad - a.cantidad)
+      .slice(0, 5);
+      
+  } catch (error) {
+    console.error('Error al obtener libros más vendidos:', error);
+    return [];
+  }
 };
