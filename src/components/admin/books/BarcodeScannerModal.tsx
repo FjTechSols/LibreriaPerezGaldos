@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import { X } from 'lucide-react';
+import { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { X, Camera, RefreshCw } from 'lucide-react';
 
 interface BarcodeScannerModalProps {
   isOpen: boolean;
@@ -9,83 +9,198 @@ interface BarcodeScannerModalProps {
 }
 
 export function BarcodeScannerModal({ isOpen, onClose, onScanSuccess }: BarcodeScannerModalProps) {
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const regionId = 'html5qr-code-full-region';
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [cameras, setCameras] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string>('');
+  const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
+  // Initial setup and camera listing
   useEffect(() => {
     if (isOpen) {
-      // Small timeout to ensure DOM is ready
-      const timer = setTimeout(() => {
-        try {
-            // Clean up previous instance if any (handling strict mode double-mount)
-            if (scannerRef.current) {
-                scannerRef.current.clear().catch(console.error);
-            }
+      setLoading(true);
+      setError('');
+      
+      // Initialize instance
+      const html5QrCode = new Html5Qrcode(regionId);
+      scannerRef.current = html5QrCode;
 
-            const scanner = new Html5QrcodeScanner(
-              regionId,
-              { 
-                fps: 10, 
-                qrbox: { width: 250, height: 150 }, // Rectangular for EAN barcodes
-                aspectRatio: 1.0,
-                showTorchButtonIfSupported: true,
-                rememberLastUsedCamera: true
-              },
-              /* verbose= */ false
-            );
-            
-            scannerRef.current = scanner;
-
-            scanner.render(
-              (decodedText) => {
-                // Success callback
-                onScanSuccess(decodedText);
-                onClose(); // Close immediately on success
-              },
-              (errorMessage) => {
-                // Ignore transient errors
-                // console.log(errorMessage);
-              }
-            );
-        } catch (e) {
-            console.error("Error initializing scanner", e);
-            setError("No se pudo iniciar la cámara. Verifica los permisos.");
-        }
-      }, 100);
+      Html5Qrcode.getCameras()
+        .then((devices) => {
+          if (devices && devices.length) {
+            setCameras(devices);
+            // Default to the last one (often the back camera on mobile) or the first one
+            setSelectedCameraId(devices[devices.length - 1].id);
+          } else {
+            setError('No se detectaron cámaras.');
+          }
+        })
+        .catch((err) => {
+          console.error("Error getting cameras", err);
+          let msg = "No se pudo acceder a la cámara.";
+          if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError' || err?.toString().includes('Permission')) {
+             msg = "permisos"; // Keyword for UI handler
+          }
+          setError(msg);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
 
       return () => {
-        clearTimeout(timer);
         if (scannerRef.current) {
-          scannerRef.current.clear().catch(err => console.error("Failed to clear scanner", err));
+          if (scannerRef.current.isScanning) {
+            scannerRef.current.stop().catch(e => console.error("Error stopping scanner", e));
+          }
+          // The clear() method removes the element from DOM? No, clear() is for Scanner widget.
+          // For Html5Qrcode class, wait... stop() is enough generally. 
+          // But cleaning up the instance is good.
+          // Html5Qrcode doesn't have a 'destroy' method in same way, but stop() releases camera.
         }
       };
     }
-  }, [isOpen]); // Only re-run if isOpen changes
+  }, [isOpen]);
+
+  const startScanning = async () => {
+    if (!scannerRef.current || !selectedCameraId) return;
+
+    try {
+        setIsScanning(true);
+        setError('');
+        const config: Html5QrcodeCameraScanConfig = {
+            fps: 10,
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.0
+        };
+
+        await scannerRef.current.start(
+            selectedCameraId,
+            config,
+            (decodedText) => {
+                onScanSuccess(decodedText);
+                handleClose();
+            },
+            () => { 
+                // Scan failure (normal frame skipping)
+            }
+        );
+    } catch (err) {
+        console.error("Error starting scanner", err);
+        setIsScanning(false);
+        setError("Error al iniciar el escaneo.");
+    }
+  };
+
+  const handleClose = async () => {
+      if (scannerRef.current && scannerRef.current.isScanning) {
+          try {
+            await scannerRef.current.stop();
+          } catch(e) {
+              console.error(e);
+          }
+      }
+      onClose();
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" style={{ zIndex: 60 }}>
-      {/* Higher z-index to sit on top of BookForm (which is usually z-50) */}
       <div className="modal" style={{ maxWidth: '500px', width: '90%' }}>
         <div className="modal-header">
           <h3 className="modal-title">Escanear Código de Barras</h3>
-          <button onClick={onClose} className="close-btn">
+          <button onClick={handleClose} className="close-btn">
             <X size={20} />
           </button>
         </div>
         
         <div style={{ padding: '1.5rem' }}>
+            {/* Viewfinder Area */}
+            <div 
+                id={regionId} 
+                style={{ 
+                    width: '100%', 
+                    minHeight: '250px', 
+                    background: '#000', 
+                    borderRadius: '8px', 
+                    overflow: 'hidden',
+                    marginBottom: '1rem',
+                    position: 'relative'
+                }}
+            >
+                {!isScanning && !loading && !error && (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+                        <Camera size={48} opacity={0.5} />
+                    </div>
+                )}
+            </div>
+
             {error ? (
-                <div className="error-message">{error}</div>
+                 <div style={{ textAlign: 'center', color: '#dc2626' }}>
+                    {error === 'permisos' ? (
+                        <div style={{ background: '#fef2f2', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', color: '#b91c1c', textAlign: 'left' }}>
+                            <strong>⚠️ Permiso Denegado</strong>
+                            <p style={{ margin: '0.5rem 0' }}>Para escanear, necesitas dar acceso a la cámara:</p>
+                            <ol style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <li>Toca el candado 🔒 en la barra de dirección.</li>
+                                <li>Activa "Cámara" o "Permisos".</li>
+                                <li>Vuelve aquí y recarga.</li>
+                            </ol>
+                            <button 
+                                onClick={() => window.location.reload()}
+                                style={{ marginTop: '1rem', width: '100%', padding: '0.5rem', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                            >
+                                Recargar Página
+                            </button>
+                        </div>
+                    ) : (
+                        <div>⚠️ {error}</div>
+                    )}
+                </div>
             ) : (
-                <>
-                    <div id={regionId} style={{ width: '100%' }}></div>
-                    <p style={{ marginTop: '1rem', textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>
-                        Apunta la cámara al código de barras del libro (EAN/ISBN).
-                    </p>
-                </>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {loading ? (
+                        <p style={{ textAlign: 'center' }}>Buscando cámaras...</p>
+                    ) : (
+                        <>
+                             {!isScanning && (
+                                <>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Seleccionar Cámara</label>
+                                        <select 
+                                            value={selectedCameraId} 
+                                            onChange={(e) => setSelectedCameraId(e.target.value)}
+                                            className="form-select" // Uses global styles for dark mode support
+                                            style={{ width: '100%' }}
+                                        >
+                                            {cameras.map(cam => (
+                                                <option key={cam.id} value={cam.id}>
+                                                    {cam.label || `Cámara ${cam.id.substring(0, 5)}...`}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <button 
+                                        className="save-btn" // Reuse primary button style
+                                        onClick={startScanning}
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.75rem' }}
+                                    >
+                                        <Camera size={18} />
+                                        Iniciar Escáner
+                                    </button>
+                                </>
+                             )}
+                             
+                             {isScanning && (
+                                <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                    Apunta al código de barras.
+                                </p>
+                             )}
+                        </>
+                    )}
+                </div>
             )}
         </div>
       </div>
