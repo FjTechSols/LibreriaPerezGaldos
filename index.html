@@ -170,11 +170,27 @@
         </div>
 
         <!-- Headings -->
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight">
           Librería Pérez Galdós
         </h1>
-        <div class="inline-block px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-full text-sm font-semibold mb-6 tracking-wide uppercase shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-          ¡Próximamente!
+        <!-- Countdown Timer -->
+        <div id="countdown" class="flex flex-wrap justify-center gap-4 mb-8">
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
+                <span id="days" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Días</span>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
+                <span id="hours" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Horas</span>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
+                <span id="minutes" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Min</span>
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
+                <span id="seconds" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Seg</span>
+            </div>
         </div>
 
         <p class="text-gray-300 mb-8 max-w-md mx-auto leading-relaxed">
@@ -283,6 +299,47 @@
             mainContent.classList.remove('opacity-0');
         }, 9000);
       });
+      
+      // COUNTDOWN TIMER LOGIC
+      (function() {
+          const countDownDate = new Date("Jan 1, 2026 08:00:00").getTime();
+          
+          function updateTimer() {
+              const now = new Date().getTime();
+              const distance = countDownDate - now;
+
+              if (distance < 0) {
+                  const countdownEl = document.getElementById("countdown");
+                  if (countdownEl) {
+                      countdownEl.innerHTML = `
+                        <div class="inline-block px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white font-bold tracking-wider uppercase shadow-lg shadow-blue-500/30 animate-pulse">
+                            ¡Ya estamos aquí!
+                        </div>`;
+                  }
+                  return;
+              }
+
+              const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+              const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+              const dayEl = document.getElementById("days");
+              const hourEl = document.getElementById("hours");
+              const minEl = document.getElementById("minutes");
+              const secEl = document.getElementById("seconds");
+
+              if (dayEl) dayEl.innerText = days < 10 ? "0" + days : days;
+              if (hourEl) hourEl.innerText = hours < 10 ? "0" + hours : hours;
+              if (minEl) minEl.innerText = minutes < 10 ? "0" + minutes : minutes;
+              if (secEl) secEl.innerText = seconds < 10 ? "0" + seconds : seconds;
+          }
+
+          // Initial call
+          updateTimer();
+          // Update every second
+          setInterval(updateTimer, 1000);
+      })();
 
       // SUPABASE CONFIGURATION
       const SUPABASE_URL = "https://weaihscsaqxadxjgsfbt.supabase.co";
