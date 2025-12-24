@@ -236,8 +236,31 @@ class SettingsService {
     data.forEach((setting: Setting) => {
       const category = setting.category;
       if (settings[category]) {
-        const key = this.toCamelCase(setting.key.replace(`${category}_`, ''));
-        (settings[category] as any)[key] = setting.value;
+        const rawKey = setting.key;
+        const prefix = `${category}_`;
+        
+        // Option 1: Strip prefix if it exists at the start
+        let keyWithoutPrefix = rawKey;
+        if (rawKey.startsWith(prefix)) {
+          keyWithoutPrefix = rawKey.substring(prefix.length);
+        }
+        const camelCaseWithoutPrefix = this.toCamelCase(keyWithoutPrefix);
+
+        // Option 2: Use raw key (for cases like shipping_zones -> shippingZones)
+        const camelCaseRaw = this.toCamelCase(rawKey);
+        
+        const categorySettings = settings[category] as any;
+        
+        // Check which key actually exists in the default settings
+        if (camelCaseWithoutPrefix in categorySettings) {
+          categorySettings[camelCaseWithoutPrefix] = setting.value;
+        } else if (camelCaseRaw in categorySettings) {
+          categorySettings[camelCaseRaw] = setting.value;
+        } else {
+            // Fallback: If neither exists, assume the stripped version is intended strictly 
+            // from the old logic, or just assign it to avoid data loss on generic objects
+             categorySettings[camelCaseWithoutPrefix] = setting.value;
+        }
       }
     });
 
