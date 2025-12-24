@@ -317,7 +317,57 @@ export const obtenerLibros = async (
                  query = query.or(`and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
               }
           } else {
-              query = query.or(`titulo.ilike.%${searchTerm}%,autor.ilike.%${searchTerm}%,legacy_id.ilike.%${searchTerm}%`);
+              // Tokenized Search Strategy:
+              // Split query (e.g. "Planeta Galdos") into ["Planeta", "Galdos"]
+              // AND logic: Match(Planeta) AND Match(Galdos)
+              // Match(Term) = Title OR Author OR ISBN OR LegacyID matches Term
+              
+              // Key Fix: Sanitize terms to remove PostgREST reserved chars like (, ), , that break the parser
+              const cleanSearchTerm = searchTerm.replace(/[(),.]/g, ' '); 
+              const terms = cleanSearchTerm.split(/\s+/).filter(t => t.length > 0);
+
+              if (terms.length === 0) {
+                 // Empty? Should not happen due to trim() check above
+              } else {
+                 for (const term of terms) {
+                     // Check if term matches an Editorial first (Optional optimization or just include in OR?)
+                     // OR logic via string: `titulo.ilike.%term%,autor.ilike.%term%,...`
+                     // Note: To match Publisher Name, we still need IDs.
+                     
+                     // Optimization: Searching Editorials for 5 terms is expensive.
+                     // Compromise: We check Publisher ONLY for the FULL string or single significant terms if cheap.
+                     // OR we just rely on Title/Author/ISBN for split terms.
+                     // User asked for "Editorial and Author".("Planeta Cervantes")
+                     // We need to match Planeta in Publisher.
+                     
+                     // Let's do a lightweight Publisher ID lookup for THIS term
+                     // We can't await inside this loop easily if we want to build a synchronous query chain?
+                     // Supabase query builder IS synchronous in construction. Await is for execution.
+                     // BUT we need `await` to fetch editorial IDs.
+                     // We must fetch editorial IDs for ALL terms beforehand?
+                     
+                     // Correction: We can await inside the loop because the surrounding function `obtenerLibros` is async.
+                     
+                     let subQuery = `titulo.ilike.%${term}%,autor.ilike.%${term}%,legacy_id.ilike.%${term}%`;
+                     
+                     // ISBN check (usually one chunk, but fine to check)
+                     if (term.length > 3) subQuery += `,isbn.ilike.%${term}%`;
+
+                     // Publisher Check
+                     const { data: edData } = await supabase
+                        .from('editoriales')
+                        .select('id')
+                        .ilike('nombre', `%${term}%`)
+                        .limit(5);
+
+                     if (edData && edData.length > 0) {
+                         const ids = edData.map(e => e.id);
+                         subQuery += `,editorial_id.in.(${ids.join(',')})`;
+                     }
+
+                     query = query.or(subQuery);
+                 }
+              }
           }
        }
      }
@@ -924,11 +974,36 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
       }
 
       // Standard fuzzy search for 'all' mode
+      
+      // 1. First, find matching publishers (Editoriales)
+      let editorialIds: number[] = [];
+      try {
+        const { data: editorialData } = await supabase
+          .from('editoriales')
+          .select('id')
+          .ilike('nombre', `%${query}%`)
+          .limit(5); // Limit to top 5 matching publishers to avoid massive OR strings
+          
+        if (editorialData && editorialData.length > 0) {
+            editorialIds = editorialData.map(e => e.id);
+        }
+      } catch (err) {
+        console.warn('Error fetching matching editorials:', err);
+      }
+
+      // 2. Build Query
+      let orQuery = `titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`;
+      
+      // If we found matching publishers, include their books in the results
+      if (editorialIds.length > 0) {
+          orQuery += `,editorial_id.in.(${editorialIds.join(',')})`;
+      }
+
       const { data, error } = await supabase
         .from('libros')
         .select('*')
         .eq('activo', true)
-        .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`)
+        .or(orQuery)
         .order('titulo', { ascending: true })
         .limit(20);
 
@@ -972,7 +1047,7 @@ export const obtenerTotalLibros = async (): Promise<number> => {
   try {
     const { count, error } = await supabase
       .from('libros')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'estimated', head: true })
       .eq('activo', true)
       .gt('stock', 0);
 
@@ -994,10 +1069,10 @@ export const obtenerEstadisticasLibros = async () => {
         const [totalRes, sinStockRes] = await Promise.all([
             supabase
                 .from('libros')
-                .select('*', { count: 'exact', head: true }),
+                .select('*', { count: 'estimated', head: true }),
             supabase
                 .from('libros')
-                .select('*', { count: 'exact', head: true })
+                .select('*', { count: 'exact', head: true }) // Keep exact for filtered if possible, or filtered estimated
                 .eq('stock', 0)
         ]);
 
@@ -1195,4 +1270,48 @@ export const actualizarISBN = async (id: number, isbn: string): Promise<boolean>
       .eq('id', id);
 
     return !error;
+};
+
+export const obtenerSugerencias = async (termino: string): Promise<string[]> => {
+  if (!termino || termino.trim().length < 2) return [];
+
+  const query = termino.trim();
+  
+  try {
+    const [librosTitulo, librosAutor, editoriales] = await Promise.all([
+      // 1. Titles
+      supabase
+        .from('libros')
+        .select('titulo')
+        .ilike('titulo', `%${query}%`)
+        .limit(3),
+      
+      // 2. Authors (distinct is harder in simple query, we dedup later)
+      supabase
+        .from('libros')
+        .select('autor')
+        .ilike('autor', `%${query}%`)
+        .limit(5),
+
+      // 3. Publishers
+      supabase
+        .from('editoriales')
+        .select('nombre')
+        .ilike('nombre', `%${query}%`)
+        .limit(3)
+    ]);
+
+    const suggestions = new Set<string>();
+
+    librosTitulo.data?.forEach((l: any) => suggestions.add(l.titulo));
+    librosAutor.data?.forEach((l: any) => suggestions.add(l.autor));
+    editoriales.data?.forEach((e: any) => suggestions.add(e.nombre));
+
+    // Convert to array and take top 8
+    return Array.from(suggestions).slice(0, 8); 
+
+  } catch (error) {
+    console.warn('Error fetching suggestions:', error);
+    return [];
+  }
 };

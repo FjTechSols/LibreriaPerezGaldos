@@ -1029,4 +1029,23 @@
   .navbar-search {
     margin: 0 0.75rem;
   }
+}/* Publisher Badge Styles in Search Suggestions */
+.suggestion-publisher {
+  font-size: 0.75rem;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 12px;
+  width: fit-content;
+  font-weight: 500;
+  margin-top: 2px;
+  display: inline-block;
+  border: 1px solid #e5e7eb;
 }
+
+.dark-mode .suggestion-publisher {
+  background-color: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+

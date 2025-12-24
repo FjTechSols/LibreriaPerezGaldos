@@ -11,7 +11,8 @@ import {
   actualizarLibro, 
   eliminarLibro,
   obtenerOcrearEditorial,
-  obtenerCategoriaId
+  obtenerCategoriaId,
+  obtenerSugerencias
 } from '../../../services/libroService';
 import '../../../styles/components/BooksManager.css';
 import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
@@ -53,6 +54,8 @@ export function BooksManager() {
 
   // Filters State
   const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [filters, setFilters] = useState({
     search: '', // Synced with localSearchTerm when getting results
     category: 'Todos',
@@ -161,8 +164,37 @@ export function BooksManager() {
   const handleSearch = () => {
     setFilters(prev => ({ ...prev, search: localSearchTerm }));
     setCurrentPage(1); // Reset to page 1 on search
-    setLocalSearchTerm('');
+    setLocalSearchTerm(''); // Optional: clear or keep? Usually keep. User might want to edit.
+    // Actually, usually we keep it. The original code cleared it?
+    // "setLocalSearchTerm('');" -> Yes, line 164.
+    // If we want autocomplete, clearing it might be annoying if they want to refine.
+    // But let's stick to original behavior unless asked.
+    setShowSuggestions(false);
   };
+
+  // Autocomplete Effect
+  useEffect(() => {
+     const delayDebounceFn = setTimeout(async () => {
+        // Only fetch if "Full Search" mode is active (filters.searchMode)
+        if (filters.searchMode && localSearchTerm.trim().length >= 2) {
+           const sugs = await obtenerSugerencias(localSearchTerm);
+           setSuggestions(sugs);
+           // We don't set showSuggestions(true) here blindly, usually controlled by focus too,
+           // but if they are typing, they are focused.
+           setShowSuggestions(true);
+        } else {
+           setSuggestions([]);
+           setShowSuggestions(false);
+        }
+     }, 300);
+
+     return () => clearTimeout(delayDebounceFn);
+  }, [localSearchTerm, filters.searchMode]); // Add searchMode to dependency
+
+  // ... (handleCreateSubmit, etc stay same)
+
+  // ... In Render ...
+
 
   const handleCreateSubmit = async (bookData: Partial<Book>, contents: string[]) => {
     // Validation: Title, Price, Location, Category are mandatory. Author is usually expected but user didn't explicitly list it as mandatory, though typically it is.
@@ -368,12 +400,45 @@ export function BooksManager() {
                 <Search className="admin-search-icon" size={20} />
                 <input
                   type="text"
-                  placeholder={filters.searchMode ? "Buscar por Título, Autor, Editorial o ISBN..." : "Introduzca el código del libro..."}
+                  placeholder={filters.searchMode ? "Buscar por Título, Autor, Editorial e ISBN (separados por espacio)..." : "Introduzca el código del libro..."}
                   value={localSearchTerm}
                   onChange={(e) => setLocalSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => {
+                     if (e.key === 'Enter') {
+                        handleSearch();
+                        setShowSuggestions(false);
+                     }
+                  }}
+                  onFocus={() => {
+                     if (filters.searchMode && localSearchTerm.trim().length >= 2) setShowSuggestions(true);
+                  }}
+                  onBlur={() => {
+                     setTimeout(() => setShowSuggestions(false), 200);
+                  }}
                   className="admin-search-input"
                 />
+                
+                {/* Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                   <ul className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
+                      {suggestions.map((suggestion, index) => (
+                         <li 
+                           key={index}
+                           className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
+                           onClick={() => {
+                              setLocalSearchTerm(suggestion);
+                              // Force Full Search Mode when selecting a suggestion (since suggestions are Titles/Authors)
+                              setFilters(prev => ({ ...prev, search: suggestion, searchMode: true }));
+                              setCurrentPage(1); // Trigger search
+                              setSuggestions([]);
+                              setShowSuggestions(false);
+                           }}
+                         >
+                            {suggestion}
+                         </li>
+                      ))}
+                   </ul>
+                )}
              </div>
              <button onClick={handleSearch} className="action-btn search-btn">
                Buscar

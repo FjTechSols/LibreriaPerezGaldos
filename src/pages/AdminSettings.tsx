@@ -453,7 +453,7 @@ export function AdminSettings() {
                         id="standardShipping"
                         type="number"
                         step="0.01"
-                        value={shippingData.standardShippingCost}
+                        value={shippingData.standardShippingCost ?? ''}
                         onChange={(e) => setShippingData({ ...shippingData, standardShippingCost: Number(e.target.value) })}
                       />
                     </div>
@@ -467,7 +467,7 @@ export function AdminSettings() {
                         id="expressShipping"
                         type="number"
                         step="0.01"
-                        value={shippingData.expressShippingCost}
+                        value={shippingData.expressShippingCost ?? ''}
                         onChange={(e) => setShippingData({ ...shippingData, expressShippingCost: Number(e.target.value) })}
                       />
                     </div>
@@ -478,7 +478,7 @@ export function AdminSettings() {
                         id="freeShipping"
                         type="number"
                         step="0.01"
-                        value={shippingData.freeShippingThreshold}
+                        value={shippingData.freeShippingThreshold ?? ''}
                         onChange={(e) => setShippingData({ ...shippingData, freeShippingThreshold: Number(e.target.value) })}
                       />
                     </div>
@@ -490,7 +490,7 @@ export function AdminSettings() {
                       <input
                         id="standardDelivery"
                         type="number"
-                        value={shippingData.estimatedDeliveryDays.standard}
+                        value={shippingData.estimatedDeliveryDays.standard ?? ''}
                         onChange={(e) => setShippingData({
                           ...shippingData,
                           estimatedDeliveryDays: {
@@ -506,7 +506,7 @@ export function AdminSettings() {
                       <input
                         id="expressDelivery"
                         type="number"
-                        value={shippingData.estimatedDeliveryDays.express}
+                        value={shippingData.estimatedDeliveryDays.express ?? ''}
                         onChange={(e) => setShippingData({
                           ...shippingData,
                           estimatedDeliveryDays: {

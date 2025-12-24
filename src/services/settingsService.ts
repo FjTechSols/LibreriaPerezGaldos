@@ -129,21 +129,28 @@ class SettingsService {
     }
   }
 
-  async updateMultipleSettings(updates: { key: string; value: any }[]): Promise<boolean> {
+  async updateMultipleSettings(updates: { key: string; value: any; category?: string }[]): Promise<boolean> {
     try {
-      const promises = updates.map(({ key, value }) =>
-        supabase.from('settings').update({ value }).eq('key', key)
-      );
+      const promises = updates.map(({ key, value, category }) => {
+        // Prepare the data object. Key and value are required.
+        // Category is optional but recommended for new inserts.
+        const data: any = { key, value, updated_at: new Date().toISOString() };
+        if (category) {
+          data.category = category;
+        }
+
+        return supabase
+          .from('settings')
+          .upsert(data, { onConflict: 'key' });
+      });
 
       const results = await Promise.all(promises);
       const hasErrors = results.some(result => result.error);
 
       if (hasErrors) {
         const firstError = results.find(r => r.error)?.error;
-        if (firstError?.code === 'PGRST205' || firstError?.message?.includes('Could not find the table')) {
-          return false;
-        }
-        throw new Error('Some settings failed to update');
+        console.error('Error updating settings:', firstError);
+        return false;
       }
 
       return true;
@@ -154,86 +161,87 @@ class SettingsService {
   }
 
   async updateCompanySettings(settings: CompanySettings): Promise<boolean> {
+    const category = 'company';
     const updates = [
-      { key: 'company_name', value: settings.name },
-      { key: 'company_address', value: settings.address },
-      { key: 'company_phone', value: settings.phone },
-      { key: 'company_email', value: settings.email },
-      { key: 'company_website', value: settings.website },
-      { key: 'company_tax_id', value: settings.taxId },
-      { key: 'company_logo', value: settings.logo },
+      { key: 'company_name', value: settings.name, category },
+      { key: 'company_address', value: settings.address, category },
+      { key: 'company_phone', value: settings.phone, category },
+      { key: 'company_email', value: settings.email, category },
+      { key: 'company_website', value: settings.website, category },
+      { key: 'company_tax_id', value: settings.taxId, category },
+      { key: 'company_logo', value: settings.logo, category },
     ];
 
     return this.updateMultipleSettings(updates);
   }
 
   async updateBillingSettings(settings: BillingSettings): Promise<boolean> {
+    const category = 'billing';
     const updates = [
-      { key: 'currency', value: settings.currency },
-      { key: 'currency_symbol', value: settings.currencySymbol },
-      { key: 'tax_rate', value: settings.taxRate },
-      { key: 'invoice_prefix', value: settings.invoicePrefix },
-      { key: 'invoice_terms', value: settings.invoiceTerms },
-      { key: 'invoice_footer', value: settings.invoiceFooter },
+      { key: 'currency', value: settings.currency, category },
+      { key: 'currency_symbol', value: settings.currencySymbol, category },
+      { key: 'tax_rate', value: settings.taxRate, category },
+      { key: 'invoice_prefix', value: settings.invoicePrefix, category },
+      { key: 'invoice_terms', value: settings.invoiceTerms, category },
+      { key: 'invoice_footer', value: settings.invoiceFooter, category },
     ];
 
     return this.updateMultipleSettings(updates);
   }
 
   async updateShippingSettings(settings: ShippingSettings): Promise<boolean> {
+    const category = 'shipping';
     const updates = [
-      { key: 'free_shipping_threshold', value: settings.freeShippingThreshold },
-      { key: 'standard_shipping_cost', value: settings.standardShippingCost },
-      { key: 'express_shipping_cost', value: settings.expressShippingCost },
-      { key: 'shipping_zones', value: settings.shippingZones },
-      { key: 'estimated_delivery_days', value: settings.estimatedDeliveryDays },
+      { key: 'free_shipping_threshold', value: settings.freeShippingThreshold, category },
+      { key: 'standard_shipping_cost', value: settings.standardShippingCost, category },
+      { key: 'express_shipping_cost', value: settings.expressShippingCost, category },
+      { key: 'shipping_zones', value: settings.shippingZones, category },
+      { key: 'estimated_delivery_days', value: settings.estimatedDeliveryDays, category },
     ];
 
     return this.updateMultipleSettings(updates);
   }
 
   async updateSystemSettings(settings: SystemSettings): Promise<boolean> {
+    const category = 'system';
     const updates = [
-      { key: 'items_per_page_catalog', value: settings.itemsPerPageCatalog },
-      { key: 'items_per_page_admin', value: settings.itemsPerPageAdmin },
-      { key: 'maintenance_mode', value: settings.maintenanceMode },
-      { key: 'allow_registration', value: settings.allowRegistration },
-      { key: 'default_language', value: settings.defaultLanguage },
-      { key: 'enable_wishlist', value: settings.enableWishlist },
-      { key: 'enable_reviews', value: settings.enableReviews },
+      { key: 'items_per_page_catalog', value: settings.itemsPerPageCatalog, category },
+      { key: 'items_per_page_admin', value: settings.itemsPerPageAdmin, category },
+      { key: 'maintenance_mode', value: settings.maintenanceMode, category },
+      { key: 'allow_registration', value: settings.allowRegistration, category },
+      { key: 'default_language', value: settings.defaultLanguage, category },
+      { key: 'enable_wishlist', value: settings.enableWishlist, category },
+      { key: 'enable_reviews', value: settings.enableReviews, category },
     ];
 
     return this.updateMultipleSettings(updates);
   }
 
   async updateSecuritySettings(settings: SecuritySettings): Promise<boolean> {
+    const category = 'security';
     const updates = [
-      { key: 'session_timeout', value: settings.sessionTimeout },
-      { key: 'max_login_attempts', value: settings.maxLoginAttempts },
-      { key: 'password_min_length', value: settings.passwordMinLength },
-      { key: 'require_email_verification', value: settings.requireEmailVerification },
-      { key: 'enable_2fa', value: settings.enable2FA },
+      { key: 'session_timeout', value: settings.sessionTimeout, category },
+      { key: 'max_login_attempts', value: settings.maxLoginAttempts, category },
+      { key: 'password_min_length', value: settings.passwordMinLength, category },
+      { key: 'require_email_verification', value: settings.requireEmailVerification, category },
+      { key: 'enable_2fa', value: settings.enable2FA, category },
     ];
 
     return this.updateMultipleSettings(updates);
   }
 
   private parseSettings(data: Setting[]): AllSettings {
-    const settings: any = {
-      company: {},
-      billing: {},
-      shipping: {},
-      system: {},
-      security: {}
-    };
+    const settings = this.getDefaultSettings();
 
     data.forEach((setting: Setting) => {
       const category = setting.category;
-      const key = this.toCamelCase(setting.key.replace(`${category}_`, ''));
-      settings[category][key] = setting.value;
+      if (settings[category]) {
+        const key = this.toCamelCase(setting.key.replace(`${category}_`, ''));
+        (settings[category] as any)[key] = setting.value;
+      }
     });
 
-    return settings as AllSettings;
+    return settings;
   }
 
   private toCamelCase(str: string): string {

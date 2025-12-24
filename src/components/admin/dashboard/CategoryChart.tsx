@@ -17,20 +17,20 @@ export function CategoryChart() {
         // Get all books with their categories
         const { data: books, error } = await supabase
           .from('libros')
-          .select('categoria, stock')
-          .not('categoria', 'is', null);
+          .select('stock, categorias(nombre)')
+          .not('categoria_id', 'is', null);
 
         if (error) throw error;
 
         // Count books by category
         const categoryMap = new Map<string, { count: number; inStock: number }>();
         
-        books?.forEach(book => {
-          const category = book.categoria || 'Sin categoría';
-          const current = categoryMap.get(category) || { count: 0, inStock: 0 };
+        books?.forEach((book: any) => {
+          const categoryName = book.categorias?.nombre || 'Sin categoría';
+          const current = categoryMap.get(categoryName) || { count: 0, inStock: 0 };
           current.count += 1;
           if (book.stock > 0) current.inStock += 1;
-          categoryMap.set(category, current);
+          categoryMap.set(categoryName, current);
         });
 
         // Convert to array and sort by count

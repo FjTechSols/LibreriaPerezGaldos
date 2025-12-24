@@ -101,7 +101,7 @@ export function Navbar() {
             <Search className="search-icon" size={20} />
             <input
               type="text"
-              placeholder="Buscar libros, autores, ISBN..."
+              placeholder="Buscar libros, autores, editoriales, ISBN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
@@ -144,6 +144,7 @@ export function Navbar() {
                       <div className="suggestion-info">
                         <span className="suggestion-title">{book.title}</span>
                         <span className="suggestion-author">{book.author}</span>
+                        {book.publisher && <span className="suggestion-publisher">{book.publisher}</span>}
                       </div>
                       <span className="suggestion-price">${book.price}</span>
                     </div>
