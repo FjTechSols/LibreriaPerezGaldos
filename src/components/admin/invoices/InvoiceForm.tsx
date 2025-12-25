@@ -167,7 +167,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   }, []);
 
   const handleSelectBook = (bookId: string) => {
-    const book = books.find(b => b.id === bookId);
+    const book = filteredBooks.find(b => b.id === bookId);
     if (book) {
       setSelectedBookId(bookId);
       setSearchTerm(book.title);
@@ -182,7 +182,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       return;
     }
 
-    const book = books.find(b => b.id === selectedBookId);
+    const book = filteredBooks.find(b => b.id === selectedBookId);
     if (!book) return;
 
     const lineTotal = quantity * unitPrice;

@@ -1,6 +1,6 @@
 export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion';
 export type TipoPedido = 'interno' | 'iberlibro' | 'uniliber' | 'perez_galdos' | 'galeon';
-export type MetodoPago = 'tarjeta' | 'paypal' | 'transferencia' | 'reembolso' | 'efectivo';
+export type MetodoPago = 'tarjeta' | 'paypal' | 'bizum' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'Correos' | 'Otro' | 'otro';
 export type TipoFactura = 'normal' | 'rectificativa';
 export type TipoDocumento = 'certificado' | 'factura' | 'reembolso' | 'tarjeta_adhesiva' | 'tarjeta_termica' | 'etiqueta_envio';
@@ -20,6 +20,8 @@ export interface Usuario {
   fecha_registro?: string;
   legacy_id?: number;
   activo?: boolean;
+  nombre_completo?: string;
+  fecha_nacimiento?: string;
 }
 
 export interface Cliente {
@@ -137,6 +139,7 @@ export interface Pedido {
   total?: number;
   metodo_pago?: MetodoPago;
   direccion_envio?: string;
+  coste_envio?: number;
   transportista?: Transportista;
   tracking?: string;
   observaciones?: string;
@@ -271,7 +274,15 @@ export interface Review {
 export interface User {
   id: string;
   email: string;
-  name: string;
+  name: string; // Display name (usually username)
+  username: string; // Explicit username
+  fullName?: string;
+  birthDate?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  createdAt?: string;
   role: 'user' | 'admin';
 }
 
@@ -286,6 +297,7 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, username: string, firstName: string, lastName: string) => Promise<boolean>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 export interface CartState {
@@ -405,4 +417,34 @@ export interface CompanyInfo {
   website: string;
   taxId: string;
   logo?: string;
+}
+
+export interface Reserva {
+  id: number;
+  usuario_id: string;
+  libro_id: number;
+  estado: 'pendiente' | 'confirmada' | 'rechazada' | 'expirada';
+  created_at: string;
+  updated_at?: string;
+  fecha_expiracion?: string;
+  confirmado_por?: string;
+  rechazado_por?: string;
+  fecha_confirmacion?: string;
+  fecha_rechazo?: string;
+  usuario?: Usuario;
+  libro?: Libro;
+}
+
+export interface Notificacion {
+  id: number;
+  usuario_id: string;
+  tipo: 'reserva_confirmada' | 'reserva_rechazada' | 'reserva_creada' | 'reserva_cancelada' | 'pedido' | 'nuevo_pedido' | 'general';
+  titulo: string;
+  mensaje: string;
+  leida: boolean;
+  reserva_id?: number;
+  pedido_id?: number;
+  libro_id?: string; // Added new field
+  created_at: string;
+  updated_at?: string; // Added new field
 }

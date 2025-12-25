@@ -6,6 +6,8 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
+import { useTheme } from '../context/ThemeContext';
 import { ShareModal } from '../components/ShareModal';
 import { ReviewForm } from '../components/ReviewForm';
 import { Book } from '../types';
@@ -17,12 +19,16 @@ import {
   getBookAverageRating
 } from '../services/reviewService';
 import { NotFound } from '../components/NotFound';
+import { createReservation } from '../services/reservationService';
 import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
+  const { settings, formatPrice } = useSettings();
+  const { actualTheme } = useTheme();
+  const isDark = actualTheme === 'dark';
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -94,9 +100,30 @@ export function BookDetail() {
     return <NotFound type="book" />;
   }
 
+  const handleReserve = async () => {
+    if (!isAuthenticated || !user) {
+      alert(language === 'es' ? 'Debes iniciar sesión para reservar.' : 'You must log in to reserve.');
+      return;
+    }
+
+    if (!book) return;
+
+    try {
+      await createReservation(user.id, Number(book.id));
+      alert(language === 'es' ? 'Reserva solicitada con éxito.' : 'Reservation requested successfully.');
+    } catch (error: any) {
+      console.error('Error reserving book:', error);
+      const errorMessage = error.message || 'Error desconocido';
+      alert(language === 'es' 
+        ? `Error al solicitar la reserva: ${errorMessage}` 
+        : `Error requesting reservation: ${errorMessage}`
+      );
+    }
+  };
+
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
-      addItem(book);
+        addItem(book);
     }
   };
 
@@ -160,7 +187,7 @@ export function BookDetail() {
           <ArrowLeft size={20} />
           {language === 'es' ? 'Volver al catálogo' : language === 'en' ? 'Back to catalog' : 'Retour au catalogue'}
         </Link>
-
+        
         <div className="book-detail-content">
           <div className="book-image-section">
             <div className="book-image-container">
@@ -190,6 +217,20 @@ export function BookDetail() {
 
           <div className="book-info-section">
             <div className="book-header">
+              {user?.role === 'admin' && book.code && (
+                <div style={{ 
+                  fontSize: '0.85rem', 
+                  color: isDark ? '#9ca3af' : '#6b7280', 
+                  fontFamily: 'monospace',
+                  marginBottom: '0.5rem',
+                  padding: '0.25rem 0.5rem',
+                  backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                  borderRadius: '4px',
+                  display: 'inline-block'
+                }}>
+                  ID: {book.code}
+                </div>
+              )}
               <h1 className="book-title">{book.title}</h1>
               <p className="book-author">{language === 'es' ? 'por' : language === 'en' ? 'by' : 'par'} {book.author}</p>
               
@@ -256,7 +297,10 @@ export function BookDetail() {
                     {t('addToCart')}
                   </button>
 
-                  <button className="reserve-btn">
+                  <button 
+                    className="reserve-btn"
+                    onClick={handleReserve}
+                  >
                     <Bookmark size={20} />
                     {language === 'es' ? 'Reservar' : language === 'en' ? 'Reserve' : 'Réserver'}
                   </button>
@@ -264,7 +308,14 @@ export function BookDetail() {
 
                 <div className="shipping-info">
                   <Truck size={16} />
-                  <span>{language === 'es' ? 'Envío gratis en pedidos mayores a $50' : language === 'en' ? 'Free shipping on orders over $50' : 'Livraison gratuite pour les commandes de plus de 50$'}</span>
+                  <span>
+                    {language === 'es' 
+                      ? `Envío gratis en pedidos mayores a ${formatPrice(settings.shipping.freeShippingThreshold)}` 
+                      : language === 'en' 
+                      ? `Free shipping on orders over ${formatPrice(settings.shipping.freeShippingThreshold)}` 
+                      : `Livraison gratuite pour les commandes de plus de ${formatPrice(settings.shipping.freeShippingThreshold)}`
+                    }
+                  </span>
                 </div>
               </div>
             )}

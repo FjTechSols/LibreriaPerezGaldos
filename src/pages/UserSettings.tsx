@@ -3,26 +3,72 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
-import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key } from 'lucide-react';
+import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar } from 'lucide-react';
 import '../styles/pages/UserSettings.css';
 
 export function UserSettings() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'notifications'>('profile');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+    name: '',
+    email: '',
+    fullName: '',
+    birthDate: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
     newEmail: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+
+  // Load user data when it changes
+  React.useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        fullName: user.fullName || '',
+        birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split('T')[0] : '',
+        phone: user.phone || '',
+        address: user.address || '',
+        city: user.city || '',
+        postalCode: user.postalCode || ''
+      }));
+    }
+  }, [user]);
+
+  const toggleEdit = () => {
+    if (isEditing) {
+      // Cancel editing: revert form data to user data
+      if (user) {
+        setFormData(prev => ({
+          ...prev,
+          name: user.name || '',
+          email: user.email || '',
+          fullName: user.fullName || '',
+          birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split('T')[0] : '',
+          phone: user.phone || '',
+          address: user.address || '',
+          city: user.city || '',
+          postalCode: user.postalCode || ''
+        }));
+      }
+    }
+    setIsEditing(!isEditing);
+    setMessage('');
+    setError('');
+  };
 
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [otpCode, setOtpCode] = useState('');
@@ -37,8 +83,52 @@ export function UserSettings() {
     newsletter: true
   });
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
+  // Sync local preferences with global context updates
+  React.useEffect(() => {
+    setPreferences(prev => ({
+      ...prev,
+      language: language,
+      theme: theme
+    }));
+  }, [language, theme]);
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    // If just toggling to edit mode, do nothing here (handled by button)
+    // This function handles the SAVE action
+    try {
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('usuarios')
+        .update({
+          nombre: formData.fullName,
+          fecha_nacimiento: formData.birthDate || null,
+          telefono: formData.phone || null,
+          direccion: formData.address || null,
+          ciudad: formData.city || null,
+          codigo_postal: formData.postalCode || null
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        setError('Error al actualizar el perfil.');
+        console.error('Profile update error:', error);
+      } else {
+        await refreshUser(); // Reload user data from DB
+        setMessage('Perfil actualizado correctamente.');
+        setIsEditing(false); // Exit edit mode on success
+      }
+    } catch (err) {
+      setError('Error inesperado.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEmailChange = async (e: React.FormEvent) => {
@@ -226,7 +316,11 @@ export function UserSettings() {
                 <button
                   key={tab.id}
                   className={`settings-nav-item ${activeTab === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                  onClick={() => {
+                    setActiveTab(tab.id as typeof activeTab);
+                    setMessage(''); // Clear messages when switching tabs
+                    setError('');
+                  }}
                 >
                   <Icon size={20} />
                   <span>{tab.label}</span>
@@ -239,18 +333,70 @@ export function UserSettings() {
             {activeTab === 'profile' && (
               <div className="settings-section">
                 <h2>Información Personal</h2>
+                
+                {message && <div className="success-message-box mb-4">{message}</div>}
+                {error && <div className="error-message-box mb-4">{error}</div>}
+
                 <form onSubmit={handleProfileUpdate} className="settings-form">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label htmlFor="username">
+                        <User size={16} />
+                        Nombre de usuario
+                      </label>
+                      <input
+                        id="username"
+                        type="text"
+                        value={user?.username || ''}
+                        disabled
+                        className="bg-gray-100 dark:bg-slate-700 cursor-not-allowed input-readonly"
+                        title="El nombre de usuario no se puede cambiar"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="fecha_registro">
+                        <Globe size={16} />
+                        Fecha de Registro
+                      </label>
+                      <input
+                        id="fecha_registro"
+                        type="text"
+                        value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Desconocida'}
+                        disabled
+                        className="bg-gray-100 dark:bg-slate-700 cursor-not-allowed input-readonly"
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-group">
-                    <label htmlFor="name">
+                    <label htmlFor="fullName">
                       <User size={16} />
                       Nombre completo
                     </label>
                     <input
-                      id="name"
+                      id="fullName"
                       type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Tu nombre"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      placeholder={isEditing ? "Tu nombre real completo" : "No especificado"}
+                      disabled={!isEditing}
+                      className={!isEditing ? "input-readonly" : ""}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="birthDate">
+                      <Calendar size={16} />
+                      Fecha de Nacimiento
+                    </label>
+                    <input
+                      id="birthDate"
+                      type="date"
+                      value={formData.birthDate}
+                      onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "input-readonly" : ""}
                     />
                   </div>
 
@@ -263,14 +409,94 @@ export function UserSettings() {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="tu@email.com"
+                      disabled // Email is typically handled in security or requires special flow
+                      className="bg-gray-100 dark:bg-slate-700 cursor-not-allowed input-readonly"
+                      title="Para cambiar tu email ve a la pestaña Seguridad"
                     />
                   </div>
 
-                  <button type="submit" className="btn-primary">
-                    Guardar cambios
-                  </button>
+                  <div className="form-group">
+                    <label htmlFor="phone">
+                      <Mail size={16} />
+                      Teléfono
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder={isEditing ? "Tu número de teléfono" : "No especificado"}
+                      disabled={!isEditing}
+                      className={!isEditing ? "input-readonly" : ""}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="address">
+                      <Mail size={16} />
+                      Dirección
+                    </label>
+                    <input
+                      id="address"
+                      type="text"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder={isEditing ? "Tu dirección completa" : "No especificado"}
+                      disabled={!isEditing}
+                      className={!isEditing ? "input-readonly" : ""}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label htmlFor="city">
+                        <Mail size={16} />
+                        Ciudad
+                      </label>
+                      <input
+                        id="city"
+                        type="text"
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        placeholder={isEditing ? "Tu ciudad" : "No especificado"}
+                        disabled={!isEditing}
+                        className={!isEditing ? "input-readonly" : ""}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="postalCode">
+                        <Mail size={16} />
+                        Código Postal
+                      </label>
+                      <input
+                        id="postalCode"
+                        type="text"
+                        value={formData.postalCode}
+                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                        placeholder={isEditing ? "Tu código postal" : "No especificado"}
+                        disabled={!isEditing}
+                        className={!isEditing ? "input-readonly" : ""}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 mt-6">
+                    {isEditing ? (
+                      <>
+                        <button type="button" onClick={toggleEdit} className="btn-secondary flex-1">
+                          Cancelar
+                        </button>
+                        <button type="submit" className="btn-primary flex-1">
+                          Guardar cambios
+                        </button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={toggleEdit} className="btn-primary w-full">
+                        Editar información
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
             )}
@@ -423,7 +649,7 @@ export function UserSettings() {
                     <select
                       id="language"
                       value={preferences.language}
-                      onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
+                      onChange={(e) => setPreferences({ ...preferences, language: e.target.value as 'es' | 'en' })}
                     >
                       <option value="es">Español</option>
                       <option value="en">English</option>
@@ -438,7 +664,7 @@ export function UserSettings() {
                     <select
                       id="theme"
                       value={preferences.theme}
-                      onChange={(e) => setPreferences({ ...preferences, theme: e.target.value })}
+                      onChange={(e) => setPreferences({ ...preferences, theme: e.target.value as 'light' | 'dark' | 'auto' })}
                     >
                       <option value="light">Claro</option>
                       <option value="dark">Oscuro</option>

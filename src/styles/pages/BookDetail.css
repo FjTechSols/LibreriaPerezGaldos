@@ -854,3 +854,11 @@
 .dark .meta-value.in-stock {
     color: #34d399;
 }
+
+/* Fix for Add to Cart and Write Review button text color in Dark Mode */
+.dark .add-to-cart-btn,
+.dark-mode .add-to-cart-btn,
+.dark .write-review-btn,
+.dark-mode .write-review-btn {
+    color: white !important;
+}

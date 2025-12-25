@@ -72,15 +72,17 @@ export default function GenerarFacturaModal({
       return;
     }
 
-    const { data: facturas } = await supabase
-      .from('facturas')
-      .select('pedido_id');
 
-    const pedidosConFactura = new Set(facturas?.map(f => f.pedido_id) || []);
+    const { data: facturas } = await supabase
+      .from('invoices')
+      .select('order_id');
+
+    const pedidosConFactura = new Set(facturas?.map(f => f.order_id) || []);
 
     const pedidosSinFactura = todosPedidos?.filter(
-      p => !pedidosConFactura.has(p.id)
+      p => !pedidosConFactura.has(String(p.id))
     ) || [];
+
 
     setPedidos(pedidosSinFactura);
   };

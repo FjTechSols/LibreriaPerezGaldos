@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight, FileText, Download } from 'lucide-react';
-import { crearFactura, descargarFacturaPDF, obtenerFacturas } from '../services/facturaService';
-import { sendInvoiceEmail } from '../services/emailService';
+import { useInvoice } from '../context/InvoiceContext';
+import { obtenerPedidoPorId } from '../services/pedidoService';
+import { supabase } from '../lib/supabase';
+import { generarPDFFactura } from '../utils/pdfGenerator';
+import * as settingsService from '../services/settingsService';
+import { Factura } from '../types';
 import '../styles/pages/PaymentSuccess.css';
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
   const { pedidoId, paymentIntentId, total } = location.state || {};
+  const { createInvoice } = useInvoice();
   
   const [isGenerandoFactura, setIsGenerandoFactura] = useState(false);
-  const [facturaId, setFacturaId] = useState<number | null>(null);
+  const [facturaId, setFacturaId] = useState<string | null>(null);
   const [emailStatus, setEmailStatus] = useState<'pending' | 'sending' | 'sent' | 'error'>('pending');
+  const [finalOrder, setFinalOrder] = useState<any>(null);
 
   useEffect(() => {
     if (!pedidoId) {
@@ -20,54 +26,187 @@ export default function PaymentSuccess() {
       return;
     }
 
+    let isCreatingInvoice = false;
+
     const gestionarPostCompra = async () => {
+      if (isCreatingInvoice) return; // Prevent duplicate execution
+      
       setIsGenerandoFactura(true);
+      isCreatingInvoice = true;
+      
       try {
-        // 1. Verify if invoice already exists
-        const facturasExistentes = await obtenerFacturas({ tipo: 'normal' }); 
-        // Note: obtenerFacturas filter logic is basic, ideally we check by pedido_id explicitly if API supports it
-        // Since obtenerFacturas doesn't filter by pedido_id directly in the visible signature, 
-        // we might rely on try/create or fetching all (inefficient) or adding a filter.
-        // For efficiency, let's just try to create and rely on uniqueness or idempotency logic if possible, 
-        // OR better: search carefully. 
-        // Actually, let's implement a check:
-        const buscarFactura = facturasExistentes.find(f => f.pedido_id === pedidoId && !f.anulada);
+        // 1. Check if invoice already exists for this order
+        const { data: existingInvoice, error: searchError } = await supabase
+          .from('invoices')
+          .select('id, status')
+          .eq('order_id', String(pedidoId))
+          .maybeSingle();
 
-        let activeFacturaId = buscarFactura?.id;
-
-        if (!activeFacturaId) {
-            // 2. Create Invoice
-            const nuevaFactura = await crearFactura({
-                pedido_id: pedidoId,
-                tipo: 'normal'
-            });
-            activeFacturaId = nuevaFactura?.id;
+        if (existingInvoice) {
+          console.log('✅ Invoice already exists:', existingInvoice.id);
+          setFacturaId(existingInvoice.id);
+          setIsGenerandoFactura(false);
+          return;
         }
 
-        if (activeFacturaId) {
-            setFacturaId(activeFacturaId);
-            
-            // 3. Send Email
-            if (emailStatus === 'pending') {
-                setEmailStatus('sending');
-                const emailResult = await sendInvoiceEmail(activeFacturaId);
-                setEmailStatus(emailResult.success ? 'sent' : 'error');
-            }
+        // 2. Get order details
+        const pedido = await obtenerPedidoPorId(pedidoId);
+        if (!pedido) {
+          console.error('Pedido not found');
+          setIsGenerandoFactura(false);
+          return;
+        }
+        setFinalOrder(pedido);
+
+        // 3. Create invoice with "Pagada" status for web purchases
+        console.log('📝 Creating invoice for order:', pedidoId);
+        
+        try {
+          const nuevaFactura = await createInvoice({
+            customer_name: pedido.cliente?.nombre + ' ' + (pedido.cliente?.apellidos || '') || pedido.usuario?.username || 'Cliente',
+            customer_address: pedido.direccion_envio || '',
+            customer_nif: pedido.cliente?.nif || '',
+            tax_rate: 21,
+            payment_method: pedido.metodo_pago || 'tarjeta',
+            order_id: String(pedidoId),
+            items: (pedido.detalles || []).map(detalle => ({
+              book_id: String(detalle.libro_id || ''),
+              book_title: detalle.libro?.titulo || detalle.nombre_externo || 'Producto',
+              quantity: detalle.cantidad,
+              unit_price: detalle.precio_unitario,
+              line_total: detalle.cantidad * detalle.precio_unitario
+            })),
+            language: 'es'
+          });
+
+          if (nuevaFactura) {
+            console.log('✅ Invoice created:', nuevaFactura.id);
+            // Update invoice status to "Pagada" since payment was successful
+            await supabase
+              .from('invoices')
+              .update({ status: 'Pagada' })
+              .eq('id', nuevaFactura.id);
+              
+            setFacturaId(nuevaFactura.id);
+          }
+        } catch (invoiceError: any) {
+          // Silently handle duplicate invoice (happens in dev mode with React StrictMode)
+          if (invoiceError?.code === '23505') {
+            console.log('ℹ️ Invoice already exists for this order (duplicate prevented)');
+          } else {
+            console.error('❌ Failed to create invoice:', invoiceError);
+          }
         }
 
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error generando factura post-compra:', error);
       } finally {
         setIsGenerandoFactura(false);
+        isCreatingInvoice = false;
       }
     };
 
     gestionarPostCompra();
-  }, [pedidoId, navigate]);
+  }, [pedidoId, navigate]); // Removed createInvoice from dependencies to prevent re-execution
 
   const handleDownloadInvoice = async () => {
-    if (facturaId) {
-        await descargarFacturaPDF(facturaId);
+    try {
+        let currentFacturaId = facturaId;
+
+        // If no invoice yet, try to find it
+        if (!currentFacturaId) {
+            setIsGenerandoFactura(true);
+            try {
+                const { data: invoice } = await supabase
+                  .from('invoices')
+                  .select('id')
+                  .eq('order_id', String(pedidoId))
+                  .maybeSingle();
+                
+                if (invoice) {
+                    currentFacturaId = invoice.id;
+                    setFacturaId(invoice.id);
+                }
+            } catch (findError) {
+                console.error('❌ Error buscando factura:', findError);
+            } finally {
+                setIsGenerandoFactura(false);
+            }
+        }
+
+        if (currentFacturaId) {
+            setIsGenerandoFactura(true);
+            
+            // Fetch full invoice data with items
+            const { data: invoice, error: invoiceError } = await supabase
+                .from('invoices')
+                .select(`
+                    *,
+                    invoice_items (*)
+                `)
+                .eq('id', currentFacturaId)
+                .single();
+
+            if (invoiceError || !invoice) {
+                throw new Error('No se pudo obtener la factura');
+            }
+
+            // Convert Invoice to Factura format for PDF generation
+            const facturaData: Factura = {
+                id: parseInt(invoice.id),
+                pedido_id: parseInt(invoice.order_id || '0'),
+                numero_factura: invoice.invoice_number,
+                fecha: invoice.issue_date,
+                subtotal: invoice.subtotal,
+                iva: invoice.tax_amount,
+                total: invoice.total,
+                tipo: 'normal',
+                anulada: false,
+                pedido: {
+                    id: parseInt(invoice.order_id || '0'),
+                    cliente: {
+                        nombre: invoice.customer_name.split(' ')[0] || '',
+                        apellidos: invoice.customer_name.split(' ').slice(1).join(' ') || '',
+                        nif: invoice.customer_nif,
+                        direccion: invoice.customer_address
+                    },
+                    detalles: (invoice.invoice_items || []).map((item: any) => ({
+                        id: item.id,
+                        pedido_id: parseInt(invoice.order_id || '0'),
+                        libro_id: parseInt(item.book_id || '0'),
+                        cantidad: item.quantity,
+                        precio_unitario: item.unit_price,
+                        libro: {
+                            id: parseInt(item.book_id || '0'),
+                            titulo: item.book_title
+                        }
+                    }))
+                } as any
+            };
+
+            // Generate PDF
+            const settings = await settingsService.settingsService.getAllSettings();
+            const pdfBlob = await generarPDFFactura(facturaData, settings || undefined);
+            
+            // Download PDF
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = `${invoice.invoice_number}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(pdfUrl);
+            
+            setIsGenerandoFactura(false);
+        } else {
+            alert('No se pudo encontrar la factura. Por favor contacte con soporte.');
+        }
+    } catch (error: any) {
+        console.error('Error downloading invoice:', error);
+        setIsGenerandoFactura(false);
+        const errorMsg = error?.message || 'Error desconocido';
+        alert(`Error al descargar la factura:\n${errorMsg}\n\nPor favor contacte con soporte.`);
     }
   };
 
@@ -94,7 +233,7 @@ export default function PaymentSuccess() {
           </div>
           <div className="detail-item">
             <span className="label">Total Pagado:</span>
-            <span className="value total">€{total?.toFixed(2)}</span>
+            <span className="value total">€{(finalOrder?.total || total || 0).toFixed(2)}</span>
           </div>
         </div>
 
@@ -108,26 +247,29 @@ export default function PaymentSuccess() {
           </div>
         </div>
 
-        {/* Invoice Download Action */}
-        <div className="invoice-action" style={{ margin: '20px 0', textAlign: 'center' }}>
-            {facturaId ? (
-                <button 
-                    onClick={handleDownloadInvoice}
-                    className="btn-outline flex items-center justify-center gap-2 mx-auto"
-                    style={{ border: '1px solid #ddd', padding: '8px 16px', borderRadius: '6px', background: '#f9fafb' }}
-                >
-                    <FileText size={18} />
-                    <span>Descargar Factura</span>
-                    <Download size={16} />
-                </button>
-            ) : isGenerandoFactura ? (
-                <p className="text-sm text-gray-500">Generando factura...</p>
-            ) : null}
+        {/* Invoice Download Action - Visible Always for Pedido */}
+        <div className="invoice-action" style={{ margin: '0 0 24px 0', textAlign: 'center' }}>
+             <button 
+                onClick={handleDownloadInvoice}
+                disabled={isGenerandoFactura}
+                className="btn-secondary flex items-center justify-center gap-2 mx-auto w-full sm:w-auto"
+                style={{ borderColor: '#2563eb', color: '#2563eb' }} // Ensure visibility logic
+            >
+                {isGenerandoFactura ? (
+                    <span>Generando PDF...</span>
+                ) : (
+                    <>
+                        <FileText size={18} />
+                        <span>Descargar Factura</span>
+                        <Download size={16} />
+                    </>
+                )}
+            </button>
         </div>
 
         <div className="success-actions">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/mi-cuenta', { state: { section: 'orders' } })}
             className="btn-primary"
           >
             Ver Mis Pedidos

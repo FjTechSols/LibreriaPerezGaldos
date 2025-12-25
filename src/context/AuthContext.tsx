@@ -13,6 +13,10 @@ interface ExtendedUser extends User {
   roles?: Rol[];
   permisos?: string[];
   rolPrincipal?: Rol;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
 }
 
 interface ExtendedAuthState extends AuthState {
@@ -94,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { data: userData, error } = await supabase
         .from('usuarios')
-        .select('id, username, email, rol_id')
+        .select('id, username, email, rol_id, nombre, nombre_completo, fecha_nacimiento, fecha_registro, telefono, direccion, ciudad, codigo_postal')
         .eq('auth_user_id', authUserId)
         .maybeSingle();
 
@@ -115,6 +119,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: userData?.id || authUserId,
         email: userData?.email || userEmail || '',
         name: userData?.username || userEmail?.split('@')[0] || 'Usuario',
+        username: userData?.username || '',
+        fullName: userData?.nombre_completo || userData?.nombre || '',
+        birthDate: userData?.fecha_nacimiento || undefined,
+        createdAt: userData?.fecha_registro || undefined,
+        phone: userData?.telefono || '',
+        address: userData?.direccion || '',
+        city: userData?.ciudad || '',
+        postalCode: userData?.codigo_postal || '',
         role: roleType,
         roles,
         permisos,
@@ -170,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         const { data: userData, error: userError } = await supabase
           .from('usuarios')
-          .select('id, username, email, rol_id')
+          .select('id, username, email, rol_id, nombre_completo, fecha_nacimiento, fecha_registro')
           .eq('auth_user_id', data.user.id)
           .maybeSingle();
 
@@ -183,6 +195,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: userData.id,
           email: userData.email,
           name: userData.username,
+          username: userData.username,
+          fullName: userData.nombre_completo,
+          birthDate: userData.fecha_nacimiento,
+          createdAt: userData.fecha_registro,
           role: userData.rol_id === 1 ? 'admin' : 'user'
         });
         return true;
@@ -242,6 +258,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session?.user) {
+      await loadUserData(sessionData.session.user.id);
+    }
+  };
+
   const hasPermission = (permiso: string): boolean => {
     if (!user) return false;
     return user.permisos?.includes(permiso) || false;
@@ -271,7 +294,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hasPermission,
       hasRole,
       isAdmin,
-      isSuperAdmin
+      isSuperAdmin,
+      refreshUser
     }}>
       {(loading || showSplash) && <Loader />}
       {!loading && children}

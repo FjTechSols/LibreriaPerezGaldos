@@ -30,12 +30,21 @@ export function Catalog() {
   const [totalFilteredBooks, setTotalFilteredBooks] = useState(0);
   const [totalDatabaseBooks, setTotalDatabaseBooks] = useState(0);
 
+  // Helper to parse legacy category params as flags
+  const categoryParam = searchParams.get('category');
+  const isOfertas = categoryParam === 'Ofertas';
+  const isNovedades = categoryParam === 'Novedades';
+  const initialCategory = (isOfertas || isNovedades) ? 'Todos' : (categoryParam || 'Todos');
+
   const [filters, setFilters] = useState<FilterState>({
-    category: searchParams.get('category') || 'Todos',
+    category: initialCategory,
     priceRange: [0, 1000],
     availability: 'inStock', /* Default: Hide Out of Stock */
     sortBy: 'default',
-    sortOrder: 'asc'
+    sortOrder: 'asc',
+    featured: searchParams.get('featured') === 'true',
+    onSale: searchParams.get('onSale') === 'true' || isOfertas,
+    isNew: searchParams.get('isNew') === 'true' || isNovedades
   });
 
   // Load Total Database Count Once

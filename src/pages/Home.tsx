@@ -5,6 +5,7 @@ import { BookCard } from '../components/BookCard';
 import { BookCardSkeleton } from '../components/BookCardSkeleton';
 import { useLanguage } from '../context/LanguageContext';
 import { obtenerLibros } from '../services/libroService';
+import { MarketingPopup } from '../components/marketing/MarketingPopup';
 import '../styles/pages/Home.css';
 
 export function Home() {
@@ -64,6 +65,7 @@ export function Home() {
 
   return (
     <div className="home">
+      <MarketingPopup />
       <section className="hero">
         <div className="hero-container">
           <div className="hero-content">

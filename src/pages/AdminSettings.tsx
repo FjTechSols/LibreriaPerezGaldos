@@ -6,15 +6,16 @@ import {
   Building2, Mail, Phone, Globe, FileText, DollarSign,
   Truck, Bell, Database, Shield, Settings as SettingsIcon,
   Package, Download, HardDrive, Check, MapPin,
-  Home, LayoutDashboard, X
+  Home, LayoutDashboard, X, Megaphone
 } from 'lucide-react';
 
 import { GestionUbicaciones } from '../components/admin/books/GestionUbicaciones';
 import { GestionUsuariosAdmin } from '../components/admin/clients/GestionUsuariosAdmin';
+import { BannerManager } from '../components/admin/marketing/BannerManager';
 import {
   exportLibrosToCSV,
   exportCategoriasToCSV,
-  exportFacturasToCSV,
+  exportInvoicesToCSV,
   exportPedidosToCSV,
   exportIberlibroToCSV,
   exportUniliberToCSV,
@@ -35,7 +36,7 @@ export function AdminSettings() {
     updateSecuritySettings
   } = useSettings();
 
-  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'marketing' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
 
   const [exportState, setExportState] = useState<{ isExporting: boolean; type: string | null; progress: number; total: number }>({
     isExporting: false,
@@ -66,7 +67,8 @@ export function AdminSettings() {
   });
 
   const [shippingData, setShippingData] = useState({
-    freeShippingThreshold: 50,
+    freeShippingThresholdStandard: 30,
+    freeShippingThresholdExpress: 50,
     standardShippingCost: 5.99,
     expressShippingCost: 12.99,
     shippingZones: [] as string[],
@@ -98,7 +100,11 @@ export function AdminSettings() {
     if (!loading && settings) {
       setCompanyData(settings.company);
       setBillingData(settings.billing);
-      setShippingData(settings.shipping);
+      setShippingData({
+        ...settings.shipping,
+        freeShippingThresholdStandard: settings.shipping.freeShippingThresholdStandard ?? 30,
+        freeShippingThresholdExpress: settings.shipping.freeShippingThresholdExpress ?? 50
+      });
       setSystemData(settings.system);
       setSecurityData(settings.security);
     }
@@ -138,7 +144,13 @@ export function AdminSettings() {
 
   const handleShippingUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await updateShippingSettings(shippingData);
+    // Ensure we are passing the correct structure expected by ShippingSettings interface
+    const success = await updateShippingSettings({
+      ...shippingData,
+      freeShippingThresholdStandard: shippingData.freeShippingThresholdStandard, 
+      freeShippingThresholdExpress: shippingData.freeShippingThresholdExpress
+    } as any); 
+    
     if (success) {
       showSuccessMessage('Configuración de envíos actualizada correctamente');
     } else {
@@ -185,6 +197,7 @@ export function AdminSettings() {
     { id: 'shipping', label: 'Envíos', icon: Truck },
     { id: 'system', label: 'Sistema', icon: SettingsIcon },
     { id: 'security', label: 'Seguridad', icon: Shield },
+    { id: 'marketing', label: 'Marketing', icon: Megaphone },
     { id: 'ubicaciones', label: 'Ubicaciones', icon: MapPin },
     // Only show Usuarios tab if Super Admin
     ...(isSuperAdmin ? [{ id: 'usuarios', label: 'Usuarios Admin', icon: Shield }] : []),
@@ -241,6 +254,14 @@ export function AdminSettings() {
           </nav>
 
           <div className="settings-content">
+             {/* ... existing tabs ... */}
+             
+            {activeTab === 'marketing' && (
+              <div className="settings-section">
+                <BannerManager />
+              </div>
+            )}
+
             {activeTab === 'company' && (
               <div className="settings-section">
                 <h2>Datos de la Empresa</h2>
@@ -443,6 +464,7 @@ export function AdminSettings() {
               <div className="settings-section">
                 <h2>Configuración de Envíos</h2>
                 <form onSubmit={handleShippingUpdate} className="settings-form">
+                  {/* Fila Estándar */}
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="standardShipping">
@@ -458,33 +480,6 @@ export function AdminSettings() {
                       />
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="expressShipping">
-                        <Truck size={16} />
-                        Envío express
-                      </label>
-                      <input
-                        id="expressShipping"
-                        type="number"
-                        step="0.01"
-                        value={shippingData.expressShippingCost ?? ''}
-                        onChange={(e) => setShippingData({ ...shippingData, expressShippingCost: Number(e.target.value) })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="freeShipping">Envío gratis desde</label>
-                      <input
-                        id="freeShipping"
-                        type="number"
-                        step="0.01"
-                        value={shippingData.freeShippingThreshold ?? ''}
-                        onChange={(e) => setShippingData({ ...shippingData, freeShippingThreshold: Number(e.target.value) })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="standardDelivery">Días entrega estándar</label>
                       <input
@@ -502,6 +497,34 @@ export function AdminSettings() {
                     </div>
 
                     <div className="form-group">
+                      <label htmlFor="freeShippingStandard">Envío estándar gratis desde</label>
+                      <input
+                        id="freeShippingStandard"
+                        type="number"
+                        step="0.01"
+                        value={shippingData.freeShippingThresholdStandard ?? ''}
+                        onChange={(e) => setShippingData({ ...shippingData, freeShippingThresholdStandard: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fila Express */}
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="expressShipping">
+                        <Truck size={16} />
+                        Envío express
+                      </label>
+                      <input
+                        id="expressShipping"
+                        type="number"
+                        step="0.01"
+                        value={shippingData.expressShippingCost ?? ''}
+                        onChange={(e) => setShippingData({ ...shippingData, expressShippingCost: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="form-group">
                       <label htmlFor="expressDelivery">Días entrega express</label>
                       <input
                         id="expressDelivery"
@@ -514,6 +537,17 @@ export function AdminSettings() {
                             express: Number(e.target.value)
                           }
                         })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="freeShippingExpress">Envío express gratis desde</label>
+                      <input
+                        id="freeShippingExpress"
+                        type="number"
+                        step="0.01"
+                        value={shippingData.freeShippingThresholdExpress ?? ''}
+                        onChange={(e) => setShippingData({ ...shippingData, freeShippingThresholdExpress: Number(e.target.value) })}
                       />
                     </div>
                   </div>
@@ -722,7 +756,7 @@ export function AdminSettings() {
                     {[
                         { title: 'Todos los Libros', icon: Database, desc: 'Exportar catálogo completo de libros', fn: exportLibrosToCSV, id: 'Libros' },
                         { title: 'Categorías', icon: Package, desc: 'Exportar todas las categorías', fn: exportCategoriasToCSV, id: 'Categorías' },
-                        { title: 'Facturas', icon: FileText, desc: 'Exportar facturas con detalles', fn: exportFacturasToCSV, id: 'Facturas' },
+                        { title: 'Invoices', icon: FileText, desc: 'Exportar facturas con detalles', fn: exportInvoicesToCSV, id: 'Invoices' },
                         { title: 'Pedidos', icon: Truck, desc: 'Exportar pedidos con detalles', fn: exportPedidosToCSV, id: 'Pedidos' },
                         { title: 'Iberlibro', icon: Globe, desc: 'Exportar libros de Iberlibro', fn: exportIberlibroToCSV, id: 'Iberlibro', className: 'iberlibro' },
                         { title: 'Uniliber', icon: Globe, desc: 'Exportar libros de Uniliber', fn: exportUniliberToCSV, id: 'Uniliber', className: 'uniliber' },

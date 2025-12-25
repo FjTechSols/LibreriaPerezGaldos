@@ -79,7 +79,7 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      // Usar JOIN para obtener facturas con sus items en una sola consulta
+      // Fetch invoices without the broken pedidos relation
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
         .select(`
@@ -89,18 +89,45 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         .order('issue_date', { ascending: false });
 
       if (invoicesError) {
+        console.error('Error fetching invoices:', invoicesError);
         setLoading(false);
         return;
       }
 
-      // Transformar la respuesta para que tenga el formato esperado
-      const invoicesWithItems = (invoicesData || []).map(invoice => ({
-        ...invoice,
-        items: invoice.invoice_items || []
-      }));
+      // Extract all order IDs from invoices
+      const orderIds = (invoicesData || [])
+        .map(inv => parseInt(inv.order_id || '0'))
+        .filter(id => id > 0);
 
-      setInvoices(invoicesWithItems);
-      localStorage.setItem('invoices', JSON.stringify(invoicesWithItems));
+      // Fetch all related orders in one query
+      let ordersMap = new Map();
+      if (orderIds.length > 0) {
+        const { data: orders, error: ordersError } = await supabase
+          .from('pedidos')
+          .select('*')
+          .in('id', orderIds);
+
+        if (ordersError) {
+          console.error('Error fetching orders:', ordersError);
+        } else if (orders) {
+          ordersMap = new Map(orders.map(o => [o.id, o]));
+        }
+      }
+
+      // Merge invoices with their orders
+      const invoicesResult = (invoicesData || []).map(invoice => {
+        const orderId = parseInt(invoice.order_id || '0');
+        const pedido = ordersMap.get(orderId);
+
+        return {
+          ...invoice,
+          items: invoice.invoice_items || [],
+          pedido: pedido || null
+        };
+      });
+
+      setInvoices(invoicesResult);
+      localStorage.setItem('invoices_v3', JSON.stringify(invoicesResult));
     } catch (err) {
       console.error('❌ Error fetching invoices:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar facturas');

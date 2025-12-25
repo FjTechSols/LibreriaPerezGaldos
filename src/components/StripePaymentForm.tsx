@@ -5,6 +5,7 @@ import {
   useElements
 } from '@stripe/react-stripe-js';
 import { CreditCard, Lock } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface StripePaymentFormProps {
   amount: number;
@@ -15,6 +16,7 @@ interface StripePaymentFormProps {
 export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
+  const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -38,13 +40,13 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
       });
 
       if (error) {
-        setErrorMessage(error.message || 'Error al procesar el pago');
-        onError(error.message || 'Error al procesar el pago');
+        setErrorMessage(error.message || t('errorProcessingPaymentGeneric'));
+        onError(error.message || t('errorProcessingPaymentGeneric'));
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         onSuccess(paymentIntent.id);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error desconocido';
+      const message = err instanceof Error ? err.message : t('unknownError');
       setErrorMessage(message);
       onError(message);
     } finally {
@@ -56,11 +58,11 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
     <form onSubmit={handleSubmit} className="stripe-payment-form">
       <div className="payment-header">
         <CreditCard size={24} />
-        <h3>Información de Pago</h3>
+        <h3>{t('paymentInformation')}</h3>
       </div>
 
       <div className="payment-amount">
-        <span>Total a pagar:</span>
+        <span>{t('totalToPay')}:</span>
         <span className="amount">€{amount.toFixed(2)}</span>
       </div>
 
@@ -82,19 +84,19 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
         {isProcessing ? (
           <>
             <span className="spinner"></span>
-            Procesando...
+            {t('processingPayment')}
           </>
         ) : (
           <>
             <Lock size={18} />
-            Pagar €{amount.toFixed(2)}
+            {t('payAmount')} €{amount.toFixed(2)}
           </>
         )}
       </button>
 
       <div className="security-notice">
         <Lock size={14} />
-        <span>Pago seguro procesado por Stripe</span>
+        <span>{t('securePaymentByStripe')}</span>
       </div>
     </form>
   );

@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { BookOpen, Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSettings } from '../context/SettingsContext';
 import '../styles/components/Footer.css';
@@ -39,20 +39,20 @@ export function Footer() {
             <ul className="footer-links">
               <li><Link to="/">{t('home')}</Link></li>
               <li><Link to="/catalogo">{t('catalog')}</Link></li>
-              <li><Link to="/catalogo?category=Novedades">{t('latestReleases')}</Link></li>
+              <li><Link to="/catalogo?isNew=true">{t('latestReleases')}</Link></li>
               <li><Link to="/catalogo?featured=true">{t('featuredBooks')}</Link></li>
-              <li><Link to="/catalogo?category=Ofertas">{t('specialOffers')}</Link></li>
+              <li><Link to="/catalogo?onSale=true">{t('specialOffers')}</Link></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h3 className="footer-title">{t('categories')}</h3>
             <ul className="footer-links">
-              <li><Link to="/catalogo?category=Clásicos">Clásicos</Link></li>
+              <li><Link to="/catalogo?category=Literatura">Literatura</Link></li>
               <li><Link to="/catalogo?category=Fantasía">Fantasía</Link></li>
-              <li><Link to="/catalogo?category=Romance">Romance</Link></li>
               <li><Link to="/catalogo?category=Misterio">Misterio</Link></li>
-              <li><Link to="/catalogo?category=Historia">Historia</Link></li>
+              <li><Link to="/catalogo?category=Novelas">Novelas</Link></li>
+              <li><Link to="/catalogo?category=Arte">Arte</Link></li>
             </ul>
           </div>
 

@@ -6,6 +6,7 @@ export const getCategorias = async (): Promise<Categoria[]> => {
     const { data, error } = await supabase
       .from('categorias')
       .select('*')
+      .eq('activa', true)
       .order('nombre', { ascending: true });
 
     if (error) throw error;

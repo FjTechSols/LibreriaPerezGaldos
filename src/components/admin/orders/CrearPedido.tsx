@@ -18,6 +18,7 @@ import {
 } from "../../../services/pedidoService";
 import { obtenerLibros, buscarLibros } from "../../../services/libroService";
 import { getClientes, crearCliente } from "../../../services/clienteService";
+import { sendOrderConfirmationEmail, type OrderEmailData } from "../../../services/emailService";
 import { useAuth } from "../../../context/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
 import "../../../styles/components/CrearPedido.css";
@@ -983,49 +984,48 @@ export default function CrearPedido({
       });
 
       if (pedido) {
-        // --- Email Notification Logic ---
+        // --- Email Notification Logic (Resend) ---
         const clientEmail = (clienteSeleccionado?.email || manualClientData.email || '').trim();
-        const storeEmail = 'pedidos@perezgaldos.com';
-        const clientName = clienteSeleccionado ? `${clienteSeleccionado.nombre} ${clienteSeleccionado.apellidos || ''}` : `${manualClientData.nombre} ${manualClientData.apellidos}`;
+        const clientName = clienteSeleccionado 
+          ? `${clienteSeleccionado.nombre} ${clienteSeleccionado.apellidos || ''}`.trim()
+          : `${manualClientData.nombre} ${manualClientData.apellidos}`.trim();
         
-        // Construct Item List string for body
-        const itemsList = lineas.map(l => {
-             const title = l.es_externo ? l.nombre_externo : (l.libro?.titulo || 'Libro sin título');
-             return `- ${title} (x${l.cantidad}) - ${formatPrice(l.precio_unitario)}`;
-        }).join('\n');
-
-        const subject = encodeURIComponent(`Confirmación Pedido #${pedido.id} - Librería Pérez Galdós`);
-        
-        let bodyRaw = `Estimado/a ${clientName},\n\n`;
-        bodyRaw += `Su pedido #${pedido.id} ha sido registrado correctamente.\n\n`;
-        bodyRaw += `DETALLES DEL PEDIDO:\n`;
-        bodyRaw += `--------------------------------\n`;
-        bodyRaw += `${itemsList}\n`;
-        bodyRaw += `--------------------------------\n`;
-        bodyRaw += `Total: ${formatPrice(total)}\n\n`; // 'total' is available from component scope
-        
-        if (direccionEnvio) bodyRaw += `Dirección de Envío:\n${direccionEnvio}\n\n`;
-        if (transportista) bodyRaw += `Transportista: ${transportista}\n`;
-        if (tracking) bodyRaw += `Seguimiento: ${tracking}\n`;
-        
-        bodyRaw += `\nGracias por su confianza.\n\nLibrería Pérez Galdós\nhttps://perezgaldos.com`;
-
-        const body = encodeURIComponent(bodyRaw);
-
-        // Determine Mailto URL
-        // Priority: Send TO Client, BCC Store.
-        // If no Client Email, Send TO Store (Log).
-        let mailtoUrl = '';
+        // Send email if customer has email
         if (clientEmail) {
-             mailtoUrl = `mailto:${clientEmail}?bcc=${storeEmail}&subject=${subject}&body=${body}`;
-             alert(`Pedido #${pedido.id} creado correctamente.\n\nSe abrirá su gestor de correo para enviar la confirmación al cliente y a la tienda.`);
-        } else {
-             mailtoUrl = `mailto:${storeEmail}?subject=${subject} (Sin Email Cliente)&body=${body}`;
-             alert(`Pedido #${pedido.id} creado.\n\nEl cliente NO tiene email. Se abrirá correo para enviar copia a la tienda.`);
-        }
+          const orderEmailData: OrderEmailData = {
+            orderId: String(pedido.id),
+            customerEmail: clientEmail,
+            customerName: clientName,
+            items: lineas.map(l => ({
+              title: l.es_externo ? (l.nombre_externo || 'Producto externo') : (l.libro?.titulo || 'Libro sin título'),
+              quantity: l.cantidad,
+              price: l.precio_unitario
+            })),
+            subtotal: subtotal,
+            tax: iva,
+            taxRate: settings.billing.taxRate,
+            shipping: 0, // Add shipping cost if available
+            total: total,
+            shippingAddress: direccionEnvio || 'Sin dirección especificada'
+          };
 
-        // Trigger Mailto
-        window.location.href = mailtoUrl;
+          // Send email asynchronously (don't block order creation)
+          sendOrderConfirmationEmail(orderEmailData)
+            .then(result => {
+              if (result.success) {
+                console.log('✅ Email de confirmación enviado correctamente');
+              } else {
+                console.error('❌ Error al enviar email:', result.error);
+              }
+            })
+            .catch(err => {
+              console.error('❌ Excepción al enviar email:', err);
+            });
+
+          alert(`Pedido #${pedido.id} creado correctamente.\n\nSe enviará un email de confirmación a: ${clientEmail}`);
+        } else {
+          alert(`Pedido #${pedido.id} creado correctamente.\n\n⚠️ El cliente no tiene email. No se enviará confirmación automática.`);
+        }
 
         resetForm();
         onSuccess();

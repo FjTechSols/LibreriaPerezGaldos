@@ -20,16 +20,23 @@ export function Register() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const { register } = useAuth();
+  const { register, isAuthenticated, user } = useAuth();
   const { t } = useLanguage();
   const { settings } = useSettings();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Redirect if already logged in
+    if (isAuthenticated && user) {
+      navigate('/', { replace: true });
+      return;
+    }
+    
+    // Redirect if registration is disabled
     if (!settings.system.allowRegistration) {
       navigate('/');
     }
-  }, [settings.system.allowRegistration, navigate]);
+  }, [isAuthenticated, user, settings.system.allowRegistration, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

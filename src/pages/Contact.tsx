@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Mail, MessageSquare, Send } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/InfoPages.css';
 
 export const Contact = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,8 +40,8 @@ export const Contact = () => {
   return (
     <div className="info-page">
       <div className="info-hero">
-        <h1>Contacto</h1>
-        <p>Estamos aquí para ayudarte. Escríbenos.</p>
+        <h1>{t('contactTitle')}</h1>
+        <p>{t('contactSubtitle')}</p>
       </div>
 
       <div className="info-container">
@@ -49,17 +51,15 @@ export const Contact = () => {
               <section className="info-section">
                 <div className="section-title">
                   <MessageSquare size={32} className="section-icon" />
-                  <h2>Envíanos un mensaje</h2>
+                  <h2>{t('sendUsMessage')}</h2>
                 </div>
-                <p>
-                  Si tienes alguna duda sobre un libro, un pedido o simplemente quieres saludarnos, completa el formulario y te responderemos lo antes posible.
-                </p>
+                <p>{t('contactDescription')}</p>
                 
                 <div className="contact-info-group">
                    
                    {/* Email */}
                    <div className="contact-method">
-                     <h3 className="contact-method-title">Correo Electrónico:</h3>
+                     <h3 className="contact-method-title">{t('emailLabel')}:</h3>
                      <a href="mailto:info@perezgaldos.com" className="contact-link email-link">
                        <Mail size={20} />
                        info@perezgaldos.com
@@ -68,7 +68,7 @@ export const Contact = () => {
 
                    {/* Phone */}
                    <div className="contact-method">
-                      <h3 className="contact-method-title">Teléfonos:</h3>
+                      <h3 className="contact-method-title">{t('phonesLabel')}:</h3>
                       <div className="contact-details-list">
                         <a href="tel:+34915312640" className="contact-link">
                           <span className="contact-label">Pérez Galdós:</span> +34 91 531 26 40
@@ -81,7 +81,7 @@ export const Contact = () => {
 
                    {/* Addresses */}
                    <div className="contact-method">
-                      <h3 className="contact-method-title">Direcciones:</h3>
+                      <h3 className="contact-method-title">{t('addressesLabel')}:</h3>
                       <div className="contact-details-list">
                         <div className="contact-address-item">
                           <span className="contact-label">Librería Pérez Galdós</span>
@@ -102,20 +102,20 @@ export const Contact = () => {
               {submitted ? (
                 <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-tertiary)', borderRadius: '1rem' }}>
                   <Send size={48} color="var(--success-color)" style={{ marginBottom: '1rem' }} />
-                  <h3 style={{ marginBottom: '0.5rem' }}>¡Mensaje Enviado!</h3>
-                  <p>Gracias por contactarnos. Te responderemos en breve.</p>
+                  <h3 style={{ marginBottom: '0.5rem' }}>{t('messageSent')}</h3>
+                  <p>{t('thankYouMessage')}</p>
                   <button 
                     onClick={() => setSubmitted(false)}
                     className="action-btn primary"
                     style={{ marginTop: '1.5rem', background: 'var(--primary-600)', color: 'white', padding: '0.5rem 1rem', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}
                   >
-                    Enviar otro mensaje
+                    {t('sendAnotherMessage')}
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="info-form">
                   <div className="form-group">
-                    <label htmlFor="name">Nombre Completo</label>
+                    <label htmlFor="name">{t('fullNameLabel')}</label>
                     <input
                       type="text"
                       id="name"
@@ -123,12 +123,12 @@ export const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      placeholder="Tu nombre"
+                      placeholder={t('yourName')}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="email">Email</label>
+                    <label htmlFor="email">{t('email')}</label>
                     <input
                       type="email"
                       id="email"
@@ -136,12 +136,12 @@ export const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      placeholder="tu@email.com"
+                      placeholder={t('yourEmail')}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="subject">Asunto</label>
+                    <label htmlFor="subject">{t('subjectLabel')}</label>
                     <input
                       type="text"
                       id="subject"
@@ -149,19 +149,19 @@ export const Contact = () => {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      placeholder="Motivo de la consulta"
+                      placeholder={t('queryReason')}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="message">Mensaje</label>
+                    <label htmlFor="message">{t('messageLabel')}</label>
                     <textarea
                       id="message"
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      placeholder="Escribe aquí tu mensaje..."
+                      placeholder={t('writeYourMessage')}
                     />
                   </div>
 
@@ -184,7 +184,7 @@ export const Contact = () => {
                     }}
                   >
                     <Send size={18} />
-                    Enviar Mensaje
+                    {t('sendMessage')}
                   </button>
                 </form>
               )}

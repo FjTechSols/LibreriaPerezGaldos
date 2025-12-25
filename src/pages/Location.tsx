@@ -1,13 +1,15 @@
-import React from 'react';
 import { MapPin, Clock, Phone, Navigation, ExternalLink } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/InfoPages.css';
 
 export const Location = () => {
+  const { t } = useLanguage();
+  
   return (
     <div className="info-page">
       <div className="info-hero">
-        <h1>Nuestras Librerías</h1>
-        <p>Dos espacios únicos en el centro de Madrid</p>
+        <h1>{t('ourStores')}</h1>
+        <p>{t('twoUniqueSpaces')}</p>
       </div>
 
       <div className="info-container">
@@ -17,7 +19,7 @@ export const Location = () => {
           <div className="location-header">
             <div>
               <h2>Librería Pérez Galdós</h2>
-              <p className="location-subtitle">El corazón de nuestra historia</p>
+              <p className="location-subtitle">{t('heartOfOurHistory')}</p>
             </div>
             <a 
               href="https://maps.app.goo.gl/UqFMLQg8N7uqxz33A" 
@@ -26,7 +28,7 @@ export const Location = () => {
               className="maps-profile-btn"
             >
               <ExternalLink size={18} />
-              Ver en Google Maps
+              {t('viewOnGoogleMaps')}
             </a>
           </div>
 
@@ -36,7 +38,7 @@ export const Location = () => {
                 <div className="contact-item">
                   <Navigation className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
-                    <h3>Dirección</h3>
+                    <h3>{t('addressLabel')}</h3>
                     <p>Calle Hortaleza 5</p>
                     <p>28004, Madrid</p>
                     <p>(Barrio de Chueca - Justicia)</p>
@@ -46,17 +48,17 @@ export const Location = () => {
                 <div className="contact-item">
                   <Clock className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
-                    <h3>Horario</h3>
-                    <p>Lunes a Viernes: 10:30 - 20:30</p>
-                    <p>Sábados: 10:30 - 14:30</p>
-                    <p>Domingos: Consultar apertura</p>
+                    <h3>{t('scheduleLabel')}</h3>
+                    <p>{t('mondayToFriday')}: 10:30 - 20:30</p>
+                    <p>{t('saturdays')}: 10:30 - 14:30</p>
+                    <p>{t('sundays')}: {t('checkOpening')}</p>
                   </div>
                 </div>
 
                 <div className="contact-item">
                   <Phone className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
-                    <h3>Contacto</h3>
+                    <h3>{t('contactLabel')}</h3>
                     <p>Tel: +34 91 531 26 40</p>
                     <p>WhatsApp: +34 91 531 26 40</p>
                   </div>
@@ -83,7 +85,7 @@ export const Location = () => {
           <div className="location-header">
             <div>
               <h2>Librería El Galeón</h2>
-              <p className="location-subtitle">Nuestra nueva aventura literaria</p>
+              <p className="location-subtitle">{t('ourNewAdventure')}</p>
             </div>
             <a 
               href="https://maps.app.goo.gl/Z3W3J9Hg6LSgyQ6v9" 
@@ -92,7 +94,7 @@ export const Location = () => {
               className="maps-profile-btn"
             >
               <ExternalLink size={18} />
-              Ver en Google Maps
+              {t('viewOnGoogleMaps')}
             </a>
           </div>
 
@@ -102,7 +104,7 @@ export const Location = () => {
                 <div className="contact-item">
                   <Navigation className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
-                    <h3>Dirección</h3>
+                    <h3>{t('addressLabel')}</h3>
                     <p>Calle Sagasta 7</p>
                     <p>28004, Madrid</p>
                     <p>(Zona Bilbao - Alonso Martínez)</p>
@@ -112,17 +114,17 @@ export const Location = () => {
                 <div className="contact-item">
                   <Clock className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
-                    <h3>Horario</h3>
-                    <p>Lunes a Viernes: 11:00 - 14:30 y 17:00 - 20:30</p>
-                    <p>Sábados: 11:00 - 14:30</p>
-                    <p>Domingos: Cerrado</p>
+                    <h3>{t('scheduleLabel')}</h3>
+                    <p>{t('mondayToFriday')}: 11:00 - 14:30 y 17:00 - 20:30</p>
+                    <p>{t('saturdays')}: 11:00 - 14:30</p>
+                    <p>{t('sundays')}: {t('closed')}</p>
                   </div>
                 </div>
 
                 <div className="contact-item">
                   <Phone className="contact-icon-small" size={24} color="var(--primary-600)" />
                   <div className="contact-item-content">
-                    <h3>Contacto</h3>
+                    <h3>{t('contactLabel')}</h3>
                     <p>Tel: +34 91 123 45 67</p>
                     <p>WhatsApp: +34 91 123 45 67</p>
                   </div>

@@ -103,7 +103,7 @@
 
 .factura-table .table-header {
   display: grid;
-  grid-template-columns: 140px 100px 150px 100px 100px 100px 120px 100px 150px;
+  grid-template-columns: 140px 100px 150px 120px 100px 100px 100px 120px 100px 150px;
   gap: 1rem;
   padding: 1rem 1.5rem;
   background: #f8fafc;
@@ -115,7 +115,7 @@
 
 .factura-table .table-row {
   display: grid;
-  grid-template-columns: 140px 100px 150px 100px 100px 100px 120px 100px 150px;
+  grid-template-columns: 140px 100px 150px 120px 100px 100px 100px 120px 100px 150px;
   gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #f1f5f9;
@@ -384,7 +384,7 @@
 @media (max-width: 1200px) {
   .factura-table .table-header,
   .factura-table .table-row {
-    grid-template-columns: 120px 90px 120px 80px 80px 80px 100px 80px 120px;
+    grid-template-columns: 120px 90px 120px 100px 80px 80px 80px 100px 80px 120px;
     font-size: 0.8125rem;
   }
 }
@@ -428,7 +428,8 @@
     grid-template-areas:
       "number status"
       "date client"
-      "type total"
+      "origin type"
+      "total total"
       "sub iva"
       "actions actions";
     gap: 0.75rem;
@@ -448,8 +449,8 @@
     justify-self: start;
   }
 
-  /* 8. Status (Moved to top right) */
-  .factura-table .table-row > span:nth-child(8) {
+  /* 9. Status (Moved to top right) - Was 8 */
+  .factura-table .table-row > span:nth-child(9) {
     grid-area: status;
     justify-self: end;
   }
@@ -476,35 +477,51 @@
     text-align: right;
     color: #334155;
   }
-  
-  /* 4. Type */
+
+  /* 4. Origin (New) */
   .factura-table .table-row > span:nth-child(4) {
-    grid-area: type;
+    grid-area: origin;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #64748b;
     justify-self: start;
   }
-
-  /* 7. Total (Big) */
-  .factura-table .table-row > span:nth-child(7) {
-    grid-area: total;
-    font-size: 1.25rem;
+  
+  /* 5. Type (Was 4) */
+  .factura-table .table-row > span:nth-child(5) {
+    grid-area: type;
     justify-self: end;
   }
 
-  /* 5. Subtotal */
-  .factura-table .table-row > span:nth-child(5) {
+  /* 8. Total (Was 7) */
+  .factura-table .table-row > span:nth-child(8) {
+    grid-area: total;
+    font-size: 1.25rem;
+    justify-self: center;
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+  }
+
+  /* 6. Subtotal (Was 5) */
+  .factura-table .table-row > span:nth-child(6) {
     grid-area: sub;
     font-size: 0.75rem;
     color: #94a3b8;
     display: flex;
     gap: 0.25rem;
   }
-  .factura-table .table-row > span:nth-child(5)::before {
+  .factura-table .table-row > span:nth-child(6)::before {
     content: 'Sub:';
     font-weight: 600;
   }
 
-  /* 6. IVA */
-  .factura-table .table-row > span:nth-child(6) {
+  /* 7. IVA (Was 6) */
+  .factura-table .table-row > span:nth-child(7) {
     grid-area: iva;
     font-size: 0.75rem;
     color: #94a3b8;
@@ -512,12 +529,12 @@
     display: flex;
     gap: 0.25rem;
   }
-  .factura-table .table-row > span:nth-child(6)::before {
+  .factura-table .table-row > span:nth-child(7)::before {
     content: 'IVA:';
     font-weight: 600;
   }
 
-  /* 9. Actions */
+  /* 10. Actions (Was 9) */
   .factura-actions {
     grid-area: actions;
     width: 100%;

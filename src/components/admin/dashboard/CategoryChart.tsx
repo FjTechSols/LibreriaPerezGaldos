@@ -14,27 +14,47 @@ export function CategoryChart() {
   useEffect(() => {
     const fetchCategoryStats = async () => {
       try {
-        // Get all books with their categories
-        const { data: books, error } = await supabase
-          .from('libros')
-          .select('stock, categorias(nombre)')
-          .not('categoria_id', 'is', null);
+        setLoading(true);
 
-        if (error) throw error;
-
-        // Count books by category
-        const categoryMap = new Map<string, { count: number; inStock: number }>();
+        // Simplified approach: Only fetch a sample of books to avoid timeout
+        // Note: With 95k+ books, fetching all data causes timeouts
+        // This approach samples the first 10,000 books for statistics
         
-        books?.forEach((book: any) => {
-          const categoryName = book.categorias?.nombre || 'Sin categoría';
-          const current = categoryMap.get(categoryName) || { count: 0, inStock: 0 };
+        // 1. Fetch all categories first
+        const { data: categories, error: catError } = await supabase
+          .from('categorias')
+          .select('id, nombre');
+
+        if (catError) throw catError;
+
+        const categoryNameMap = new Map<number, string>();
+        categories?.forEach(c => categoryNameMap.set(c.id, c.nombre));
+
+        // 2. Fetch only a sample of books (first 10,000) to avoid timeout
+        const { data: sampleBooks, error: booksError } = await supabase
+          .from('libros')
+          .select('categoria_id, stock')
+          .range(0, 9999); // Sample first 10k books
+
+        if (booksError) throw booksError;
+
+        // 3. Aggregate in memory
+        const statsMap = new Map<string, { count: number; inStock: number }>();
+
+        sampleBooks?.forEach((book: any) => {
+          let catName = 'Sin categoría';
+          if (book.categoria_id && categoryNameMap.has(book.categoria_id)) {
+            catName = categoryNameMap.get(book.categoria_id)!;
+          }
+
+          const current = statsMap.get(catName) || { count: 0, inStock: 0 };
           current.count += 1;
           if (book.stock > 0) current.inStock += 1;
-          categoryMap.set(categoryName, current);
+          statsMap.set(catName, current);
         });
 
-        // Convert to array and sort by count
-        const data = Array.from(categoryMap.entries())
+        // 4. Format for Chart
+        const data = Array.from(statsMap.entries())
           .map(([name, stats]) => ({
             name: name.length > 15 ? name.substring(0, 15) + '...' : name,
             fullName: name,
@@ -42,11 +62,13 @@ export function CategoryChart() {
             inStock: stats.inStock
           }))
           .sort((a, b) => b.count - a.count)
-          .slice(0, 6); // Top 6 categories
+          .slice(0, 10); // Top 10
 
         setCategoryData(data);
       } catch (error) {
         console.error('Error fetching category stats:', error);
+        // Set empty data on error to avoid showing loading state forever
+        setCategoryData([]);
       } finally {
         setLoading(false);
       }
@@ -107,7 +129,8 @@ export function CategoryChart() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <p style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Cargando estadísticas...</p>
+        <div className="spinner"></div> {/* Ensure you have css for this or use simple text */}
+        <p style={{ color: isDark ? '#94a3b8' : '#64748b', marginLeft: 10 }}>Cargando estadísticas...</p>
       </div>
     );
   }
@@ -159,3 +182,4 @@ export function CategoryChart() {
     </div>
   );
 }
+

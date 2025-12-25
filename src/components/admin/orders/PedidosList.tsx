@@ -4,6 +4,7 @@ import { Pedido, EstadoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
 import { useSettings } from '../../../context/SettingsContext';
 import { TableLoader } from '../../Loader';
+import { Pagination } from '../../Pagination';
 import '../../../styles/components/PedidosList.css';
 
 interface PedidosListProps {
@@ -38,6 +39,8 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | ''>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [estadisticas, setEstadisticas] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   useEffect(() => {
     cargarPedidos();
@@ -52,7 +55,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
       filtros.estado = filtroEstado;
     }
 
-    const data = await obtenerPedidos(filtros);
+    const { data } = await obtenerPedidos(filtros);
     setPedidos(data);
     setLoading(false);
   };
@@ -81,6 +84,27 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
 
     return matchSearch;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(pedidosFiltrados.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const pedidosPaginados = pedidosFiltrados.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filtroEstado]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
 
   if (loading) {
     return <TableLoader text="Cargando pedidos..." />;
@@ -120,10 +144,6 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
             <span className="stat-value">{estadisticas.devoluciones}</span>
           </div>
 
-          <div className="stat-card devolucion">
-            <span className="stat-label">Devoluciones</span>
-            <span className="stat-value">{estadisticas.devoluciones}</span>
-          </div>
 
           <div className="stat-card ventas">
             <span className="stat-label">Ventas Totales</span>
@@ -171,7 +191,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           <span>Acciones</span>
         </div>
 
-        {pedidosFiltrados.map(pedido => (
+        {pedidosPaginados.map(pedido => (
           <div key={pedido.id} className="table-row">
             <span className="pedido-numero">
               <Package size={16} />
@@ -246,6 +266,19 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           </div>
         )}
       </div>
+
+      {pedidosFiltrados.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={pedidosFiltrados.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          showItemsPerPageSelector={true}
+          itemsPerPageOptions={[10, 25, 50, 100]}
+        />
+      )}
     </div>
   );
 }

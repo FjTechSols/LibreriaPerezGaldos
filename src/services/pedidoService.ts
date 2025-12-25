@@ -1,7 +1,6 @@
 import { supabase } from '../lib/supabase';
-import { Pedido, EstadoPedido, Usuario, Libro } from '../types';
-
-const IVA_RATE = 0.21;
+import { Pedido, EstadoPedido, Usuario, Libro, TipoPedido } from '../types';
+import { createAdminOrderNotification, createOrderNotification } from './notificationService';
 
 export interface CrearPedidoInput {
   usuario_id: string;
@@ -10,8 +9,10 @@ export interface CrearPedidoInput {
   metodo_pago?: string;
   direccion_envio?: string;
   transportista?: string;
+  coste_envio?: number;
   tracking?: string;
   observaciones?: string;
+  taxRate?: number; // Tax rate as decimal (e.g., 0.21 for 21%)
   detalles: ({
     libro_id: number;
     cantidad: number;
@@ -32,7 +33,7 @@ export interface CalculoPedido {
 
 export const calcularTotalesPedido = (
   detalles: { cantidad: number; precio_unitario: number }[],
-  taxRate: number = IVA_RATE
+  taxRate: number
 ): CalculoPedido => {
   const subtotal = detalles.reduce((sum, detalle) => {
     return sum + (detalle.cantidad * detalle.precio_unitario);
@@ -48,12 +49,34 @@ export const calcularTotalesPedido = (
   };
 };
 
+export const calcularTotalesPedidoConEnvio = (
+  detalles: { cantidad: number; precio_unitario: number }[],
+  taxRate: number,
+  costeEnvio: number = 0
+): CalculoPedido => {
+  const { subtotal, iva, total: totalProductos } = calcularTotalesPedido(detalles, taxRate);
+  
+  return {
+    subtotal,
+    iva,
+    total: Number((totalProductos + costeEnvio).toFixed(2))
+  };
+};
+
 export const obtenerPedidos = async (filtros?: {
   estado?: EstadoPedido;
   usuario_id?: string;
   fecha_desde?: string;
   fecha_hasta?: string;
-}): Promise<Pedido[]> => {
+  tipo?: TipoPedido;
+  page?: number;
+  limit?: number;
+}): Promise<{ data: Pedido[]; count: number }> => {
+  const page = filtros?.page || 1;
+  const limit = filtros?.limit || 10;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
   let query = supabase
     .from('pedidos')
     .select(`
@@ -64,7 +87,7 @@ export const obtenerPedidos = async (filtros?: {
         *,
         libro:libros(*)
       )
-    `)
+    `, { count: 'exact' })
     .order('fecha_pedido', { ascending: false });
 
   if (filtros?.estado) {
@@ -75,6 +98,10 @@ export const obtenerPedidos = async (filtros?: {
     query = query.eq('usuario_id', filtros.usuario_id);
   }
 
+  if (filtros?.tipo) {
+    query = query.eq('tipo', filtros.tipo);
+  }
+
   if (filtros?.fecha_desde) {
     query = query.gte('fecha_pedido', filtros.fecha_desde);
   }
@@ -83,14 +110,14 @@ export const obtenerPedidos = async (filtros?: {
     query = query.lte('fecha_pedido', filtros.fecha_hasta);
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query.range(from, to);
 
   if (error) {
     console.error('Error al obtener pedidos:', error);
-    return [];
+    return { data: [], count: 0 };
   }
 
-  return data || [];
+  return { data: data || [], count: count || 0 };
 };
 
 export const obtenerPedidoPorId = async (id: number): Promise<Pedido | null> => {
@@ -104,7 +131,6 @@ export const obtenerPedidoPorId = async (id: number): Promise<Pedido | null> => 
         *,
         libro:libros(*)
       ),
-      factura:facturas(*),
       envio:envios(*)
     `)
     .eq('id', id)
@@ -124,7 +150,11 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       throw new Error('El pedido debe tener al menos un detalle');
     }
 
-    const { subtotal, iva, total } = calcularTotalesPedido(input.detalles);
+    const { subtotal, iva, total } = calcularTotalesPedidoConEnvio(
+      input.detalles, 
+      input.taxRate || 0.21, 
+      input.coste_envio || 0
+    );
 
     const pedidoData = {
       usuario_id: input.usuario_id,
@@ -137,6 +167,7 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       metodo_pago: input.metodo_pago || 'tarjeta',
       direccion_envio: input.direccion_envio,
       transportista: input.transportista,
+      coste_envio: input.coste_envio || 0,
       tracking: input.tracking,
       observaciones: input.observaciones
     };
@@ -181,6 +212,17 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       await supabase.from('pedidos').delete().eq('id', pedido.id);
       throw detallesError;
     }
+
+    // Send notification to admins
+    // We don't await this to avoid blocking the response if it fails or takes time
+    createAdminOrderNotification(pedido.id, 'Cliente Web').catch(err => 
+      console.error('Error sending admin notification:', err)
+    );
+
+    // Send notification to USER
+    createOrderNotification(pedido.usuario_id, pedido.id, 'pendiente').catch(err =>
+      console.error('Error sending user notification:', err)
+    );
 
     return await obtenerPedidoPorId(pedido.id);
   } catch (error) {
@@ -525,4 +567,14 @@ export const obtenerLibrosMasVendidos = async (): Promise<{ titulo: string; cant
     console.error('Error al obtener libros más vendidos:', error);
     return [];
   }
+};
+
+export const getPendingOrdersCount = async (): Promise<number> => {
+  const { count, error } = await supabase
+    .from('pedidos')
+    .select('*', { count: 'exact', head: true })
+    .in('estado', ['pendiente', 'procesando']);
+
+  if (error) throw error;
+  return count || 0;
 };

@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { CreditCard, Truck, MapPin, FileText, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MapPin, FileText, User, Save } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
+import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../lib/supabase';
 import '../styles/components/CheckoutForm.css';
 
 export interface CheckoutData {
@@ -14,7 +16,6 @@ export interface CheckoutData {
   codigo_postal: string;
   provincia: string;
   pais: string;
-  metodo_pago: 'tarjeta' | 'paypal' | 'transferencia';
   observaciones: string;
 }
 
@@ -22,35 +23,100 @@ interface CheckoutFormProps {
   subtotal: number;
   iva: number;
   total: number;
-  onSubmit: (data: CheckoutData) => void;
+  onSubmit: (data: CheckoutData, shippingMethod: 'standard' | 'express', shippingCost: number) => void;
   onCancel: () => void;
   isProcessing: boolean;
+  initialShippingMethod?: 'standard' | 'express';
 }
 
 export default function CheckoutForm({
   subtotal,
   iva,
-  total,
+
   onSubmit,
   onCancel,
-  isProcessing
+  isProcessing,
+  initialShippingMethod = 'standard'
 }: CheckoutFormProps) {
-  const { user } = useAuth();
-  const { formatPrice } = useSettings();
+  const { user, refreshUser } = useAuth();
+  const { formatPrice, settings } = useSettings();
+  const { t } = useLanguage();
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
+  const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>(initialShippingMethod || 'standard');
+
+  // Calculate Shipping Cost based on rules
+  const getShippingCost = () => {
+    if (shippingMethod === 'standard') {
+      return subtotal >= settings.shipping.freeShippingThresholdStandard 
+        ? 0 
+        : settings.shipping.standardShippingCost;
+    } else {
+      return subtotal >= settings.shipping.freeShippingThresholdExpress 
+        ? 0 
+        : settings.shipping.expressShippingCost;
+    }
+  };
+
+  const shippingCost = getShippingCost();
+  
+  // Calculate Final Total
+  // subtotal (products) + iva (products) + shippingCost
+  // Note: Assuming shipping cost includes its own tax or is tax-free for simplicity for now, 
+  // or that 'iva' passed prop is only for products.
+  const finalTotal = subtotal + iva + shippingCost;
 
   const [formData, setFormData] = useState<CheckoutData>({
     nombre: '',
     apellidos: '',
-    email: user?.email || '',
+    email: '',
     telefono: '',
     direccion: '',
     ciudad: '',
     codigo_postal: '',
     provincia: '',
     pais: 'España',
-    metodo_pago: 'tarjeta',
     observaciones: ''
   });
+
+  // Helper to split full name with basic heuristics
+  const splitFullName = (fullName: string) => {
+    // Remove extra spaces
+    const parts = fullName.trim().split(/\s+/);
+    
+    if (parts.length === 0) return { nombre: '', apellidos: '' };
+    if (parts.length === 1) return { nombre: parts[0], apellidos: '' };
+    
+    // Heuristic: If 4 or more parts, assume compound name (e.g., "Francisco Javier Gonzalez Sanchez")
+    // taking first 2 words as Name.
+    if (parts.length >= 4) {
+      const nombre = parts.slice(0, 2).join(' ');
+      const apellidos = parts.slice(2).join(' ');
+      return { nombre, apellidos };
+    }
+    
+    // Default: First word is Name, rest are Surnames
+    const nombre = parts[0];
+    const apellidos = parts.slice(1).join(' ');
+    return { nombre, apellidos };
+  };
+
+  // Pre-fill form with user data
+  useEffect(() => {
+    if (user) {
+      const { nombre, apellidos } = splitFullName(user.fullName || user.name || '');
+      
+      setFormData(prev => ({
+        ...prev,
+        nombre: nombre,
+        apellidos: apellidos,
+        email: user.email || '',
+        telefono: user.phone || '',
+        direccion: user.address || '',
+        ciudad: user.city || '',
+        codigo_postal: user.postalCode || ''
+      }));
+    }
+  }, [user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -59,9 +125,38 @@ export default function CheckoutForm({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSaveAsDefault(e.target.checked);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Save as default if checked
+    if (saveAsDefault && user) {
+      try {
+        const fullName = `${formData.nombre} ${formData.apellidos}`.trim();
+        
+        const { error } = await supabase
+          .from('usuarios')
+          .update({
+            nombre: fullName, // Save combined name to 'nombre' field
+            telefono: formData.telefono,
+            direccion: formData.direccion,
+            ciudad: formData.ciudad,
+            codigo_postal: formData.codigo_postal
+          })
+          .eq('auth_user_id', user.id);
+
+        if (!error) {
+          await refreshUser(); // Update context
+        }
+      } catch (err) {
+        console.error('Error saving default address:', err);
+      }
+    }
+
+    onSubmit(formData, shippingMethod, shippingCost);
   };
 
   return (
@@ -70,12 +165,12 @@ export default function CheckoutForm({
         <div className="checkout-section">
           <div className="section-header">
             <User size={20} />
-            <h3>Información Personal</h3>
+            <h3>{t('personalInformation')}</h3>
           </div>
 
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor="nombre">Nombre *</label>
+              <label htmlFor="nombre">{t('firstName')} *</label>
               <input
                 type="text"
                 id="nombre"
@@ -84,12 +179,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="Tu nombre"
+                placeholder={t('firstNamePlaceholder')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="apellidos">Apellidos *</label>
+              <label htmlFor="apellidos">{t('lastName')} *</label>
               <input
                 type="text"
                 id="apellidos"
@@ -98,12 +193,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="Tus apellidos"
+                placeholder={t('lastNamePlaceholder')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email *</label>
+              <label htmlFor="email">{t('email')} *</label>
               <input
                 type="email"
                 id="email"
@@ -112,12 +207,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="tu@email.com"
+                placeholder={t('yourEmail')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="telefono">Teléfono *</label>
+              <label htmlFor="telefono">{t('phone')} *</label>
               <input
                 type="tel"
                 id="telefono"
@@ -126,7 +221,7 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="600123456"
+                placeholder={t('phonePlaceholder')}
               />
             </div>
           </div>
@@ -135,12 +230,50 @@ export default function CheckoutForm({
         <div className="checkout-section">
           <div className="section-header">
             <MapPin size={20} />
-            <h3>Dirección de Envío</h3>
+            <h3>{t('shippingAndAddress')}</h3>
+          </div>
+
+          <div className="shipping-methods-container" style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>{t('shippingMethodLabel')}</label>
+            
+            <div 
+              className={`shipping-option ${shippingMethod === 'standard' ? 'selected' : ''}`}
+              onClick={() => setShippingMethod('standard')}
+            >
+              <div className="shipping-option-details">
+                <div className="shipping-option-title">{t('standardShipping')}</div>
+                <div className="shipping-option-subtitle">
+                  {settings.shipping.estimatedDeliveryDays.standard} {t('workingDays')}
+                </div>
+              </div>
+              <div className={`shipping-option-price ${subtotal >= settings.shipping.freeShippingThresholdStandard ? 'free' : ''}`}>
+                {subtotal >= settings.shipping.freeShippingThresholdStandard 
+                  ? t('freeLabel') 
+                  : formatPrice(settings.shipping.standardShippingCost)}
+              </div>
+            </div>
+
+            <div 
+              className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
+              onClick={() => setShippingMethod('express')}
+            >
+              <div className="shipping-option-details">
+                <div className="shipping-option-title">{t('expressShipping')}</div>
+                <div className="shipping-option-subtitle">
+                  {settings.shipping.estimatedDeliveryDays.express} {t('workingDays')}
+                </div>
+              </div>
+              <div className={`shipping-option-price ${subtotal >= settings.shipping.freeShippingThresholdExpress ? 'free' : ''}`}>
+                {subtotal >= settings.shipping.freeShippingThresholdExpress 
+                  ? t('freeLabel') 
+                  : formatPrice(settings.shipping.expressShippingCost)}
+              </div>
+            </div>
           </div>
 
           <div className="form-grid">
             <div className="form-group full-width">
-              <label htmlFor="direccion">Dirección *</label>
+              <label htmlFor="direccion">{t('streetAddress')} *</label>
               <input
                 type="text"
                 id="direccion"
@@ -149,12 +282,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="Calle, número, piso, puerta..."
+                placeholder={t('streetAddressPlaceholder')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="ciudad">Ciudad *</label>
+              <label htmlFor="ciudad">{t('city')} *</label>
               <input
                 type="text"
                 id="ciudad"
@@ -163,12 +296,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="Madrid"
+                placeholder={t('cityPlaceholder')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="codigo_postal">Código Postal *</label>
+              <label htmlFor="codigo_postal">{t('postalCodeLabel')} *</label>
               <input
                 type="text"
                 id="codigo_postal"
@@ -177,12 +310,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="28001"
+                placeholder={t('postalCodePlaceholder')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="provincia">Provincia *</label>
+              <label htmlFor="provincia">{t('province')} *</label>
               <input
                 type="text"
                 id="provincia"
@@ -191,12 +324,12 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="Madrid"
+                placeholder={t('provincePlaceholder')}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="pais">País *</label>
+              <label htmlFor="pais">{t('country')} *</label>
               <input
                 type="text"
                 id="pais"
@@ -205,76 +338,33 @@ export default function CheckoutForm({
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder="España"
+                placeholder={t('countryPlaceholder')}
               />
             </div>
           </div>
-        </div>
-
-        <div className="checkout-section">
-          <div className="section-header">
-            <CreditCard size={20} />
-            <h3>Método de Pago</h3>
-          </div>
-
-          <div className="payment-methods">
-            <label className={`payment-method ${formData.metodo_pago === 'tarjeta' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="metodo_pago"
-                value="tarjeta"
-                checked={formData.metodo_pago === 'tarjeta'}
-                onChange={handleChange}
+          
+          {user && (
+            <div className="save-defaults-container" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input 
+                type="checkbox" 
+                id="saveAsDefault" 
+                checked={saveAsDefault} 
+                onChange={handleCheckboxChange} 
+                className="form-checkbox"
+                style={{ width: 'auto', margin: 0 }}
               />
-              <div className="payment-content">
-                <CreditCard size={24} />
-                <div>
-                  <div className="payment-title">Tarjeta de Crédito/Débito</div>
-                  <div className="payment-subtitle">Visa, Mastercard, American Express</div>
-                </div>
-              </div>
-            </label>
-
-            <label className={`payment-method ${formData.metodo_pago === 'paypal' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="metodo_pago"
-                value="paypal"
-                checked={formData.metodo_pago === 'paypal'}
-                onChange={handleChange}
-              />
-              <div className="payment-content">
-                <div className="paypal-icon">P</div>
-                <div>
-                  <div className="payment-title">PayPal</div>
-                  <div className="payment-subtitle">Pago seguro con PayPal</div>
-                </div>
-              </div>
-            </label>
-
-            <label className={`payment-method ${formData.metodo_pago === 'transferencia' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="metodo_pago"
-                value="transferencia"
-                checked={formData.metodo_pago === 'transferencia'}
-                onChange={handleChange}
-              />
-              <div className="payment-content">
-                <Truck size={24} />
-                <div>
-                  <div className="payment-title">Transferencia Bancaria</div>
-                  <div className="payment-subtitle">Pago mediante transferencia</div>
-                </div>
-              </div>
-            </label>
-          </div>
+              <label htmlFor="saveAsDefault" style={{ margin: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                <Save size={16} />
+                {t('saveAsDefaultAddress')}
+              </label>
+            </div>
+          )}
         </div>
 
         <div className="checkout-section">
           <div className="section-header">
             <FileText size={20} />
-            <h3>Observaciones (Opcional)</h3>
+            <h3>{t('notesOptional')}</h3>
           </div>
 
           <div className="form-group full-width">
@@ -285,24 +375,28 @@ export default function CheckoutForm({
               onChange={handleChange}
               className="form-textarea"
               rows={3}
-              placeholder="Notas adicionales sobre tu pedido (horarios de entrega, instrucciones especiales, etc.)"
+              placeholder={t('notesPlaceholder')}
             />
           </div>
         </div>
 
         <div className="checkout-summary">
-          <h3>Resumen del Pedido</h3>
+          <h3>{t('orderSummary')}</h3>
           <div className="summary-line">
-            <span>Subtotal:</span>
+            <span>{t('subtotalLabel')}:</span>
             <span>{formatPrice(subtotal)}</span>
           </div>
           <div className="summary-line">
-            <span>IVA (21%):</span>
+            <span>{t('shipping')} ({shippingMethod === 'standard' ? t('standardOption') : t('expressOption')}):</span>
+            <span>{shippingCost === 0 ? t('freeLabel') : formatPrice(shippingCost)}</span>
+          </div>
+          <div className="summary-line">
+            <span>IVA ({settings.billing.taxRate}%):</span>
             <span>{formatPrice(iva)}</span>
           </div>
           <div className="summary-line total">
-            <span>Total:</span>
-            <span>{formatPrice(total)}</span>
+            <span>{t('checkoutTotal')}:</span>
+            <span>{formatPrice(finalTotal)}</span>
           </div>
         </div>
 
@@ -313,14 +407,14 @@ export default function CheckoutForm({
             className="btn-cancel"
             disabled={isProcessing}
           >
-            Volver al Carrito
+            {t('backToCart')}
           </button>
           <button
             type="submit"
             className="btn-confirm"
             disabled={isProcessing}
           >
-            {isProcessing ? 'Procesando...' : 'Confirmar Pedido'}
+            {isProcessing ? t('processingOrder') : t('confirmOrder')}
           </button>
         </div>
       </form>

@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, CreditCard, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, ArrowLeft, CreditCard, AlertCircle, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
-import { crearPedido } from '../services/pedidoService';
+import { useLanguage } from '../context/LanguageContext';
 import { validateStock } from '../services/cartService';
-import { findOrCreateCliente } from '../services/clienteService';
 import CheckoutForm, { CheckoutData } from '../components/CheckoutForm';
 import '../styles/pages/Cart.css';
 
@@ -14,10 +13,13 @@ export function Cart() {
   const { items, removeItem, updateQuantity, clearCart, total } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { formatPrice, settings } = useSettings();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<'standard' | 'express'>('standard');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleInitiateCheckout = async () => {
     if (!isAuthenticated || !user) {
@@ -46,69 +48,33 @@ export function Cart() {
     }
   };
 
-  const handleCheckoutSubmit = async (checkoutData: CheckoutData) => {
+  const handleCheckoutSubmit = async (checkoutData: CheckoutData, shippingMethod: 'standard' | 'express', shippingCost: number) => {
     setIsProcessing(true);
     setError(null);
 
     try {
-      // Create Order IMMEDIATELY to prevent duplicates later
+      // DO NOT create order here - it will be created after successful payment
+      // Just navigate to Stripe with all the necessary data
+      
       const direccionCompleta = `${checkoutData.direccion}, ${checkoutData.codigo_postal} ${checkoutData.ciudad}, ${checkoutData.provincia}, ${checkoutData.pais}`;
       
-      let clienteId = undefined;
+      // Calculate total with shipping and tax
+      const subtotal = total;
+      const taxAmount = subtotal * (settings.billing.taxRate / 100);
+      const orderTotal = subtotal + shippingCost + taxAmount;
 
-      // Always create/find client first
-      const cliente = await findOrCreateCliente({
-        nombre: checkoutData.nombre,
-        apellidos: checkoutData.apellidos,
-        email: checkoutData.email,
-        telefono: checkoutData.telefono,
-        direccion: checkoutData.direccion,
-        ciudad: checkoutData.ciudad,
-        codigo_postal: checkoutData.codigo_postal,
-        provincia: checkoutData.provincia,
-        pais: checkoutData.pais,
-        tipo: 'particular'
+      navigate('/stripe-checkout', { 
+        state: { 
+          checkoutData,
+          shippingMethod,
+          shippingCost,
+          subtotal,
+          taxAmount,
+          orderTotal,
+          direccionCompleta,
+          cartItems: items // Pass cart items to create order after payment
+        } 
       });
-      clienteId = cliente.id;
-
-      const detalles = items.map(item => ({
-        libro_id: parseInt(item.book.id),
-        cantidad: item.quantity,
-        precio_unitario: item.book.price
-      }));
-
-      const pedido = await crearPedido({
-        usuario_id: user!.id,
-        cliente_id: clienteId,
-        tipo: 'interno',
-        metodo_pago: checkoutData.metodo_pago,
-        direccion_envio: direccionCompleta,
-        observaciones: checkoutData.observaciones || undefined,
-        detalles
-      });
-
-      if (!pedido) {
-        throw new Error('Error al crear el pedido inicial.');
-      }
-
-      if (checkoutData.metodo_pago === 'tarjeta') {
-        // Pass the created Order ID to the checkout page
-        // We also pass client info just for the PaymentIntent metadata if needed, 
-        // but the order itself is already safely created in DB.
-        navigate('/stripe-checkout', { 
-            state: { 
-                orderId: pedido.id, 
-                clientEmail: checkoutData.email, 
-                clientName: `${checkoutData.nombre} ${checkoutData.apellidos}` 
-            } 
-        });
-        return;
-      }
-
-      // If internal/transfer method (not card), success immediately
-      clearCart();
-      alert(`¡Pedido #${pedido.id} creado con éxito! Puede ver el estado en su panel de usuario.`);
-      navigate('/mi-cuenta');
 
     } catch (err) {
       console.error('Error in checkout:', err);
@@ -128,12 +94,12 @@ export function Cart() {
         <div className="container">
           <div className="empty-cart">
             <ShoppingCart size={64} className="empty-cart-icon" />
-            <h2 className="empty-cart-title">Tu carrito está vacío</h2>
+            <h2 className="empty-cart-title">{t('yourCartIsEmpty')}</h2>
             <p className="empty-cart-subtitle">
-              ¡Descubre nuestra increíble selección de libros y añade algunos a tu carrito!
+              {t('discoverOurSelection')}
             </p>
             <Link to="/catalogo" className="shop-btn">
-              Explorar Catálogo
+              {t('exploreCatalogBtn')}
             </Link>
           </div>
         </div>
@@ -147,12 +113,12 @@ export function Cart() {
         <div className="cart-header">
           <Link to="/catalogo" className="back-link">
             <ArrowLeft size={20} />
-            Continuar comprando
+            {t('continueShopping')}
           </Link>
-          <h1 className="cart-title">Carrito de Compras</h1>
+          <h1 className="cart-title">{t('shoppingCart')}</h1>
           <button onClick={clearCart} className="clear-cart-btn">
             <Trash2 size={16} />
-            Vaciar carrito
+            {t('emptyCartBtn')}
           </button>
         </div>
 
@@ -168,7 +134,7 @@ export function Cart() {
                   <Link to={`/libro/${item.book.id}`} className="item-title">
                     {item.book.title}
                   </Link>
-                  <p className="item-author">por {item.book.author}</p>
+                  <p className="item-author">{t('byAuthor')} {item.book.author}</p>
                   <p className="item-category">{item.book.category}</p>
                   <p className="item-isbn">ISBN: {item.book.isbn}</p>
                 </div>
@@ -202,7 +168,7 @@ export function Cart() {
                 <button 
                   onClick={() => removeItem(item.book.id)}
                   className="remove-btn"
-                  aria-label="Eliminar del carrito"
+                  aria-label={t('removeFromCart')}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -212,33 +178,102 @@ export function Cart() {
 
           <div className="cart-summary">
             <div className="summary-card">
-              <h2 className="summary-title">Resumen del Pedido</h2>
+              <h2 className="summary-title">{t('orderSummary')}</h2>
               
               <div className="summary-details">
                 <div className="summary-row">
-                  <span>Subtotal ({items.reduce((sum, item) => sum + item.quantity, 0)} libro{items.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 's' : ''})</span>
+                  <span>{t('subtotalLabel')} ({items.reduce((sum, item) => sum + item.quantity, 0)} {items.reduce((sum, item) => sum + item.quantity, 0) === 1 ? t('bookSingular') : t('bookPlural')})</span>
                   <span>{formatPrice(total)}</span>
                 </div>
-                <div className="summary-row">
-                  <span>Envío</span>
-                  <span>{total >= settings.shipping.freeShippingThreshold ? 'Gratis' : formatPrice(settings.shipping.standardShippingCost)}</span>
+                <div className="summary-row" style={{ flexDirection: 'column', gap: '8px', alignItems: 'stretch' }}>
+                  <span>{t('shippingMethodLabel')}</span>
+                  
+                  <div className="custom-shipping-selector">
+                    <div 
+                      className="selector-trigger" 
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    >
+                      <div className="option-content">
+                        <div className="option-title-row">
+                          <span>
+                            {selectedShippingMethod === 'standard' ? t('standardShipping') : t('expressShipping')}
+                          </span>
+                        </div>
+                        <span className="option-subtitle">
+                          {selectedShippingMethod === 'standard' 
+                            ? `(${t('freeFromAmount')} ${settings.shipping.freeShippingThresholdStandard}€)`
+                            : `(${t('freeFromAmount')} ${settings.shipping.freeShippingThresholdExpress}€)`
+                          }
+                        </span>
+                      </div>
+                      <ChevronDown size={16} />
+                    </div>
+
+                    {isDropdownOpen && (
+                      <div className="selector-options">
+                        <div 
+                          className={`selector-option ${selectedShippingMethod === 'standard' ? 'selected' : ''}`}
+                          onClick={() => { setSelectedShippingMethod('standard'); setIsDropdownOpen(false); }}
+                        >
+                          <div className="option-content">
+                            <div className="option-title-row">
+                              <span>{t('standardOption')}</span>
+                              <span>{total >= settings.shipping.freeShippingThresholdStandard ? t('freeLabel') : formatPrice(settings.shipping.standardShippingCost)}</span>
+                            </div>
+                            <span className="option-subtitle">({t('freeFromAmount')} {settings.shipping.freeShippingThresholdStandard}€)</span>
+                          </div>
+                        </div>
+
+                        <div 
+                          className={`selector-option ${selectedShippingMethod === 'express' ? 'selected' : ''}`}
+                          onClick={() => { setSelectedShippingMethod('express'); setIsDropdownOpen(false); }}
+                        >
+                          <div className="option-content">
+                            <div className="option-title-row">
+                              <span>{t('expressOption')}</span>
+                              <span>{total >= settings.shipping.freeShippingThresholdExpress ? t('freeLabel') : formatPrice(settings.shipping.expressShippingCost)}</span>
+                            </div>
+                            <span className="option-subtitle">({t('freeFromAmount')} {settings.shipping.freeShippingThresholdExpress}€)</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
                 <div className="summary-row">
-                  <span>Impuestos ({settings.billing.taxRate}%)</span>
+                   <span>{t('shippingCostLabel')}</span>
+                   <span>
+                     {selectedShippingMethod === 'standard' 
+                       ? (total >= settings.shipping.freeShippingThresholdStandard ? t('freeLabel') : formatPrice(settings.shipping.standardShippingCost))
+                       : (total >= settings.shipping.freeShippingThresholdExpress ? t('freeLabel') : formatPrice(settings.shipping.expressShippingCost))
+                     }
+                   </span>
+                </div>
+
+                <div className="summary-row">
+                  <span>{t('taxesLabel')} ({settings.billing.taxRate}%)</span>
                   <span>{formatPrice(total * (settings.billing.taxRate / 100))}</span>
                 </div>
 
                 <hr className="summary-divider" />
 
                 <div className="summary-row total-row">
-                  <span>Total</span>
-                  <span>{formatPrice(total + (total >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.standardShippingCost) + total * (settings.billing.taxRate / 100))}</span>
+                  <span>{t('estimatedTotalLabel')}</span>
+                  <span>{formatPrice(
+                    total + 
+                    (selectedShippingMethod === 'standard' 
+                      ? (total >= settings.shipping.freeShippingThresholdStandard ? 0 : settings.shipping.standardShippingCost)
+                      : (total >= settings.shipping.freeShippingThresholdExpress ? 0 : settings.shipping.expressShippingCost)
+                    ) + 
+                    total * (settings.billing.taxRate / 100)
+                  )}</span>
                 </div>
               </div>
 
-              {total < settings.shipping.freeShippingThreshold && (
+              {total < settings.shipping.freeShippingThresholdStandard && (
                 <div className="shipping-notice">
-                  <p>Añade {formatPrice(settings.shipping.freeShippingThreshold - total)} más para envío gratuito</p>
+                  <p>{t('addMoreForFreeShipping').replace('{0}', formatPrice(settings.shipping.freeShippingThresholdStandard - total))}</p>
                 </div>
               )}
 
@@ -267,7 +302,7 @@ export function Cart() {
                   marginBottom: '16px',
                   textAlign: 'center'
                 }}>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#856404' }}>Inicia sesión para completar tu compra</p>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#856404' }}>{t('loginToCompletePurchase')}</p>
                 </div>
               )}
 
@@ -281,13 +316,13 @@ export function Cart() {
                 }}
               >
                 <CreditCard size={20} />
-                {isProcessing ? 'Validando...' : isAuthenticated ? 'Proceder al Checkout' : 'Iniciar Sesión'}
+                {isProcessing ? t('validatingCart') : isAuthenticated ? t('proceedToCheckout') : t('login')}
               </button>
 
               <div className="security-badges">
-                <span>🔒 Compra 100% segura</span>
-                <span>📦 Envío en 24-48h</span>
-                <span>↩️ Devolución gratis</span>
+                <span>🔒 {t('securePayment')}</span>
+                <span>📦 {t('fastShipping')}</span>
+                <span>↩️ {t('freeReturns')}</span>
               </div>
             </div>
           </div>
@@ -298,11 +333,12 @@ export function Cart() {
             <div className="checkout-modal">
               <CheckoutForm
                 subtotal={total}
-                iva={total * 0.21}
-                total={total + (total * 0.21)}
+                iva={total * (settings.billing.taxRate / 100)}
+                total={total + (total * (settings.billing.taxRate / 100))}
                 onSubmit={handleCheckoutSubmit}
                 onCancel={handleCancelCheckout}
                 isProcessing={isProcessing}
+                initialShippingMethod={selectedShippingMethod}
               />
             </div>
           </div>

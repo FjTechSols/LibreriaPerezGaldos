@@ -198,6 +198,12 @@ export const generarPDFFactura = async (factura: Factura, settings?: AllSettings
   doc.text(`${factura.subtotal.toFixed(2)} ${currencySymbol}`, totalsX + 30, yPos, { align: 'right' });
   yPos += 6;
 
+  if (factura.pedido?.coste_envio && factura.pedido.coste_envio > 0) {
+    doc.text('Gastos de Envío:', totalsX, yPos);
+    doc.text(`${factura.pedido.coste_envio.toFixed(2)} ${currencySymbol}`, totalsX + 30, yPos, { align: 'right' });
+    yPos += 6;
+  }
+
   doc.text(`IVA (${taxRate}%):`, totalsX, yPos);
   doc.text(`${factura.iva.toFixed(2)} ${currencySymbol}`, totalsX + 30, yPos, { align: 'right' });
   yPos += 8;

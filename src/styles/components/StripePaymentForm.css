@@ -25,7 +25,7 @@
 }
 
 .payment-header svg {
-  color: var(--primary);
+  color: var(--primary-color);
 }
 
 .payment-amount {
@@ -42,7 +42,7 @@
 .payment-amount .amount {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--primary-color);
 }
 
 .payment-element-container {
@@ -66,26 +66,43 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 24px;
-  background: var(--primary);
-  color: white;
-  border: none;
+  background-color: #2563eb !important; /* Explicit Blue for Light Mode */
+  color: #ffffff !important;
+  border: 1px solid #2563eb !important;
   border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
 }
 
 .pay-button:hover:not(:disabled) {
-  background: var(--primary-dark, #1d4ed8);
+  background-color: #1d4ed8 !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.4);
 }
 
 .pay-button:disabled {
-  background: #cbd5e1;
+  background: #cbd5e1 !important;
+  border-color: #cbd5e1 !important;
   cursor: not-allowed;
   transform: none;
+}
+
+/* ... existing styles ... */
+
+.dark-mode .pay-button {
+  background-color: #10b981 !important; /* Green for Dark Mode */
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.dark-mode .pay-button:hover:not(:disabled) {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
 }
 
 .pay-button .spinner {
@@ -123,8 +140,54 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+
 .dark-mode .error-message {
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.3);
   color: #fca5a5;
+}
+
+/* Dark Mode Overrides */
+.dark-mode .stripe-payment-form {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .payment-header {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .payment-header h3 {
+  color: #f1f5f9;
+}
+
+.dark-mode .payment-amount {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark-mode .payment-amount .amount {
+  color: #60a5fa;
+}
+
+
+.dark-mode .security-notice {
+  border-top-color: #334155;
+  color: #94a3b8;
+}
+
+.dark-mode .pay-button {
+  background: var(--primary-color);
+  color: #ffffff;
+}
+
+.dark-mode .pay-button:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.dark-mode .pay-button:disabled {
+  background: #475569;
+  color: #94a3b8;
 }

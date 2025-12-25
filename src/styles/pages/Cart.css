@@ -623,3 +623,150 @@
 .dark-mode .shop-btn {
   color: white !important;
 }
+
+.dark-mode .clear-cart-btn {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.dark-mode .clear-cart-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.dark-mode .back-link {
+  background-color: #1e293b;
+  color: #60a5fa;
+  border: 1px solid #334155;
+}
+
+.dark-mode .back-link:hover {
+  background-color: #334155;
+  color: #93c5fd;
+}
+
+.dark-mode .checkout-btn {
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+.dark-mode .remove-btn {
+  color: #f87171;
+}
+
+.dark-mode .remove-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+  color: #fca5a5;
+}
+
+/* Custom Shipping Selector */
+.custom-shipping-selector {
+  position: relative;
+  width: 100%;
+}
+
+.selector-trigger {
+  width: 100%;
+  padding: 12px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  color: #1e293b;
+}
+
+.selector-trigger:hover {
+  border-color: #cbd5e1;
+}
+
+.selector-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.selector-option {
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.selector-option:last-child {
+  border-bottom: none;
+}
+
+.selector-option:hover {
+  background-color: #f8fafc;
+}
+
+.selector-option.selected {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+}
+
+.option-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Dark Mode Support */
+.dark-mode .selector-trigger {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.dark-mode .selector-trigger:hover {
+  border-color: #475569;
+}
+
+.dark-mode .selector-options {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .selector-option {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark-mode .selector-option:hover {
+  background-color: #334155;
+}
+
+.dark-mode .selector-option.selected {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
+}
+
+.dark-mode .option-subtitle {
+  color: #94a3b8;
+}

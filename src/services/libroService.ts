@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Book } from '../types';
 import { generarCodigoLibro, actualizarCodigoPorUbicacion } from '../utils/codigoHelper';
-
+import { discountService, DiscountRule } from './discountService';
 
 export interface LibroSupabase {
   id: number;
@@ -122,6 +122,60 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
         .map(c => c.titulo)
     : []
 });
+
+// Helper to apply discounts
+const applyDiscountsToBookWithId = (book: Book, discounts: DiscountRule[], categoryId?: number): Book => {
+    if (!discounts || discounts.length === 0) return book;
+
+    let bestDiscount: DiscountRule | null = null;
+    let maxPercent = 0;
+
+    for (const rule of discounts) {
+        if (rule.scope === 'GLOBAL') {
+            if (rule.discount_percent > maxPercent) {
+                maxPercent = rule.discount_percent;
+                bestDiscount = rule;
+            }
+        } else if (rule.scope === 'CATEGORY' && categoryId) {
+             if (rule.target_category_id === categoryId) {
+                  if (rule.discount_percent > maxPercent) {
+                    maxPercent = rule.discount_percent;
+                    bestDiscount = rule;
+                }
+             }
+        }
+    }
+
+    if (bestDiscount && maxPercent > 0) {
+        // If "Original Price" is already set (e.g. from manual single book offer), do we override?
+        // Let's assume Global Discount takes precedence OR applies on top?
+        // Usually, apply on top of *current* price? 
+        // Or if book has manual offer (isOnSale=true), ignore global?
+        // Let's say: If book is already manually on sale, we ignore global to avoid double dipping/confusion unless we want stacking.
+        // Simple Rule: If manual offer exists, keep it. If not, apply global.
+        
+        if (book.isOnSale && book.originalPrice) {
+            // Already has a specific offer, skip global rules to be safe?
+            // User can override this behaviour if they want "Extra 10% off sales".
+            // For now, let's Apply ONLY if not already on sale, OR if the Global discount > Current Discount?
+            // Let's stick to: Global applies to regular price. If manual offer exists, we respect manual offer (it's specific).
+            return book; 
+        }
+
+        const originalPrice = book.price;
+        const discountAmount = (originalPrice * maxPercent) / 100;
+        const finalPrice = originalPrice - discountAmount;
+        
+        return {
+            ...book,
+            price: Number(finalPrice.toFixed(2)),
+            originalPrice: originalPrice,
+            isOnSale: true
+        };
+    }
+
+    return book;
+};
 
 export interface LibroFilters {
    search?: string;
@@ -378,7 +432,7 @@ export const obtenerLibros = async (
             const { data: catData, error: catError } = await supabase
                 .from('categorias')
                 .select('id')
-                .eq('nombre', filters.category)
+                .ilike('nombre', filters.category) // Use ilike for robustness
                 .maybeSingle();
             
             if (catData && !catError) {
@@ -541,22 +595,52 @@ export const obtenerLibros = async (
             promises.push(supabase.from('categorias').select('id, nombre').in('id', categoryIds));
         } else promises.push(Promise.resolve({ data: [] }));
 
-        const [edResult, catResult] = await Promise.all(promises);
+        // Fetch active discounts to apply
+        promises.push(discountService.getActiveDiscounts());
+
+        const results = await Promise.all(promises);
+        const edResult = results[0] as { data: { id: number; nombre: string }[] | null };
+        const catResult = results[1] as { data: { id: number; nombre: string }[] | null };
+        const activeDiscounts = (results[2] as DiscountRule[]) || [];
         
         const edMap = new Map(edResult.data?.map((e: any) => [e.id, e]) || []);
         const catMap = new Map(catResult.data?.map((c: any) => [c.id, c]) || []);
 
-        // Attach to data
-        (data as any[]).forEach(book => {
+        // Attach to data & Apply Discounts
+        const books = (data as any[]).map(book => {
             if (book.editorial_id) book.editoriales = edMap.get(book.editorial_id);
             if (book.categoria_id) book.categorias = catMap.get(book.categoria_id);
+            
+            // First map to basic book
+            const mappedBook = mapLibroToBook(book);
+            
+            // Validate if discounts service returned populated join for category name logic
+            // (We might need to fetch categories for discount rules inside the service? 
+            //  Yes, getAllDiscounts does join 'categorias'. getActiveDiscounts currently selects '*' 
+            //  We should update getActiveDiscounts in service to also join categories for the name match to work safely)
+            //  Wait, getActiveDiscounts in service (Step 1057) did NOT join categories. 
+            //  It did select '*'. I should fix that or fetch names here.
+            //  ACTUALLY, I can match by ID if I expose category_id on the Book object? 
+            //  Book type currently doesn't have it explicitly defined in this file's mapLibroToBook return 
+            //  (it returns Book interface which usually doesn't have it).
+            //  But `mapLibroToBook` uses `libro.categorias?.nombre`.
+            //  
+            //  Strategy: Since I have `catMap` here with IDs, and the rule has `target_category_id`.
+            //  I can match `book.categoria_id` === `rule.target_category_id`.
+            //  Much safer than string matching.
+            
+            return applyDiscountsToBookWithId(mappedBook, activeDiscounts, book.categoria_id);
         });
+
+         return {
+           data: books,
+           count: count || 0
+         };
     }
 
      return {
-       data: data ? data.map(mapLibroToBook) : [],
-       // If default view, return 0 (infinite pagination) or use estimated. Actually, better to return 0/estimated here and let Catalog override it with TotalCount.
-       count: count || 0
+       data: [],
+       count: 0
      };
   } catch (error) {
     console.error('Error inesperado al obtener libros:', error);
@@ -566,18 +650,27 @@ export const obtenerLibros = async (
 
 export const obtenerLibroPorId = async (id: string | number): Promise<Book | null> => {
   try {
-    const { data, error } = await supabase
-      .from('libros')
-      .select('*, editoriales(id, nombre), categorias(id, nombre), libros_contenidos(titulo, numero_volumen)')
-      .eq('id', id)
-      .maybeSingle();
+    const [bookResult, discountsResult] = await Promise.all([
+        supabase
+          .from('libros')
+          .select('*, editoriales(id, nombre), categorias(id, nombre), libros_contenidos(titulo, numero_volumen)')
+          .eq('id', id)
+          .maybeSingle(),
+        discountService.getActiveDiscounts()
+    ]);
+
+    const { data, error } = bookResult;
+    const activeDiscounts = discountsResult || [];
 
     if (error) {
       console.error('Error al obtener libro:', error);
       return null;
     }
 
-    return data ? mapLibroToBook(data) : null;
+    if (!data) return null;
+
+    const mappedBook = mapLibroToBook(data);
+    return applyDiscountsToBookWithId(mappedBook, activeDiscounts, data.categoria_id);
   } catch (error) {
     console.error('Error inesperado al obtener libro:', error);
     return null;
@@ -1315,3 +1408,33 @@ export const obtenerSugerencias = async (termino: string): Promise<string[]> => 
     return [];
   }
 };
+
+export const decrementStock = async (bookId: number, quantity: number = 1): Promise<void> => {
+  // Get current stock
+  const { data: book, error: fetchError } = await supabase
+    .from('libros')
+    .select('stock')
+    .eq('id', bookId)
+    .single();
+
+  if (fetchError) {
+    console.error('Error fetching book stock:', fetchError);
+    throw fetchError;
+  }
+  
+  if (!book || book.stock < quantity) {
+    throw new Error(`Stock insuficiente. Stock actual: ${book?.stock || 0}, cantidad solicitada: ${quantity}`);
+  }
+
+  // Decrement stock
+  const { error: updateError } = await supabase
+    .from('libros')
+    .update({ stock: book.stock - quantity })
+    .eq('id', bookId);
+
+  if (updateError) {
+    console.error('Error updating book stock:', updateError);
+    throw updateError;
+  }
+};
+

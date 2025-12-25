@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import { LanguageSelector } from './LanguageSelector';
 import { buscarLibros } from '../services/libroService';
+import { getUnreadCount } from '../services/notificationService';
 import { Book } from '../types';
 import '../styles/components/Navbar.css';
 
@@ -19,6 +20,7 @@ export function Navbar() {
   const [suggestions, setSuggestions] = useState<Book[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { user, logout } = useAuth();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
@@ -88,6 +90,25 @@ export function Navbar() {
     [cartItems]
   );
 
+  // Fetch unread notifications count
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      if (user) {
+        try {
+          const count = await getUnreadCount(user.id);
+          setUnreadNotifications(count);
+        } catch (error) {
+          console.error('Error fetching notification count:', error);
+        }
+      }
+    };
+
+    fetchNotificationCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchNotificationCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -101,9 +122,9 @@ export function Navbar() {
             <Search className="search-icon" size={20} />
             <input
               type="text"
-              placeholder="Buscar libros, autores, editoriales, ISBN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('searchPlaceholder')}
               className="search-input"
               onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
             />
@@ -126,7 +147,7 @@ export function Navbar() {
             <div className="search-suggestions">
               {loadingSuggestions ? (
                 <div className="suggestions-loading">
-                  <p>Buscando...</p>
+                  <p>{t('searching')}</p>
                 </div>
               ) : suggestions.length > 0 ? (
                 <>
@@ -151,13 +172,13 @@ export function Navbar() {
                   ))}
                   <div className="suggestion-footer">
                     <button type="submit" className="view-all-btn">
-                      Ver todos los resultados ({suggestions.length}+)
+                      {t('viewAllResults')} ({suggestions.length}+)
                     </button>
                   </div>
                 </>
               ) : (
                 <div className="suggestions-empty">
-                  <p>No se encontraron resultados</p>
+                  <p>{t('noResults')}</p>
                 </div>
               )}
             </div>
@@ -173,19 +194,19 @@ export function Navbar() {
             <div className="nav-dropdown-menu">
               <Link to="/catalogo" className="nav-dropdown-item">
                 <BookOpen size={18} className="nav-dropdown-icon" />
-                Ver Todo el Catálogo
+                {t('viewAllCatalog')}
               </Link>
               <Link to="/nosotros" className="nav-dropdown-item">
                 <Info size={18} className="nav-dropdown-icon" />
-                Sobre Nosotros
+                {t('aboutUs')}
               </Link>
               <Link to="/ubicacion" className="nav-dropdown-item">
                 <MapPin size={18} className="nav-dropdown-icon" />
-                Ubicación
+                {t('location')}
               </Link>
               <Link to="/contacto" className="nav-dropdown-item">
                 <Mail size={18} className="nav-dropdown-icon" />
-                Contacto
+                {t('contact')}
               </Link>
             </div>
           </div>
@@ -200,7 +221,10 @@ export function Navbar() {
                 className="account-btn"
                 onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
               >
-                <User size={20} />
+                <div className="account-btn-icon">
+                  <User size={20} />
+                  {unreadNotifications > 0 && <span className="notification-dot"></span>}
+                </div>
                 <span>{t('account')}</span>
                 <ChevronDown size={16} className={`chevron ${isAccountMenuOpen ? 'open' : ''}`} />
               </button>
@@ -216,16 +240,42 @@ export function Navbar() {
                     </div>
                   </div>
                   <div className="account-menu-divider" />
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="account-menu-item"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                    >
+                      <User size={18} />
+                      <span>{t('adminPanel')}</span>
+                      {unreadNotifications > 0 && (
+                        <span className="notification-count">{unreadNotifications}</span>
+                      )}
+                    </Link>
+                  )}
                   <Link
-                    to={user.role === 'admin' ? '/admin' : '/mi-cuenta'}
+                    to="/mi-cuenta"
                     className="account-menu-item"
                     onClick={() => setIsAccountMenuOpen(false)}
                   >
                     <User size={18} />
-                    <span>{user.role === 'admin' ? t('adminPanel') : t('myAccount')}</span>
+                    <span>{t('myAccount')}</span>
+                    {unreadNotifications > 0 && (
+                      <span className="notification-count">{unreadNotifications}</span>
+                    )}
                   </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin/ajustes"
+                      className="account-menu-item"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                    >
+                      <Settings size={18} />
+                      <span>{t('adminSettings')}</span>
+                    </Link>
+                  )}
                   <Link
-                    to={user.role === 'admin' ? '/admin/ajustes' : '/ajustes'}
+                    to="/ajustes"
                     className="account-menu-item"
                     onClick={() => setIsAccountMenuOpen(false)}
                   >
@@ -234,26 +284,26 @@ export function Navbar() {
                   </Link>
                   <div className="account-menu-divider" />
                   <div className="theme-selector">
-                    <span className="theme-label">Tema:</span>
+                    <span className="theme-label">{t('theme')}:</span>
                     <div className="theme-buttons">
                       <button
                         onClick={() => setTheme('light')}
                         className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
-                        title="Modo claro"
+                        title={t('lightMode')}
                       >
                         <Sun size={16} />
                       </button>
                       <button
                         onClick={() => setTheme('dark')}
                         className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
-                        title="Modo oscuro"
+                        title={t('darkMode')}
                       >
                         <Moon size={16} />
                       </button>
                       <button
                         onClick={() => setTheme('auto')}
                         className={`theme-btn ${theme === 'auto' ? 'active' : ''}`}
-                        title="Automático"
+                        title={t('autoMode')}
                       >
                         <Monitor size={16} />
                       </button>
@@ -296,13 +346,13 @@ export function Navbar() {
             {t('catalog')}
           </Link>
           <Link to="/nosotros" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-            Sobre Nosotros
+            {t('aboutUs')}
           </Link>
           <Link to="/ubicacion" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-            Ubicación
+            {t('location')}
           </Link>
           <Link to="/contacto" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-            Contacto
+            {t('contact')}
           </Link>
           <Link to="/carrito" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
             {t('cart')} ({cartCount})
@@ -314,44 +364,49 @@ export function Navbar() {
             <LanguageSelector />
           </div>
           <div className="mobile-theme-selector">
-            <span className="mobile-theme-label">Tema:</span>
+            <span className="mobile-theme-label">{t('theme')}:</span>
             <div className="mobile-theme-buttons">
               <button
                 onClick={() => setTheme('light')}
                 className={`mobile-theme-btn ${theme === 'light' ? 'active' : ''}`}
               >
                 <Sun size={18} />
-                <span>Claro</span>
+                <span>{t('light')}</span>
               </button>
               <button
                 onClick={() => setTheme('dark')}
                 className={`mobile-theme-btn ${theme === 'dark' ? 'active' : ''}`}
               >
                 <Moon size={18} />
-                <span>Oscuro</span>
+                <span>{t('dark')}</span>
               </button>
               <button
                 onClick={() => setTheme('auto')}
                 className={`mobile-theme-btn ${theme === 'auto' ? 'active' : ''}`}
               >
                 <Monitor size={18} />
-                <span>Auto</span>
+                <span>{t('auto')}</span>
               </button>
             </div>
           </div>
           {user ? (
             <>
-              <span className="mobile-user">Hola, {user.name}</span>
+              <span className="mobile-user">{t('hello')}, {user.name}</span>
               <Link to="/mi-cuenta" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
                 {t('dashboard')}
               </Link>
               {user.role === 'admin' && (
                 <Link to="/admin" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-                  Panel Admin
+                  {t('adminPanel')}
+                </Link>
+              )}
+              {user.role === 'admin' && (
+                <Link to="/admin/ajustes" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+                  {t('adminSettings')}
                 </Link>
               )}
               <Link
-                to={user.role === 'admin' ? '/admin/ajustes' : '/ajustes'}
+                to="/ajustes"
                 className="mobile-link"
                 onClick={() => setIsMenuOpen(false)}
               >

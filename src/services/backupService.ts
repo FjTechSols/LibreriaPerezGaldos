@@ -190,13 +190,11 @@ export async function exportLibrosToCSV(onProgress?: (val: number, total: number
   }
 }
 
-export async function exportFacturasToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
+
+// Export new invoices table
+export async function exportInvoicesToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
   try {
-    // For joined data, fetchAll needs adaptation or we use specific logic.
-    // Since fetchAll logic does .select('*'), we can't easily join without modifying fetchAll.
-    // Let's implement specific loop for Facturas to include line items.
-    
-    let allFacturas: any[] = [];
+    let allInvoices: any[] = [];
     let page = 0;
     const pageSize = 1000;
     let hasMore = true;
@@ -204,67 +202,67 @@ export async function exportFacturasToCSV(onProgress?: (val: number, total: numb
     // Get count for progress
     let totalRows = 0;
     if (onProgress) {
-         const { count } = await supabase.from('facturas').select('*', { count: 'exact', head: true });
-         totalRows = count || 0;
+      const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true });
+      totalRows = count || 0;
     }
 
     while (hasMore) {
-        const from = page * pageSize;
-        const to = from + pageSize - 1;
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
 
-        const { data, error } = await supabase
-            .from('facturas')
-            .select(`*, lineas_factura (*)`)
-            .order('id', { ascending: true })
-            .range(from, to);
-        
-        if (error) throw error;
+      const { data, error } = await supabase
+        .from('invoices')
+        .select(`*, invoice_items (*)`)
+        .order('id', { ascending: true })
+        .range(from, to);
+      
+      if (error) throw error;
 
-        if (data && data.length > 0) {
-            allFacturas = [...allFacturas, ...data];
-            if (onProgress) onProgress(allFacturas.length, totalRows);
-            if (data.length < pageSize) hasMore = false;
-            page++;
-        } else {
-            hasMore = false;
-        }
+      if (data && data.length > 0) {
+        allInvoices = [...allInvoices, ...data];
+        if (onProgress) onProgress(allInvoices.length, totalRows);
+        if (data.length < pageSize) hasMore = false;
+        page++;
+      } else {
+        hasMore = false;
+      }
     }
 
-    if (!allFacturas || allFacturas.length === 0) {
+    if (!allInvoices || allInvoices.length === 0) {
       alert('No hay facturas para exportar');
       return;
     }
 
     const headers = [
-      'ID Factura', 'Número', 'Cliente', 'NIF', 'Email', 'Teléfono',
-      'Dirección', 'Fecha', 'Base Imponible', 'IVA', 'Total',
-      'Estado', 'Método Pago', 'Notas'
+      'ID', 'Número Factura', 'Cliente', 'NIF', 'Dirección',
+      'Fecha Emisión', 'Estado', 'Subtotal', 'Tasa IVA (%)', 'IVA',
+      'Total', 'Método Pago', 'ID Pedido', 'Idioma'
     ];
     const csvRows = [headers.join(',')];
 
-    allFacturas.forEach(factura => {
+    allInvoices.forEach(invoice => {
       const row = [
-        factura.id,
-        `"${factura.numero_factura || ''}"`,
-        `"${factura.cliente_nombre?.replace(/"/g, '""') || ''}"`,
-        `"${factura.cliente_nif || ''}"`,
-        `"${factura.cliente_email || ''}"`,
-        `"${factura.cliente_telefono || ''}"`,
-        `"${factura.cliente_direccion?.replace(/"/g, '""') || ''}"`,
-        factura.fecha || '',
-        factura.base_imponible || 0,
-        factura.iva || 0,
-        factura.total || 0,
-        `"${factura.estado || ''}"`,
-        `"${factura.metodo_pago || ''}"`,
-        `"${factura.notas?.replace(/"/g, '""') || ''}"`,
+        invoice.id,
+        `"${invoice.invoice_number || ''}"`,
+        `"${invoice.customer_name?.replace(/"/g, '""') || ''}"`,
+        `"${invoice.customer_nif || ''}"`,
+        `"${invoice.customer_address?.replace(/"/g, '""') || ''}"`,
+        invoice.issue_date || '',
+        `"${invoice.status || ''}"`,
+        invoice.subtotal || 0,
+        invoice.tax_rate || 0,
+        invoice.tax_amount || 0,
+        invoice.total || 0,
+        `"${invoice.payment_method || ''}"`,
+        `"${invoice.order_id || ''}"`,
+        `"${invoice.language || 'es'}"`,
       ];
       csvRows.push(row.join(','));
     });
 
-    downloadCSV(csvRows.join('\n'), `facturas_backup_${new Date().toISOString().split('T')[0]}.csv`);
+    downloadCSV(csvRows.join('\n'), `invoices_backup_${new Date().toISOString().split('T')[0]}.csv`);
   } catch (error) {
-    console.error('Error exportando facturas:', error);
+    console.error('Error exportando invoices:', error);
     alert('Error al exportar facturas');
   }
 }

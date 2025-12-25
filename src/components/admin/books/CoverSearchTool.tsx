@@ -9,7 +9,7 @@ export function CoverSearchTool() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
-  const [successIds, setSuccessIds] = useState<Set<string>>(new Set());
+
   const [results, setResults] = useState<Map<string, string>>(new Map()); // bookId -> url
   
   // Search inputs state
@@ -27,7 +27,7 @@ export function CoverSearchTool() {
   const loadBooks = async () => {
     setLoading(true);
     try {
-      const data = await obtenerLibrosSinPortada(50);
+      const data = await obtenerLibrosSinPortada();
       setBooks(data);
       
       // Initialize inputs
@@ -35,8 +35,8 @@ export function CoverSearchTool() {
       data.forEach(book => {
         initialInputs.set(book.id, {
           isbn: book.isbn || '',
-          title: book.title,
-          author: book.author,
+          title: book.title || '',
+          author: book.author || '',
           year: book.publicationYear?.toString() || ''
         });
       });
@@ -74,7 +74,7 @@ export function CoverSearchTool() {
 
       if (url) {
         setResults(prev => new Map(prev).set(bookId, url));
-        setSuccessIds(prev => new Set(prev).add(bookId));
+
       } else {
         // Clear result if exists to show error/empty
         setResults(prev => {
@@ -82,12 +82,7 @@ export function CoverSearchTool() {
             m.delete(bookId);
             return m;
         });
-        // Remove from success if it was there
-         setSuccessIds(prev => {
-            const s = new Set(prev);
-            s.delete(bookId);
-            return s;
-        });
+
       }
     } catch (error) {
       console.error('Error searching cover:', error);

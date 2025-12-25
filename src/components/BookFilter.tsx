@@ -1,7 +1,7 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Filter, SlidersHorizontal, Grid2x2 as Grid, List } from 'lucide-react';
 import { FilterState } from '../types';
-import { categories } from '../data/categories';
+import { getCategorias } from '../services/categoriaService';
 import { useLanguage } from '../context/LanguageContext';
 import '../styles/components/BookFilter.css';
 
@@ -13,8 +13,24 @@ interface BookFilterProps {
 }
 
 export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChange }: BookFilterProps) {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { language } = useLanguage();
+  const [categories, setCategories] = useState<string[]>(['Todos']);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await getCategorias();
+        if (data && data.length > 0) {
+          // Add 'Todos' and then map DB categories to names
+          setCategories(['Todos', ...data.map(c => c.nombre)]);
+        }
+      } catch (error) {
+        console.error('Failed to load categories', error);
+      }
+    };
+    loadCategories();
+  }, []);
 
   return (
 

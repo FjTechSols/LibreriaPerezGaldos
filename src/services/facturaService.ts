@@ -73,8 +73,8 @@ export const crearFactura = async (input: CrearFacturaInput): Promise<Factura | 
       tipo: input.tipo || 'normal',
       factura_original_id: input.factura_original_id,
       motivo_anulacion: input.motivo_anulacion,
-      anulada: false,
-      status: 'Pagada' // Asumimos que si se crea es porque se ha pagado o confirmado
+      anulada: false
+      // Note: 'status' field removed - column doesn't exist in facturas table
     };
 
     const { data, error } = await supabase

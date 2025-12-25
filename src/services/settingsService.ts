@@ -30,7 +30,8 @@ export interface BillingSettings {
 }
 
 export interface ShippingSettings {
-  freeShippingThreshold: number;
+  freeShippingThresholdStandard: number;
+  freeShippingThresholdExpress: number;
   standardShippingCost: number;
   expressShippingCost: number;
   shippingZones: string[];
@@ -92,7 +93,7 @@ class SettingsService {
     }
   }
 
-  async getSettingsByCategory(category: string): Promise<any> {
+  async getSettingsByCategory(category: string): Promise<Record<string, unknown>> {
     try {
       const { data, error } = await supabase
         .from('settings')
@@ -101,7 +102,7 @@ class SettingsService {
 
       if (error) throw error;
 
-      const result: any = {};
+      const result: Record<string, unknown> = {};
       data?.forEach((setting: Setting) => {
         const key = this.toCamelCase(setting.key.replace(`${category}_`, ''));
         result[key] = setting.value;
@@ -192,7 +193,8 @@ class SettingsService {
   async updateShippingSettings(settings: ShippingSettings): Promise<boolean> {
     const category = 'shipping';
     const updates = [
-      { key: 'free_shipping_threshold', value: settings.freeShippingThreshold, category },
+      { key: 'free_shipping_threshold_standard', value: settings.freeShippingThresholdStandard, category },
+      { key: 'free_shipping_threshold_express', value: settings.freeShippingThresholdExpress, category },
       { key: 'standard_shipping_cost', value: settings.standardShippingCost, category },
       { key: 'express_shipping_cost', value: settings.expressShippingCost, category },
       { key: 'shipping_zones', value: settings.shippingZones, category },
@@ -291,7 +293,8 @@ class SettingsService {
         invoiceFooter: 'Gracias por su compra. Para cualquier consulta contacte con nosotros.'
       },
       shipping: {
-        freeShippingThreshold: 50,
+        freeShippingThresholdStandard: 30,
+        freeShippingThresholdExpress: 50,
         standardShippingCost: 5.99,
         expressShippingCost: 12.99,
         shippingZones: ['España', 'Portugal', 'Francia', 'Italia'],

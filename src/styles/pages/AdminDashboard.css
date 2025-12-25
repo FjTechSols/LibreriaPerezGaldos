@@ -439,6 +439,57 @@
   transition: all 0.2s;
 }
 
+/* Collapsible Sections */
+.nav-section {
+  margin-bottom: 0.5rem;
+}
+
+.section-header {
+  display: flex !important;
+  flex-direction: row !important; /* Prevent column layout on mobile */
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.section-header:hover {
+  color: #f8fafc;
+}
+
+.section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dark-mode .section-header {
+  color: #64748b;
+}
+
+.dark-mode .section-header:hover {
+  color: #e2e8f0;
+}
+
+/* Light Mode Overrides for Section Header */
+:root:not(.dark-mode) .section-header {
+  color: #64748b;
+}
+
+:root:not(.dark-mode) .section-header:hover {
+  color: #1e293b;
+}
+
 /* Dark mode section title */
 .dark-mode .sidebar-section-title,
 :root.dark-mode .sidebar-section-title {
@@ -2689,4 +2740,378 @@ html.dark-mode .create-book-modal,
 .dark-mode .stock-btn.decrease:disabled {
   background: #1e293b; /* Slate-800 */
   color: #475569;      /* Slate-600 */
+}
+
+/* Reservation Manager Styles */
+.reservation-manager {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  width: 100%;
+}
+
+.reservation-manager .section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-6);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.reservation-manager .section-header h2 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.reservation-manager .section-header p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.reservation-manager .table-container {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden; /* Fix for rounded corners */
+  padding: 0; /* Ensure no padding */
+}
+
+.reservation-manager .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+  margin: 0; /* Remove potential default margin */
+}
+
+.reservation-manager .data-table th,
+.reservation-manager .data-table td {
+  padding: 12px 16px; /* Reduced vertical padding */
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.reservation-manager .data-table th {
+  background: var(--bg-tertiary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase; /* Optional: standardizes header look */
+  letter-spacing: 0.05em;
+  height: 48px; /* Fixed height to prevent oversize */
+}
+
+.reservation-manager .data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Center the actions column */
+.reservation-manager .data-table td:last-child {
+  text-align: center;
+}
+
+.reservation-manager .user-info,
+.reservation-manager .book-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reservation-manager .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.reservation-manager .status-badge.pendiente {
+  background: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+}
+
+.reservation-manager .status-badge.confirmada {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.reservation-manager .status-badge.rechazada {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.reservation-manager .action-buttons {
+  display: flex;
+  flex-direction: row; /* Force horizontal */
+  gap: 8px;
+  align-items: center;
+  width: fit-content; /* Shrink to content size */
+  margin: 0 auto; /* Center horizontally */
+}
+
+.reservation-manager .action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px; /* Space between icon and text */
+  padding: 6px 12px; /* Adjusted padding for text */
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid transparent; /* Ensure border exists for contrast */
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.75rem; /* Small text */
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.reservation-manager .action-btn.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a; /* Darker green for visibility on light */
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.reservation-manager .action-btn.success:hover {
+  background: #16a34a;
+  color: white;
+}
+
+.reservation-manager .action-btn.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626; /* Darker red */
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.reservation-manager .action-btn.danger:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.reservation-manager .action-btn.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.reservation-manager .action-btn.warning:hover {
+  background: #f59e0b;
+  color: white;
+}
+
+/* Dark Mode Overrides for Action Buttons */
+.dark-mode .reservation-manager .action-btn.success {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80; /* Lighter green for dark mode */
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.dark-mode .reservation-manager .action-btn.success:hover {
+    background: #22c55e;
+    color: #ecfdf5; /* Very light green/white */
+}
+
+.dark-mode .reservation-manager .action-btn.danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171; /* Lighter red for dark mode */
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.dark-mode .reservation-manager .action-btn.danger:hover {
+    background: #ef4444;
+    color: #fef2f2;
+}
+
+/* Dark Mode Overrides for Reservation Manager */
+.dark-mode .reservation-manager .section-header,
+.dark-mode .reservation-manager .table-container {
+    background: #1f2937; /* Dark gray for containers */
+    border-color: #374151;
+}
+
+.dark-mode .reservation-manager .section-header h2 {
+    color: #f9fafb; /* White text */
+}
+
+.dark-mode .reservation-manager .section-header p {
+    color: #9ca3af; /* Light gray text */
+}
+
+.dark-mode .reservation-manager .data-table th {
+    background: #111827; /* Darker gray for header */
+    color: #d1d5db; /* Light gray text */
+    border-bottom-color: #374151;
+}
+
+.dark-mode .reservation-manager .data-table td {
+    color: #e5e7eb; /* White-ish text */
+    border-bottom-color: #374151;
+}
+
+.dark-mode .reservation-manager .data-table tr:hover td {
+    background: #374151; /* Hover effect */
+}
+
+.dark-mode .reservation-manager .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+.dark-mode .reservation-manager .user-info .text-sm {
+    color: #9ca3af;
+}
+
+.dark-mode .reservation-manager .book-info .text-xs {
+    color: #9ca3af;
+}
+
+.dark-mode .reservation-manager .action-btn.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.dark-mode .reservation-manager .action-btn.warning:hover {
+    background: #f59e0b;
+    color: #fffbeb;
+}
+
+/* Notification Badge */
+.admin-notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: var(--danger-color);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.25rem;
+  border: 2px solid var(--bg-secondary);
+  font-weight: 700;
+  z-index: 10;
+}
+
+/* Sidebar Badge Count */
+.sidebar-badge-count {
+  background-color: var(--danger-color);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 6px;
+  border-radius: 99px;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+/* Mobile Reservation Manager */
+@media (max-width: 1024px) {
+  .reservation-manager .data-table thead {
+    display: none;
+  }
+  
+  .reservation-manager .data-table, 
+  .reservation-manager .data-table tbody, 
+  .reservation-manager .data-table tr, 
+  .reservation-manager .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .reservation-manager .data-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+  }
+
+  /* Specific handling for each data cell */
+  .reservation-manager .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    text-align: right;
+    min-height: 3rem;
+  }
+
+  .reservation-manager .data-table td.empty-actions {
+    display: none;
+  }
+
+  .reservation-manager .data-table td:last-child {
+    border-bottom: none;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+    margin-top: 0.5rem;
+    padding-bottom: 0;
+  }
+
+  .reservation-manager .data-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    margin-right: 1rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  
+  /* Adjust content for specific cells */
+  .reservation-manager .data-table td .user-info {
+    text-align: right;
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    max-width: 60%;
+  }
+  
+  .reservation-manager .data-table td .book-info {
+    text-align: right;
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+  }
+
+  .reservation-manager .data-table td .book-info a {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    text-align: right;
+    gap: 4px; /* gap-1 is 0.25rem = 4px */
+    line-height: 1.3;
+    word-break: break-word; /* Ensure wrapping */
+  }
+  
+  .reservation-manager .data-table td .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: stretch;
+    width: 100%;
+  }
+  
+  .reservation-manager .data-table td .action-buttons .action-btn {
+    flex: 1;
+    justify-content: center;
+  }
 }

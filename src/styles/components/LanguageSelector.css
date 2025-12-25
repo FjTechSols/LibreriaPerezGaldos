@@ -100,15 +100,37 @@
 
 @media (max-width: 768px) {
   .language-selector-button {
-    padding: 0.4rem 0.6rem;
+    padding: 0.625rem 0.875rem; /* Larger touch target */
+    min-width: 80px; /* Ensure minimum width */
+    justify-content: center;
+  }
+
+  .language-selector-button svg {
+    width: 22px; /* Slightly larger icon */
+    height: 22px;
+  }
+
+  .language-flag {
+    font-size: 1.375rem; /* Larger flag emoji */
   }
 
   .language-code {
-    display: none;
+    display: inline; /* Keep code visible on mobile */
+    font-size: 0.8125rem;
   }
 
   .language-dropdown {
-    right: -1rem;
+    right: 0;
+    min-width: 200px; /* Wider dropdown for easier tapping */
+  }
+
+  .language-option {
+    padding: 1rem 1.25rem; /* Larger touch targets */
+    font-size: 0.9375rem;
+  }
+
+  .language-option .language-flag {
+    font-size: 1.75rem; /* Even larger flags in dropdown */
   }
 }
 

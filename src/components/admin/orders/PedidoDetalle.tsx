@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { actualizarEstadoPedido } from '../../../services/pedidoService';
-
+import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
 
@@ -26,6 +26,7 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
 };
 
 export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEditar }: PedidoDetalleProps) {
+  const { settings } = useSettings();
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
 
@@ -275,7 +276,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
   };
 
   const subtotal = calcularSubtotal();
-  const iva = subtotal * 0.21;
+  const iva = subtotal * (settings.billing.taxRate / 100);
   const total = subtotal + iva;
 
   const tieneFactura = pedido.factura && !Array.isArray(pedido.factura);
@@ -449,7 +450,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <span className="total-valor">{subtotal.toFixed(2)} €</span>
               </div>
               <div className="total-row">
-                <span>IVA (21%):</span>
+                <span>IVA ({settings.billing.taxRate}%):</span>
                 <span className="total-valor">{iva.toFixed(2)} €</span>
               </div>
               <div className="total-row final">

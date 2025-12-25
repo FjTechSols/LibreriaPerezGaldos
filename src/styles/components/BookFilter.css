@@ -253,8 +253,18 @@
   }
   
   .Book-Filter__panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr); /* Prevent grid blowout */
+    gap: 1rem; /* Reduce gap */
   }
+
+  .Book-Filter {
+    padding: 1rem; /* Reduce container padding */
+  }
+}
+
+/* Ensure box-sizing to prevent padding overflow */
+.Book-Filter, .Book-Filter * {
+  box-sizing: border-box;
 }
 
 /* Dark Mode Overrides (Using Explicit Slate Palette) */
