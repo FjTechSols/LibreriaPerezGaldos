@@ -60,10 +60,10 @@ export default function CrearPedido({
   const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
   const clienteAutocompleteRef = useRef<HTMLDivElement>(null);
   
-  // New state for manual client entry
-  const [clienteInputMode, setClienteInputMode] = useState<'search' | 'manual'>('search');
-  const [saveClient, setSaveClient] = useState(true);
-  const [manualClientData, setManualClientData] = useState({
+  
+  // State for client creation modal
+  const [showClienteModal, setShowClienteModal] = useState(false);
+  const [clienteModalData, setClienteModalData] = useState({
       nombre: '',
       apellidos: '',
       email: '',
@@ -74,7 +74,12 @@ export default function CrearPedido({
       ciudad: '',
       codigo_postal: '',
       provincia: '',
-      pais: ''
+      pais: 'España',
+      notas: '',
+      activo: true,
+      persona_contacto: '',
+      cargo: '',
+      web: ''
   });
 
   const [libroSearch, setLibroSearch] = useState("");
@@ -236,6 +241,72 @@ export default function CrearPedido({
     }
   };
 
+  const handleOpenClienteModal = () => {
+    setClienteModalData({
+      nombre: '',
+      apellidos: '',
+      email: '',
+      nif: '',
+      tipo: 'particular',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      codigo_postal: '',
+      provincia: '',
+      pais: 'España',
+      notas: '',
+      activo: true,
+      persona_contacto: '',
+      cargo: '',
+      web: ''
+    });
+    setShowClienteModal(true);
+  };
+
+  const handleCloseClienteModal = () => {
+    setShowClienteModal(false);
+  };
+
+  const handleSubmitClienteModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!clienteModalData.nombre.trim()) {
+      alert('El nombre es obligatorio');
+      return;
+    }
+
+    if (clienteModalData.tipo === 'particular' && !clienteModalData.apellidos.trim()) {
+      alert('Los apellidos son obligatorios para particulares');
+      return;
+    }
+
+    try {
+      const nuevoCliente = await crearCliente(clienteModalData);
+      
+      if (!nuevoCliente) {
+        alert('Error al crear cliente');
+        return;
+      }
+      
+      // Reload clients list
+      await cargarClientes();
+      
+      // Auto-select the new client
+      setClienteSeleccionado(nuevoCliente);
+      setClienteSearch(`${nuevoCliente.nombre} ${nuevoCliente.apellidos || ''}`);
+      setDireccionEnvio(nuevoCliente.direccion || '');
+      
+      // Close modal
+      handleCloseClienteModal();
+      
+      alert('Cliente creado exitosamente');
+    } catch (error) {
+      console.error('Error creating client:', error);
+      alert('Error al crear cliente');
+    }
+  };
+
 
 
   // ... (handlers)
@@ -337,11 +408,6 @@ export default function CrearPedido({
         // --- 1. Extract Header Info (Client, Address, Phone, IDs) ---
         let nombre = '';
         let direccion = '';
-        let ciudad = '';
-        let cp = '';
-        let provincia = '';
-        let pais = '';
-        let telefono = '';
         
         let orderId = '';
         let abeBooksId = '';
@@ -368,26 +434,9 @@ export default function CrearPedido({
             nombre = addressBlockLines[0]; // First line is name
             const addressLines = addressBlockLines.slice(1);
             direccion = addressLines.join(', '); // Full address string
-            
-            if (addressLines.length > 0) {
-               const last = addressLines[addressLines.length - 1];
-               if (last.match(/Spain|España/i)) pais = 'España';
-               else if (last.match(/France|Francia/i)) pais = 'Francia';
-               else pais = last; 
-            }
- 
-            for (const line of addressLines) {
-                 const cpMatch = line.match(/\b\d{5}\b/);
-                 if (cpMatch) {
-                     cp = cpMatch[0];
-                     ciudad = line.replace(cp, '').trim(); 
-                     break;
-                 }
-            }
         }
 
-        const phoneMatch = cleanText.match(/Phone:\s*([\d\s\-\+\(\)]+)/i);
-        if (phoneMatch) telefono = phoneMatch[1].trim();
+
 
         const idMatch = cleanText.match(/Nº de pedido:\s*(\d+)/i);
         if (idMatch) orderId = idMatch[1];
@@ -525,32 +574,59 @@ export default function CrearPedido({
         if (description) finalObservaciones += `\nDescripción:\n${description}`;
 
         setClienteSearch('');
-        setManualClientData({
-            nombre: nombre || '',
-            apellidos: '',
-            email: '',
-            nif: '',
-            tipo: 'particular',
-            telefono: telefono,
-            direccion: direccion,
-            ciudad: ciudad,
-            codigo_postal: cp,
-            provincia: provincia,
-            pais: pais || 'España'
-        });
         setDireccionEnvio(direccion);
         setObservaciones(finalObservaciones);
         setLineas(finalItems);
 
+        // --- Auto Client Search/Creation Logic ---
+        if (nombre) {
+            // Try to find existing client by name
+            const matchingClients = clientes.filter(c => 
+                c.nombre.toLowerCase().includes(nombre.toLowerCase())
+            );
+
+            if (matchingClients.length === 1) {
+                // Exact match found - auto-select
+                setClienteSeleccionado(matchingClients[0]);
+                if (matchingClients[0].direccion) {
+                    setDireccionEnvio(matchingClients[0].direccion);
+                }
+            } else if (matchingClients.length > 1) {
+                // Multiple matches - let user choose
+                setClienteSearch(nombre);
+            } else {
+                // No match - open modal with pre-filled data
+                setClienteModalData({
+                    tipo: 'particular',
+                    nombre: nombre,
+                    apellidos: '',
+                    email: '',
+                    nif: '',
+                    telefono: '',
+                    direccion: direccion,
+                    ciudad: '',
+                    codigo_postal: '',
+                    provincia: '',
+                    pais: 'España',
+                    persona_contacto: '',
+                    cargo: '',
+                    web: '',
+                    notas: `Cliente importado de IberLibro`,
+                    activo: true
+                });
+                setShowClienteModal(true);
+            }
+        }
+
         setDatosPegados("");
         setPlataformaOrigen(null);
-        setClienteInputMode('manual');
         setModoEntrada("manual");
 
-        setTimeout(() => setClienteInputMode('manual'), 100);
+
         
         const internalCount = finalItems.filter(i => !i.es_externo).length;
-        alert(`Datos de IberLibro procesados.\nCliente: ${nombre}\nItems: ${finalItems.length} (${internalCount} encontrados en catálogo)`);
+        const clientMsg = nombre ? `\n👤 Cliente: ${nombre}` : '';
+        alert(`✅ Datos de IberLibro procesados.${clientMsg}\n📦 Items: ${finalItems.length} (${internalCount} encontrados en catálogo)`);
         
     } catch (e: any) {
         console.error('Error parsing IberLibro:', e);
@@ -755,12 +831,6 @@ export default function CrearPedido({
           const nombre = extract(/Nombre\s*[:\.]\s*([^\n]+)/i);
           const direccion = extract(/Direcci[óo]n\s*[:\.]\s*([^\n]+)/i);
           const poblacion = extract(/Poblaci[óo]n\s*[:\.]\s*([^\n]+)/i);
-          const provincia = extract(/Provincia\s*[:\.]\s*([^\n]+)/i);
-          const cp = extract(/(?:C\.?\s*Postal|CP|Postal)\s*[:\.]\s*([^\n]+)/i);
-          const pais = extract(/Pa[íi]s\s*[:\.]\s*([^\n]+)/i);
-          const email = extract(/(?:Email|E-mail)\s*[:\.]\s*([^\n]+)/i);
-          const telefono = extract(/Tel[ée]fono\s*[:\.]\s*([^\n]+)/i);
-          const movil = extract(/M[óo]vil\s*[:\.]\s*([^\n]+)/i);
           const referencia = extract(/Referencia\s*[:\.]\s*([^\n]+)/i);
 
           // Price extraction (handling "Precio total: X" or "Precio total\nX")
@@ -798,20 +868,7 @@ export default function CrearPedido({
 
           // Set Client Data
           setClienteSearch(''); // Clear search input
-          setManualClientData({
-              nombre: nombre || '',
-              apellidos: '',
-              email: email || '',
-              nif: '',
-              tipo: 'particular',
-              telefono: movil || telefono || '',
-              direccion: direccion || '',
-              ciudad: poblacion || '',
-              codigo_postal: cp || '',
-              provincia: provincia || '',
-              pais: pais || 'España'
-          });
-          setDireccionEnvio(`${direccion}, ${cp} ${poblacion}, ${provincia}`);
+          setDireccionEnvio(poblacion ? `${direccion}, ${poblacion}` : direccion);
           
           // Set Description
           const descripcion = descripcionLines.join('\n').trim();
@@ -857,20 +914,55 @@ export default function CrearPedido({
                 cantidad: 1,
                 precio_unitario: precioTotal > 0 ? precioTotal : 0, 
                 es_externo: true,
-                nombre_externo: `${titulo} ${autor ? '- ' + autor : ''} (Ref: ${referencia})`,
+                nombre_externo: `${titulo} ${autor ? '- ' + autor : ''}  (Ref: ${referencia})`,
                 url_externa: ''
              });
           }
 
           setLineas(items);
+
+          // --- Auto Client Search/Creation Logic ---
+          if (nombre) {
+              // Try to find existing client by name
+              const matchingClients = clientes.filter(c => 
+                  c.nombre.toLowerCase().includes(nombre.toLowerCase())
+              );
+
+              if (matchingClients.length === 1) {
+                  // Exact match found - auto-select
+                  setClienteSeleccionado(matchingClients[0]);
+                  if (matchingClients[0].direccion) {
+                      setDireccionEnvio(matchingClients[0].direccion);
+                  }
+              } else if (matchingClients.length > 1) {
+                  // Multiple matches - let user choose
+                  setClienteSearch(nombre);
+              } else {
+                  // No match - open modal with pre-filled data
+                  setClienteModalData({
+                      tipo: 'particular',
+                      nombre: nombre,
+                      apellidos: '',
+                      email: '',
+                      nif: '',
+                      telefono: '',
+                      direccion: poblacion ? `${direccion}, ${poblacion}` : direccion,
+                      ciudad: poblacion,
+                      codigo_postal: '',
+                      provincia: '',
+                      pais: 'España',
+                      persona_contacto: '',
+                      cargo: '',
+                      web: '',
+                      notas: `Cliente importado de Uniliber`,
+                      activo: true
+                  });
+                  setShowClienteModal(true);
+              }
+          }
+
           setDatosPegados("");
-          setClienteInputMode('manual');
           setModoEntrada("manual");
-          
-          // Force manual mode with delay to ensure UI update after re-render
-          setTimeout(() => {
-              setClienteInputMode('manual');
-          }, 100);
 
           const foundMsg = foundBook ? `\n📕 Libro encontrado en catálogo: ${foundBook.titulo}` : '';
           alert(`Datos de Uniliber procesados.\nCliente detectado: "${nombre}"${foundMsg}`); 
@@ -893,50 +985,10 @@ export default function CrearPedido({
     }
 
     let finalClienteId = clienteSeleccionado?.id;
-    let effectiveMode = clienteInputMode;
-
-    // Robustez: Si estamos en search pero tenemos datos manuales cargados (e.g. desde pegar) y no hay cliente seleccionado,
-    // asumimos que el usuario quiere crear el cliente manual.
-    if (effectiveMode === 'search' && !finalClienteId && manualClientData.nombre.trim()) {
-        effectiveMode = 'manual';
-    }
-
-    // Handle Manual Client Creation
-    if (effectiveMode === 'manual') {
-        if (!manualClientData.nombre.trim()) {
-            alert("El nombre del cliente es obligatorio");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const newClient = await crearCliente({
-                ...manualClientData,
-                activo: saveClient, // If not saving, mark inactive
-                notas: saveClient ? '' : 'Cliente temporal creado desde Crear Pedido',
-                direccion: direccionEnvio, // Use shipping address as client address
-                ciudad: '', // Optional: extract from address if possible or leave empty
-                codigo_postal: '',
-                provincia: '',
-                pais: 'España'
-            });
-
-            if (newClient) {
-                finalClienteId = newClient.id;
-            } else {
-                throw new Error("No se pudo crear el cliente temporal");
-            }
-        } catch (err: any) {
-             console.error("Error creating manual client:", err);
-             alert("Error al registrar el cliente: " + err.message);
-             setLoading(false);
-             return;
-        }
-    } else {
-        if (!finalClienteId) {
-            alert(`Debe seleccionar un cliente (Modo: ${clienteInputMode}, Manual: "${manualClientData.nombre}")`);
-            return;
-        }
+    
+    if (!finalClienteId) {
+        alert("Debe seleccionar un cliente. Use el buscador o cree uno nuevo con el botón 'Nuevo Cliente'.");
+        return;
     }
 
     if (lineas.length === 0) {
@@ -985,10 +1037,10 @@ export default function CrearPedido({
 
       if (pedido) {
         // --- Email Notification Logic (Resend) ---
-        const clientEmail = (clienteSeleccionado?.email || manualClientData.email || '').trim();
+        const clientEmail = (clienteSeleccionado?.email || '').trim();
         const clientName = clienteSeleccionado 
           ? `${clienteSeleccionado.nombre} ${clienteSeleccionado.apellidos || ''}`.trim()
-          : `${manualClientData.nombre} ${manualClientData.apellidos}`.trim();
+          : '';
         
         // Send email if customer has email
         if (clientEmail) {
@@ -1044,21 +1096,6 @@ export default function CrearPedido({
   const resetForm = () => {
     setClienteSearch("");
     setClienteSeleccionado(null);
-    setClienteInputMode('search');
-    setManualClientData({ 
-        nombre: '', 
-        apellidos: '', 
-        email: '', 
-        nif: '', 
-        tipo: 'particular',
-        telefono: '',
-        direccion: '',
-        ciudad: '',
-        codigo_postal: '',
-        provincia: '',
-        pais: ''
-    });
-    setSaveClient(true);
     setTipo("perez_galdos");
     setMetodoPago("tarjeta");
     setDireccionEnvio("");
@@ -1214,33 +1251,26 @@ export default function CrearPedido({
           </div>
 
           {modoEntrada === "manual" && (
-            <>
+              <>
               <div className="form-section">
-                <div className="section-header">
-                  <User size={20} />
-                  <h3>Información del Cliente</h3>
+                <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <User size={20} />
+                    <h3>Información del Cliente</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleOpenClienteModal}
+                    className="btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                  >
+                    <Plus size={16} />
+                    Nuevo Cliente
+                  </button>
                 </div>
 
-                 <div className="client-mode-selector" style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <input 
-                            type="radio" 
-                            checked={clienteInputMode === 'search'} 
-                            onChange={() => setClienteInputMode('search')}
-                        />
-                        Buscar Cliente Existente
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                        <input 
-                            type="radio" 
-                            checked={clienteInputMode === 'manual'} 
-                            onChange={() => setClienteInputMode('manual')}
-                        />
-                        Introducir Datos Manualmente
-                    </label>
-                 </div>
 
-                {clienteInputMode === 'search' ? (
+
                     <div className="form-grid">
                       <div
                         className="form-group full-width"
@@ -1319,91 +1349,7 @@ export default function CrearPedido({
                         )}
                       </div>
                     </div>
-                ) : (
-                    <div className="manual-client-form">
-                        {/* Type Selector */}
-                        <div className="client-type-tabs" style={{ marginBottom: '1rem', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '0.5rem' }}>
-                            {['particular', 'empresa', 'institucion'].map((t) => (
-                                <button
-                                    key={t}
-                                    type="button"
-                                    onClick={() => setManualClientData({...manualClientData, tipo: t as any})}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        border: 'none',
-                                        background: manualClientData.tipo === t ? '#eff6ff' : 'transparent',
-                                        color: manualClientData.tipo === t ? '#2563eb' : '#6b7280',
-                                        fontWeight: 500,
-                                        cursor: 'pointer',
-                                        borderRadius: '0.5rem 0.5rem 0 0',
-                                        borderBottom: manualClientData.tipo === t ? '2px solid #2563eb' : '2px solid transparent'
-                                    }}
-                                >
-                                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                                </button>
-                            ))}
-                        </div>
 
-                        <div className="form-grid">
-                            <div className="form-group full-width">
-                                <label>{manualClientData.tipo === 'particular' ? 'Nombre *' : (manualClientData.tipo === 'empresa' ? 'Razón Social *' : 'Nombre Institución *')}</label>
-                                <input 
-                                    type="text" 
-                                    className="form-input" 
-                                    value={manualClientData.nombre}
-                                    onChange={(e) => setManualClientData({...manualClientData, nombre: e.target.value})}
-                                    required 
-                                />
-                            </div>
-                            
-                            {manualClientData.tipo === 'particular' && (
-                                <div className="form-group full-width">
-                                    <label>Apellidos *</label>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        value={manualClientData.apellidos}
-                                        onChange={(e) => setManualClientData({...manualClientData, apellidos: e.target.value})}
-                                        required 
-                                    />
-                                </div>
-                            )}
-
-                            <div className="form-group">
-                                <label>Email</label>
-                                <input 
-                                    type="email" 
-                                    className="form-input" 
-                                    value={manualClientData.email}
-                                    onChange={(e) => setManualClientData({...manualClientData, email: e.target.value})}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label>{manualClientData.tipo === 'particular' ? 'NIF/DNI' : 'CIF'}</label>
-                                <input 
-                                    type="text" 
-                                    className="form-input" 
-                                    value={manualClientData.nif}
-                                    onChange={(e) => setManualClientData({...manualClientData, nif: e.target.value})}
-                                />
-                            </div>
-                            
-                            <div className="form-group full-width" style={{ marginTop: '0.5rem' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'auto', cursor: 'pointer' }}>
-                                    <input 
-                                        type="checkbox" 
-                                        checked={saveClient} 
-                                        onChange={(e) => setSaveClient(e.target.checked)}
-                                        style={{ width: 'auto', margin: 0 }}
-                                    />
-                                    <span>Guardar este cliente en la base de datos</span>
-                                </label>
-                                {!saveClient && <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.25rem', marginLeft: '1.5rem' }}>El cliente se creará como inactivo solo para este pedido.</p>}
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                   <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label>Tipo de Pedido</label>
@@ -2000,6 +1946,210 @@ export default function CrearPedido({
           </div>
         </form>
       </div>
+
+      {/* Client Creation Modal */}
+      {showClienteModal && (
+        <div className="modal-overlay" onClick={handleCloseClienteModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h2>Crear Nuevo Cliente</h2>
+              <button onClick={handleCloseClienteModal} className="modal-close">
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitClienteModal}>
+              <div className="modal-body">
+                {/* Client Type Tabs */}
+                <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '0.5rem' }}>
+                  {(['particular', 'empresa', 'institucion'] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setClienteModalData({...clienteModalData, tipo: t})}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        border: 'none',
+                        background: clienteModalData.tipo === t ? '#eff6ff' : 'transparent',
+                        color: clienteModalData.tipo === t ? '#2563eb' : '#6b7280',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        borderRadius: '0.5rem 0.5rem 0 0',
+                        borderBottom: clienteModalData.tipo === t ? '2px solid #2563eb' : '2px solid transparent',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {t === 'particular' && <User size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t === 'empresa' && <Building2 size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t === 'institucion' && <School size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group full-width">
+                    <label>{clienteModalData.tipo === 'particular' ? 'Nombre *' : (clienteModalData.tipo === 'empresa' ? 'Razón Social *' : 'Nombre Institución *')}</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.nombre}
+                      onChange={(e) => setClienteModalData({...clienteModalData, nombre: e.target.value})}
+                      required 
+                    />
+                  </div>
+                  
+                  {clienteModalData.tipo === 'particular' && (
+                    <div className="form-group full-width">
+                      <label>Apellidos *</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={clienteModalData.apellidos}
+                        onChange={(e) => setClienteModalData({...clienteModalData, apellidos: e.target.value})}
+                        required 
+                      />
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input 
+                      type="email" 
+                      className="form-input" 
+                      value={clienteModalData.email}
+                      onChange={(e) => setClienteModalData({...clienteModalData, email: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>{clienteModalData.tipo === 'particular' ? 'NIF/DNI' : 'CIF'}</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.nif}
+                      onChange={(e) => setClienteModalData({...clienteModalData, nif: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Teléfono</label>
+                    <input 
+                      type="tel" 
+                      className="form-input" 
+                      value={clienteModalData.telefono}
+                      onChange={(e) => setClienteModalData({...clienteModalData, telefono: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Dirección</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.direccion}
+                      onChange={(e) => setClienteModalData({...clienteModalData, direccion: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Ciudad</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.ciudad}
+                      onChange={(e) => setClienteModalData({...clienteModalData, ciudad: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Código Postal</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.codigo_postal}
+                      onChange={(e) => setClienteModalData({...clienteModalData, codigo_postal: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Provincia</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.provincia}
+                      onChange={(e) => setClienteModalData({...clienteModalData, provincia: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>País</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.pais}
+                      onChange={(e) => setClienteModalData({...clienteModalData, pais: e.target.value})}
+                    />
+                  </div>
+
+                  {clienteModalData.tipo !== 'particular' && (
+                    <>
+                      <div className="form-group">
+                        <label>Persona de Contacto</label>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          value={clienteModalData.persona_contacto}
+                          onChange={(e) => setClienteModalData({...clienteModalData, persona_contacto: e.target.value})}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Cargo</label>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          value={clienteModalData.cargo}
+                          onChange={(e) => setClienteModalData({...clienteModalData, cargo: e.target.value})}
+                        />
+                      </div>
+
+                      <div className="form-group full-width">
+                        <label>Sitio Web</label>
+                        <input 
+                          type="url" 
+                          className="form-input" 
+                          value={clienteModalData.web}
+                          onChange={(e) => setClienteModalData({...clienteModalData, web: e.target.value})}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="form-group full-width">
+                    <label>Notas</label>
+                    <textarea 
+                      className="form-textarea" 
+                      value={clienteModalData.notas}
+                      onChange={(e) => setClienteModalData({...clienteModalData, notas: e.target.value})}
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" onClick={handleCloseClienteModal} className="btn-cancelar">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-guardar">
+                  Crear Cliente
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
