@@ -1,4 +1,4 @@
-import { MapPin, Clock, Phone, Navigation, ExternalLink } from 'lucide-react';
+import { Clock, Phone, Navigation, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import '../styles/pages/InfoPages.css';
 

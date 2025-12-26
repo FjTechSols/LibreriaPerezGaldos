@@ -21,7 +21,7 @@ export function Navbar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const { t } = useLanguage();
@@ -240,7 +240,7 @@ export function Navbar() {
                     </div>
                   </div>
                   <div className="account-menu-divider" />
-                  {user.role === 'admin' && (
+                  {(hasRole('admin') || hasRole('super_admin')) && (
                     <Link
                       to="/admin"
                       className="account-menu-item"
@@ -253,18 +253,20 @@ export function Navbar() {
                       )}
                     </Link>
                   )}
-                  <Link
-                    to="/mi-cuenta"
-                    className="account-menu-item"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    <User size={18} />
-                    <span>{t('myAccount')}</span>
-                    {unreadNotifications > 0 && (
-                      <span className="notification-count">{unreadNotifications}</span>
-                    )}
-                  </Link>
-                  {user.role === 'admin' && (
+                  {hasRole('usuario') && (
+                    <Link
+                      to="/mi-cuenta"
+                      className="account-menu-item"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                    >
+                      <User size={18} />
+                      <span>{t('myAccount')}</span>
+                      {unreadNotifications > 0 && (
+                        <span className="notification-count">{unreadNotifications}</span>
+                      )}
+                    </Link>
+                  )}
+                  {(hasRole('admin') || hasRole('super_admin')) && (
                     <Link
                       to="/admin/ajustes"
                       className="account-menu-item"
@@ -274,14 +276,16 @@ export function Navbar() {
                       <span>{t('adminSettings')}</span>
                     </Link>
                   )}
-                  <Link
-                    to="/ajustes"
-                    className="account-menu-item"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    <Settings size={18} />
-                    <span>{t('settings')}</span>
-                  </Link>
+                  {hasRole('usuario') && (
+                    <Link
+                      to="/ajustes"
+                      className="account-menu-item"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                    >
+                      <Settings size={18} />
+                      <span>{t('settings')}</span>
+                    </Link>
+                  )}
                   <div className="account-menu-divider" />
                   <div className="theme-selector">
                     <span className="theme-label">{t('theme')}:</span>
@@ -392,26 +396,30 @@ export function Navbar() {
           {user ? (
             <>
               <span className="mobile-user">{t('hello')}, {user.name}</span>
-              <Link to="/mi-cuenta" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
-                {t('dashboard')}
-              </Link>
-              {user.role === 'admin' && (
+              {hasRole('usuario') && (
+                <Link to="/mi-cuenta" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+                  {t('dashboard')}
+                </Link>
+              )}
+              {(hasRole('admin') || hasRole('super_admin')) && (
                 <Link to="/admin" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
                   {t('adminPanel')}
                 </Link>
               )}
-              {user.role === 'admin' && (
+              {(hasRole('admin') || hasRole('super_admin')) && (
                 <Link to="/admin/ajustes" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
                   {t('adminSettings')}
                 </Link>
               )}
-              <Link
-                to="/ajustes"
-                className="mobile-link"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t('settings')}
-              </Link>
+              {hasRole('usuario') && (
+                <Link
+                  to="/ajustes"
+                  className="mobile-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t('settings')}
+                </Link>
+              )}
               <button
                 onClick={() => { logout(); setIsMenuOpen(false); }}
                 className="mobile-logout"

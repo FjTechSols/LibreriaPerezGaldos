@@ -147,27 +147,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       let userEmail = emailOrUsername;
 
+      // Si no contiene @, buscar por nombre de usuario
       if (!emailOrUsername.includes('@')) {
-        const { data: userData, error: lookupError } = await supabase
+        console.log('Buscando usuario por username:', emailOrUsername);
+        
+        // Intentar búsqueda exacta por username
+        let { data: userData, error: lookupError } = await supabase
           .from('usuarios')
           .select('email')
-          .ilike('username', emailOrUsername)
-          .maybeSingle();
+          .eq('username', emailOrUsername)
+          .single();
 
-        if (lookupError || !userData) {
-          const { data: userDataExact } = await supabase
+        console.log('Resultado búsqueda por username:', { userData, lookupError });
+
+        // Si no se encuentra por username, intentar por nombre
+        if (!userData && lookupError) {
+          console.log('Intentando búsqueda por nombre...');
+          const result = await supabase
             .from('usuarios')
             .select('email')
-            .eq('username', emailOrUsername)
-            .maybeSingle();
-
-          if (!userDataExact) {
-            return false;
-          }
-          userEmail = userDataExact.email;
-        } else {
-          userEmail = userData.email;
+            .eq('nombre', emailOrUsername)
+            .single();
+          
+          userData = result.data;
+          lookupError = result.error;
+          console.log('Resultado búsqueda por nombre:', { userData, lookupError });
         }
+
+        if (lookupError || !userData) {
+          console.error('Usuario no encontrado. Error:', lookupError);
+          return false;
+        }
+        
+        userEmail = userData.email;
+        console.log('Email encontrado:', userEmail);
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({

@@ -1,11 +1,5 @@
 import { supabase } from '../lib/supabase';
 
-interface BackupData {
-  data: any[];
-  timestamp: string;
-  recordCount: number;
-}
-
 // Helper to fetch all rows using batching to bypass Supabase 1000 row limit
 async function fetchAll(table: string, queryBuilder?: (query: any) => any, select: string = '*', onProgress?: (current: number, total: number) => void) {
   let allData: any[] = [];

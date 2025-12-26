@@ -115,12 +115,7 @@ export function MyReservations({ onReservationChange }: MyReservationsProps) {
         >
           {t('confirmed')} ({reservations.filter(r => r.estado === 'confirmada').length})
         </button>
-        <button 
-          className={filter === 'entregada' ? 'active' : ''}
-          onClick={() => setFilter('entregada')}
-        >
-          {t('delivered')} ({reservations.filter(r => r.estado === 'entregada').length})
-        </button>
+
       </div>
 
       {filteredReservations.length === 0 ? (

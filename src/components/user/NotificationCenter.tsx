@@ -3,7 +3,8 @@ import { getUserNotifications, markAsRead, markAllAsRead } from '../../services/
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Notificacion } from '../../types';
-import { Bell, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, CheckCheck } from 'lucide-react';
+
 
 export function NotificationCenter() {
   const { user } = useAuth();

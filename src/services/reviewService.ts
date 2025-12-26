@@ -10,6 +10,8 @@ export interface Review {
   updated_at: string;
   usuario?: {
     email: string;
+    username?: string;
+    nombre?: string;
   };
 }
 
@@ -21,12 +23,10 @@ export interface ReviewFormData {
 
 export const getReviewsByLibroId = async (libroId: number): Promise<Review[]> => {
   try {
-    const { data, error } = await supabase
+    // Fetch reviews without JOIN
+    const { data: reviewsData, error } = await supabase
       .from('reviews')
-      .select(`
-        *,
-        usuario:auth.users!reviews_usuario_id_fkey(email)
-      `)
+      .select('*')
       .eq('libro_id', libroId)
       .order('created_at', { ascending: false });
 
@@ -35,7 +35,29 @@ export const getReviewsByLibroId = async (libroId: number): Promise<Review[]> =>
       return [];
     }
 
-    return data || [];
+    if (!reviewsData || reviewsData.length === 0) {
+      return [];
+    }
+
+    // Get unique user IDs
+    const userIds = [...new Set(reviewsData.map(r => r.usuario_id))];
+
+    // Fetch user data separately
+    const { data: usersData } = await supabase
+      .from('usuarios')
+      .select('id, email, username, nombre')
+      .in('id', userIds);
+
+    // Create a map of users by ID
+    const usersMap = new Map(usersData?.map(u => [u.id, u]) || []);
+
+    // Merge reviews with user data
+    const reviews = reviewsData.map(review => ({
+      ...review,
+      usuario: usersMap.get(review.usuario_id)
+    }));
+
+    return reviews;
   } catch (error) {
     console.error('Error inesperado al obtener reseñas:', error);
     return [];
