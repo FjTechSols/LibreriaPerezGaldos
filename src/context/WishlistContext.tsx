@@ -16,7 +16,17 @@ const WishlistContext = createContext<WishlistState | undefined>(undefined);
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user, isAuthenticated } = useAuth();
+  
+  // Safe access to auth context with fallback for hot reload issues
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // AuthContext not ready yet (hot reload issue)
+    authContext = { user: null, isAuthenticated: false };
+  }
+  
+  const { user, isAuthenticated } = authContext;
 
   useEffect(() => {
     const loadWishlist = async () => {

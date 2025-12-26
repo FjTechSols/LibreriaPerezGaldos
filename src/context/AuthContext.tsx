@@ -151,23 +151,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!emailOrUsername.includes('@')) {
         console.log('Buscando usuario por username:', emailOrUsername);
         
-        // Intentar búsqueda exacta por username
+        // Búsqueda case-insensitive usando el índice funcional LOWER(username)
+        // Usamos .ilike() que PostgreSQL puede optimizar con el índice funcional
+        // pero solo si buscamos exactamente (sin wildcards)
         let { data: userData, error: lookupError } = await supabase
           .from('usuarios')
           .select('email')
-          .eq('username', emailOrUsername)
-          .single();
+          .ilike('username', emailOrUsername)
+          .maybeSingle();
 
         console.log('Resultado búsqueda por username:', { userData, lookupError });
 
-        // Si no se encuentra por username, intentar por nombre
+        // Si no se encuentra por username, intentar por nombre (también case-insensitive)
         if (!userData && lookupError) {
           console.log('Intentando búsqueda por nombre...');
           const result = await supabase
             .from('usuarios')
             .select('email')
-            .eq('nombre', emailOrUsername)
-            .single();
+            .ilike('nombre', emailOrUsername)
+            .maybeSingle();
           
           userData = result.data;
           lookupError = result.error;
