@@ -167,10 +167,19 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
     try {
       const invoiceNumber = await getNextInvoiceNumber();
 
-      const subtotal = formData.items.reduce((sum, item) => sum + item.line_total, 0);
-      const taxAmount = subtotal * (formData.tax_rate / 100);
+      // Prices in formData.items include tax
+      // Calculate total with tax first
+      const totalWithTax = formData.items.reduce((sum, item) => sum + item.line_total, 0);
+      
+      // Calculate subtotal without tax (base price)
+      // Formula: subtotal = total / (1 + (tax_rate / 100))
+      const subtotalWithoutTax = totalWithTax / (1 + (formData.tax_rate / 100));
+      
+      // Calculate tax amount
+      const taxAmount = totalWithTax - subtotalWithoutTax;
+      
       const shippingCost = formData.shipping_cost || 0;
-      const total = subtotal + taxAmount + shippingCost;
+      const total = totalWithTax + shippingCost;
 
       const invoiceData = {
         invoice_number: invoiceNumber,
@@ -179,10 +188,10 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         customer_nif: formData.customer_nif,
         issue_date: new Date().toISOString(),
         status: 'Pendiente' as const,
-        subtotal,
+        subtotal: Number(subtotalWithoutTax.toFixed(2)), // Subtotal WITHOUT tax
         tax_rate: formData.tax_rate,
-        tax_amount: taxAmount,
-        total,
+        tax_amount: Number(taxAmount.toFixed(2)), // Tax amount
+        total: Number(total.toFixed(2)), // Total WITH tax + shipping
         payment_method: formData.payment_method || null,
         // shipping_cost: shippingCost, // Commented out until DB migration provided
         language: formData.language,
@@ -197,14 +206,21 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
 
       if (invoiceError) throw invoiceError;
 
-      const itemsToInsert = formData.items.map(item => ({
-        invoice_id: invoice.id,
-        book_id: item.book_id,
-        book_title: item.book_title,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        line_total: item.line_total
-      }));
+      // For invoice items, calculate unit price without tax
+      const itemsToInsert = formData.items.map(item => {
+        const unitPriceWithTax = item.unit_price;
+        const unitPriceWithoutTax = unitPriceWithTax / (1 + (formData.tax_rate / 100));
+        const lineTotalWithoutTax = unitPriceWithoutTax * item.quantity;
+        
+        return {
+          invoice_id: invoice.id,
+          book_id: item.book_id,
+          book_title: item.book_title,
+          quantity: item.quantity,
+          unit_price: Number(unitPriceWithoutTax.toFixed(2)), // Unit price WITHOUT tax
+          line_total: Number(lineTotalWithoutTax.toFixed(2)) // Line total WITHOUT tax
+        };
+      });
 
       const { data: items, error: itemsError } = await supabase
         .from('invoice_items')

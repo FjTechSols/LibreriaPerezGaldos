@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { CartItem, Book, CartState } from '../types';
 import { useAuth } from './AuthContext';
 import {
@@ -6,8 +6,7 @@ import {
   loadCartFromSupabase,
   mergeCartWithLocal,
   getLocalCart,
-  saveLocalCart,
-  clearLocalCart
+  saveLocalCart
 } from '../services/cartService';
 
 const CartContext = createContext<CartState | undefined>(undefined);
@@ -23,27 +22,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const loadCart = async () => {
       setIsLoading(true);
       try {
+        // Always load from localStorage first for immediate display
+        const localCart = getLocalCart();
+        
         if (isAuthenticated && user) {
-          const localCart = getLocalCart();
+          // Show local cart immediately
+          if (!isCancelled && localCart.length > 0) {
+            setItems(localCart);
+          }
+
+          // Then sync with server in background
           const serverCart = await loadCartFromSupabase(user.id);
 
-          // No actualizar si el efecto fue cancelado
           if (isCancelled) return;
 
+          // Merge server cart with local cart
           const mergedCart = mergeCartWithLocal(serverCart, localCart);
           setItems(mergedCart);
-          if (localCart.length > 0) {
+          
+          // Save merged cart back to server
+          if (mergedCart.length > 0) {
             await saveCartToSupabase(user.id, mergedCart);
-            clearLocalCart();
           }
         } else {
-          if (isCancelled) return;
-          const localCart = getLocalCart();
-          setItems(localCart);
+          // Not authenticated, use local cart only
+          if (!isCancelled) {
+            setItems(localCart);
+          }
         }
       } catch (error) {
         if (isCancelled) return;
         console.error('Error loading cart:', error);
+        // Fallback to local cart on error
         const localCart = getLocalCart();
         setItems(localCart);
       } finally {
@@ -63,12 +73,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoading) return;
 
+    // Always save to localStorage as backup, even for authenticated users
+    saveLocalCart(items);
+
+    // Also save to Supabase if authenticated
     if (isAuthenticated && user) {
       saveCartToSupabase(user.id, items).catch(error => {
         console.error('Error saving cart to Supabase:', error);
+        // If Supabase save fails, localStorage backup is already saved above
       });
-    } else {
-      saveLocalCart(items);
     }
   }, [items, isAuthenticated, user, isLoading]);
 

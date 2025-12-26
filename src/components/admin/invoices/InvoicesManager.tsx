@@ -120,22 +120,22 @@ export function InvoicesManager() {
           invoice.items.forEach(item => {
             doc.text(item.book_title, 20, y);
             doc.text(item.quantity.toString(), 100, y);
-            doc.text(`${item.unit_price.toFixed(2)} €`, 125, y);
-            doc.text(`${item.line_total.toFixed(2)} €`, 170, y);
+            doc.text(`${(item.unit_price || 0).toFixed(2)} €`, 125, y);
+            doc.text(`${(item.line_total || 0).toFixed(2)} €`, 170, y);
             y += 7;
           });
         }
   
         y += 10;
-        doc.text(`${t.subtotal}: ${invoice.subtotal.toFixed(2)} €`, 150, y);
+        doc.text(`${t.subtotal}: ${(invoice.subtotal || 0).toFixed(2)} €`, 150, y);
         y += 7;
-        if (invoice.tax_rate > 0) {
-            doc.text(`${t.tax} (${invoice.tax_rate}%): ${invoice.tax_amount.toFixed(2)} €`, 150, y);
+        if ((invoice.tax_rate || 0) > 0) {
+            doc.text(`${t.tax} (${invoice.tax_rate}%): ${(invoice.tax_amount || 0).toFixed(2)} €`, 150, y);
             y += 7;
         }
         
         doc.setFontSize(12);
-        doc.text(`${t.totalUpper}: ${invoice.total.toFixed(2)} €`, 150, y);
+        doc.text(`${t.totalUpper}: ${(invoice.total || 0).toFixed(2)} €`, 150, y);
   
         doc.save(`${t.title}-${invoice.invoice_number}.pdf`);
       } catch (error) {

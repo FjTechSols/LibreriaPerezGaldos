@@ -108,15 +108,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const formatPrice = (price: number): string => {
     const { currency, currencySymbol } = settings.billing;
+    
+    // Handle undefined, null, or NaN prices
+    const safePrice = (price !== null && price !== undefined && !isNaN(price)) ? price : 0;
 
     switch (currency) {
       case 'EUR':
-        return `${price.toFixed(2)}${currencySymbol}`;
+        return `${safePrice.toFixed(2)}${currencySymbol}`;
       case 'USD':
       case 'GBP':
-        return `${currencySymbol}${price.toFixed(2)}`;
+        return `${currencySymbol}${safePrice.toFixed(2)}`;
       default:
-        return `${price.toFixed(2)}${currencySymbol}`;
+        return `${safePrice.toFixed(2)}${currencySymbol}`;
     }
   };
 

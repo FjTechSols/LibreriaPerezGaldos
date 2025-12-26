@@ -230,7 +230,7 @@ export default function StripeCheckout() {
                 <div key={item.book.id} className="order-item">
                   <span>{item.book.title}</span>
                   <span>
-                    {item.quantity} x €{item.book.price.toFixed(2)}
+                    {item.quantity} x €{(item.book.price || 0).toFixed(2)}
                   </span>
                 </div>
               ))}

@@ -243,7 +243,7 @@ export function BookDetail() {
             </div>
 
             <div className="book-pricing">
-              {book.isOnSale && book.originalPrice ? (
+              {book.isOnSale && book.originalPrice && book.price ? (
                 <div className="pricing-sale">
                   <span className="original-price">${book.originalPrice}</span>
                   <span className="sale-price">${book.price}</span>
@@ -252,7 +252,7 @@ export function BookDetail() {
                   </span>
                 </div>
               ) : (
-                <span className="current-price">${book.price}</span>
+                <span className="current-price">${book.price || '0.00'}</span>
               )}
             </div>
 
