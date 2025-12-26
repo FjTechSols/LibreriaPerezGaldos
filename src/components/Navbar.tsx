@@ -231,11 +231,11 @@ export function Navbar() {
               {isAccountMenuOpen && (
                 <div className="account-menu">
                   <div className="account-menu-header">
-                    <div className="account-user-info">
+                      <div className="account-user-info">
                       <User size={20} className="user-avatar-icon" />
                       <div className="user-details">
-                        <span className="user-email">{user.email}</span>
-                        {user.role && <span className="user-role">{user.role}</span>}
+                        <span className="user-email">{user.username || user.email}</span>
+                        {user.rolPrincipal && <span className="user-role">{user.rolPrincipal.nombre.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</span>}
                       </div>
                     </div>
                   </div>
