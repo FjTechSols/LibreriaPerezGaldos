@@ -824,10 +824,6 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
 
 export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>, contenidos?: string[]): Promise<Book | null> => {
   try {
-    console.log('=== ACTUALIZAR LIBRO ===');
-    console.log('ID:', id);
-    console.log('Datos a actualizar:', libro);
-
     // Obtener el libro actual para saber su código y ubicación actual
     const { data: libroActual, error: fetchError } = await supabase
       .from('libros')
@@ -843,8 +839,6 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
     if (!libroActual) {
       throw new Error('Libro no encontrado');
     }
-
-    console.log('Libro actual:', libroActual);
 
     const updateData: any = {};
 
@@ -881,32 +875,22 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
 
     updateData.updated_at = new Date().toISOString();
 
-    console.log('Datos preparados para UPDATE:', updateData);
-
     // Verificar permisos antes del UPDATE
     const { data: permisosCheck } = await supabase.rpc('can_manage_books');
-    console.log('Resultado can_manage_books():', permisosCheck);
-
     const { data: editorCheck } = await supabase.rpc('is_editor');
-    console.log('Resultado is_editor():', editorCheck);
 
     const { error: updateError } = await supabase
       .from('libros')
       .update(updateData)
       .eq('id', id);
 
-    console.log('Error del UPDATE:', updateError);
-
     if (updateError) {
       console.error('Error al actualizar libro:', updateError);
       throw new Error(`Error de base de datos: ${updateError.message}`);
     }
 
-    console.log('✓ UPDATE ejecutado correctamente');
-
     // Actualizar contenidos si se proporcionan
     if (contenidos) {
-      console.log('Actualizando contenidos del libro...');
       // 1. Eliminar contenidos existentes
       const { error: deleteError } = await supabase
         .from('libros_contenidos')
@@ -952,8 +936,6 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
       .eq('id', id)
       .maybeSingle();
 
-    console.log('Libro actualizado (con SELECT):', libroActualizado);
-
     if (selectError) {
       console.error('Error al obtener libro actualizado:', selectError);
       throw new Error(`Error al obtener libro actualizado: ${selectError.message}`);
@@ -964,9 +946,6 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
     }
 
     const libroMapeado = mapLibroToBook(libroActualizado);
-    console.log('Libro mapeado final:', libroMapeado);
-    console.log('=== FIN ACTUALIZAR LIBRO ===');
-
     return libroMapeado;
   } catch (error) {
     console.error('Error inesperado al actualizar libro:', error);
@@ -1286,38 +1265,7 @@ export const incrementarStockLibro = async (id: number, cantidad: number): Promi
     }
 
     // Success - optionally return the new stock? Function signature says return boolean.
-    // The calling code might interpret result as Boolean or Object?
-    // In `handleCreateSubmit`: `const actualizado = await ...`
-    // `if (actualizado) { alert(... actualizado.stock) }`
-    // Wait, the original usage in `handleCreateSubmit` expects an OBJECT with `.stock`?
-    // Let's check `BooksManager.tsx` lines 173-175:
-    // `const actualizado = await incrementarStockLibro(...)`
-    // `if (actualizado) { alert(... actualizado.stock ...)`
-    // BUT the implementation I replaced (line 966) returned `Promise<boolean>`: `return !error;`
-    // THIS IS A CONTRADICTION.
-    // If usage expects object, the previous code was ALREADY wrong or signature was wrong?
-    // The previous code: `return !error;` (boolean).
-    // `handleCreateSubmit` code: `if (actualizado) { ... actualizado.stock }`.
-    // If boolean true is returned, `actualizado.stock` is undefined.
-    // So `alert` would say "undefined".
-    // But `handleStockUpdate` (the one failing now) checks `if (updated)`. Boolean is fine there.
-    
-    // I should probably fix the return type to return `{ stock: number } | null` or compatible?
-    // Or just fix `BooksManager.tsx` usage?
-    // The user issue is "gives error".
-    // If I change return to Boolean, I must ensure usages handle it.
-    // `handleStockUpdate` usage: `const updated = await ...; if (updated) ...`. Boolean is fine.
-    // `handleCreateSubmit` usage: accesses `.stock`. This is broken for boolean.
-    
-    // I will return the updated book object (or partial) if possible, or just the new stock?
-    // To match `handleCreateSubmit` expectation, I should return an object?
-    // But `incrementarStockLibro` signature says `Promise<boolean>`.
-    // I should change the signature to `Promise<{ stock: number } | null>` or `Promise<boolean | ...>`.
-    
-    // For now, I'll stick to Boolean to match the signature in the file I saw (line 966).
-    // AND I will fix `handleCreateSubmit` in `BooksManager.tsx` to not access `.stock` on a boolean.
-    // The user's specific issue is the Buttons (+/-), handled by `handleStockUpdate`.
-    // That function uses it as boolean.
+    // The previous implementation returned boolean, so we maintain that.
     
     return true;
   } catch (error) {
@@ -1356,13 +1304,17 @@ export const obtenerLibrosSinPortada = async (): Promise<Book[]> => {
     return data.map(mapLibroToBook);
 };
 
-export const actualizarISBN = async (id: number, isbn: string): Promise<boolean> => {
+export const actualizarISBN = async (id: number, isbn: string): Promise<{ success: boolean; error?: string }> => {
     const { error } = await supabase
       .from('libros')
       .update({ isbn: isbn })
       .eq('id', id);
 
-    return !error;
+    if (error) {
+        console.error('Error updating ISBN:', error);
+        return { success: false, error: error.message };
+    }
+    return { success: true };
 };
 
 export const obtenerSugerencias = async (termino: string): Promise<string[]> => {

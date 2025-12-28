@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import { ShareModal } from '../components/ShareModal';
+import { ReservationRequestModal } from '../components/ReservationRequestModal';
+import { MessageModal } from '../components/MessageModal';
 import { ReviewForm } from '../components/ReviewForm';
 import { Book } from '../types';
 import {
@@ -34,6 +36,38 @@ export function BookDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'reviews'>('description');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showReservationModal, setShowReservationModal] = useState(false);
+  const [reservationSuccess, setReservationSuccess] = useState(false);
+  
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
+
+  const [isReserving, setIsReserving] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -100,25 +134,51 @@ export function BookDetail() {
     return <NotFound type="book" />;
   }
 
-  const handleReserve = async () => {
+  const handleReservationClick = () => {
     if (!isAuthenticated || !user) {
-      alert(language === 'es' ? 'Debes iniciar sesión para reservar.' : 'You must log in to reserve.');
+      setMessageModalConfig({
+        title: language === 'es' ? 'Acceso requerido' : 'Login required',
+        message: language === 'es' 
+          ? 'Debes iniciar sesión para reservar un libro.' 
+          : 'You must log in to reserve a book.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
       return;
     }
+    setReservationSuccess(false);
+    setShowReservationModal(true);
+  };
 
-    if (!book) return;
-
+  const handleConfirmReservation = async () => {
+    if (!book || !user) return;
+    
+    setIsReserving(true);
     try {
       await createReservation(user.id, Number(book.id));
-      alert(language === 'es' ? 'Reserva solicitada con éxito.' : 'Reservation requested successfully.');
+      setReservationSuccess(true);
     } catch (error: any) {
       console.error('Error reserving book:', error);
       const errorMessage = error.message || 'Error desconocido';
-      alert(language === 'es' 
-        ? `Error al solicitar la reserva: ${errorMessage}` 
-        : `Error requesting reservation: ${errorMessage}`
-      );
+      
+      setMessageModalConfig({
+        title: 'Error',
+        message: language === 'es' 
+          ? `Error al solicitar la reserva: ${errorMessage}` 
+          : `Error requesting reservation: ${errorMessage}`,
+        type: 'error'
+      });
+      setShowMessageModal(true);
+    } finally {
+      setIsReserving(false);
     }
+  };
+
+  const handleCloseReservationModal = () => {
+    setShowReservationModal(false);
+    setTimeout(() => {
+      setReservationSuccess(false);
+    }, 300);
   };
 
   const handleAddToCart = () => {
@@ -162,13 +222,21 @@ export function BookDetail() {
     }
   };
 
-  const handleDeleteReview = async (reviewId: number) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar tu reseña?')) return;
-
-    const success = await deleteReview(reviewId);
-    if (success) {
-      handleReviewSuccess();
-    }
+  const handleDeleteReview = (reviewId: number) => {
+    showModal(
+        'Confirmar Eliminación',
+        '¿Estás seguro de que deseas eliminar tu reseña?',
+        'warning',
+        async () => {
+            const success = await deleteReview(reviewId);
+            if (success) {
+                handleReviewSuccess();
+                showModal('Éxito', 'Reseña eliminada correctamente', 'success');
+            } else {
+                showModal('Error', 'No se pudo eliminar la reseña', 'error');
+            }
+        }
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -299,7 +367,7 @@ export function BookDetail() {
 
                   <button 
                     className="reserve-btn"
-                    onClick={handleReserve}
+                    onClick={handleReservationClick}
                   >
                     <Bookmark size={20} />
                     {language === 'es' ? 'Reservar' : language === 'en' ? 'Reserve' : 'Réserver'}
@@ -310,10 +378,10 @@ export function BookDetail() {
                   <Truck size={16} />
                   <span>
                     {language === 'es' 
-                      ? `Envío gratis en pedidos mayores a ${formatPrice(settings.shipping.freeShippingThreshold)}` 
+                      ? `Envío gratis en pedidos mayores a ${formatPrice(settings.shipping.freeShippingThresholdStandard)}` 
                       : language === 'en' 
-                      ? `Free shipping on orders over ${formatPrice(settings.shipping.freeShippingThreshold)}` 
-                      : `Livraison gratuite pour les commandes de plus de ${formatPrice(settings.shipping.freeShippingThreshold)}`
+                      ? `Free shipping on orders over ${formatPrice(settings.shipping.freeShippingThresholdStandard)}` 
+                      : `Livraison gratuite pour les commandes de plus de ${formatPrice(settings.shipping.freeShippingThresholdStandard)}`
                     }
                   </span>
                 </div>
@@ -504,6 +572,28 @@ export function BookDetail() {
           book={book}
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
+        />
+        
+        {book && (
+          <ReservationRequestModal
+            isOpen={showReservationModal}
+            onClose={handleCloseReservationModal}
+            onConfirm={handleConfirmReservation}
+            bookTitle={book.title}
+            isProcessing={isReserving}
+            isSuccess={reservationSuccess}
+          />
+        )}
+        
+        <MessageModal
+          isOpen={showMessageModal}
+          onClose={() => setShowMessageModal(false)}
+          title={messageModalConfig.title}
+          message={messageModalConfig.message}
+          type={messageModalConfig.type as any}
+          onConfirm={messageModalConfig.onConfirm}
+          showCancel={messageModalConfig.showCancel}
+          buttonText={messageModalConfig.buttonText}
         />
       </div>
     </div>

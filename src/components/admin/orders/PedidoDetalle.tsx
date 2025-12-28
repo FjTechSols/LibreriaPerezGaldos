@@ -5,6 +5,7 @@ import { actualizarEstadoPedido } from '../../../services/pedidoService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 interface PedidoDetalleProps {
   pedido: Pedido | null;
@@ -30,24 +31,92 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
 
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+  }>({ title: '', message: '', type: 'info' });
+
   if (!isOpen || !pedido) return null;
 
   const handleCambiarEstado = async (nuevoEstado: EstadoPedido) => {
-    const exito = await actualizarEstadoPedido(pedido.id, nuevoEstado);
+    const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
 
-    if (exito) {
-      alert('Estado actualizado correctamente');
+    if (result.success) {
+      setMessageModalConfig({
+        title: 'Estado Actualizado',
+        message: 'El estado del pedido se ha actualizado correctamente.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
       onRefresh();
     } else {
-      alert('Error al actualizar el estado');
+      setMessageModalConfig({
+        title: 'Error',
+        message: result.error || 'Hubo un error al actualizar el estado del pedido.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
     }
   };
 
   const { createInvoice } = useInvoice();
 
+  // Lógica híbrida para totales:
+  // 1. Calculamos el total teórico sumando los precios de los ítems (que incluyen impuestos).
+  const calcularTotalBruto = () => {
+    if (!pedido?.detalles) return 0;
+    return pedido.detalles.reduce((sum, detalle) => {
+      // Precio unitario ya incluye IVA en el nuevo sistema
+      return sum + (detalle.cantidad * detalle.precio_unitario);
+    }, 0);
+  };
+
+  const totalItems = calcularTotalBruto();
+  
+  // 2. Verificamos si el pedido tiene totales guardados válidos
+  const tieneValoresGuardados = pedido?.total !== undefined && pedido.total > 0;
+
+  // 3. Comprobamos si el total guardado coincide con la suma de ítems para detectar si es pedido "nuevo" (IVA incluido)
+  const totalGuardado = pedido?.total || 0;
+  const diferencia = tieneValoresGuardados ? Math.abs(totalGuardado - totalItems) : 999;
+  const esPedidoConIvaIncluido = diferencia < 0.05; // 5 céntimos de margen
+
+  let total, subtotal, iva, taxRateApplied;
+
+  if (esPedidoConIvaIncluido && tieneValoresGuardados) {
+    // Caso: Pedido histórico válido (IVA Incluido). Respetamos los valores guardados.
+    total = totalGuardado;
+    // Usamos el subtotal guardado, o lo derivamos si falta
+    subtotal = pedido?.subtotal !== undefined ? pedido.subtotal : (total / (1 + (settings.billing.taxRate / 100)));
+    // Usamos el iva guardado, o lo derivamos
+    iva = pedido?.iva !== undefined ? pedido.iva : (total - subtotal);
+    
+    // Calculamos la tasa real basada en los valores guardados
+    const rawRate = subtotal > 0 ? Math.round((iva / subtotal) * 100) : settings.billing.taxRate;
+    
+    // FIX: Si detectamos que el pedido se guardó con el default de 21% (error común) pero la configuración actual es diferente (ej. 4%),
+    // forzamos el uso de la tasa configurada para que la factura salga correcta.
+    taxRateApplied = (rawRate === 21 && Number(settings.billing.taxRate) !== 21) ? Number(settings.billing.taxRate) : rawRate;
+  } else {
+    // Caso: Pedido antiguo (IVA Sumado) o sin datos. Recalculamos con la configuración ACTUAL.
+    total = totalItems;
+    const currentTaxRateDecimal = settings.billing.taxRate / 100;
+    subtotal = total / (1 + currentTaxRateDecimal);
+    iva = total - subtotal;
+    taxRateApplied = settings.billing.taxRate;
+  }
+
   const handleGenerarFactura = async () => {
     if (!pedido.detalles || pedido.detalles.length === 0) {
-      alert('El pedido no tiene detalles para facturar');
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'El pedido no tiene detalles para facturar.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
       return;
     }
 
@@ -78,25 +147,40 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
           customer_name: customerName,
           customer_address: customerAddress,
           customer_nif: customerNif,
-          tax_rate: 21, // Default to 21% or fetch from somewhere?
+          tax_rate: taxRateApplied, // Usamos la tasa que se aplicó al pedido (histórica o actual)
           payment_method: pedido.metodo_pago,
           order_id: pedido.id.toString(),
           items: items,
-          shipping_cost: 0, // Should be passed if available in Pedido
+          shipping_cost: pedido.coste_envio || 0, // Usamos el coste de envío real del pedido
           language: 'es' as 'es' | 'en'
       };
 
       const invoice = await createInvoice(formData);
 
       if (invoice) {
-        alert(`Factura ${invoice.invoice_number} generada correctamente`);
+        setMessageModalConfig({
+          title: 'Factura Generada',
+          message: `Factura ${invoice.invoice_number} generada correctamente.`,
+          type: 'info'
+        });
+        setShowMessageModal(true);
         onRefresh();
       } else {
-        alert('Error al generar la factura');
+        setMessageModalConfig({
+          title: 'Error',
+          message: 'Error al generar la factura.',
+          type: 'error'
+        });
+        setShowMessageModal(true);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al generar la factura');
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'Error al generar la factura.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
     } finally {
       setGenerandoFactura(false);
     }
@@ -262,22 +346,18 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
 
     } catch (error) {
       console.error('Error generating Albaran PDS:', error);
-      alert('Error al generar el albarán PDF');
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'Error al generar el albarán PDF.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
     } finally {
       setGenerandoAlbaran(false);
     }
   };
 
-  const calcularSubtotal = () => {
-    if (!pedido.detalles) return 0;
-    return pedido.detalles.reduce((sum, detalle) => {
-      return sum + (detalle.cantidad * detalle.precio_unitario);
-    }, 0);
-  };
 
-  const subtotal = calcularSubtotal();
-  const iva = subtotal * (settings.billing.taxRate / 100);
-  const total = subtotal + iva;
 
   const tieneFactura = pedido.factura && !Array.isArray(pedido.factura);
 
@@ -287,7 +367,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
         <div className="modal-header">
           <div className="header-title">
             <Package size={24} />
-            <h2>Detalle del Pedido #{pedido.id}</h2>
+            <h2>Detalle del Pedido #{pedido?.id}</h2>
           </div>
           <button onClick={onClose} className="btn-close">
             <X size={20} />
@@ -295,6 +375,28 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
         </div>
 
         <div className="modal-body">
+          <div className="creado-por-section" style={{ 
+            marginBottom: '1.5rem', 
+            padding: '1rem', 
+            backgroundColor: 'var(--bg-tertiary)', 
+            borderRadius: '8px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.75rem', 
+            border: '1px solid var(--border-color)'
+          }}>
+            <User size={20} style={{ color: 'var(--text-secondary)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Creado por</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+                 {pedido?.usuario?.username} 
+                 <span style={{ color: 'var(--text-secondary)', fontWeight: 400, marginLeft: '0.5rem', fontSize: '0.875rem' }}>
+                   ({pedido?.usuario?.email})
+                 </span>
+              </span>
+            </div>
+          </div>
+
           <div className="pedido-info-grid">
             <div className="info-card">
               <div className="info-card-header">
@@ -302,8 +404,19 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <h3>Cliente</h3>
               </div>
               <div className="info-card-body">
-                <p className="info-principal">{pedido.usuario?.username}</p>
-                <p className="info-secundario">{pedido.usuario?.email}</p>
+                {pedido?.cliente ? (
+                  <>
+                    <p className="info-principal">
+                      {pedido.cliente.tipo === 'empresa' || pedido.cliente.tipo === 'institucion'
+                        ? pedido.cliente.nombre
+                        : `${pedido.cliente.nombre} ${pedido.cliente.apellidos || ''}`.trim()}
+                    </p>
+                    {pedido.cliente.email && <p className="info-secundario">{pedido.cliente.email}</p>}
+                    {pedido.cliente.telefono && <p className="info-secundario">{pedido.cliente.telefono}</p>}
+                  </>
+                ) : (
+                  <p className="info-principal" style={{ color: 'var(--text-tertiary)' }}>Sin cliente asignado</p>
+                )}
               </div>
             </div>
 
@@ -314,7 +427,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               </div>
               <div className="info-card-body">
                 <p className="info-principal">
-                  {pedido.fecha_pedido
+                  {pedido?.fecha_pedido
                     ? new Date(pedido.fecha_pedido).toLocaleDateString('es-ES', {
                         day: '2-digit',
                         month: 'long',
@@ -332,7 +445,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               </div>
               <div className="info-card-body">
                 <select
-                  value={pedido.estado || 'pendiente'}
+                  value={pedido?.estado || 'pendiente'}
                   onChange={(e) => handleCambiarEstado(e.target.value as EstadoPedido)}
                   className="estado-selector-detalle"
                 >
@@ -352,7 +465,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               </div>
               <div className="info-card-body">
                 <span className="info-principal uppercase px-2 py-1 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-700">
-                  {pedido.tipo?.replace('_', ' ') || '-'}
+                  {pedido?.tipo?.replace('_', ' ') || '-'}
                 </span>
               </div>
             </div>
@@ -363,11 +476,11 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <h3>Método de Pago</h3>
               </div>
               <div className="info-card-body">
-                <p className="info-principal">{pedido.metodo_pago || '-'}</p>
+                <p className="info-principal">{pedido?.metodo_pago || '-'}</p>
               </div>
             </div>
 
-            {pedido.direccion_envio && (
+            {pedido?.direccion_envio && (
               <div className="info-card full-width">
                 <div className="info-card-header">
                   <MapPin size={20} />
@@ -379,24 +492,24 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               </div>
             )}
 
-            {(pedido.transportista || pedido.tracking) && (
+            {(pedido?.transportista || pedido?.tracking) && (
               <div className="info-card">
                 <div className="info-card-header">
                   <Truck size={20} />
                   <h3>Envío</h3>
                 </div>
                 <div className="info-card-body">
-                  {pedido.transportista && (
+                  {pedido?.transportista && (
                     <p className="info-principal">Transportista: {pedido.transportista}</p>
                   )}
-                  {pedido.tracking && (
+                  {pedido?.tracking && (
                     <p className="info-secundario">Tracking: {pedido.tracking}</p>
                   )}
                 </div>
               </div>
             )}
 
-            {pedido.observaciones && (
+            {pedido?.observaciones && (
               <div className="info-card full-width">
                 <div className="info-card-header">
                   <FileText size={20} />
@@ -428,7 +541,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <span>Subtotal</span>
               </div>
 
-              {pedido.detalles && pedido.detalles.length > 0 ? (
+              {pedido?.detalles && pedido.detalles.length > 0 ? (
                 pedido.detalles.map(detalle => (
                   <div key={detalle.id} className="table-row">
                     <span className="libro-titulo">{detalle.libro?.titulo || 'Sin título'}</span>
@@ -450,7 +563,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <span className="total-valor">{subtotal.toFixed(2)} €</span>
               </div>
               <div className="total-row">
-                <span>IVA ({settings.billing.taxRate}%):</span>
+                <span>IVA ({taxRateApplied}%):</span>
                 <span className="total-valor">{iva.toFixed(2)} €</span>
               </div>
               <div className="total-row final">
@@ -491,19 +604,28 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
           {tieneFactura ? (
             <div className="factura-generada">
               <FileText size={16} />
-              Factura: {typeof pedido.factura === 'object' ? pedido.factura.numero_factura : ''}
+              Factura: {typeof pedido?.factura === 'object' ? pedido.factura.numero_factura : ''}
             </div>
           ) : (
             <button
               onClick={handleGenerarFactura}
               className="btn-generar-factura"
-              disabled={generandoFactura || !pedido.detalles || pedido.detalles.length === 0}
+              disabled={generandoFactura || !pedido?.detalles || pedido.detalles.length === 0}
             >
               <FileText size={16} />
               {generandoFactura ? 'Generando...' : 'Generar Factura'}
             </button>
           )}
         </div>
+
+        {/* Message Modal Component */}
+        <MessageModal
+          isOpen={showMessageModal}
+          onClose={() => setShowMessageModal(false)}
+          title={messageModalConfig.title}
+          message={messageModalConfig.message}
+          type={messageModalConfig.type}
+        />
       </div>
     </div>
   );

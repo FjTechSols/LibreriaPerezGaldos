@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     checkUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       (async () => {
         if (session?.user) {
           await loadUserData(session.user.id);
@@ -149,7 +149,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Si no contiene @, buscar por nombre de usuario
       if (!emailOrUsername.includes('@')) {
-        console.log('Buscando usuario por username:', emailOrUsername);
         
         // Búsqueda case-insensitive usando el índice funcional LOWER(username)
         // Usamos .ilike() que PostgreSQL puede optimizar con el índice funcional
@@ -160,11 +159,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .ilike('username', emailOrUsername)
           .maybeSingle();
 
-        console.log('Resultado búsqueda por username:', { userData, lookupError });
-
         // Si no se encuentra por username, intentar por nombre (también case-insensitive)
         if (!userData && lookupError) {
-          console.log('Intentando búsqueda por nombre...');
           const result = await supabase
             .from('usuarios')
             .select('email')
@@ -173,7 +169,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           userData = result.data;
           lookupError = result.error;
-          console.log('Resultado búsqueda por nombre:', { userData, lookupError });
         }
 
         if (lookupError || !userData) {
@@ -182,7 +177,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         userEmail = userData.email;
-        console.log('Email encontrado:', userEmail);
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({

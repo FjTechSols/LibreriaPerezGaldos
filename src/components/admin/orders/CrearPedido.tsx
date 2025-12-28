@@ -22,6 +22,7 @@ import { sendOrderConfirmationEmail, type OrderEmailData } from "../../../servic
 import { useAuth } from "../../../context/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
 import "../../../styles/components/CrearPedido.css";
+import { MessageModal } from "../../MessageModal"; // Import MessageModal
 
 interface CrearPedidoProps {
   isOpen: boolean;
@@ -60,6 +61,18 @@ export default function CrearPedido({
   const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
   const clienteAutocompleteRef = useRef<HTMLDivElement>(null);
   
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
   
   // State for client creation modal
   const [showClienteModal, setShowClienteModal] = useState(false);
@@ -272,12 +285,12 @@ export default function CrearPedido({
     
     // Validation
     if (!clienteModalData.nombre.trim()) {
-      alert('El nombre es obligatorio');
+      showModal('Error', 'El nombre es obligatorio', 'error');
       return;
     }
 
     if (clienteModalData.tipo === 'particular' && !clienteModalData.apellidos.trim()) {
-      alert('Los apellidos son obligatorios para particulares');
+      showModal('Error', 'Los apellidos son obligatorios para particulares', 'error');
       return;
     }
 
@@ -285,7 +298,7 @@ export default function CrearPedido({
       const nuevoCliente = await crearCliente(clienteModalData);
       
       if (!nuevoCliente) {
-        alert('Error al crear cliente');
+        showModal('Error', 'Error al crear cliente', 'error');
         return;
       }
       
@@ -300,10 +313,10 @@ export default function CrearPedido({
       // Close modal
       handleCloseClienteModal();
       
-      alert('Cliente creado exitosamente');
+      showModal('Éxito', 'Cliente creado exitosamente');
     } catch (error) {
       console.error('Error creating client:', error);
-      alert('Error al crear cliente');
+      showModal('Error', 'Error al crear cliente', 'error');
     }
   };
 
@@ -326,13 +339,13 @@ export default function CrearPedido({
 
   const agregarLinea = () => {
     if (cantidadTemporal <= 0) {
-      alert("La cantidad debe ser mayor a 0");
+      showModal('Error', "La cantidad debe ser mayor a 0", 'error');
       return;
     }
 
     if (tipoProducto === "interno") {
       if (!libroSeleccionado) {
-        alert("Seleccione un libro de las sugerencias");
+        showModal('Error', "Seleccione un libro de las sugerencias", 'error');
         return;
       }
 
@@ -350,17 +363,17 @@ export default function CrearPedido({
       setLibroSearch("");
     } else {
       if (!nombreExterno.trim()) {
-        alert("Ingrese el nombre del producto");
+        showModal('Error', "Ingrese el nombre del producto", 'error');
         return;
       }
 
       if (!urlExterna.trim()) {
-        alert("Ingrese la URL de compra");
+        showModal('Error', "Ingrese la URL de compra", 'error');
         return;
       }
 
       if (precioExterno <= 0) {
-        alert("El precio debe ser mayor a 0");
+        showModal('Error', "El precio debe ser mayor a 0", 'error');
         return;
       }
 
@@ -626,11 +639,11 @@ export default function CrearPedido({
         
         const internalCount = finalItems.filter(i => !i.es_externo).length;
         const clientMsg = nombre ? `\n👤 Cliente: ${nombre}` : '';
-        alert(`✅ Datos de IberLibro procesados.${clientMsg}\n📦 Items: ${finalItems.length} (${internalCount} encontrados en catálogo)`);
+        showModal('Éxito', `✅ Datos de IberLibro procesados.${clientMsg}\n📦 Items: ${finalItems.length} (${internalCount} encontrados en catálogo)`);
         
     } catch (e: any) {
         console.error('Error parsing IberLibro:', e);
-        alert('Error al procesar datos de IberLibro: ' + e.message);
+        showModal('Error', 'Error al procesar datos de IberLibro: ' + e.message, 'error');
     } finally {
         setLoading(false);
     }
@@ -638,7 +651,7 @@ export default function CrearPedido({
 
   const parsearDatosPegados = async () => {
     if (!datosPegados.trim()) {
-      alert("Por favor, pega la información del pedido");
+      showModal('Aviso', "Por favor, pega la información del pedido", 'info');
       return;
     }
 
@@ -805,14 +818,13 @@ export default function CrearPedido({
       setModoEntrada("manual");
       setDatosPegados("");
 
-      alert(
-        `Se han parseado ${nuevasLineas.length} producto(s) (Formato Genérico).`
-      );
+      setModoEntrada("manual");
+      setDatosPegados("");
+
+      showModal('Éxito', `Se han parseado ${nuevasLineas.length} producto(s) (Formato Genérico).`);
     } catch (error) {
       console.error("Error al parsear datos:", error);
-      alert(
-        "Error al procesar los datos pegados."
-      );
+      showModal('Error', "Error al procesar los datos pegados.", 'error');
     }
   };
 
@@ -965,11 +977,11 @@ export default function CrearPedido({
           setModoEntrada("manual");
 
           const foundMsg = foundBook ? `\n📕 Libro encontrado en catálogo: ${foundBook.titulo}` : '';
-          alert(`Datos de Uniliber procesados.\nCliente detectado: "${nombre}"${foundMsg}`); 
+          showModal('Éxito', `Datos de Uniliber procesados.\nCliente detectado: "${nombre}"${foundMsg}`); 
 
       } catch (err) {
           console.error(err);
-          alert("Error al procesar datos de Uniliber.");
+          showModal('Error', "Error al procesar datos de Uniliber.", 'error');
       } finally {
           setLoading(false);
       }
@@ -980,19 +992,19 @@ export default function CrearPedido({
 
     // Check for unparsed data
     if (modoEntrada === 'pegar' && datosPegados.trim().length > 0) {
-        alert("⚠️ Has pegado datos pero no los has analizado.\n\nPor favor, haz clic en el botón 'Analizar y Rellenar Formulario' (icono de lupa) que está debajo del cuadro de texto para procesar los datos antes de guardar.");
+        showModal('Atención', "⚠️ Has pegado datos pero no los has analizado.\n\nPor favor, haz clic en el botón 'Analizar y Rellenar Formulario' (icono de lupa) que está debajo del cuadro de texto para procesar los datos antes de guardar.", 'error');
         return;
     }
 
     let finalClienteId = clienteSeleccionado?.id;
     
     if (!finalClienteId) {
-        alert("Debe seleccionar un cliente. Use el buscador o cree uno nuevo con el botón 'Nuevo Cliente'.");
+        showModal('Error', "Debe seleccionar un cliente. Use el buscador o cree uno nuevo con el botón 'Nuevo Cliente'.", 'error');
         return;
     }
 
     if (lineas.length === 0) {
-      alert("Agregue al menos un producto al pedido");
+      showModal('Error', "Agregue al menos un producto al pedido", 'error');
       setLoading(false);
       return;
     }
@@ -1018,7 +1030,7 @@ export default function CrearPedido({
       });
 
       if (!user) {
-        alert("Error: Usuario no autenticado");
+        showModal('Error', "Error: Usuario no autenticado", 'error');
         setLoading(false);
         return;
       }
@@ -1060,12 +1072,11 @@ export default function CrearPedido({
             total: total,
             shippingAddress: direccionEnvio || 'Sin dirección especificada'
           };
-
           // Send email asynchronously (don't block order creation)
           sendOrderConfirmationEmail(orderEmailData)
             .then(result => {
               if (result.success) {
-                console.log('✅ Email de confirmación enviado correctamente');
+                // console.log('✅ Email de confirmación enviado correctamente');
               } else {
                 console.error('❌ Error al enviar email:', result.error);
               }
@@ -1074,20 +1085,20 @@ export default function CrearPedido({
               console.error('❌ Excepción al enviar email:', err);
             });
 
-          alert(`Pedido #${pedido.id} creado correctamente.\n\nSe enviará un email de confirmación a: ${clientEmail}`);
+          showModal('Pedido Creado', `Pedido #${pedido.id} creado correctamente.\n\nSe enviará un email de confirmación a: ${clientEmail}`);
         } else {
-          alert(`Pedido #${pedido.id} creado correctamente.\n\n⚠️ El cliente no tiene email. No se enviará confirmación automática.`);
+          showModal('Pedido Creado', `Pedido #${pedido.id} creado correctamente.\n\n⚠️ El cliente no tiene email. No se enviará confirmación automática.`);
         }
 
         resetForm();
         onSuccess();
         onClose();
       } else {
-        alert("Error al crear el pedido");
+        showModal('Error', "Error al crear el pedido", 'error');
       }
     } catch (error: any) {
       console.error("Error:", error);
-      alert("Error al crear el pedido: " + (error.message || JSON.stringify(error)));
+      showModal('Error', "Error al crear el pedido: " + (error.message || JSON.stringify(error)), 'error');
     } finally {
       setLoading(false);
     }
@@ -1952,7 +1963,7 @@ export default function CrearPedido({
         <div className="modal-overlay" onClick={handleCloseClienteModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
             <div className="modal-header">
-              <h2>Crear Nuevo Cliente</h2>
+              <h2 className="text-gray-900 dark:text-white">Crear Nuevo Cliente</h2>
               <button onClick={handleCloseClienteModal} className="modal-close">
                 <X size={24} />
               </button>
@@ -2138,11 +2149,11 @@ export default function CrearPedido({
                 </div>
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
                 <button type="button" onClick={handleCloseClienteModal} className="btn-cancelar">
                   Cancelar
                 </button>
-                <button type="submit" className="btn-guardar">
+                <button type="submit" className="btn-guardar" style={{ color: '#ffffff' }}>
                   Crear Cliente
                 </button>
               </div>
@@ -2150,6 +2161,15 @@ export default function CrearPedido({
           </div>
         </div>
       )}
+
+      {/* Message Modal Component */}
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </div>
   );
 }

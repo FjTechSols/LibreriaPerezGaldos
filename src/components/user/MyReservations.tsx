@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { Reserva } from '../../types';
 import { Clock, CheckCircle, XCircle, Package, RotateCcw, Ban, Calendar } from 'lucide-react';
 import { Pagination } from '../Pagination';
+import { MessageModal } from '../MessageModal'; // Import MessageModal
 
 interface MyReservationsProps {
   onReservationChange?: () => void;
@@ -20,6 +21,34 @@ export function MyReservations({ onReservationChange }: MyReservationsProps) {
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
 
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
+
   useEffect(() => {
     if (user) {
       loadReservations();
@@ -27,9 +56,11 @@ export function MyReservations({ onReservationChange }: MyReservationsProps) {
   }, [user, currentPage]);
 
   const loadReservations = async () => {
-    setLoading(true);
+    if (!user) return;
+    
     try {
-      const { data, count } = await getUserReservations(user!.id, currentPage, itemsPerPage);
+      setLoading(true);
+      const { data, count } = await getUserReservations(user.id, currentPage, itemsPerPage);
       setReservations(data);
       setTotalItems(count);
     } catch (error) {
@@ -39,23 +70,25 @@ export function MyReservations({ onReservationChange }: MyReservationsProps) {
     }
   };
 
-  const handleCancelReservation = async (reservationId: number) => {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
-      return;
-    }
-
-    try {
-      await cancelReservation(reservationId, user!.id);
-      alert('Reserva cancelada exitosamente');
-      await loadReservations();
-      // Refresh parent stats
-      if (onReservationChange) {
-        onReservationChange();
-      }
-    } catch (error) {
-      console.error('Error canceling reservation:', error);
-      alert((error as Error).message || 'Error al cancelar la reserva');
-    }
+  const handleCancelReservation = (reservationId: number) => {
+    showModal(
+        'Confirmar Cancelación',
+        '¿Estás seguro de que deseas cancelar esta reserva?',
+        'warning',
+        async () => {
+            try {
+                await cancelReservation(reservationId, user!.id);
+                showModal('Reserva Cancelada', 'La reserva ha sido cancelada exitosamente.', 'success');
+                await loadReservations();
+                if (onReservationChange) {
+                    onReservationChange();
+                }
+            } catch (error) {
+                console.error('Error canceling reservation:', error);
+                showModal('Error', 'No se pudo cancelar la reserva. Por favor, intenta de nuevo.', 'error');
+            }
+        }
+    );
   };
 
   const getStatusBadge = (estado: string) => {
@@ -195,6 +228,18 @@ export function MyReservations({ onReservationChange }: MyReservationsProps) {
           onPageChange={setCurrentPage}
         />
       )}
+
+      {/* Message Modal Component */}
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

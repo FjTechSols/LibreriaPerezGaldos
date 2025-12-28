@@ -8,6 +8,7 @@ import { generarPDFFactura } from '../utils/pdfGenerator';
 import * as settingsService from '../services/settingsService';
 import { Factura } from '../types';
 import '../styles/pages/PaymentSuccess.css';
+import { MessageModal } from '../components/MessageModal'; // Import MessageModal
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -19,6 +20,19 @@ export default function PaymentSuccess() {
   const [facturaId, setFacturaId] = useState<string | null>(null);
   const [emailStatus, setEmailStatus] = useState<'pending' | 'sending' | 'sent' | 'error'>('pending');
   const [finalOrder, setFinalOrder] = useState<any>(null);
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     if (!pedidoId) {
@@ -43,7 +57,6 @@ export default function PaymentSuccess() {
           .maybeSingle();
 
         if (existingInvoice) {
-          console.log('✅ Invoice already exists:', existingInvoice.id);
           setFacturaId(existingInvoice.id);
           setIsGenerandoFactura(false);
           return;
@@ -58,15 +71,18 @@ export default function PaymentSuccess() {
         }
         setFinalOrder(pedido);
 
+        // 2.5 Get settings for tax rate
+        const settings = await settingsService.settingsService.getAllSettings();
+        const taxRate = settings?.billing?.taxRate ?? 4; // Default to 4% if not setting found
+
         // 3. Create invoice with "Pagada" status for web purchases
-        console.log('📝 Creating invoice for order:', pedidoId);
         
         try {
           const nuevaFactura = await createInvoice({
             customer_name: pedido.cliente?.nombre + ' ' + (pedido.cliente?.apellidos || '') || pedido.usuario?.username || 'Cliente',
             customer_address: pedido.direccion_envio || '',
             customer_nif: pedido.cliente?.nif || '',
-            tax_rate: 21,
+            tax_rate: taxRate,
             payment_method: pedido.metodo_pago || 'tarjeta',
             order_id: String(pedidoId),
             items: (pedido.detalles || []).map(detalle => ({
@@ -76,11 +92,11 @@ export default function PaymentSuccess() {
               unit_price: detalle.precio_unitario,
               line_total: detalle.cantidad * detalle.precio_unitario
             })),
+            shipping_cost: pedido.coste_envio || 0,
             language: 'es'
           });
 
           if (nuevaFactura) {
-            console.log('✅ Invoice created:', nuevaFactura.id);
             // Update invoice status to "Pagada" since payment was successful
             await supabase
               .from('invoices')
@@ -92,7 +108,6 @@ export default function PaymentSuccess() {
         } catch (invoiceError: any) {
           // Silently handle duplicate invoice (happens in dev mode with React StrictMode)
           if (invoiceError?.code === '23505') {
-            console.log('ℹ️ Invoice already exists for this order (duplicate prevented)');
           } else {
             console.error('❌ Failed to create invoice:', invoiceError);
           }
@@ -200,13 +215,13 @@ export default function PaymentSuccess() {
             
             setIsGenerandoFactura(false);
         } else {
-            alert('No se pudo encontrar la factura. Por favor contacte con soporte.');
+            showModal('Error', 'No se pudo encontrar la factura. Por favor contacte con soporte.', 'error');
         }
     } catch (error: any) {
         console.error('Error downloading invoice:', error);
         setIsGenerandoFactura(false);
         const errorMsg = error?.message || 'Error desconocido';
-        alert(`Error al descargar la factura:\n${errorMsg}\n\nPor favor contacte con soporte.`);
+        showModal('Error al Descargar', `Error al descargar la factura:\n${errorMsg}\n\nPor favor contacte con soporte.`, 'error');
     }
   };
 
@@ -283,6 +298,15 @@ export default function PaymentSuccess() {
           </button>
         </div>
       </div>
+
+
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </div>
   );
 }

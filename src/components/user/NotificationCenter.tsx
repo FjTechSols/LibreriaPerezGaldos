@@ -6,7 +6,11 @@ import { Notificacion } from '../../types';
 import { Bell, CheckCheck } from 'lucide-react';
 
 
-export function NotificationCenter() {
+interface NotificationCenterProps {
+  onNotificationsChange?: () => void;
+}
+
+export function NotificationCenter({ onNotificationsChange }: NotificationCenterProps) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [notifications, setNotifications] = useState<Notificacion[]>([]);
@@ -34,6 +38,7 @@ export function NotificationCenter() {
     try {
       await markAsRead(notificationId);
       loadNotifications();
+      if (onNotificationsChange) onNotificationsChange();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -43,6 +48,7 @@ export function NotificationCenter() {
     try {
       await markAllAsRead(user!.id);
       loadNotifications();
+      if (onNotificationsChange) onNotificationsChange();
     } catch (error) {
       console.error('Error marking all as read:', error);
     }

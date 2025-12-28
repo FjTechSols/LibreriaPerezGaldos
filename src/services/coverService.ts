@@ -21,6 +21,11 @@ export const searchBookCover = async (
 
     const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=1`);
     
+    // Check for rate limiting
+    if (response.status === 429) {
+      throw new Error('Too Many Requests - Rate limit exceeded');
+    }
+    
     if (!response.ok) return null;
     
     const data = await response.json();
@@ -39,7 +44,11 @@ export const searchBookCover = async (
     }
     
     return null;
-  } catch (error) {
+  } catch (error: any) {
+    // Re-throw rate limit errors so they can be caught upstream
+    if (error?.message?.includes('Too Many Requests') || error?.message?.includes('429')) {
+      throw error;
+    }
     console.error('Error searching book cover:', error);
     return null;
   }

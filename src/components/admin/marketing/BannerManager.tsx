@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, ExternalLink, Image as ImageIcon, Eye, EyeOff, X, Palette, Star, Tag, Clock, Calendar, Pencil } from 'lucide-react';
 import { bannerService, Banner, BannerType } from '../../../services/bannerService';
+import { MessageModal } from '../../MessageModal';
 
 export function BannerManager() {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -44,6 +45,34 @@ export function BannerManager() {
   });
 
   const [error, setError] = useState<string | null>(null);
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     loadBanners();
@@ -234,11 +263,21 @@ export function BannerManager() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este banner?')) {
-      const success = await bannerService.deleteBanner(id);
-      if (success) loadBanners();
-    }
+  const handleDelete = (id: string) => {
+    showModal(
+        'Confirmar Eliminación',
+        '¿Estás seguro de que deseas eliminar este banner?',
+        'warning',
+        async () => {
+            const success = await bannerService.deleteBanner(id);
+            if (success) {
+                loadBanners();
+                showModal('Éxito', 'Banner eliminado correctamente', 'success');
+            } else {
+                showModal('Error', 'No se pudo eliminar el banner', 'error');
+            }
+        }
+    );
   };
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
@@ -669,7 +708,17 @@ export function BannerManager() {
           )}
         </div>
       )}
-    </div>
 
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
+    </div>
   );
 }

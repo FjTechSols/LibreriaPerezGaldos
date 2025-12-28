@@ -3,6 +3,7 @@ import { Plus, Search, Edit2, Trash2, X } from 'lucide-react';
 import { getEditoriales, createEditorial, updateEditorial, deleteEditorial } from '../../../services/editorialService';
 import { Editorial } from '../../../types';
 import '../../../styles/components/MetadataManager.css';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 export function PublisherManager() {
   const [publishers, setPublishers] = useState<Editorial[]>([]);
@@ -14,6 +15,34 @@ export function PublisherManager() {
   const [editingPublisher, setEditingPublisher] = useState<Editorial | null>(null);
   const [formData, setFormData] = useState({ nombre: '', direccion: '', telefono: '' });
   const [submitting, setSubmitting] = useState(false);
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     loadPublishers();
@@ -45,25 +74,32 @@ export function PublisherManager() {
       handleCloseModal();
     } catch (error) {
       console.error(error);
-      alert('Error al guardar la editorial');
+      showModal('Error', 'Error al guardar la editorial', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta editorial?')) return;
-    
-    try {
-        const success = await deleteEditorial(id);
-        if (success) {
-            setPublishers(prev => prev.filter(p => p.id !== id));
-        } else {
-            alert('No se pudo eliminar. Puede que esté en uso por algunos libros.');
+  const handleDelete = (id: number) => {
+    showModal(
+        'Confirmar Eliminación',
+        '¿Estás seguro de eliminar esta editorial?',
+        'warning',
+        async () => {
+            try {
+                const success = await deleteEditorial(id);
+                if (success) {
+                    setPublishers(prev => prev.filter(p => p.id !== id));
+                    showModal('Éxito', 'Editorial eliminada correctamente', 'success');
+                } else {
+                    showModal('Error', 'No se pudo eliminar. Puede que esté en uso por algunos libros.', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showModal('Error', 'Error al eliminar editorial', 'error');
+            }
         }
-    } catch (error) {
-        console.error(error);
-    }
+    );
   };
 
   const handleOpenModal = (publisher?: Editorial) => {
@@ -212,6 +248,16 @@ export function PublisherManager() {
           </div>
         </div>
       )}
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { buscarLibroPorISBNMultiple } from '../../../services/isbnService';
 import { supabase } from '../../../lib/supabase'; // Import supabase
 import { obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 interface BookFormProps {
   isOpen: boolean;
@@ -45,6 +46,20 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   // State for dynamic categories
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
+
 
   // Scanner State
   const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -89,13 +104,14 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                 setShowContentInput(true);
                 setBookContents(['']);
             }
-            alert('Información encontrada!');
+
+            showModal('Éxito', 'Información encontrada!', 'success');
         } else {
-            alert('No se encontró información. Puedes ingresarla manualmente.');
+            showModal('Información', 'No se encontró información. Puedes ingresarla manualmente.', 'info');
         }
       } catch (e) {
         console.error(e);
-        alert('Error al buscar.');
+        showModal('Error', 'Error al buscar.', 'error');
       } finally {
         setSearchingISBN(false);
       }
@@ -107,7 +123,12 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
           isbnInputRef.current.focus();
           isbnInputRef.current.select();
       }
-      alert("Listo para escanear con USB. \n\n1. El cursor está en el campo ISBN.\n2. Dispara el lector.\n3. El formulario se rellenará automáticamente.");
+
+      showModal(
+        'Escanear con USB', 
+        "Listo para escanear con USB. \n\n1. El cursor está en el campo ISBN.\n2. Dispara el lector.\n3. El formulario se rellenará automáticamente.",
+        'info'
+      );
   };
 
   // Fetch categories from DB
@@ -219,8 +240,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     const query = formData.isbn || '';
     
     if (!query || query.trim().length < 10) {
-      alert('Por favor ingresa un ISBN válido (mínimo 10 caracteres)');
-      return;
+
     }
 
     setSearchingISBN(true);
@@ -256,13 +276,13 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
              if (bookContents.length === 0) setBookContents(['']);
          }
 
-        alert('Información del libro encontrada y cargada en el formulario');
+        showModal('Éxito', 'Información del libro encontrada y cargada en el formulario', 'success');
       } else {
-        alert('No se encontró información para este ISBN. Puedes continuar ingresando los datos manualmente.');
+        showModal('Información', 'No se encontró información para este ISBN. Puedes continuar ingresando los datos manualmente.', 'info');
       }
     } catch (error) {
       console.error('Error al buscar ISBN:', error);
-      alert('Ocurrió un error al buscar el ISBN. Por favor, intenta nuevamente.');
+      showModal('Error', 'Ocurrió un error al buscar el ISBN. Por favor, intenta nuevamente.', 'error');
     } finally {
       setSearchingISBN(false);
     }
@@ -699,6 +719,15 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         onClose={() => setIsScannerOpen(false)} 
         onScanSuccess={handleScanSuccess} 
       />
+      
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+      />
     </div>
+
   );
 }

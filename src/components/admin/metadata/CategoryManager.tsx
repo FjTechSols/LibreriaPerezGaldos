@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, X, RefreshCw, Layers } from 'lucide-react';
 import { getCategorias, createCategoria, updateCategoria, deleteCategoria, findDuplicates, mergeCategories, normalizeCategoryName } from '../../../services/categoriaService';
 import { Categoria } from '../../../types';
+
 import '../../../styles/components/MetadataManager.css';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 export function CategoryManager() {
   const [categories, setCategories] = useState<Categoria[]>([]);
@@ -13,6 +15,34 @@ export function CategoryManager() {
   const [duplicates, setDuplicates] = useState<[string, Categoria[]][]>([]);
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [processingMerge, setProcessingMerge] = useState(false);
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,43 +67,47 @@ export function CategoryManager() {
     setShowDuplicates(true);
   };
 
-  const handleMergeGroup = async (name: string, group: Categoria[]) => {
-    if (!window.confirm(`¿Fusionar ${group.length} categorías en una sola llamada "${normalizeCategoryName(name)}"?`)) return;
-    
-    setProcessingMerge(true);
-    try {
-        // 1. Determine Master (Prefer shortest valid ID or one with description)
-        // For simplicity, pick the first one as master, or create a new clean one? 
-        // Better: Pick the one that matches normalized name exactly if exists, or just first one.
-        
-        let master = group.find(c => c.nombre === normalizeCategoryName(name));
-        if (!master) master = group[0];
+  const handleMergeGroup = (name: string, group: Categoria[]) => {
+    showModal(
+        'Confirmar Fusión',
+        `¿Fusionar ${group.length} categorías en una sola llamada "${normalizeCategoryName(name)}"?`,
+        'warning',
+        async () => {
+            setProcessingMerge(true);
+            try {
+                let master = group.find(c => c.nombre === normalizeCategoryName(name));
+                if (!master) master = group[0];
 
-        // 2. Ensure master has the normalized name if needed
-        if (master.nombre !== normalizeCategoryName(name)) {
-            await updateCategoria(master.id, { nombre: normalizeCategoryName(name) });
-        }
+                if (master.nombre !== normalizeCategoryName(name)) {
+                    await updateCategoria(master.id, { nombre: normalizeCategoryName(name) });
+                }
 
-        const masterId = master.id;
-        const others = group.filter(c => c.id !== masterId).map(c => c.id);
+                const masterId = master.id;
+                const others = group.filter(c => c.id !== masterId).map(c => c.id);
 
-        if (others.length > 0) {
-            const result = await mergeCategories(masterId, others);
-            if (result.success) {
-               // Update local state
-               await loadCategories();
-               // Re-scan or remove from local duplicates list
-               setDuplicates(prev => prev.filter(([n]) => n !== name));
-            } else {
-                alert('Error: ' + result.message);
+                if (others.length > 0) {
+                    const result = await mergeCategories(masterId, others);
+                    if (result.success) {
+                        await loadCategories();
+                        setDuplicates(prev => prev.filter(([n]) => n !== name)); // Corrected from d.name to [n]
+                        showModal('Éxito', `Se fusionaron ${others.length + 1} categorías correctamente.`, 'success');
+                    } else {
+                        showModal('Error', result.message || 'Error al fusionar categorías', 'error');
+                    }
+                } else {
+                    // If only one category in the group, just ensure its name is normalized
+                    await loadCategories();
+                    setDuplicates(prev => prev.filter(([n]) => n !== name));
+                    showModal('Éxito', `La categoría "${normalizeCategoryName(name)}" ha sido normalizada.`, 'success');
+                }
+            } catch (error) {
+                console.error(error);
+                showModal('Error', 'Error al fusionar categorías', 'error');
+            } finally {
+                setProcessingMerge(false);
             }
         }
-    } catch (error) {
-        console.error(error);
-        alert('Error al fusionar');
-    } finally {
-        setProcessingMerge(false);
-    }
+    );
   };
 
   const filteredCategories = categories.filter(cat => 
@@ -96,25 +130,32 @@ export function CategoryManager() {
       handleCloseModal();
     } catch (error) {
       console.error(error);
-      alert('Error al guardar la categoría');
+      showModal('Error', 'Error al guardar la categoría', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta categoría?')) return;
-    
-    try {
-        const success = await deleteCategoria(id);
-        if (success) {
-            setCategories(prev => prev.filter(c => c.id !== id));
-        } else {
-            alert('No se pudo eliminar. Puede que esté en uso por algunos libros.');
+  const handleDelete = (id: number) => {
+    showModal(
+        'Confirmar Eliminación',
+        '¿Estás seguro de eliminar esta categoría?',
+        'warning',
+        async () => {
+            try {
+                const success = await deleteCategoria(id);
+                if (success) {
+                    setCategories(prev => prev.filter(c => c.id !== id));
+                    showModal('Éxito', 'Categoría eliminada correctamente', 'success');
+                } else {
+                    showModal('Error', 'No se pudo eliminar. Puede que esté en uso por algunos libros.', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showModal('Error', 'Error al eliminar categoría', 'error');
+            }
         }
-    } catch (error) {
-        console.error(error);
-    }
+    );
   };
 
   const handleOpenModal = (category?: Categoria) => {
@@ -296,6 +337,17 @@ export function CategoryManager() {
           </div>
         </div>
       )}
+
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

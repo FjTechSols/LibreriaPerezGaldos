@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ConfirmReservationModal } from './ConfirmReservationModal';
 import { Pagination } from '../Pagination';
+import { MessageModal } from '../MessageModal'; // Import MessageModal
 
 export function ReservationManager() {
   const [reservations, setReservations] = useState<Reserva[]>([]);
@@ -20,6 +21,34 @@ export function ReservationManager() {
   const [totalItems, setTotalItems] = useState(0);
   const { user } = useAuth();
 
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
+
   useEffect(() => {
     loadReservations();
   }, [currentPage]); // Reload when page changes
@@ -28,7 +57,6 @@ export function ReservationManager() {
     setLoading(true);
     try {
       const { data, count } = await getReservations({ page: currentPage, limit: itemsPerPage });
-      console.log('Loaded reservations:', data);
       setReservations(data);
       setTotalItems(count);
     } catch (error) {
@@ -68,88 +96,96 @@ export function ReservationManager() {
       await loadReservations();
       setShowConfirmModal(false);
       setSelectedReservation(null);
-      alert('Reserva confirmada exitosamente');
+      
+      // Success modal
+      setMessageModalConfig({
+        title: 'Reserva Confirmada',
+        message: 'Reserva confirmada exitosamente',
+        type: 'info'
+      });
+      setShowMessageModal(true);
     } catch (error) {
       console.error('Error confirming reservation:', error);
-      alert('Error al confirmar la reserva: ' + (error as Error).message);
-    }
-  };
-
-  const handleRejectClick = async (reservation: Reserva) => {
-    if (!user) return;
-    
-    if (!confirm(`¿Estás seguro de rechazar la reserva de "${reservation.libro?.titulo}"?`)) {
-      return;
-    }
-
-    try {
-      // 1. Reject reservation with admin tracking
-      await rejectReservation(reservation.id, user.id);
-
-      // 2. Create in-app notification
-      await createNotification(
-        reservation.usuario_id,
-        'reserva_rechazada',
-        'Reserva Rechazada',
-        `Tu reserva para "${reservation.libro?.titulo}" no ha podido ser confirmada. Por favor, contacta con la librería para más información.`,
-        reservation.id
-      );
-
-      // 3. Send email notification (non-blocking)
-      sendReservationEmail(reservation.id, 'rejected').catch(error => {
-        console.warn('Email notification failed:', error);
+      
+      // Error modal
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'Error al confirmar la reserva: ' + (error as Error).message,
+        type: 'error'
       });
-
-      // 4. Reload reservations
-      await loadReservations();
-      alert('Reserva rechazada');
-    } catch (error) {
-      console.error('Error rejecting reservation:', error);
-      alert('Error al rechazar la reserva: ' + (error as Error).message);
+      setShowMessageModal(true);
     }
   };
 
-  const handleMarkAsDelivered = async (reservation: Reserva) => {
+  const handleRejectClick = (reservation: Reserva) => {
     if (!user) return;
     
-    if (!confirm(`¿Marcar como entregada la reserva de "${reservation.libro?.titulo}"? Esto reducirá el stock.`)) {
-      return;
-    }
-
-    try {
-      // 1. Mark as delivered
-      await markAsDelivered(reservation.id, user.id);
-
-      // 2. Deduct stock
-      await decrementStock(reservation.libro_id, 1);
-
-      // 3. Reload reservations
-      await loadReservations();
-      alert('Reserva marcada como entregada y stock actualizado');
-    } catch (error) {
-      console.error('Error marking as delivered:', error);
-      alert('Error al marcar como entregada: ' + (error as Error).message);
-    }
+    showModal(
+        'Confirmar Rechazo',
+        `¿Estás seguro de rechazar la reserva de "${reservation.libro?.titulo}"?`,
+        'warning',
+        async () => {
+            try {
+                await rejectReservation(reservation.id, user.id);
+                await createNotification(
+                    reservation.usuario_id,
+                    'reserva_rechazada',
+                    'Reserva Rechazada',
+                    `Tu reserva para "${reservation.libro?.titulo}" no ha podido ser confirmada. Por favor, contacta con la librería para más información.`,
+                    reservation.id
+                );
+                sendReservationEmail(reservation.id, 'rejected').catch(error => {
+                    console.warn('Email notification failed:', error);
+                });
+                await loadReservations();
+                showModal('Reserva Rechazada', 'Reserva rechazada exitosamente', 'success');
+            } catch (error) {
+                console.error('Error rejecting reservation:', error);
+                showModal('Error', 'Error al rechazar la reserva: ' + (error as Error).message, 'error');
+            }
+        }
+    );
   };
 
-  const handleMarkAsReturned = async (reservation: Reserva) => {
+  const handleMarkAsDelivered = (reservation: Reserva) => {
     if (!user) return;
     
-    if (!confirm(`¿Marcar como devuelta la reserva de "${reservation.libro?.titulo}"?`)) {
-      return;
-    }
+    showModal(
+        'Confirmar Entrega',
+        `¿Marcar como entregada la reserva de "${reservation.libro?.titulo}"? Esto reducirá el stock.`,
+        'warning',
+        async () => {
+            try {
+                await markAsDelivered(reservation.id, user.id);
+                await decrementStock(reservation.libro_id, 1);
+                await loadReservations();
+                showModal('Reserva Entregada', 'Reserva marcada como entregada y stock actualizado correctamente', 'success');
+            } catch (error) {
+                console.error('Error marking as delivered:', error);
+                showModal('Error', 'Error al marcar como entregada: ' + (error as Error).message, 'error');
+            }
+        }
+    );
+  };
 
-    try {
-      // 1. Mark as returned (no stock change)
-      await markAsReturned(reservation.id, user.id);
-
-      // 2. Reload reservations
-      await loadReservations();
-      alert('Reserva marcada como devuelta');
-    } catch (error) {
-      console.error('Error marking as returned:', error);
-      alert('Error al marcar como devuelta: ' + (error as Error).message);
-    }
+  const handleMarkAsReturned = (reservation: Reserva) => {
+    if (!user) return;
+    
+    showModal(
+        'Confirmar Devolución',
+        `¿Marcar como devuelta la reserva de "${reservation.libro?.titulo}"?`,
+        'warning',
+        async () => {
+            try {
+                await markAsReturned(reservation.id, user.id);
+                await loadReservations();
+                showModal('Reserva Devuelta', 'Reserva marcada como devuelta correctamente', 'success');
+            } catch (error) {
+                console.error('Error marking as returned:', error);
+                showModal('Error', 'Error al marcar como devuelta: ' + (error as Error).message, 'error');
+            }
+        }
+    );
   };
 
   if (loading) return <div>Cargando reservas...</div>;
@@ -264,6 +300,18 @@ export function ReservationManager() {
           }}
         />
       )}
+
+      {/* Message Modal Component */}
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
 
       <div className="mt-4">
         <Pagination

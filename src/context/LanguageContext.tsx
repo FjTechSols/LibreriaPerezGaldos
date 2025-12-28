@@ -311,6 +311,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingPayment: 'Procesando...',
     payAmount: 'Pagar',
     securePaymentByStripe: 'Pago seguro procesado por Stripe',
+    pleaseWaitDoNotClose: 'Por favor, espere. No cierre ni recargue esta página mientras procesamos su pago.',
   },
   en: {
     home: 'Home',
@@ -614,6 +615,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingPayment: 'Processing...',
     payAmount: 'Pay',
     securePaymentByStripe: 'Secure payment processed by Stripe',
+    pleaseWaitDoNotClose: 'Please wait. Do not close or reload this page while we process your payment.',
   },
   fr: {
     home: 'Accueil',
@@ -917,6 +919,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingPayment: 'Traitement...',
     payAmount: 'Payer',
     securePaymentByStripe: 'Paiement sécurisé traité par Stripe',
+    pleaseWaitDoNotClose: 'Veuillez patienter. Ne fermez pas et ne rechargez pas cette page pendant le traitement de votre paiement.',
   },
 };
 

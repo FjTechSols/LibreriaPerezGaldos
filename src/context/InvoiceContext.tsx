@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Invoice, InvoiceFormData, InvoiceContextType, InvoiceItem } from '../types';
+import { Invoice, InvoiceFormData, InvoiceContextType } from '../types';
 import { supabase } from '../lib/supabase';
 
 import { useAuth } from './AuthContext';

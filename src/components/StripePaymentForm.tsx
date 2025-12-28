@@ -9,7 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 interface StripePaymentFormProps {
   amount: number;
-  onSuccess: (paymentIntentId: string) => void;
+  onSuccess: (paymentIntentId: string) => Promise<void> | void;
   onError: (error: string) => void;
 }
 
@@ -42,62 +42,80 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
       if (error) {
         setErrorMessage(error.message || t('errorProcessingPaymentGeneric'));
         onError(error.message || t('errorProcessingPaymentGeneric'));
+        setIsProcessing(false); // Enable retry on error
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        onSuccess(paymentIntent.id);
+        // Keep isProcessing=true while we handle the success (create order, etc.)
+        // This keeps the overlay active until the parent component navigates away.
+        await onSuccess(paymentIntent.id);
+        // We DON'T set isProcessing(false) here if successful, 
+        // to prevent UI flicker before navigation.
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : t('unknownError');
       setErrorMessage(message);
       onError(message);
-    } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="stripe-payment-form">
-      <div className="payment-header">
-        <CreditCard size={24} />
-        <h3>{t('paymentInformation')}</h3>
-      </div>
-
-      <div className="payment-amount">
-        <span>{t('totalToPay')}:</span>
-        <span className="amount">€{amount.toFixed(2)}</span>
-      </div>
-
-      <div className="payment-element-container">
-        <PaymentElement />
-      </div>
-
-      {errorMessage && (
-        <div className="error-message">
-          {errorMessage}
+    <>
+      {isProcessing && (
+        <div className="payment-processing-overlay">
+          <div className="processing-content">
+            <div className="processing-spinner"></div>
+            <div className="processing-title">{t('processingPayment')}</div>
+            <p className="processing-text">
+              {t('pleaseWaitDoNotClose')}
+            </p>
+          </div>
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className="pay-button"
-      >
-        {isProcessing ? (
-          <>
-            <span className="spinner"></span>
-            {t('processingPayment')}
-          </>
-        ) : (
-          <>
-            <Lock size={18} />
-            {t('payAmount')} €{amount.toFixed(2)}
-          </>
-        )}
-      </button>
+      <form onSubmit={handleSubmit} className="stripe-payment-form">
+        <div className="payment-header">
+          <CreditCard size={24} />
+          <h3>{t('paymentInformation')}</h3>
+        </div>
 
-      <div className="security-notice">
-        <Lock size={14} />
-        <span>{t('securePaymentByStripe')}</span>
-      </div>
-    </form>
+        <div className="payment-amount">
+          <span>{t('totalToPay')}:</span>
+          <span className="amount">€{amount.toFixed(2)}</span>
+        </div>
+
+        <div className="payment-element-container">
+          <PaymentElement />
+        </div>
+
+        {errorMessage && (
+          <div className="error-message">
+            {errorMessage}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={!stripe || isProcessing}
+          className="pay-button"
+        >
+          {isProcessing ? (
+            <>
+              <span className="spinner"></span>
+              {t('processingPayment')}
+            </>
+          ) : (
+            <>
+              <Lock size={18} />
+              {t('payAmount')} €{amount.toFixed(2)}
+            </>
+          )}
+        </button>
+
+        <div className="security-notice">
+          <Lock size={14} />
+          <span>{t('securePaymentByStripe')}</span>
+        </div>
+      </form>
+    </>
   );
 }

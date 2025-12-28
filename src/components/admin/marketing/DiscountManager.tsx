@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Tag, Trash2, Power, PowerOff, Filter, Calendar } from 'lucide-react';
 import { discountService, DiscountRule } from '../../../services/discountService';
 import { supabase } from '../../../lib/supabase';
+import { MessageModal } from '../../MessageModal';
 
 // Simple Category type for dropdown
 interface Category {
@@ -32,6 +33,34 @@ export function DiscountManager() {
         start_date: '',
         end_date: ''
     });
+
+    // MessageModal State
+    const [showMessageModal, setShowMessageModal] = useState(false);
+    const [messageModalConfig, setMessageModalConfig] = useState<{
+        title: string;
+        message: string;
+        type: 'info' | 'error' | 'success' | 'warning';
+        onConfirm?: () => void;
+        showCancel?: boolean;
+        buttonText?: string;
+    }>({ title: '', message: '', type: 'info' });
+
+    const showModal = (
+        title: string, 
+        message: string, 
+        type: 'info' | 'error' | 'success' | 'warning' = 'info',
+        onConfirm?: () => void
+    ) => {
+        setMessageModalConfig({ 
+            title, 
+            message, 
+            type, 
+            onConfirm,
+            showCancel: !!onConfirm,
+            buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+        });
+        setShowMessageModal(true);
+    };
 
     useEffect(() => {
         loadData();
@@ -107,13 +136,21 @@ export function DiscountManager() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!window.confirm('¿Seguro que quieres eliminar este descuento?')) return;
-        
-        const success = await discountService.deleteDiscount(id);
-        if (success) {
-            setDiscounts(discounts.filter(d => d.id !== id));
-        }
+    const handleDelete = (id: string) => {
+        showModal(
+            'Confirmar Eliminación',
+            '¿Seguro que quieres eliminar este descuento?',
+            'warning',
+            async () => {
+                const success = await discountService.deleteDiscount(id);
+                if (success) {
+                    setDiscounts(discounts.filter(d => d.id !== id));
+                    showModal('Éxito', 'Descuento eliminado correctamente', 'success');
+                } else {
+                    showModal('Error', 'No se pudo eliminar el descuento', 'error');
+                }
+            }
+        );
     };
 
     return (
@@ -284,6 +321,17 @@ export function DiscountManager() {
                     ))
                 )}
             </div>
+
+            <MessageModal
+                isOpen={showMessageModal}
+                onClose={() => setShowMessageModal(false)}
+                title={messageModalConfig.title}
+                message={messageModalConfig.message}
+                type={messageModalConfig.type as any}
+                onConfirm={messageModalConfig.onConfirm}
+                showCancel={messageModalConfig.showCancel}
+                buttonText={messageModalConfig.buttonText}
+            />
         </div>
     );
 }

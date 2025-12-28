@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Book, WishlistState } from '../types';
 import { useAuth } from './AuthContext';
 import {
@@ -15,7 +15,7 @@ const WishlistContext = createContext<WishlistState | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Book[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
   
   // Safe access to auth context with fallback for hot reload issues
   let authContext;
@@ -30,7 +30,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const loadWishlist = async () => {
-      setIsLoading(true);
+
       try {
         if (isAuthenticated && user) {
           const localWishlist = getLocalWishlist();
@@ -52,8 +52,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         console.error('Error loading wishlist:', error);
         const localWishlist = getLocalWishlist();
         setItems(localWishlist);
-      } finally {
-        setIsLoading(false);
       }
     };
 

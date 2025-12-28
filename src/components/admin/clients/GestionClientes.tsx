@@ -3,6 +3,7 @@ import { Users, Plus, Edit2, Trash2, Search, X, Mail, Phone, MapPin, CreditCard,
 import { Cliente } from '../../../types';
 import { getClientes, crearCliente, actualizarCliente, eliminarCliente, buscarClientes, ClienteFormData } from '../../../services/clienteService';
 import '../../../styles/components/GestionClientes.css';
+import { MessageModal } from '../../MessageModal';
 
 const initialFormState: ClienteFormData = {
   nombre: '',
@@ -32,6 +33,34 @@ export function GestionClientes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [error, setError] = useState<string | null>(null);
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showMessageModalHelper = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     if (searchTerm.trim().length >= 2) {
@@ -143,18 +172,22 @@ export function GestionClientes() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Está seguro de eliminar este cliente?')) {
-      return;
-    }
-
-    try {
-      await eliminarCliente(id);
-      loadClientes();
-    } catch (err) {
-      console.error('Error deleting client:', err);
-      setError('Error al eliminar cliente');
-    }
+  const handleDelete = (id: string) => {
+    showMessageModalHelper(
+        'Confirmar Eliminación',
+        '¿Está seguro de eliminar este cliente?',
+        'warning',
+        async () => {
+            try {
+                await eliminarCliente(id);
+                loadClientes();
+                showMessageModalHelper('Éxito', 'Cliente eliminado correctamente', 'success');
+            } catch (err) {
+                console.error('Error deleting client:', err);
+                setError('Error al eliminar cliente');
+            }
+        }
+    );
   };
 
   // Helper to get type label
@@ -544,6 +577,17 @@ export function GestionClientes() {
           </div>
         </div>
       )}
+      
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import { LanguageSelector } from './LanguageSelector';
 import { buscarLibros } from '../services/libroService';
-import { getUnreadCount } from '../services/notificationService';
+import { getUnreadCount, getAdminUnreadCount } from '../services/notificationService';
 import { Book } from '../types';
 import '../styles/components/Navbar.css';
 
@@ -95,7 +95,10 @@ export function Navbar() {
     const fetchNotificationCount = async () => {
       if (user) {
         try {
-          const count = await getUnreadCount(user.id);
+          // Use admin-specific function for admins, regular function for users
+          const count = (hasRole('admin') || hasRole('super_admin'))
+            ? await getAdminUnreadCount(user.id)
+            : await getUnreadCount(user.id);
           setUnreadNotifications(count);
         } catch (error) {
           console.error('Error fetching notification count:', error);
@@ -104,10 +107,10 @@ export function Navbar() {
     };
 
     fetchNotificationCount();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchNotificationCount, 30000);
+    // Refresh every 10 seconds for more responsive updates
+    const interval = setInterval(fetchNotificationCount, 10000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, hasRole]);
 
   return (
     <nav className="navbar">

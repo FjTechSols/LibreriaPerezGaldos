@@ -12,6 +12,7 @@ import {
   UsuarioConRoles
 } from '../../../services/rolesService';
 import { useAuth } from '../../../context/AuthContext';
+import { MessageModal } from '../../MessageModal';
 
 export function GestionUsuariosAdmin() {
   const { user } = useAuth();
@@ -32,6 +33,34 @@ export function GestionUsuariosAdmin() {
     rolId: 0,
     notas: ''
   });
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     cargarDatos();
@@ -162,9 +191,9 @@ export function GestionUsuariosAdmin() {
     }
   };
 
-  const handleEliminarUsuario = async (usuario: UsuarioConRoles) => {
+  const handleEliminarUsuario = (usuario: UsuarioConRoles) => {
     if (usuario.id === user?.id) {
-      setError('No puedes eliminarte a ti mismo');
+      showModal('Error', 'No puedes eliminarte a ti mismo', 'error');
       return;
     }
 
@@ -172,23 +201,24 @@ export function GestionUsuariosAdmin() {
     const usuarioActualEsAdmin = usuarios.find(u => u.id === user?.id)?.roles.some(r => r.nombre === 'admin');
 
     if (esSuperAdmin && usuarioActualEsAdmin) {
-      setError('Los administradores no pueden eliminar super administradores');
+      showModal('Error', 'Los administradores no pueden eliminar super administradores', 'error');
       return;
     }
 
-    const confirmacion = window.confirm(
-      `¿Estás seguro de eliminar al usuario ${usuario.email}? Esta acción no se puede deshacer.`
+    showModal(
+        'Confirmar Eliminación',
+        `¿Estás seguro de eliminar al usuario ${usuario.email}? Esta acción no se puede deshacer.`,
+        'warning',
+        async () => {
+            try {
+                await eliminarUsuario(usuario.id);
+                showModal('Éxito', 'Usuario eliminado exitosamente', 'success');
+                await cargarDatos();
+            } catch (err: any) {
+                showModal('Error', 'Error al eliminar usuario: ' + err.message, 'error');
+            }
+        }
     );
-
-    if (!confirmacion) return;
-
-    try {
-      await eliminarUsuario(usuario.id);
-      setSuccess('Usuario eliminado exitosamente');
-      await cargarDatos();
-    } catch (err: any) {
-      setError('Error al eliminar usuario: ' + err.message);
-    }
   };
 
   const getRolBadgeColor = (nivelJerarquia: number) => {
@@ -549,7 +579,16 @@ export function GestionUsuariosAdmin() {
         </div>
       )}
 
-
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

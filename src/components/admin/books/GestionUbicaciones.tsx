@@ -8,6 +8,7 @@ import {
   eliminarUbicacion
 } from '../../../services/ubicacionService';
 import '../../../styles/components/GestionUbicaciones.css';
+import { MessageModal } from '../../MessageModal';
 
 export function GestionUbicaciones() {
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
@@ -19,6 +20,34 @@ export function GestionUbicaciones() {
     descripcion: '',
     activa: true
   });
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     cargarUbicaciones();
@@ -33,7 +62,7 @@ export function GestionUbicaciones() {
 
   const handleCreate = async () => {
     if (!formData.nombre.trim()) {
-      alert('El nombre de la ubicación es obligatorio');
+      showModal('Error', 'El nombre de la ubicación es obligatorio', 'error');
       return;
     }
 
@@ -42,14 +71,15 @@ export function GestionUbicaciones() {
       await cargarUbicaciones();
       setIsCreating(false);
       setFormData({ nombre: '', descripcion: '', activa: true });
+      showModal('Éxito', 'Ubicación creada correctamente', 'success');
     } else {
-      alert('Error al crear ubicación');
+      showModal('Error', 'Error al crear ubicación', 'error');
     }
   };
 
   const handleUpdate = async (id: number) => {
     if (!formData.nombre.trim()) {
-      alert('El nombre de la ubicación es obligatorio');
+      showModal('Error', 'El nombre de la ubicación es obligatorio', 'error');
       return;
     }
 
@@ -58,22 +88,27 @@ export function GestionUbicaciones() {
       await cargarUbicaciones();
       setEditingId(null);
       setFormData({ nombre: '', descripcion: '', activa: true });
+      showModal('Éxito', 'Ubicación actualizada correctamente', 'success');
     } else {
-      alert('Error al actualizar ubicación');
+      showModal('Error', 'Error al actualizar ubicación', 'error');
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de desactivar esta ubicación?')) {
-      return;
-    }
-
-    const success = await eliminarUbicacion(id);
-    if (success) {
-      await cargarUbicaciones();
-    } else {
-      alert('Error al desactivar ubicación');
-    }
+  const handleDelete = (id: number) => {
+    showModal(
+        'Confirmar Desactivación',
+        '¿Estás seguro de desactivar esta ubicación?',
+        'warning',
+        async () => {
+            const success = await eliminarUbicacion(id);
+            if (success) {
+                await cargarUbicaciones();
+                showModal('Éxito', 'Ubicación desactivada correctamente', 'success');
+            } else {
+                showModal('Error', 'Error al desactivar ubicación', 'error');
+            }
+        }
+    );
   };
 
   const startEdit = (ubicacion: Ubicacion) => {
@@ -270,6 +305,17 @@ export function GestionUbicaciones() {
           </div>
         )}
       </div>
+      
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

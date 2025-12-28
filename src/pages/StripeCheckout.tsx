@@ -12,6 +12,7 @@ import { useSettings } from '../context/SettingsContext';
 import { crearPedido, confirmOrderAndDeductStock } from '../services/pedidoService';
 import { findOrCreateCliente } from '../services/clienteService';
 import { ArrowLeft } from 'lucide-react';
+import { MessageModal } from '../components/MessageModal'; // Import MessageModal
 import '../styles/components/StripePaymentForm.css';
 import '../styles/pages/StripeCheckout.css';
 
@@ -44,6 +45,25 @@ export default function StripeCheckout() {
   const [clientSecret, setClientSecret] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+    onClose?: () => void;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+    title: string, 
+    message: string, 
+    type: 'info' | 'error' = 'info', 
+    onClose?: () => void
+  ) => {
+    setMessageModalConfig({ title, message, type, onClose });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     if (!user || !state || !state.cartItems || state.cartItems.length === 0) {
@@ -146,7 +166,25 @@ export default function StripeCheckout() {
 
       if (!result.success) {
         console.error("Stock deduction failed:", result.error);
-        alert("Pago recibido, pero hubo un error actualizando el stock. Por favor guarda este ID de pedido: " + pedido.id);
+        showModal(
+          'Atención Requida', 
+          "Pago recibido correctamente, POSIBLE ERROR DE STOCK.\n\n" + 
+          "Hubo un problema actualizando el inventario automáticamente.\n" +
+          "Por favor, guarde este ID de pedido: " + pedido.id + "\n" + 
+          "y contacte con nosotros si no recibe confirmación en 24h.",
+          'error',
+          () => {
+              clearCart();
+              navigate('/pago-completado', {
+                state: {
+                  pedidoId: pedido.id,
+                  paymentIntentId,
+                  total: state.orderTotal,
+                },
+              });
+          }
+        );
+        return;
       }
 
       clearCart();
@@ -280,6 +318,18 @@ export default function StripeCheckout() {
           </Elements>
         </div>
       </div>
+
+
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => {
+            setShowMessageModal(false);
+            if (messageModalConfig.onClose) messageModalConfig.onClose();
+        }}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </div>
   );
 }

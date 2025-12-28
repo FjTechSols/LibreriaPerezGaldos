@@ -46,12 +46,16 @@ export default function CheckoutForm({
 
   // Calculate Shipping Cost based on rules
   const getShippingCost = () => {
+    // En lógica "IVA Incluido", el umbral de envío gratis se basa en el precio total de productos (IVA incluido)
+    // subtotal es Base Imponible, iva es la cuota. Sumados dan el bruto.
+    const productsTotalWithTax = subtotal + iva;
+
     if (shippingMethod === 'standard') {
-      return subtotal >= settings.shipping.freeShippingThresholdStandard 
+      return productsTotalWithTax >= settings.shipping.freeShippingThresholdStandard 
         ? 0 
         : settings.shipping.standardShippingCost;
     } else {
-      return subtotal >= settings.shipping.freeShippingThresholdExpress 
+      return productsTotalWithTax >= settings.shipping.freeShippingThresholdExpress 
         ? 0 
         : settings.shipping.expressShippingCost;
     }
@@ -246,8 +250,8 @@ export default function CheckoutForm({
                   {settings.shipping.estimatedDeliveryDays.standard} {t('workingDays')}
                 </div>
               </div>
-              <div className={`shipping-option-price ${subtotal >= settings.shipping.freeShippingThresholdStandard ? 'free' : ''}`}>
-                {subtotal >= settings.shipping.freeShippingThresholdStandard 
+              <div className={`shipping-option-price ${(subtotal + iva) >= settings.shipping.freeShippingThresholdStandard ? 'free' : ''}`}>
+                {(subtotal + iva) >= settings.shipping.freeShippingThresholdStandard 
                   ? t('freeLabel') 
                   : formatPrice(settings.shipping.standardShippingCost)}
               </div>
@@ -263,8 +267,8 @@ export default function CheckoutForm({
                   {settings.shipping.estimatedDeliveryDays.express} {t('workingDays')}
                 </div>
               </div>
-              <div className={`shipping-option-price ${subtotal >= settings.shipping.freeShippingThresholdExpress ? 'free' : ''}`}>
-                {subtotal >= settings.shipping.freeShippingThresholdExpress 
+              <div className={`shipping-option-price ${(subtotal + iva) >= settings.shipping.freeShippingThresholdExpress ? 'free' : ''}`}>
+                {(subtotal + iva) >= settings.shipping.freeShippingThresholdExpress 
                   ? t('freeLabel') 
                   : formatPrice(settings.shipping.expressShippingCost)}
               </div>

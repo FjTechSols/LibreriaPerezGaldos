@@ -9,6 +9,7 @@ import InvoiceModal from './InvoiceModal';
 import InvoiceDetailModal from './InvoiceDetailModal';
 import GenerarFacturaModal from '../orders/GenerarFacturaDesdeped';
 import DownloadInvoiceModal from './DownloadInvoiceModal';
+import { MessageModal } from '../../MessageModal';
 
 export function InvoicesManager() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
@@ -32,6 +33,19 @@ export function InvoicesManager() {
   const [filterCustomer] = useState('');
   const [filterDateFrom] = useState('');
   const [filterDateTo] = useState('');
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' | 'warning' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   // Handlers
   const handleCreateInvoice = async (formData: InvoiceFormData) => {
@@ -140,7 +154,7 @@ export function InvoicesManager() {
         doc.save(`${t.title}-${invoice.invoice_number}.pdf`);
       } catch (error) {
         console.error('Error generating PDF:', error);
-        alert('Error al generar el PDF');
+        showModal('Error', 'Error al generar el PDF', 'error');
       }
   };
 
@@ -287,7 +301,15 @@ export function InvoicesManager() {
           onClose={() => setIsDownloadModalOpen(false)}
           onDownload={handleConfirmDownload}
           invoiceNumber={invoiceToDownload?.invoice_number || ''}
-       />
-    </div>
+        />
+
+        <MessageModal
+          isOpen={showMessageModal}
+          onClose={() => setShowMessageModal(false)}
+          title={messageModalConfig.title}
+          message={messageModalConfig.message}
+          type={messageModalConfig.type as any}
+        />
+     </div>
   );
 }

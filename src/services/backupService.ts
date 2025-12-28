@@ -103,98 +103,95 @@ async function fetchAll(table: string, queryBuilder?: (query: any) => any, selec
   return allData;
 }
 
-export async function exportLibrosToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
+// Helper to handle export logic without alerts
+const handleExport = async (
+  exportPromise: Promise<any[]>, 
+  filename: string,
+  transformToRows: (data: any[]) => string[]
+): Promise<{ success: boolean; error?: string }> => {
   try {
-    // Use manual batching
+    const data = await exportPromise;
+    
+    if (!data || data.length === 0) {
+      return { success: false, error: 'No hay datos para exportar.' };
+    }
+
+    const csvRows = transformToRows(data);
+    downloadCSV(csvRows.join('\n'), filename);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error in export:', error);
+    return { success: false, error: error.message || 'Error desconocido al exportar.' };
+  }
+};
+
+export async function exportLibrosToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
     const headers_map = 'id, isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), paginas, descripcion, ubicacion, notas, created_at';
-    const libros = await fetchAll('libros', (query) => query.order('id', { ascending: true }), headers_map, onProgress);
-
-
-    if (!libros || libros.length === 0) {
-      alert('No hay libros para exportar');
-      return;
-    }
-
-    const headers = [
-      'ID', 'ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio',
-      'Stock', 'Categoría', 'Páginas', 'Descripción',
-      'Ubicación', 'Notas', 'Fecha Creación'
-    ];
-
-    const csvRows = [headers.join(',')];
-
-    libros.forEach((libro: any) => {
-      // Handle joined data which might be an object or array depending on relation
-      const editorialName = libro.editoriales?.nombre || '';
-      const categoriaName = libro.categorias?.nombre || '';
-
-      const row = [
-        libro.id,
-        `"${libro.isbn || ''}"`,
-        `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
-        `"${libro.autor?.replace(/"/g, '""') || ''}"`,
-        `"${editorialName.replace(/"/g, '""')}"`,
-        libro.anio || '',
-        libro.precio || 0,
-        libro.stock || 0,
-        `"${categoriaName.replace(/"/g, '""')}"`,
-        libro.paginas || '',
-        `"${libro.descripcion?.replace(/"/g, '""') || ''}"`,
-        `"${libro.ubicacion || ''}"`,
-        `"${libro.notas?.replace(/"/g, '""') || ''}"`,
-        libro.created_at || ''
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    downloadCSV(csvRows.join('\n'), `libros_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
-    console.error('Error exportando libros:', error);
-    alert('Error al exportar libros');
-  }
+    
+    return handleExport(
+      fetchAll('libros', (query) => query.order('id', { ascending: true }), headers_map, onProgress),
+      `libros_backup_${new Date().toISOString().split('T')[0]}.csv`,
+      (libros) => {
+          const headers = ['ID', 'ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Páginas', 'Descripción', 'Ubicación', 'Notas', 'Fecha Creación'];
+          const rows = [headers.join(',')];
+          
+          libros.forEach((libro: any) => {
+            const editorialName = libro.editoriales?.nombre || '';
+            const categoriaName = libro.categorias?.nombre || '';
+            const row = [
+                libro.id,
+                `"${libro.isbn || ''}"`,
+                `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
+                `"${libro.autor?.replace(/"/g, '""') || ''}"`,
+                `"${editorialName.replace(/"/g, '""')}"`,
+                libro.anio || '',
+                libro.precio || 0,
+                libro.stock || 0,
+                `"${categoriaName.replace(/"/g, '""')}"`,
+                libro.paginas || '',
+                `"${libro.descripcion?.replace(/"/g, '""') || ''}"`,
+                `"${libro.ubicacion || ''}"`,
+                `"${libro.notas?.replace(/"/g, '""') || ''}"`,
+                libro.created_at || ''
+            ];
+            rows.push(row.join(','));
+          });
+          return rows;
+      }
+    );
 }
 
-  export async function exportCategoriasToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
-  try {
-    const categorias = await fetchAll('categorias', (q) => q.order('id', { ascending: true }), '*', onProgress);
-
-    if (!categorias || categorias.length === 0) {
-      alert('No hay categorías para exportar');
-      return;
-    }
-
-    const headers = ['ID', 'Nombre', 'Descripción', 'Activa', 'Fecha Creación'];
-    const csvRows = [headers.join(',')];
-
-    categorias.forEach((cat: any) => {
-      const row = [
-        cat.id,
-        `"${cat.nombre?.replace(/"/g, '""') || ''}"`,
-        `"${cat.descripcion?.replace(/"/g, '""') || ''}"`,
-        cat.activa ? 'Sí' : 'No',
-        cat.created_at || ''
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    downloadCSV(csvRows.join('\n'), `categorias_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
-    console.error('Error exportando categorías:', error);
-    alert('Error al exportar categorías');
-  }
+export async function exportCategoriasToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
+    return handleExport(
+        fetchAll('categorias', (q) => q.order('id', { ascending: true }), '*', onProgress),
+        `categorias_backup_${new Date().toISOString().split('T')[0]}.csv`,
+        (categorias) => {
+            const headers = ['ID', 'Nombre', 'Descripción', 'Activa', 'Fecha Creación'];
+            const rows = [headers.join(',')];
+            categorias.forEach((cat: any) => {
+              const row = [
+                cat.id,
+                `"${cat.nombre?.replace(/"/g, '""') || ''}"`,
+                `"${cat.descripcion?.replace(/"/g, '""') || ''}"`,
+                cat.activa ? 'Sí' : 'No',
+                cat.created_at || ''
+              ];
+              rows.push(row.join(','));
+            });
+            return rows;
+        }
+    );
 }
-
 
 // Export new invoices table
-export async function exportInvoicesToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
+export async function exportInvoicesToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
   try {
     let allInvoices: any[] = [];
     let page = 0;
     const pageSize = 1000;
     let hasMore = true;
-
-    // Get count for progress
     let totalRows = 0;
+    
     if (onProgress) {
       const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true });
       totalRows = count || 0;
@@ -203,7 +200,6 @@ export async function exportInvoicesToCSV(onProgress?: (val: number, total: numb
     while (hasMore) {
       const from = page * pageSize;
       const to = from + pageSize - 1;
-
       const { data, error } = await supabase
         .from('invoices')
         .select(`*, invoice_items (*)`)
@@ -223,8 +219,7 @@ export async function exportInvoicesToCSV(onProgress?: (val: number, total: numb
     }
 
     if (!allInvoices || allInvoices.length === 0) {
-      alert('No hay facturas para exportar');
-      return;
+        return { success: false, error: 'No hay facturas para exportar' };
     }
 
     const headers = [
@@ -255,22 +250,22 @@ export async function exportInvoicesToCSV(onProgress?: (val: number, total: numb
     });
 
     downloadCSV(csvRows.join('\n'), `invoices_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
+    return { success: true };
+    
+  } catch (error: any) {
     console.error('Error exportando invoices:', error);
-    alert('Error al exportar facturas');
+    return { success: false, error: error.message || 'Error al exportar facturas' };
   }
 }
 
-export async function exportPedidosToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
+export async function exportPedidosToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
   try {
-     // Similar loop for Pedidos
     let allPedidos: any[] = [];
     let page = 0;
     const pageSize = 1000;
     let hasMore = true;
-
-    // Get count for progress
     let totalRows = 0;
+    
     if (onProgress) {
          const { count } = await supabase.from('pedidos').select('*', { count: 'exact', head: true });
          totalRows = count || 0;
@@ -279,7 +274,6 @@ export async function exportPedidosToCSV(onProgress?: (val: number, total: numbe
     while (hasMore) {
         const from = page * pageSize;
         const to = from + pageSize - 1;
-
         const { data, error } = await supabase
             .from('pedidos')
             .select(`*, lineas_pedido (*)`)
@@ -299,8 +293,7 @@ export async function exportPedidosToCSV(onProgress?: (val: number, total: numbe
     }
 
     if (!allPedidos || allPedidos.length === 0) {
-      alert('No hay pedidos para exportar');
-      return;
+      return { success: false, error: 'No hay pedidos para exportar' };
     }
 
     const headers = [
@@ -326,154 +319,98 @@ export async function exportPedidosToCSV(onProgress?: (val: number, total: numbe
     });
 
     downloadCSV(csvRows.join('\n'), `pedidos_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
+    return { success: true };
+  } catch (error: any) {
     console.error('Error exportando pedidos:', error);
-    alert('Error al exportar pedidos');
+    return { success: false, error: error.message || 'Error al exportar pedidos' };
   }
 }
 
-export async function exportIberlibroToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
-  try {
-    // WARNING: 'proveedor_externo' column missing in schema. Providing generic export or attempting alternative?
-    // Current schema check shows NO 'proveedor_externo'.
-    // We will export ALL books but with limited columns to avoid crash, until schema is fixed.
-    
-    // Actually, let's just alert that feature is unavailable if column missing?
-    // But user wants to download. I'll download basic book list.
-    
+export async function exportIberlibroToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
     const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
-
-    // We can't filter by proveedor_externo if it doesn't exist. 
-    // Just fetch all? Or empty? Fetching all might be confusing. 
-    // Let's assume the user knows and just wants the format.
-    const libros = await fetchAll('libros', (q) => 
-        q.order('id', { ascending: true }), // Removed .eq('proveedor_externo'...)
-        headers_map,
-        onProgress
+    return handleExport(
+        fetchAll('libros', (q) => q.order('id', { ascending: true }), headers_map, onProgress),
+        `iberlibro_backup_${new Date().toISOString().split('T')[0]}.csv`,
+        (libros) => {
+            const headers = ['ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Fecha Creación'];
+            const rows = [headers.join(',')];
+            libros.forEach((libro: any) => {
+                const editorialName = libro.editoriales?.nombre || '';
+                const categoriaName = libro.categorias?.nombre || '';
+                const row = [
+                    `"${libro.isbn || ''}"`,
+                    `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
+                    `"${libro.autor?.replace(/"/g, '""') || ''}"`,
+                    `"${editorialName.replace(/"/g, '""')}"`,
+                    libro.anio || '',
+                    libro.precio || 0,
+                    libro.stock || 0,
+                    `"${categoriaName.replace(/"/g, '""')}"`,
+                    libro.created_at || ''
+                ];
+                rows.push(row.join(','));
+            });
+            return rows;
+        }
     );
-
-    if (!libros || libros.length === 0) {
-      alert('No hay libros para exportar');
-      return;
-    }
-
-    const headers = [
-      'ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio',
-      'Stock', 'Categoría', 'Fecha Creación'
-    ];
-    const csvRows = [headers.join(',')];
-
-    libros.forEach((libro: any) => {
-      const editorialName = libro.editoriales?.nombre || '';
-      const categoriaName = libro.categorias?.nombre || '';
-
-      const row = [
-        `"${libro.isbn || ''}"`,
-        `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
-        `"${libro.autor?.replace(/"/g, '""') || ''}"`,
-        `"${editorialName.replace(/"/g, '""')}"`,
-        libro.anio || '',
-        libro.precio || 0,
-        libro.stock || 0,
-        `"${categoriaName.replace(/"/g, '""')}"`,
-        libro.created_at || ''
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    downloadCSV(csvRows.join('\n'), `iberlibro_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
-    console.error('Error exportando Iberlibro:', error);
-    alert('Error al exportar libros de Iberlibro');
-  }
 }
 
-export async function exportUniliberToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
-  try {
-     // WARNING: 'proveedor_externo' missing. 
-     // Exporting basic list as fallback.
+export async function exportUniliberToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
     const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
-    
-    const libros = await fetchAll('libros', (q) => 
-        q.order('id', { ascending: true }),
-        headers_map,
-        onProgress
+    return handleExport(
+        fetchAll('libros', (q) => q.order('id', { ascending: true }), headers_map, onProgress),
+        `uniliber_backup_${new Date().toISOString().split('T')[0]}.csv`,
+        (libros) => {
+             const headers = ['ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Fecha Creación'];
+             const rows = [headers.join(',')];
+             libros.forEach((libro: any) => {
+                const editorialName = libro.editoriales?.nombre || '';
+                const categoriaName = libro.categorias?.nombre || '';
+                const row = [
+                    `"${libro.isbn || ''}"`,
+                    `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
+                    `"${libro.autor?.replace(/"/g, '""') || ''}"`,
+                    `"${editorialName.replace(/"/g, '""')}"`,
+                    libro.anio || '',
+                    libro.precio || 0,
+                    libro.stock || 0,
+                    `"${categoriaName.replace(/"/g, '""')}"`,
+                    libro.created_at || ''
+                ];
+                rows.push(row.join(','));
+             });
+             return rows;
+        }
     );
-
-    if (!libros || libros.length === 0) {
-      alert('No hay libros para exportar');
-      return;
-    }
-
-    const headers = [
-      'ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio',
-      'Stock', 'Categoría', 'Fecha Creación'
-    ];
-    const csvRows = [headers.join(',')];
-
-    libros.forEach((libro: any) => {
-      const editorialName = libro.editoriales?.nombre || '';
-      const categoriaName = libro.categorias?.nombre || '';
-
-      const row = [
-        `"${libro.isbn || ''}"`,
-        `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
-        `"${libro.autor?.replace(/"/g, '""') || ''}"`,
-        `"${editorialName.replace(/"/g, '""')}"`,
-        libro.anio || '',
-        libro.precio || 0,
-        libro.stock || 0,
-        `"${categoriaName.replace(/"/g, '""')}"`,
-        libro.created_at || ''
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    downloadCSV(csvRows.join('\n'), `uniliber_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
-    console.error('Error exportando Uniliber:', error);
-    alert('Error al exportar libros de Uniliber');
-  }
 }
 
-export async function exportClientesToCSV(onProgress?: (val: number, total: number) => void): Promise<void> {
-  try {
-    const clientes = await fetchAll('clientes', (q) => q.order('id', { ascending: true }), '*', onProgress);
-
-    if (!clientes || clientes.length === 0) {
-      alert('No hay clientes para exportar');
-      return;
-    }
-
-    const headers = [
-      'ID', 'Nombre', 'Email', 'Teléfono', 'NIF', 'Dirección',
-      'Ciudad', 'Código Postal', 'País', 'Activo', 'Notas', 'Fecha Creación'
-    ];
-    const csvRows = [headers.join(',')];
-
-    clientes.forEach(cliente => {
-      const row = [
-        cliente.id,
-        `"${cliente.nombre?.replace(/"/g, '""') || ''}"`,
-        `"${cliente.email || ''}"`,
-        `"${cliente.telefono || ''}"`,
-        `"${cliente.nif || ''}"`,
-        `"${cliente.direccion?.replace(/"/g, '""') || ''}"`,
-        `"${cliente.ciudad || ''}"`,
-        `"${cliente.codigo_postal || ''}"`,
-        `"${cliente.pais || ''}"`,
-        cliente.activo ? 'Sí' : 'No',
-        `"${cliente.notas?.replace(/"/g, '""') || ''}"`,
-        cliente.created_at || ''
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    downloadCSV(csvRows.join('\n'), `clientes_backup_${new Date().toISOString().split('T')[0]}.csv`);
-  } catch (error) {
-    console.error('Error exportando clientes:', error);
-    alert('Error al exportar clientes');
-  }
+export async function exportClientesToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
+     return handleExport(
+        fetchAll('clientes', (q) => q.order('id', { ascending: true }), '*', onProgress),
+        `clientes_backup_${new Date().toISOString().split('T')[0]}.csv`,
+        (clientes) => {
+             const headers = ['ID', 'Nombre', 'Email', 'Teléfono', 'NIF', 'Dirección', 'Ciudad', 'Código Postal', 'País', 'Activo', 'Notas', 'Fecha Creación'];
+             const rows = [headers.join(',')];
+             clientes.forEach(cliente => {
+                  const row = [
+                    cliente.id,
+                    `"${cliente.nombre?.replace(/"/g, '""') || ''}"`,
+                    `"${cliente.email || ''}"`,
+                    `"${cliente.telefono || ''}"`,
+                    `"${cliente.nif || ''}"`,
+                    `"${cliente.direccion?.replace(/"/g, '""') || ''}"`,
+                    `"${cliente.ciudad || ''}"`,
+                    `"${cliente.codigo_postal || ''}"`,
+                    `"${cliente.pais || ''}"`,
+                    cliente.activo ? 'Sí' : 'No',
+                    `"${cliente.notas?.replace(/"/g, '""') || ''}"`,
+                    cliente.created_at || ''
+                  ];
+                  rows.push(row.join(','));
+             });
+             return rows;
+        }
+     );
 }
 
 function downloadCSV(content: string, filename: string): void {

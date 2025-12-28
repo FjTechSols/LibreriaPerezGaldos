@@ -35,17 +35,23 @@ export const calcularTotalesPedido = (
   detalles: { cantidad: number; precio_unitario: number }[],
   taxRate: number
 ): CalculoPedido => {
-  const subtotal = detalles.reduce((sum, detalle) => {
+  // Prices already include VAT, so we need to extract the VAT amount
+  // Total WITH tax (what we have)
+  const totalWithTax = detalles.reduce((sum, detalle) => {
     return sum + (detalle.cantidad * detalle.precio_unitario);
   }, 0);
 
-  const iva = subtotal * taxRate;
-  const total = subtotal + iva;
+  // Calculate subtotal WITHOUT tax
+  // Formula: subtotal = total / (1 + tax_rate)
+  const subtotalWithoutTax = totalWithTax / (1 + taxRate);
+  
+  // Calculate VAT amount
+  const iva = totalWithTax - subtotalWithoutTax;
 
   return {
-    subtotal: Number(subtotal.toFixed(2)),
+    subtotal: Number(subtotalWithoutTax.toFixed(2)),
     iva: Number(iva.toFixed(2)),
-    total: Number(total.toFixed(2))
+    total: Number(totalWithTax.toFixed(2))
   };
 };
 
@@ -264,7 +270,7 @@ export const restoreStockForce = async (pedidoId: number): Promise<{ success: bo
 export const actualizarEstadoPedido = async (
   id: number,
   estado: EstadoPedido
-): Promise<boolean> => {
+): Promise<{ success: boolean; error?: string }> => {
   try {
       const { data: currentOrder } = await supabase
           .from('pedidos')
@@ -282,8 +288,7 @@ export const actualizarEstadoPedido = async (
           if (currentOrder.estado !== 'enviado' && currentOrder.estado !== 'completado') {
                const res = await deductStockForce(id);
                if (!res.success) {
-                   alert("Error al descontar stock (insuficiente): " + res.error);
-                   return false;
+                   return { success: false, error: "Error al descontar stock (insuficiente): " + res.error };
                }
           }
       }
@@ -309,8 +314,7 @@ export const actualizarEstadoPedido = async (
            if (shouldRestore) {
                const res = await restoreStockForce(id);
                if (!res.success) {
-                    alert("Error al restaurar stock: " + res.error);
-                    return false;
+                    return { success: false, error: "Error al restaurar stock: " + res.error };
                }
            }
       }
@@ -322,7 +326,7 @@ export const actualizarEstadoPedido = async (
 
     if (error) {
       console.error('Error al actualizar estado:', error);
-      return false;
+      return { success: false, error: error.message };
     }
 
     const { error: auditoriaError } = await supabase
@@ -338,10 +342,10 @@ export const actualizarEstadoPedido = async (
       console.error('Error en auditoría:', auditoriaError);
     }
 
-    return true;
-  } catch (error) {
+    return { success: true };
+  } catch (error: any) {
     console.error('Error en actualizarEstadoPedido:', error);
-    return false;
+    return { success: false, error: error.message || 'Error desconocido' };
   }
 };
 

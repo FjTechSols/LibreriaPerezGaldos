@@ -6,6 +6,7 @@ import { useSettings } from '../../../context/SettingsContext';
 import { TableLoader } from '../../Loader';
 import { Pagination } from '../../Pagination';
 import '../../../styles/components/PedidosList.css';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 interface PedidosListProps {
   onVerDetalle: (pedido: Pedido) => void;
@@ -42,6 +43,14 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
 
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+  }>({ title: '', message: '', type: 'info' });
+
   useEffect(() => {
     cargarPedidos();
     cargarEstadisticas();
@@ -55,7 +64,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
       filtros.estado = filtroEstado;
     }
 
-    const { data } = await obtenerPedidos(filtros);
+    const { data } = await obtenerPedidos({ ...filtros, limit: 10000 });
     setPedidos(data);
     setLoading(false);
   };
@@ -66,13 +75,18 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   };
 
   const handleCambiarEstado = async (pedidoId: number, nuevoEstado: EstadoPedido) => {
-    const exito = await actualizarEstadoPedido(pedidoId, nuevoEstado);
+    const result = await actualizarEstadoPedido(pedidoId, nuevoEstado);
 
-    if (exito) {
+    if (result.success) {
       cargarPedidos();
       cargarEstadisticas();
     } else {
-      alert('Error al actualizar el estado del pedido');
+      setMessageModalConfig({
+        title: 'Error',
+        message: result.error || 'Error al actualizar el estado del pedido.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
     }
   };
 
@@ -182,6 +196,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
         <div className="table-header">
           <span>Nº Pedido</span>
           <span>Usuario</span>
+          <span>Cliente</span>
           <span>Fecha</span>
           <span>Estado</span>
           <span>Tipo</span>
@@ -202,6 +217,20 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                 <span className="usuario-nombre">{pedido.usuario?.username}</span>
                 <span className="usuario-email">{pedido.usuario?.email}</span>
               </div>
+            </span>
+            <span className="pedido-cliente">
+              {pedido.cliente ? (
+                <div className="cliente-info">
+                  <span className="cliente-nombre">
+                    {pedido.cliente.tipo === 'empresa' || pedido.cliente.tipo === 'institucion'
+                      ? pedido.cliente.nombre
+                      : `${pedido.cliente.nombre} ${pedido.cliente.apellidos || ''}`.trim()}
+                  </span>
+                  {pedido.cliente.email && <span className="cliente-email">{pedido.cliente.email}</span>}
+                </div>
+              ) : (
+                <span style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>-</span>
+              )}
             </span>
             <span className="pedido-fecha">
               {pedido.fecha_pedido
@@ -279,6 +308,15 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           itemsPerPageOptions={[10, 25, 50, 100]}
         />
       )}
+
+      {/* Message Modal Component */}
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </div>
   );
 }

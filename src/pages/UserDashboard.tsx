@@ -124,7 +124,7 @@ export function UserDashboard() {
       case 'reservations':
         return <MyReservations onReservationChange={loadStats} />;
       case 'notifications':
-        return <NotificationCenter />;
+        return <NotificationCenter onNotificationsChange={loadStats} />;
       case 'orders':
         return <OrderHistory />;
       case 'profile':

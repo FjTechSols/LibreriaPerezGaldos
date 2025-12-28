@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Manager Components
 import { BooksManager } from '../components/admin/books/BooksManager';
@@ -61,6 +61,8 @@ import '../styles/pages/AdminDashboard.css';
 
 import { getAdminUnreadNotifications } from '../services/notificationService';
 import { getPendingOrdersCount } from '../services/pedidoService';
+import { getPendingReservationsCount } from '../services/reservationService';
+import { getUnreadOrdersCount, getUnreadReservationsCount, getUnreadInvoicesCount } from '../services/notificationService';
 import { AdminNotificationCenter } from '../components/admin';
 
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'reservations' | 'clients' | 'marketing' | 'discounts' | 'isbn' | 'titles' | 'covers' | 'metadata' | 'notifications';
@@ -79,37 +81,38 @@ export function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const [badgeCounts, setBadgeCounts] = useState({ total: 0, orders: 0, reservations: 0, invoices: 0 });
 
-  useEffect(() => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
+    try {
+      const unreadNotes = await getAdminUnreadNotifications(user.id);
+      const pendingOrdersCount = await getPendingOrdersCount();
+      
+      
+      // Orders count uses PENDING/PROCESSING orders (Action items)
+      // Reservations count: Actual pending reservations from DB
+      const reservationsCount = await getPendingReservationsCount();
+      
+      // Invoices count (Pending) - derived from context
+      const pendingInvoices = invoices.filter(inv => inv.status?.toLowerCase() === 'pendiente' || inv.status?.toLowerCase() === 'pending').length;
 
-    const fetchUnreadCount = async () => {
-      try {
-        const unreadNotes = await getAdminUnreadNotifications(user.id);
-        const pendingOrdersCount = await getPendingOrdersCount();
-        
-        // Orders count uses PENDING/PROCESSING orders (Action items)
-        // Reservations count uses unread matching notifications
-        const reservationsCount = unreadNotes.filter(n => n.tipo.includes('reserva')).length;
-        
-        // Invoices count (Pending) - derived from context
-        const pendingInvoices = invoices.filter(inv => inv.status?.toLowerCase() === 'pendiente' || inv.status?.toLowerCase() === 'pending').length;
+      setBadgeCounts({
+        total: unreadNotes.length,
+        orders: pendingOrdersCount,
+        reservations: reservationsCount,
+        invoices: pendingInvoices
+      });
+    } catch (error) {
+      console.error('Error fetching unread notifications:', error);
+    }
+  }, [user, invoices]);
 
-        setBadgeCounts({
-          total: unreadNotes.length,
-          orders: pendingOrdersCount,
-          reservations: reservationsCount,
-          invoices: pendingInvoices
-        });
-      } catch (error) {
-        console.error('Error fetching unread notifications:', error);
-      }
-    };
-
+  useEffect(() => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000); // Poll every 30 seconds
 
     return () => clearInterval(interval);
-  }, [user, invoices]);
+  }, [fetchUnreadCount]);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Section collapse state
@@ -150,6 +153,11 @@ export function AdminDashboard() {
   const [booksInStock, setBooksInStock] = useState(0);
   const [booksOutOfStock, setBooksOutOfStock] = useState(0);
   const [totalStockUnits, setTotalStockUnits] = useState(0);
+  
+  // Notification badges for sidebar
+  const [unreadOrders, setUnreadOrders] = useState(0);
+  const [unreadReservations, setUnreadReservations] = useState(0);
+  const [unreadInvoices, setUnreadInvoices] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
 
@@ -178,6 +186,32 @@ export function AdminDashboard() {
     };
     cargarEstadisticas();
   }, []);
+
+  // Fetch notification counts for sidebar badges
+  useEffect(() => {
+    const fetchNotificationCounts = async () => {
+      if (user) {
+        try {
+          const [orders, reservations, invoices] = await Promise.all([
+            getUnreadOrdersCount(user.id),
+            getUnreadReservationsCount(user.id),
+            getUnreadInvoicesCount(user.id)
+          ]);
+          
+          setUnreadOrders(orders);
+          setUnreadReservations(reservations);
+          setUnreadInvoices(invoices);
+        } catch (error) {
+          console.error('Error fetching notification counts:', error);
+        }
+      }
+    };
+
+    fetchNotificationCounts();
+    // Refresh every 10 seconds
+    const interval = setInterval(fetchNotificationCounts, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleSectionChange = (section: AdminSection) => {
     setActiveSection(section);
@@ -403,7 +437,10 @@ export function AdminDashboard() {
                   className={`nav-item ${activeSection === 'invoices' ? 'active' : ''}`}
                   title={isSidebarCollapsed ? 'Facturas' : ''}
                 >
-                  <FileText size={20} className="nav-item-icon" />
+                  <div className="nav-item-icon-wrapper">
+                    <FileText size={20} className="nav-item-icon" />
+                    {unreadInvoices > 0 && <span className="notification-dot"></span>}
+                  </div>
                   {!isSidebarCollapsed && (
                     <div className="flex items-center justify-between w-full">
                       <span className="nav-item-text">Facturas</span>
@@ -417,7 +454,10 @@ export function AdminDashboard() {
                   className={`nav-item ${activeSection === 'orders' ? 'active' : ''}`}
                   title={isSidebarCollapsed ? 'Pedidos' : ''}
                 >
-                  <ShoppingBag size={20} className="nav-item-icon" />
+                  <div className="nav-item-icon-wrapper">
+                    <ShoppingBag size={20} className="nav-item-icon" />
+                    {unreadOrders > 0 && <span className="notification-dot"></span>}
+                  </div>
                   {!isSidebarCollapsed && (
                     <div className="flex items-center justify-between w-full">
                      <span className="nav-item-text">Pedidos</span>
@@ -431,7 +471,10 @@ export function AdminDashboard() {
                   className={`nav-item ${activeSection === 'reservations' ? 'active' : ''}`}
                   title={isSidebarCollapsed ? 'Reservas' : ''}
                 >
-                  <CalendarClock size={20} className="nav-item-icon" />
+                  <div className="nav-item-icon-wrapper">
+                    <CalendarClock size={20} className="nav-item-icon" />
+                    {unreadReservations > 0 && <span className="notification-dot"></span>}
+                  </div>
                   {!isSidebarCollapsed && (
                     <div className="flex items-center justify-between w-full">
                       <span className="nav-item-text">Reservas</span>
@@ -633,7 +676,7 @@ export function AdminDashboard() {
              {activeSection === 'dashboard' && renderDashboard()}
              {activeSection === 'books' && <BooksManager />}
              {activeSection === 'invoices' && <InvoicesManager />}
-             {activeSection === 'orders' && <OrdersManager />}
+             {activeSection === 'orders' && <OrdersManager onOrdersChange={fetchUnreadCount} />}
              {activeSection === 'reservations' && <ReservationManager />}
              {activeSection === 'clients' && <GestionClientes />}
              
@@ -646,7 +689,7 @@ export function AdminDashboard() {
              {activeSection === 'titles' && <TitleFixer />}
              {activeSection === 'covers' && <CoverSearchTool />}
              {activeSection === 'metadata' && <MetadataManager />}
-             {activeSection === 'notifications' && <AdminNotificationCenter />}
+             {activeSection === 'notifications' && <AdminNotificationCenter onNotificationsChange={fetchUnreadCount} />}
            </div>
         </main>
       </div>

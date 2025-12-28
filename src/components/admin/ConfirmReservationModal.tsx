@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Reserva } from '../../types';
 import { X } from 'lucide-react';
 import '../../styles/components/ConfirmReservationModal.css';
+import { MessageModal } from '../MessageModal'; // Import MessageModal
 
 interface ConfirmReservationModalProps {
   reservation: Reserva;
@@ -18,6 +19,21 @@ export function ConfirmReservationModal({
   const [loading, setLoading] = useState(false);
   const [currentStock, setCurrentStock] = useState(reservation.libro?.stock || 0);
   const [stockLoading, setStockLoading] = useState(true);
+
+
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   // Fetch current stock when modal opens
   useEffect(() => {
@@ -45,12 +61,12 @@ export function ConfirmReservationModal({
 
   const handleConfirm = async () => {
     if (!expirationDate) {
-      alert('Por favor selecciona una fecha de expiración');
+      showModal('Error', 'Por favor selecciona una fecha de expiración', 'error');
       return;
     }
 
     if (currentStock <= 0) {
-      alert('No hay stock disponible para confirmar esta reserva. El libro ya no está disponible.');
+      showModal('Error', 'No hay stock disponible para confirmar esta reserva. El libro ya no está disponible.', 'error');
       return;
     }
     
@@ -125,6 +141,13 @@ export function ConfirmReservationModal({
           </button>
         </div>
       </div>
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+      />
     </div>
   );
 }

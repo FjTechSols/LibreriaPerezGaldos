@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { ArrowRight, Check, Search, RefreshCw } from 'lucide-react';
 import { mergeCategories } from '../../../services/categoriaService';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
+
 
 const STANDARD_CATEGORIES = [
   'Arqueología', 'Arte', 'Autoayuda y Desarrollo Personal', 'Biografías y Memorias', 'Ciencia Ficción',
@@ -37,6 +39,34 @@ export function CategoryStandardizer() {
   const [candidateFilter, setCandidateFilter] = useState('');
   
   const [merging, setMerging] = useState(false);
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Aceptar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
 
   useEffect(() => {
     loadData();
@@ -104,64 +134,75 @@ export function CategoryStandardizer() {
   const [progressState, setProgressState] = useState({ current: 0, total: 0 });
 
   const ensureStandardCategories = async () => {
-    if (!window.confirm('Esto verificará que existan todas las categorías estándar en la base de datos y las creará si faltan. ¿Continuar?')) return;
-    
-    setLoading(true);
-    try {
-        const { data: existing } = await supabase.from('categorias').select('nombre');
-        const existingNames = new Set(existing?.map(c => c.nombre.toLowerCase()) || []);
-        
-        const toCreate = STANDARD_CATEGORIES.filter(c => !existingNames.has(c.toLowerCase()));
-        
-        if (toCreate.length === 0) {
-            alert('Todas las categorías estándar ya existen.');
-        } else {
-            const { error } = await supabase.from('categorias').insert(
-                toCreate.map(name => ({ nombre: name, descripcion: 'Categoría Estándar' }))
-            );
-            if (error) throw error;
-            alert(`Se han creado ${toCreate.length} categorías faltantes (incluyendo 'Otros').`);
-            await loadData(); // Reload to see them
+    showModal(
+        'Confirmar Acción',
+        'Esto verificará que existan todas las categorías estándar en la base de datos y las creará si faltan. ¿Continuar?',
+        'warning',
+        async () => {
+             setLoading(true);
+            try {
+                const { data: existing } = await supabase.from('categorias').select('nombre');
+                const existingNames = new Set(existing?.map(c => c.nombre.toLowerCase()) || []);
+                
+                const toCreate = STANDARD_CATEGORIES.filter(c => !existingNames.has(c.toLowerCase()));
+                
+                if (toCreate.length === 0) {
+                    showModal('Información', 'Todas las categorías estándar ya existen.', 'info');
+                } else {
+                    const { error } = await supabase.from('categorias').insert(
+                        toCreate.map(name => ({ nombre: name, descripcion: 'Categoría Estándar' }))
+                    );
+                    if (error) throw error;
+                    showModal('Éxito', `Se han creado ${toCreate.length} categorías faltantes (incluyendo 'Otros').`, 'success');
+                    await loadData(); // Reload to see them
+                }
+            } catch (err) {
+                console.error(err);
+                showModal('Error', 'Error al crear categorías.', 'error');
+            } finally {
+                setLoading(false);
+            }
         }
-    } catch (err) {
-        console.error(err);
-        alert('Error al crear categorías.');
-        setLoading(false);
-    }
+    );
   };
 
   const handleMerge = async () => {
     if (!selectedTargetId || selectedCandidates.size === 0) return;
     
-    if (!window.confirm(`¿Estás seguro de fusionar ${selectedCandidates.size} categorías en la categoría seleccionada?`)) return;
-
-    setMerging(true);
-    setProgressState({ current: 0, total: selectedCandidates.size });
-
-    try {
-        const candidateIds = Array.from(selectedCandidates);
+    showModal(
+        'Confirmar Fusión',
+        `¿Estás seguro de fusionar ${selectedCandidates.size} categorías en la categoría seleccionada?`,
+        'warning',
+        async () => {
+             setMerging(true);
+            setProgressState({ current: 0, total: selectedCandidates.size });
         
-        const result = await mergeCategories(
-            selectedTargetId, 
-            candidateIds,
-            (current, total) => setProgressState({ current, total })
-        );
-        
-        if (result.success) {
-            // Remove merged from 'others'
-            setOtherCats(prev => prev.filter(c => !selectedCandidates.has(c.id)));
-            setSelectedCandidates(new Set());
-            alert('Fusión completada con éxito.');
-        } else {
-            alert('Error: ' + result.message);
+            try {
+                const candidateIds = Array.from(selectedCandidates);
+                
+                const result = await mergeCategories(
+                    selectedTargetId, 
+                    candidateIds,
+                    (current, total) => setProgressState({ current, total })
+                );
+                
+                if (result.success) {
+                    // Remove merged from 'others'
+                    setOtherCats(prev => prev.filter(c => !selectedCandidates.has(c.id)));
+                    setSelectedCandidates(new Set());
+                    showModal('Éxito', 'Fusión completada con éxito.', 'success');
+                } else {
+                    showModal('Error', 'Error: ' + result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showModal('Error', 'Ocurrió un error inesperado.', 'error');
+            } finally {
+                setMerging(false);
+                setProgressState({ current: 0, total: 0 });
+            }
         }
-    } catch (err) {
-        console.error(err);
-        alert('Ocurrió un error inesperado.');
-    } finally {
-        setMerging(false);
-        setProgressState({ current: 0, total: 0 });
-    }
+    );
   };
 
   const toggleCandidate = (id: number) => {
@@ -326,6 +367,17 @@ export function CategoryStandardizer() {
          </div>
 
       </div>
+      
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

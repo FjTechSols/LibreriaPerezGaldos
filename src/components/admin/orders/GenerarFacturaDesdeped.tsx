@@ -4,6 +4,7 @@ import { Pedido } from '../../../types';
 import { useInvoice } from '../../../context/InvoiceContext';
 import { supabase } from '../../../lib/supabase';
 import '../../../styles/components/GenerarFacturaModal.css';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 interface GenerarFacturaModalProps {
   isOpen: boolean;
@@ -25,6 +26,19 @@ export default function GenerarFacturaModal({
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [language, setLanguage] = useState<'es' | 'en'>('es');
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   const [facturaElectronicaData, setFacturaElectronicaData] = useState({
     nif_emisor: '',
@@ -91,7 +105,7 @@ export default function GenerarFacturaModal({
 
   const handleGenerarFactura = async () => {
     if (!pedidoSeleccionado) {
-      alert('Debe seleccionar un pedido');
+      showModal('Error', 'Debe seleccionar un pedido', 'error');
       return;
     }
 
@@ -147,22 +161,22 @@ export default function GenerarFacturaModal({
       });
 
       if (result) {
-        alert(`Factura ${result.invoice_number} generada correctamente`);
+        showModal('Factura Generada', `Factura ${result.invoice_number} generada correctamente`);
         onSuccess?.();
         onClose();
       } else {
-        alert('Error al generar la factura');
+        showModal('Error', 'Error al generar la factura', 'error');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al generar la factura');
+      showModal('Error', 'Error al generar la factura', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleGuardarFacturaElectronica = () => {
-    alert('Funcionalidad en desarrollo. Los datos no se procesarán todavía.');
+    showModal('Información', 'Funcionalidad en desarrollo. Los datos no se procesarán todavía.', 'info');
   };
 
   const pedidosFiltrados = pedidos.filter(pedido =>
@@ -565,6 +579,14 @@ export default function GenerarFacturaModal({
           )}
         </div>
       </div>
+
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </div>
   );
 }

@@ -13,7 +13,11 @@ import {
 } from 'lucide-react';
 import '../../styles/components/AdminNotifications.css';
 
-export default function AdminNotificationCenter() {
+interface AdminNotificationCenterProps {
+  onNotificationsChange?: () => void;
+}
+
+export default function AdminNotificationCenter({ onNotificationsChange }: AdminNotificationCenterProps) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +48,8 @@ export default function AdminNotificationCenter() {
       setNotifications(prev => prev.map(n => 
         n.id === notificationId ? { ...n, leida: true } : n
       ));
+      // Notify parent to refresh badge immediately
+      if (onNotificationsChange) onNotificationsChange();
     } catch (error) {
       console.error('Error marking notification as read:', error);
       loadNotifications(); // Revert on error
@@ -55,6 +61,8 @@ export default function AdminNotificationCenter() {
       await markAllAdminNotificationsAsRead(user!.id);
       // Optimistic update
       setNotifications(prev => prev.map(n => ({ ...n, leida: true })));
+      // Notify parent to refresh badge immediately
+      if (onNotificationsChange) onNotificationsChange();
     } catch (error) {
       console.error('Error marking all as read:', error);
       loadNotifications();

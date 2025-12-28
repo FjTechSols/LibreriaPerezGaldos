@@ -93,8 +93,6 @@ export const mergeCategories = async (
   onProgress?: (current: number, total: number) => void
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    console.log(`Merging ${toMergeIds.length} categories into ${toKeepId}`);
-
     // Process sequentially to avoid timeouts (Error 500)
     let processed = 0;
     let errors: string[] = [];

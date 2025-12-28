@@ -1,6 +1,9 @@
 import { supabase } from '../lib/supabase';
 import { Reserva } from '../types';
 
+
+
+
 export const createReservation = async (usuario_id: string, libro_id: number) => {
   const { data, error } = await supabase
     .from('reservas')
@@ -14,7 +17,23 @@ export const createReservation = async (usuario_id: string, libro_id: number) =>
     console.error('Error creating reservation:', error);
     throw error;
   }
+
   return data;
+};
+
+
+
+export const getPendingReservationsCount = async (): Promise<number> => {
+  const { count, error } = await supabase
+    .from('reservas')
+    .select('*', { count: 'exact', head: true })
+    .eq('estado', 'pendiente');
+
+  if (error) {
+    console.error('Error fetching pending reservations count:', error);
+    return 0;
+  }
+  return count || 0;
 };
 
 export const getReservations = async ({ page, limit }: { page?: number; limit?: number } = {}) => {
@@ -125,7 +144,6 @@ export const rejectReservation = async (
   reservationId: number,
   adminId: string
 ): Promise<void> => {
-  console.log('Rejecting reservation:', { reservationId, adminId });
   
   const { data, error } = await supabase
     .from('reservas')
@@ -138,8 +156,6 @@ export const rejectReservation = async (
     .eq('id', reservationId)
     .select();
 
-  console.log('Reject result:', { data, error });
-
   if (error) {
     console.error('Error rejecting reservation:', error);
     throw error;
@@ -150,7 +166,6 @@ export const markAsDelivered = async (
   reservationId: number,
   adminId: string
 ): Promise<void> => {
-  console.log('Marking reservation as delivered:', { reservationId, adminId });
   
   const { data, error } = await supabase
     .from('reservas')
@@ -162,8 +177,6 @@ export const markAsDelivered = async (
     .eq('id', reservationId)
     .select();
 
-  console.log('Mark as delivered result:', { data, error });
-
   if (error) {
     console.error('Error marking reservation as delivered:', error);
     throw error;
@@ -174,7 +187,6 @@ export const markAsReturned = async (
   reservationId: number,
   adminId: string
 ): Promise<void> => {
-  console.log('Marking reservation as returned:', { reservationId, adminId });
   
   const { data, error } = await supabase
     .from('reservas')
@@ -186,8 +198,6 @@ export const markAsReturned = async (
     .eq('id', reservationId)
     .select();
 
-  console.log('Mark as returned result:', { data, error });
-
   if (error) {
     console.error('Error marking reservation as returned:', error);
     throw error;
@@ -198,7 +208,6 @@ export const cancelReservation = async (
   reservationId: number,
   userId: string
 ): Promise<void> => {
-  console.log('Canceling reservation:', { reservationId, userId });
   
   const { data, error } = await supabase
     .from('reservas')
@@ -210,8 +219,6 @@ export const cancelReservation = async (
     .eq('usuario_id', userId) // Ensure user can only cancel their own reservations
     .eq('estado', 'pendiente') // Only allow canceling pending reservations
     .select();
-
-  console.log('Cancel result:', { data, error });
 
   if (error) {
     console.error('Error canceling reservation:', error);

@@ -83,9 +83,7 @@ export interface OrderEmailData {
  */
 export const sendOrderConfirmationEmail = async (orderData: OrderEmailData): Promise<EmailResult> => {
   try {
-    console.log('📧 Sending order confirmation email to:', orderData.customerEmail);
-
-    const { data, error } = await supabase.functions.invoke('send-order-email', {
+    const { data, error } = await supabase.functions.invoke('send-order-confirmation', {
       body: { orderData }
     });
 
@@ -99,12 +97,9 @@ export const sendOrderConfirmationEmail = async (orderData: OrderEmailData): Pro
       return { success: false, error: data?.error || 'Unknown error' };
     }
 
-    console.log('✅ Order confirmation email sent successfully. Email ID:', data.emailId);
     return { success: true };
-
   } catch (error: any) {
     console.error('❌ Exception sending order confirmation email:', error);
     return { success: false, error: error.message };
   }
 };
-

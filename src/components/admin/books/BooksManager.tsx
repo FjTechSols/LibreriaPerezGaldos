@@ -24,6 +24,7 @@ import { BookTable } from './BookTable';
 import { BookForm } from './BookForm';
 import { BookSuccessModal } from './BookSuccessModal';
 import { BookExistenceCheckModal } from './BookExistenceCheckModal';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 // Import sub-tools if we want to render them as tabs inside Manager (Optional, but planned for future)
 // For now we focus on the Catalog section logic.
@@ -46,6 +47,35 @@ export function BooksManager() {
   const [totalBooks, setTotalBooks] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (
+    title: string,
+    message: string,
+    type: 'info' | 'error' | 'success' | 'warning' = 'info',
+    onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({
+      title,
+      message,
+      type,
+      onConfirm,
+      showCancel: !!onConfirm,
+      buttonText: onConfirm ? 'Confirmar' : 'Cerrar'
+    });
+    setShowMessageModal(true);
+  };
+
   const [isCheckingExistence, setIsCheckingExistence] = useState(false);
   // Book Form State
   const [isCreating, setIsCreating] = useState(false);
@@ -200,7 +230,7 @@ export function BooksManager() {
     // Validation: Title, Price, Location, Category are mandatory. Author is usually expected but user didn't explicitly list it as mandatory, though typically it is.
     // User said: "los pos que si son obligatorio son Titulo, Precio, Ubicacion y categoria"
     if (!bookData.title || !bookData.price || !bookData.ubicacion || !bookData.category) {
-      alert('Por favor completa los campos obligatorios: Título, Precio, Ubicación y Categoría.');
+      showModal('Campos incompletos', 'Por favor completa los campos obligatorios: Título, Precio, Ubicación y Categoría.', 'error');
       return;
     }
 
@@ -216,7 +246,7 @@ export function BooksManager() {
           if (libroExistente) {
             const actualizado = await incrementarStockLibro(parseInt(libroExistente.id), 1);
             if (actualizado) {
-              alert(`El libro ya existe. Stock incrementado.`);
+              showModal('Libro Existente', 'El libro ya existe. Stock incrementado correctamente.', 'success');
               setRefreshTrigger(prev => prev + 1);
               setIsModalOpen(false); // Close the modal
               return;
@@ -266,7 +296,7 @@ export function BooksManager() {
         }
     } catch (e) {
       console.error('Error creating book:', e);
-      alert('Error al crear el libro.');
+      showModal('Error', 'Error al crear el libro.', 'error');
     }
   };
 
@@ -309,7 +339,7 @@ export function BooksManager() {
 
       const updated = await actualizarLibro(parseInt(selectedBook.id), mappedUpdate as any, contents); // Use selectedBook
       if (updated) {
-        alert('Libro actualizado.');
+        showModal('Éxito', 'Libro actualizado correctamente.', 'success');
         setRefreshTrigger(prev => prev + 1);
         setSelectedBook(null); // Clear selected book
         setIsModalOpen(false); // Close the modal
@@ -318,46 +348,60 @@ export function BooksManager() {
       }
     } catch (e) {
       console.error('Error updating book:', e);
-      alert('Error al actualizar el libro.');
+      showModal('Error', 'Error al actualizar el libro.', 'error');
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este libro?')) return;
-    try {
-      const deleted = await eliminarLibro(parseInt(id));
-      if (deleted) {
-        alert('Libro eliminado.');
-        setRefreshTrigger(prev => prev + 1);
-      }
-    } catch (e) {
-      console.error('Error deleting book:', e);
-      alert('Error al eliminar.');
-    }
+  const handleDelete = (id: string) => {
+     showModal(
+        'Confirmar Eliminación',
+        '¿Estás seguro de que deseas eliminar este libro? Esta acción no se puede deshacer.',
+        'warning',
+        async () => {
+            try {
+                // Show loading state or just modify modal?
+                // Ideally we would show a loader but simple replacement works for now.
+                const deleted = await eliminarLibro(parseInt(id));
+                if (deleted) {
+                    showModal('Éxito', 'Libro eliminado correctamente.', 'success');
+                    setRefreshTrigger(prev => prev + 1);
+                } else {
+                     showModal('Error', 'No se pudo eliminar el libro.', 'error');
+                }
+            } catch (e) {
+                console.error('Error deleting book:', e);
+                showModal('Error', 'Error al eliminar el libro.', 'error');
+            }
+        }
+     );
   };
 
   const totalPages = Math.ceil((filters.search || filters.category !== 'Todos' || filters.stockStatus !== 'all' ? filteredCount : totalBooks) / itemsPerPage);
 
-  const handleStockUpdate = async (book: Book, amount: number) => {
+  const handleStockUpdate = (book: Book, amount: number) => {
     const action = amount > 0 ? "Aumentar" : "Reducir";
     const symbol = amount > 0 ? "+1" : "-1";
-    // Check if confirming "cancelar" or "concelar" -> standard is Cancelar
-    const message = `¿${action} el stock del Libro (${book.title}, ${book.author}, ${book.code}) en ${symbol}? confirmar o cancelar`; 
+    const message = `¿${action} el stock del Libro (${book.title}, ${book.author}, ${book.code}) en ${symbol}?`; 
     
-    if (!confirm(message)) return;
-
-    try {
-        const updated = await incrementarStockLibro(parseInt(book.id), amount);
-        if (updated) {
-            // Optimistic update or refresh
-            setRefreshTrigger(prev => prev + 1);
-        } else {
-            alert('Error al actualizar el stock.');
+    showModal(
+        'Confirmar Cambio de Stock',
+        message,
+        'warning',
+        async () => {
+             try {
+                const updated = await incrementarStockLibro(parseInt(book.id), amount);
+                if (updated) {
+                    setRefreshTrigger(prev => prev + 1);
+                     showModal('Éxito', `Stock ${action.toLowerCase()} en 1.`, 'success');
+                } else {
+                    showModal('Error', 'Error al actualizar el stock.', 'error');
+                }
+            } catch (e) {
+                console.error('Error updating stock:', e);
+                showModal('Error', 'Error inesperado al actualizar stock.', 'error');
+            }
         }
-    } catch (e) {
-        console.error('Error updating stock:', e);
-        alert('Error inesperado.');
-    }
+    );
   };
 
   const loadBooks = () => {
@@ -796,6 +840,17 @@ export function BooksManager() {
            book={createdBook}
          />
        )}
+       
+       <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
+      />
     </div>
   );
 }

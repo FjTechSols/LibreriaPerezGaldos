@@ -4,6 +4,7 @@ import { Book } from '../../../types';
 import { actualizarLibro, buscarLibros } from '../../../services/libroService';
 import { buscarLibroPorISBN, buscarLibroPorTituloAutor } from '../../../services/isbnService';
 import '../../../styles/components/GestionISBN.css'; // Reusing similar styles
+import { MessageModal } from '../../MessageModal';
 
 export function TitleFixer() {
   const [candidates, setCandidates] = useState<Book[]>([]);
@@ -14,6 +15,19 @@ export function TitleFixer() {
   const [isAutoFixing, setIsAutoFixing] = useState(false);
   const [autoFixProgress, setAutoFixProgress] = useState('');
   const [stopRequested, setStopRequested] = useState(false);
+
+  // MessageModal State
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success' | 'warning';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' | 'warning' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   const scanForBadTitles = async () => {
     setLoading(true);
@@ -69,7 +83,7 @@ export function TitleFixer() {
       } else {
         // Allow manual entry if everything fails
         setProposedTitles(prev => new Map(prev).set(book.id, book.title)); // Pre-fill with current
-        alert(`No se encontró información automática. Puedes editar el título manualmente.`);
+        showModal('Información', 'No se encontró información automática. Puedes editar el título manualmente.', 'info');
       }
     } catch (error) {
       console.error('Error analyzing book:', error);
@@ -102,7 +116,7 @@ export function TitleFixer() {
       }
     } catch (error) {
       console.error('Error applying fix:', error);
-      alert('Error al actualizar el título');
+      showModal('Error', 'Error al actualizar el título', 'error');
     } finally {
       setAnalyzing(prev => {
         const next = new Set(prev);
@@ -326,6 +340,14 @@ export function TitleFixer() {
           );
         })}
       </div>
+      
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+      />
     </div>
   );
 }

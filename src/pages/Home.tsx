@@ -129,7 +129,7 @@ export function Home() {
               <TrendingUp className="section-icon" size={24} />
               <h2 className="section-title">{t('latestReleases')}</h2>
             </div>
-            <Link to="/catalogo?new=true" className="section-link">
+            <Link to="/catalogo?isNew=true" className="section-link">
               {t('viewAllReleases')} <ArrowRight size={16} />
             </Link>
           </div>
@@ -168,7 +168,7 @@ export function Home() {
               <Tag className="section-icon" size={24} />
               <h2 className="section-title">{t('specialOffers')}</h2>
             </div>
-            <Link to="/catalogo?sale=true" className="section-link">
+            <Link to="/catalogo?onSale=true" className="section-link">
               {t('viewOffers')} <ArrowRight size={16} />
             </Link>
           </div>

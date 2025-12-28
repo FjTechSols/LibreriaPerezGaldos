@@ -22,6 +22,7 @@ import {
   exportClientesToCSV
 } from '../services/backupService';
 import '../styles/pages/AdminSettings.css';
+import { MessageModal } from '../components/MessageModal'; // Import MessageModal
 
 export function AdminSettings() {
   const navigate = useNavigate();
@@ -44,8 +45,22 @@ export function AdminSettings() {
     progress: 0,
     total: 0
   });
+
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   const [companyData, setCompanyData] = useState({
     name: '',
@@ -178,14 +193,21 @@ export function AdminSettings() {
     }
   };
 
-  const handleExport = async (exportFunction: (onProgress: (c: number, t: number) => void) => Promise<void>, name: string) => {
+  const handleExport = async (exportFunction: (onProgress: (c: number, t: number) => void) => Promise<{ success: boolean; error?: string }>, name: string) => {
     setExportState({ isExporting: true, type: name, progress: 0, total: 0 });
     try {
-      await exportFunction((current, total) => {
+      const result = await exportFunction((current, total) => {
          setExportState(prev => ({ ...prev, progress: current, total }));
       });
-    } catch (error) {
+      
+      if (result.success) {
+          showModal('Exportación Exitosa', `La exportación de ${name} se ha completado correctamente.\nEl archivo se descargará automáticamente.`, 'info');
+      } else {
+          showModal('Error en Exportación', result.error || `Error al exportar ${name}`, 'error');
+      }
+    } catch (error: any) {
       console.error(`Error exportando ${name}:`, error);
+      showModal('Error Inesperado', `Ocurrió un error inesperado al exportar ${name}: ${error.message}`, 'error');
     } finally {
       setExportState({ isExporting: false, type: null, progress: 0, total: 0 });
     }
@@ -817,6 +839,13 @@ export function AdminSettings() {
           </div>
         </div>
       </div>
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </div>
   );
 }

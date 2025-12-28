@@ -6,7 +6,11 @@ import PedidosList from './PedidosList';
 import PedidoDetalle from './PedidoDetalle';
 import CrearPedido from './CrearPedido';
 
-export function OrdersManager() {
+interface OrdersManagerProps {
+  onOrdersChange?: () => void;
+}
+
+export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
   const [isPedidoDetalleOpen, setIsPedidoDetalleOpen] = useState(false);
@@ -18,13 +22,15 @@ export function OrdersManager() {
       .channel('orders-manager-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
         setRefreshTrigger(prev => prev + 1);
+        // Optional: Trigger badge update on realtime changes too
+        if (onOrdersChange) onOrdersChange();
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [onOrdersChange]);
 
   return (
     <div className="orders-manager">
@@ -63,6 +69,7 @@ export function OrdersManager() {
             setRefreshTrigger(prev => prev + 1);
             setIsPedidoDetalleOpen(false);
             setSelectedPedido(null);
+            if (onOrdersChange) onOrdersChange();
           }}
         />
 
@@ -72,6 +79,7 @@ export function OrdersManager() {
           onSuccess={() => {
             setRefreshTrigger(prev => prev + 1);
             setIsCrearPedidoOpen(false);
+            if (onOrdersChange) onOrdersChange();
           }}
         />
     </div>

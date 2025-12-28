@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, X, Plus, BookOpen, User, Barcode, Hash, Loader2, AlertCircle, Pencil } from 'lucide-react';
 import { Book } from '../../../types';
 import { incrementarStockLibro, verificarExistenciaLibro } from '../../../services/libroService';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 
 interface BookExistenceCheckModalProps {
   isOpen: boolean;
@@ -29,6 +30,19 @@ export function BookExistenceCheckModal({
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState('');
   const [updatingStockId, setUpdatingStockId] = useState<string | null>(null);
+
+  // State for MessageModal
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success';
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
 
   // if (!isOpen) return null; // MOVED to return statement to fix Hook rules
   // Do NOT return here.
@@ -129,13 +143,14 @@ export function BookExistenceCheckModal({
         onStockUpdated(); // Notify parent
         // Optional: show a mini success toast or message?
         // User didn't ask explicitly but cleaning form implies 'done'.
-        alert('Stock actualizado +1');
+        // User didn't ask explicitly but cleaning form implies 'done'.
+        showModal('Éxito', 'Stock actualizado +1', 'success');
       } else {
-        alert('Error al actualizar el stock');
+        showModal('Error', 'Error al actualizar el stock', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Error inesperado');
+      showModal('Error', 'Error inesperado', 'error');
     } finally {
         setUpdatingStockId(null);
     }
@@ -317,6 +332,15 @@ export function BookExistenceCheckModal({
            </div>
         </div>
       </div>
+
+      
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type as any}
+      />
     </div>
   );
 }

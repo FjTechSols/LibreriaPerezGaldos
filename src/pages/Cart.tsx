@@ -58,21 +58,26 @@ export function Cart() {
       
       const direccionCompleta = `${checkoutData.direccion}, ${checkoutData.codigo_postal} ${checkoutData.ciudad}, ${checkoutData.provincia}, ${checkoutData.pais}`;
       
-      // Calculate total with shipping and tax
-      const subtotal = total;
-      const taxAmount = subtotal * (settings.billing.taxRate / 100);
-      const orderTotal = subtotal + shippingCost + taxAmount;
+      // Calculate total with shipping and tax (Tax Included Logic)
+      // En sistema IVA incluido: Total Items = Precio final
+      // Base Imponible = Total Items / (1 + tasa)
+      // OrderTotal = Total Items + Shipping
+      
+      const taxRateDecimal = settings.billing.taxRate / 100;
+      const subtotalNeto = total / (1 + taxRateDecimal);
+      const taxAmount = total - subtotalNeto;
+      const orderTotal = total + shippingCost;
 
       navigate('/stripe-checkout', { 
         state: { 
           checkoutData,
           shippingMethod,
           shippingCost,
-          subtotal,
+          subtotal: subtotalNeto, // Enviamos la base imponible real
           taxAmount,
           orderTotal,
           direccionCompleta,
-          cartItems: items // Pass cart items to create order after payment
+          cartItems: items
         } 
       });
 
@@ -183,7 +188,7 @@ export function Cart() {
               <div className="summary-details">
                 <div className="summary-row">
                   <span>{t('subtotalLabel')} ({items.reduce((sum, item) => sum + item.quantity, 0)} {items.reduce((sum, item) => sum + item.quantity, 0) === 1 ? t('bookSingular') : t('bookPlural')})</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatPrice(total / (1 + settings.billing.taxRate / 100))}</span>
                 </div>
                 <div className="summary-row" style={{ flexDirection: 'column', gap: '8px', alignItems: 'stretch' }}>
                   <span>{t('shippingMethodLabel')}</span>
@@ -253,20 +258,19 @@ export function Cart() {
 
                 <div className="summary-row">
                   <span>{t('taxesLabel')} ({settings.billing.taxRate}%)</span>
-                  <span>{formatPrice(total * (settings.billing.taxRate / 100))}</span>
+                  <span>{formatPrice(total - (total / (1 + settings.billing.taxRate / 100)))}</span>
                 </div>
 
                 <hr className="summary-divider" />
 
                 <div className="summary-row total-row">
                   <span>{t('estimatedTotalLabel')}</span>
-                  <span>{formatPrice(
+                   <span>{formatPrice(
                     total + 
                     (selectedShippingMethod === 'standard' 
                       ? (total >= settings.shipping.freeShippingThresholdStandard ? 0 : settings.shipping.standardShippingCost)
                       : (total >= settings.shipping.freeShippingThresholdExpress ? 0 : settings.shipping.expressShippingCost)
-                    ) + 
-                    total * (settings.billing.taxRate / 100)
+                    )
                   )}</span>
                 </div>
               </div>
@@ -332,9 +336,12 @@ export function Cart() {
           <div className="checkout-overlay">
             <div className="checkout-modal">
               <CheckoutForm
-                subtotal={total}
-                iva={total * (settings.billing.taxRate / 100)}
-                total={total + (total * (settings.billing.taxRate / 100))}
+                subtotal={total / (1 + settings.billing.taxRate / 100)}
+                iva={total - (total / (1 + settings.billing.taxRate / 100))}
+                total={total + (selectedShippingMethod === 'standard' 
+                  ? (total >= settings.shipping.freeShippingThresholdStandard ? 0 : settings.shipping.standardShippingCost)
+                  : (total >= settings.shipping.freeShippingThresholdExpress ? 0 : settings.shipping.expressShippingCost)
+                )}
                 onSubmit={handleCheckoutSubmit}
                 onCancel={handleCancelCheckout}
                 isProcessing={isProcessing}
