@@ -6,7 +6,7 @@ import { MessageModal } from '../MessageModal'; // Import MessageModal
 
 interface ConfirmReservationModalProps {
   reservation: Reserva;
-  onConfirm: (expirationDate: string) => Promise<void>;
+  onConfirm: (expirationDate: string, startDate: string) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -15,12 +15,12 @@ export function ConfirmReservationModal({
   onConfirm, 
   onCancel 
 }: ConfirmReservationModalProps) {
+  // Set default start date to today
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [expirationDate, setExpirationDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentStock, setCurrentStock] = useState(reservation.libro?.stock || 0);
   const [stockLoading, setStockLoading] = useState(true);
-
-
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -60,8 +60,18 @@ export function ConfirmReservationModal({
   }, [reservation.libro_id]);
 
   const handleConfirm = async () => {
+    if (!startDate) {
+      showModal('Error', 'Por favor selecciona una fecha de inicio de recogida', 'error');
+      return;
+    }
+
     if (!expirationDate) {
       showModal('Error', 'Por favor selecciona una fecha de expiración', 'error');
+      return;
+    }
+
+    if (new Date(expirationDate) <= new Date(startDate)) {
+      showModal('Error', 'La fecha límite debe ser posterior a la fecha de inicio', 'error');
       return;
     }
 
@@ -72,7 +82,7 @@ export function ConfirmReservationModal({
     
     setLoading(true);
     try {
-      await onConfirm(expirationDate);
+      await onConfirm(expirationDate, startDate);
     } finally {
       setLoading(false);
     }
@@ -82,6 +92,7 @@ export function ConfirmReservationModal({
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const minDateStr = minDate.toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
@@ -119,13 +130,26 @@ export function ConfirmReservationModal({
         </div>
         
         <div className="form-group">
+          <label htmlFor="start-date">Fecha inicial de recogida *</label>
+          <input 
+            id="start-date"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            min={todayStr}
+            required
+            disabled={loading}
+          />
+        </div>
+
+        <div className="form-group">
           <label htmlFor="expiration-date">Fecha límite para recoger *</label>
           <input 
             id="expiration-date"
             type="date"
             value={expirationDate}
             onChange={(e) => setExpirationDate(e.target.value)}
-            min={minDateStr}
+            min={startDate || minDateStr}
             required
             disabled={loading}
           />

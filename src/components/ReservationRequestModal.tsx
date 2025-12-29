@@ -1,4 +1,5 @@
-import { X, CalendarClock, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, CalendarClock, BookOpen, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
 import '../styles/components/ReservationRequestModal.css';
 
 interface ReservationRequestModalProps {
@@ -18,6 +19,15 @@ export function ReservationRequestModal({
   isProcessing = false,
   isSuccess = false
 }: ReservationRequestModalProps) {
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // Reset checkbox when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setAcceptedTerms(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -74,16 +84,43 @@ export function ReservationRequestModal({
                 </p>
               </div>
 
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg text-sm">
+                <div className="flex items-start gap-2 mb-2 text-blue-800 dark:text-blue-300 font-medium">
+                  <MapPin size={18} className="shrink-0 mt-0.5" />
+                  <span>Información de Recogida</span>
+                </div>
+                <div className="text-blue-700 dark:text-blue-400 pl-6 space-y-2">
+                  <p>
+                    Recomendamos este servicio para la <strong>provincia de Madrid</strong> (recogida personal). 
+                    Si no puedes desplazarte, por favor utiliza el servicio de <strong>compra directa</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-4 flex items-start gap-3 px-1">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms-checkbox"
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    disabled={isProcessing}
+                  />
+                </div>
+                <div className="text-sm">
+                  <label htmlFor="terms-checkbox" className="font-medium text-gray-700 dark:text-gray-300 select-none cursor-pointer">
+                    He leído la información sobre recogida y accesibilidad
+                  </label>
+                </div>
+              </div>
+
               <div className="reservation-modal__warning">
                 <AlertCircle className="reservation-modal__warning-icon" size={20} />
                 <p className="m-0">
                    Te notificaremos automáticamente una vez que la reserva haya sido confirmada y te informaremos sobre el plazo de recogida.
                 </p>
               </div>
-
-              <p className="reservation-modal__text text-center font-medium mt-2">
-                ¿Deseas continuar con la reserva?
-              </p>
             </div>
 
             <div className="reservation-modal__footer">
@@ -97,7 +134,9 @@ export function ReservationRequestModal({
               <button 
                 onClick={onConfirm} 
                 className="reservation-modal__btn reservation-modal__btn--confirm"
-                disabled={isProcessing}
+                disabled={isProcessing || !acceptedTerms}
+                title={!acceptedTerms ? "Debes aceptar los términos de recogida para continuar" : ""}
+                style={!acceptedTerms ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
                 {isProcessing ? (
                   <>

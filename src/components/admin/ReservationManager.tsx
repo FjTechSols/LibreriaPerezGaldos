@@ -71,7 +71,7 @@ export function ReservationManager() {
     setShowConfirmModal(true);
   };
 
-  const handleConfirmReservation = async (expirationDate: string) => {
+  const handleConfirmReservation = async (expirationDate: string, startDate: string) => {
     if (!selectedReservation || !user) return;
 
     try {
@@ -83,7 +83,7 @@ export function ReservationManager() {
         selectedReservation.usuario_id,
         'reserva_confirmada',
         'Reserva Confirmada',
-        `Tu reserva para "${selectedReservation.libro?.titulo}" ha sido confirmada. Recógela antes del ${new Date(expirationDate).toLocaleDateString('es-ES')}.`,
+        `Tu reserva para "${selectedReservation.libro?.titulo}" ha sido confirmada. Puede recogerla desde el ${new Date(startDate).toLocaleDateString('es-ES')} hasta el ${new Date(expirationDate).toLocaleDateString('es-ES')}.`,
         selectedReservation.id
       );
 
