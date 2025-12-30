@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InvoiceFormData, InvoiceItem } from '../../../types';
 import { obtenerLibros, buscarLibros } from '../../../services/libroService';
-import { Plus, Trash2, FileText, Search } from 'lucide-react';
-import { getClientes } from '../../../services/clienteService';
+import { Plus, Trash2, FileText, Search, User, Building2, School, X } from 'lucide-react'; // Added icons
+import { getClientes, crearCliente } from '../../../services/clienteService';
+import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import type { Cliente, Book } from '../../../types';
 import '../../../styles/components/InvoiceForm.css';
 
@@ -39,9 +40,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   const [unitPrice, setUnitPrice] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [selectedClienteId, setSelectedClienteId] = useState<string>('');
+  /* Removed selectedClienteId state - using only formData */
   /* Removed isManualEntry state */
-  const [loadingClientes, setLoadingClientes] = useState(false);
+  /* Removed isManualEntry state */
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
@@ -60,68 +61,167 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       }
 
       // Cargar clientes
-      setLoadingClientes(true);
       try{
         const clientesData = await getClientes();
         setClientes(clientesData.filter(c => c.activo));
       } catch (error) {
         console.error('Error loading clients:', error);
-      } finally {
-        setLoadingClientes(false);
       }
     };
     fetchData();
   }, []);
 
-  /* State for Client Mode */
-  const [clientMode, setClientMode] = useState<'existing' | 'particular' | 'empresa' | 'institucion'>('existing');
-  const [nombreParticular, setNombreParticular] = useState('');
-  const [apellidosParticular, setApellidosParticular] = useState('');
+  /* Client Autocomplete State */
+  const [clienteSearch, setClienteSearch] = useState("");
+  const [showClienteSuggestions, setShowClienteSuggestions] = useState(false);
+  const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
+  const clientAutocompleteRef = useRef<HTMLDivElement>(null);
 
-  /* Effects to syncing fields */
+  /* Client Creation Modal State */
+  const [showClienteModal, setShowClienteModal] = useState(false);
+  const [clienteModalData, setClienteModalData] = useState({
+      nombre: '',
+      apellidos: '',
+      email: '',
+      nif: '',
+      tipo: 'particular' as 'particular' | 'empresa' | 'institucion',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      codigo_postal: '',
+      provincia: '',
+      pais: 'España',
+      notas: '',
+      activo: true,
+      persona_contacto: '',
+      cargo: '',
+      web: ''
+  });
+
+  /* Message Modal State */
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalConfig, setMessageModalConfig] = useState<{
+    title: string;
+    message: string;
+    type: 'info' | 'error' | 'success'; // removed warning to match typical usage or keep it if needed
+  }>({ title: '', message: '', type: 'info' });
+
+  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' = 'info') => {
+    setMessageModalConfig({ title, message, type });
+    setShowMessageModal(true);
+  };
+
+  /* Filter Clientes Effect */
   useEffect(() => {
-    if (clientMode === 'particular') {
-      setFormData(prev => ({
-        ...prev,
-        customer_name: `${nombreParticular} ${apellidosParticular}`.trim()
-      }));
+    if (clienteSearch.trim()) {
+      const filtered = clientes
+        .filter((cliente) => {
+          const fullName = `${cliente.nombre || ''} ${cliente.apellidos || ''}`.toLowerCase();
+          const search = clienteSearch.toLowerCase();
+          return (
+            fullName.includes(search) ||
+            cliente.email?.toLowerCase().includes(search) ||
+            cliente.nif?.toLowerCase().includes(search)
+          );
+        })
+        .filter((c) => c.activo);
+      setFilteredClientes(filtered);
+    } else {
+      setFilteredClientes(clientes.filter((c) => c.activo));
     }
-  }, [nombreParticular, apellidosParticular, clientMode]);
+  }, [clienteSearch, clientes]);
 
-  /* Reset form when switching modes */
+  /* Click Outside Effect for Client Suggestions */
   useEffect(() => {
-     if (clientMode === 'existing') {
-       // Returning to existing: clear manual fields if needed, or just let the dropdown handler do it
-       setNombreParticular('');
-       setApellidosParticular('');
-     } else {
-       // Switching to manual: clear the selected existing client
-       setSelectedClienteId('');
-       setFormData(prev => ({
-          ...prev,
-          customer_name: '',
-          customer_address: '',
-          customer_nif: ''
-       }));
-       // If switching to particular, clear specific particular fields too? Maybe keep them for UX if switching fast.
-       // But we should ensure formData is clean.
-     }
-  }, [clientMode]);
-
-
-  useEffect(() => {
-    if (selectedClienteId && clientMode === 'existing') {
-      const cliente = clientes.find(c => c.id === selectedClienteId);
-      if (cliente) {
-        setFormData(prev => ({
-          ...prev,
-          customer_name: `${cliente.nombre} ${cliente.apellidos}`,
-          customer_address: cliente.direccion || '',
-          customer_nif: cliente.nif || ''
-        }));
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        clientAutocompleteRef.current &&
+        !clientAutocompleteRef.current.contains(event.target as Node)
+      ) {
+        setShowClienteSuggestions(false);
       }
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  /* Handlers */
+  const handleSelectCliente = (cliente: Cliente) => {
+    setClienteSearch(`${cliente.nombre} ${cliente.apellidos}`);
+    setFormData(prev => ({
+        ...prev,
+        customer_name: `${cliente.nombre} ${cliente.apellidos}`,
+        customer_nif: cliente.nif || '',
+        customer_address: cliente.direccion || ''
+    }));
+    setShowClienteSuggestions(false);
+  };
+
+  const handleOpenClienteModal = () => {
+    setClienteModalData({
+      nombre: '',
+      apellidos: '',
+      email: '',
+      nif: '',
+      tipo: 'particular',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      codigo_postal: '',
+      provincia: '',
+      pais: 'España',
+      notas: '',
+      activo: true,
+      persona_contacto: '',
+      cargo: '',
+      web: ''
+    });
+    setShowClienteModal(true);
+  };
+
+  const handleCloseClienteModal = () => {
+    setShowClienteModal(false);
+  };
+
+  const handleSubmitClienteModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!clienteModalData.nombre.trim()) {
+      showModal('Error', 'El nombre es obligatorio', 'error');
+      return;
     }
-  }, [selectedClienteId, clientes, clientMode]);
+
+    if (clienteModalData.tipo === 'particular' && !clienteModalData.apellidos.trim()) {
+      showModal('Error', 'Los apellidos son obligatorios para particulares', 'error');
+      return;
+    }
+
+    // setLoadingClientes(true); // Optional: show loading state
+    try {
+      const nuevoCliente = await crearCliente(clienteModalData);
+      
+      if (!nuevoCliente) {
+        showModal('Error', 'Error al crear cliente', 'error');
+        return;
+      }
+      
+      // Update local clients list
+      setClientes(prev => [...prev, nuevoCliente]);
+
+      // Auto-select
+      handleSelectCliente(nuevoCliente);
+      
+      handleCloseClienteModal();
+      showModal('Éxito', 'Cliente creado exitosamente', 'success');
+    } catch (error) {
+      console.error('Error creating client:', error);
+      showModal('Error', 'Error al crear cliente', 'error');
+    }
+  };
 
   // ... (keeping other effects) ...
   /* Removed client-side filtering effect */
@@ -213,27 +313,32 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     });
   };
 
-  const calculateSubtotal = () => {
+  const calculateItemsGross = () => {
     return formData.items.reduce((sum, item) => sum + item.line_total, 0);
   };
 
+  const calculateSubtotal = () => {
+    // This is effectively the Base Imponible (Net Amount)
+    const itemsGross = calculateItemsGross();
+    return itemsGross / (1 + formData.tax_rate / 100);
+  };
+
   const calculateTax = () => {
-    return calculateSubtotal() * (formData.tax_rate / 100);
+    const itemsGross = calculateItemsGross();
+    return itemsGross - calculateSubtotal();
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTax() + (formData.shipping_cost || 0);
+    // Total is Gross Items + Shipping
+    // Note: This assumes Shipping is added AFTER tax or is inherently gross/exempt in this simple logic, matching backend.
+    return calculateItemsGross() + (formData.shipping_cost || 0);
   };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.customer_name.trim()) {
-      newErrors.customer_name = clientMode === 'empresa' 
-        ? 'La Razón Social es obligatoria' 
-        : clientMode === 'institucion' 
-          ? 'El Nombre de la Institución es obligatorio' 
-          : 'El nombre es obligatorio';
+      newErrors.customer_name = 'El nombre / razón social es obligatorio';
     }
 
     if (!formData.customer_address.trim()) {
@@ -241,13 +346,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     }
 
     if (!formData.customer_nif.trim()) {
-       newErrors.customer_nif = clientMode === 'particular'
-        ? 'El DNI/NIF es obligatorio'
-        : clientMode === 'empresa' || clientMode === 'institucion'
-           ? 'El CIF/NIF es obligatorio'
-           : 'El NIF es obligatorio';
-
+       newErrors.customer_nif = 'El NIF/CIF/DNI es obligatorio';
     } else if (!/^[A-Z0-9]{9}$/.test(formData.customer_nif.toUpperCase())) {
+      // Basic format check, can be relaxed if needed
       newErrors.customer_nif = 'El NIF/CIF debe tener 9 caracteres alfanuméricos';
     }
 
@@ -279,172 +380,99 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       <div className="form-section">
         <h3>Datos del cliente</h3>
         
-        <div className="client-mode-selector" style={{ marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-             <label className="mode-option" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.5rem', border: clientMode === 'existing' ? '1px solid currentColor' : '1px solid transparent', borderRadius: '4px' }}>
-               <input 
-                 type="radio" 
-                 name="clientMode" 
-                 value="existing" 
-                 checked={clientMode === 'existing'} 
-                 onChange={() => setClientMode('existing')}
-               />
-               <span style={{ fontWeight: 500 }}>Cliente Existente</span>
+        <div className="form-group" style={{ position: 'relative', marginBottom: '1.5rem' }}>
+             <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Seleccionar cliente</span>
+                <button
+                    type="button"
+                    onClick={handleOpenClienteModal}
+                    className="btn-link"
+                    style={{ fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: 0 }}
+                >
+                    <Plus size={14} />
+                    Nuevo Cliente
+                </button>
              </label>
-             <label className="mode-option" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.5rem', border: clientMode === 'particular' ? '1px solid currentColor' : '1px solid transparent', borderRadius: '4px' }}>
-               <input 
-                 type="radio" 
-                 name="clientMode" 
-                 value="particular" 
-                 checked={clientMode === 'particular'} 
-                 onChange={() => setClientMode('particular')}
-               />
-               <span>Particular</span>
-             </label>
-             <label className="mode-option" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.5rem', border: clientMode === 'empresa' ? '1px solid currentColor' : '1px solid transparent', borderRadius: '4px' }}>
-               <input 
-                 type="radio" 
-                 name="clientMode" 
-                 value="empresa" 
-                 checked={clientMode === 'empresa'} 
-                 onChange={() => setClientMode('empresa')}
-               />
-               <span>Empresa</span>
-             </label>
-             <label className="mode-option" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.5rem', border: clientMode === 'institucion' ? '1px solid currentColor' : '1px solid transparent', borderRadius: '4px' }}>
-               <input 
-                 type="radio" 
-                 name="clientMode" 
-                 value="institucion" 
-                 checked={clientMode === 'institucion'} 
-                 onChange={() => setClientMode('institucion')}
-               />
-               <span>Institución</span>
-             </label>
-         </div>
+             <div className="search-input-wrapper">
+                 <Search className="search-icon-absolute" size={18} style={{ color: '#9ca3af', position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                 <input
+                    type="text"
+                    placeholder="Buscar cliente por nombre, NIF o email..."
+                    value={clienteSearch}
+                    onChange={(e) => {
+                        setClienteSearch(e.target.value);
+                        if (!e.target.value) {
+                             setFormData(prev => ({ ...prev, customer_name: '', customer_nif: '', customer_address: '' }));
+                        }
+                    }}
+                    onFocus={() => {
+                        if (filteredClientes.length > 0) setShowClienteSuggestions(true);
+                    }}
+                    className="form-input"
+                    style={{ paddingLeft: '2.5rem' }}
+                    autoComplete="off"
+                 />
+             </div>
 
-        {clientMode === 'existing' && (
-          <div className="form-group">
-            <label>Seleccionar cliente</label>
-            <select
-              value={selectedClienteId}
-              onChange={(e) => setSelectedClienteId(e.target.value)}
-              className="form-select"
-              disabled={loadingClientes}
-            >
-              <option value="">{loadingClientes ? 'Cargando...' : 'Seleccionar cliente...'}</option>
-              {clientes.map(cliente => (
-                <option key={cliente.id} value={cliente.id}>
-                  {cliente.nombre} {cliente.apellidos} - {cliente.nif || 'Sin NIF'}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+             {showClienteSuggestions && filteredClientes.length > 0 && (
+                <div className="autocomplete-suggestions" ref={clientAutocompleteRef}>
+                    {filteredClientes.map(cliente => (
+                        <div 
+                            key={cliente.id} 
+                            className="suggestion-item"
+                            onClick={() => handleSelectCliente(cliente)}
+                        >
+                            <div style={{ fontWeight: 500 }}>{cliente.nombre} {cliente.apellidos}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                {cliente.nif || 'Sin NIF'} • {cliente.email || 'Sin email'}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+             )}
+             
+             {showClienteSuggestions && clienteSearch && filteredClientes.length === 0 && (
+                 <div className="autocomplete-suggestions" style={{ padding: '0.75rem', fontSize: '0.875rem', color: '#64748b' }}>
+                     No se encontraron clientes. 
+                     <button type="button" onClick={handleOpenClienteModal} className="btn-link" style={{ marginLeft: '0.5rem' }}>Crear nuevo</button>
+                 </div>
+             )}
+        </div>
 
         <div className="form-grid">
-          
-          {/* PARTICULAR FIELDS */}
-          {clientMode === 'particular' && (
-             <>
-               <div className="form-group">
-                <label>Nombre *</label>
-                <input
-                  type="text"
-                  value={nombreParticular}
-                  onChange={(e) => setNombreParticular(e.target.value)}
-                  className={errors.customer_name ? 'error' : ''}
-                />
+           <div className="form-group full-width">
+                 <label>Nombre / Razón Social *</label>
+                 <input
+                   type="text"
+                   value={formData.customer_name}
+                   onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                   className={errors.customer_name ? 'error' : ''}
+                 />
                  {errors.customer_name && <span className="error-message">{errors.customer_name}</span>}
-              </div>
-              <div className="form-group">
-                <label>Apellidos *</label>
-                <input
-                  type="text"
-                  value={apellidosParticular}
-                  onChange={(e) => setApellidosParticular(e.target.value)}
-                />
-              </div>
-            </>
-          )}
+           </div>
 
-          {/* EMPRESA FIELDS */}
-          {clientMode === 'empresa' && (
-              <div className="form-group full-width">
-                <label>Razón Social *</label>
-                <input
-                  type="text"
-                  value={formData.customer_name}
-                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  className={errors.customer_name ? 'error' : ''}
-                />
-                {errors.customer_name && <span className="error-message">{errors.customer_name}</span>}
-              </div>
-          )}
+           <div className="form-group">
+             <label>NIF / CIF / DNI *</label>
+             <input
+               type="text"
+               value={formData.customer_nif}
+               onChange={(e) => setFormData({ ...formData, customer_nif: e.target.value.toUpperCase() })}
+               maxLength={9}
+               className={errors.customer_nif ? 'error' : ''}
+             />
+             {errors.customer_nif && <span className="error-message">{errors.customer_nif}</span>}
+           </div>
 
-           {/* INSTITUCION FIELDS */}
-           {clientMode === 'institucion' && (
-              <div className="form-group full-width">
-                <label>Nombre Institución *</label>
-                <input
-                  type="text"
-                  value={formData.customer_name}
-                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  className={errors.customer_name ? 'error' : ''}
-                />
-                {errors.customer_name && <span className="error-message">{errors.customer_name}</span>}
-              </div>
-          )}
-
-          {/* SHARED FIELDS / EXISTING MODE FIELDS */}
-          {clientMode === 'existing' && (
-            <div className="form-group">
-              <label>Nombre *</label>
-              <input
-                type="text"
-                value={formData.customer_name}
-                // Allow edit even if existing selected? Usually yes, but user requirement was specific about manual. 
-                // Let's keep it behaving as before: disabled logic or populated.
-                // The previous code had `disabled={!isManualEntry && !!selectedClienteId}`
-                // If existing: disabled if client selected? Or always editable?
-                // Let's keep consistent: if mode is existing, disable it if a client is selected, to prevent accidental overwrite of DB data in the View?
-                // Actually, this is *Creating* an invoice. We populate from DB, but maybe we want to tweak it for this invoice only.
-                // But the fields down below (customer_nif etc) were the ones being "Manual".
-                // If mode is 'existing', we show the standard fields populated.
-                onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                className={errors.customer_name ? 'error' : ''}
-                disabled={!!selectedClienteId} 
-              />
-               {errors.customer_name && <span className="error-message">{errors.customer_name}</span>}
-            </div>
-          )}
-
-          <div className="form-group">
-            <label>
-              {clientMode === 'particular' ? 'DNI/NIF' : clientMode === 'empresa' ? 'CIF' : clientMode === 'institucion' ? 'NIF/CIF' : 'NIF'} *
-            </label>
-            <input
-              type="text"
-              value={formData.customer_nif}
-              onChange={(e) => setFormData({ ...formData, customer_nif: e.target.value.toUpperCase() })}
-              placeholder={clientMode === 'particular' ? "12345678A" : clientMode === 'existing' ? "" : "B12345678"}
-              maxLength={9}
-              className={errors.customer_nif ? 'error' : ''}
-              disabled={clientMode === 'existing' && !!selectedClienteId}
-            />
-            {errors.customer_nif && <span className="error-message">{errors.customer_nif}</span>}
-          </div>
-
-          <div className="form-group full-width">
-            <label>Dirección *</label>
-            <input
-              type="text"
-              value={formData.customer_address}
-              onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
-              className={errors.customer_address ? 'error' : ''}
-              disabled={clientMode === 'existing' && !!selectedClienteId}
-            />
-            {errors.customer_address && <span className="error-message">{errors.customer_address}</span>}
-          </div>
+           <div className="form-group full-width">
+             <label>Dirección *</label>
+             <input
+               type="text"
+               value={formData.customer_address}
+               onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
+               className={errors.customer_address ? 'error' : ''}
+             />
+             {errors.customer_address && <span className="error-message">{errors.customer_address}</span>}
+           </div>
         </div>
       </div>
 
@@ -653,7 +681,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
       <div className="invoice-summary">
         <div className="summary-row">
-          <span>Subtotal:</span>
+          <span>Base Imponible:</span>
           <span className="summary-amount">{formatCurrency(calculateSubtotal())}</span>
         </div>
         {(formData.shipping_cost || 0) > 0 && (
@@ -694,6 +722,177 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
           </button>
         </div>
       </div>
+
+       {/* Client Creation Modal */}
+      {showClienteModal && (
+        <div className="modal-overlay" onClick={handleCloseClienteModal} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%', background: 'var(--bg-card)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header" style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Crear Nuevo Cliente</h2>
+              <button 
+                type="button"
+                onClick={handleCloseClienteModal} 
+                className="modal-close"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.5rem' }}>
+                {/* Client Type Tabs */}
+                <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '0.5rem' }}>
+                  {(['particular', 'empresa', 'institucion'] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setClienteModalData({...clienteModalData, tipo: t})}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        border: 'none',
+                        background: clienteModalData.tipo === t ? '#eff6ff' : 'transparent',
+                        color: clienteModalData.tipo === t ? '#2563eb' : '#6b7280',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        borderRadius: '0.5rem 0.5rem 0 0',
+                        borderBottom: clienteModalData.tipo === t ? '2px solid #2563eb' : '2px solid transparent',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {t === 'particular' && <User size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t === 'empresa' && <Building2 size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t === 'institucion' && <School size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group full-width">
+                    <label>{clienteModalData.tipo === 'particular' ? 'Nombre *' : (clienteModalData.tipo === 'empresa' ? 'Razón Social *' : 'Nombre Institución *')}</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.nombre}
+                      onChange={(e) => setClienteModalData({...clienteModalData, nombre: e.target.value})}
+                      required 
+                    />
+                  </div>
+                  
+                  {clienteModalData.tipo === 'particular' && (
+                    <div className="form-group full-width">
+                      <label>Apellidos *</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={clienteModalData.apellidos}
+                        onChange={(e) => setClienteModalData({...clienteModalData, apellidos: e.target.value})}
+                        required 
+                      />
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input 
+                      type="email" 
+                      className="form-input" 
+                      value={clienteModalData.email}
+                      onChange={(e) => setClienteModalData({...clienteModalData, email: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>{clienteModalData.tipo === 'particular' ? 'NIF/DNI' : 'CIF'}</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.nif}
+                      onChange={(e) => setClienteModalData({...clienteModalData, nif: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Teléfono</label>
+                    <input 
+                      type="tel" 
+                      className="form-input" 
+                      value={clienteModalData.telefono}
+                      onChange={(e) => setClienteModalData({...clienteModalData, telefono: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Dirección</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.direccion}
+                      onChange={(e) => setClienteModalData({...clienteModalData, direccion: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Ciudad</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.ciudad}
+                      onChange={(e) => setClienteModalData({...clienteModalData, ciudad: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Código Postal</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.codigo_postal}
+                      onChange={(e) => setClienteModalData({...clienteModalData, codigo_postal: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Provincia</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.provincia}
+                      onChange={(e) => setClienteModalData({...clienteModalData, provincia: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>País</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={clienteModalData.pais}
+                      onChange={(e) => setClienteModalData({...clienteModalData, pais: e.target.value})}
+                    />
+                  </div>
+                </div>
+            </div>
+
+            <div className="modal-footer" style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                <button type="button" onClick={handleCloseClienteModal} className="btn-cancelar" style={{ padding: '0.5rem 1rem', background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '0.375rem', cursor: 'pointer' }}>
+                  Cancelar
+                </button>
+                <button type="button" onClick={handleSubmitClienteModal} className="btn-guardar" style={{ padding: '0.5rem 1rem', background: '#2563eb', color: 'white', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>
+                  Crear Cliente
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <MessageModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title={messageModalConfig.title}
+        message={messageModalConfig.message}
+        type={messageModalConfig.type}
+      />
     </form>
   );
 };

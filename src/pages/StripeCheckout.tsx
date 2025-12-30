@@ -9,7 +9,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useSettings } from '../context/SettingsContext';
-import { crearPedido, confirmOrderAndDeductStock } from '../services/pedidoService';
+import { crearPedido, confirmOrderAndDeductStock, obtenerPedidoPorId, actualizarEstadoPedido } from '../services/pedidoService';
 import { findOrCreateCliente } from '../services/clienteService';
 import { ArrowLeft } from 'lucide-react';
 import { MessageModal } from '../components/MessageModal'; // Import MessageModal
@@ -27,7 +27,8 @@ interface StripeCheckoutState {
   taxAmount: number;
   orderTotal: number;
   direccionCompleta: string;
-  cartItems: any[];
+  cartItems?: any[];
+  orderId?: string; // New: Support for existing order payment
 }
 
 export default function StripeCheckout() {
@@ -40,7 +41,10 @@ export default function StripeCheckout() {
   const { settings } = useSettings();
 
   // Extract state passed from Cart
-  const state = location.state as StripeCheckoutState | undefined;
+  const locationState = location.state as StripeCheckoutState | undefined;
+  
+  // Local state to handle potentially fetched order data
+  const [checkoutState, setCheckoutState] = useState<StripeCheckoutState | undefined>(locationState);
 
   const [clientSecret, setClientSecret] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -66,28 +70,85 @@ export default function StripeCheckout() {
   };
 
   useEffect(() => {
-    if (!user || !state || !state.cartItems || state.cartItems.length === 0) {
-      navigate('/carrito');
-      return;
+    // If we already have full data from Cart navigation (locationState), use it.
+    if (locationState?.cartItems && locationState.cartItems.length > 0) {
+       setCheckoutState(locationState); // Explicitly set it
+       initializePayment(locationState);
+       return;
     }
 
-    initializePayment();
+    // If we have an orderID but no items (e.g. from Dashboard), fetch it.
+    if (locationState?.orderId) {
+       initializeExistingOrderPayment(locationState.orderId);
+       return;
+    }
+
+    // Fallback
+    if (!locationState) {
+        navigate('/carrito');
+    }
   }, []);
 
-  const initializePayment = async () => {
+  const initializeExistingOrderPayment = async (orderId: string) => {
+      try {
+          setIsLoading(true);
+          const pedido = await obtenerPedidoPorId(parseInt(orderId));
+          
+          if (!pedido) throw new Error("Pedido no encontrado");
+
+          // Construct state from existing order
+          const loadedState: StripeCheckoutState = {
+              orderId: orderId,
+              checkoutData: {
+                  nombre: pedido.cliente?.nombre || pedido.usuario?.nombre_completo || '',
+                  apellidos: pedido.cliente?.apellidos || '',
+                  email: pedido.cliente?.email || pedido.usuario?.email || '',
+                  telefono: pedido.cliente?.telefono || '',
+                  direccion: pedido.direccion_envio || '',
+                  ciudad: '', 
+                  codigo_postal: '',
+                  provincia: '',
+                  pais: 'España',
+                  observaciones: pedido.observaciones || ''
+              } as CheckoutData,
+              orderTotal: pedido.total || 0,
+              subtotal: pedido.subtotal || 0,
+              taxAmount: pedido.iva || 0,
+              shippingCost: pedido.coste_envio || 0,
+              shippingMethod: 'standard', // Default or infer from cost/name
+              direccionCompleta: pedido.direccion_envio || '',
+              cartItems: pedido.detalles?.map(d => ({
+                  book: {
+                      id: d.libro?.id.toString() || '0',
+                      title: d.libro?.titulo || d.nombre_externo || 'Libro',
+                      price: d.precio_unitario
+                  },
+                  quantity: d.cantidad
+              })) || []
+          };
+          
+          setCheckoutState(loadedState);
+          initializePayment(loadedState);
+      } catch (err) {
+          console.error("Error loading order:", err);
+          setError("Error al cargar el pedido");
+          setIsLoading(false);
+      }
+  };
+
+  const initializePayment = async (currentState: StripeCheckoutState) => {
     try {
       setIsLoading(true);
 
-      if (!state) {
-        throw new Error('No checkout data found');
-      }
-
       // Create payment intent WITHOUT creating the order
+      // Stripe expects amount in cents
+      const amountInCents = Math.round(currentState.orderTotal * 100);
+      
       const { clientSecret: secret } = await stripeService.createPaymentIntent(
-        state.orderTotal,
+        amountInCents,
         {
-          cliente_email: state.checkoutData.email,
-          cliente_nombre: `${state.checkoutData.nombre} ${state.checkoutData.apellidos}`,
+          cliente_email: currentState.checkoutData.email,
+          cliente_nombre: `${currentState.checkoutData.nombre} ${currentState.checkoutData.apellidos}`,
         }
       );
 
@@ -102,23 +163,44 @@ export default function StripeCheckout() {
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
     try {
-      if (!state) throw new Error("Checkout data not found");
+      // PATH A: Pay for EXISTING Order
+      if (checkoutState?.orderId) {
+          // Verify payment on backend if needed, or just update status
+          // Update status to 'procesando' (Paid)
+          const result = await actualizarEstadoPedido(parseInt(checkoutState.orderId), 'procesando');
+          
+          if (!result.success) {
+               throw new Error(result.error || "Error al actualizar estado del pedido");
+          }
 
-      // NOW create the order after successful payment
+          navigate('/pago-completado', {
+            state: {
+                pedidoId: parseInt(checkoutState.orderId),
+                paymentIntentId,
+                total: checkoutState.orderTotal,
+            },
+        });
+        return;
+      }
+
+      // PATH B: Create NEW Order (Legacy / Direct Flow)
+      if (!checkoutState) throw new Error("Checkout data not found");
+
+      // ... (Rest of existing logic for creating client and order) ...
       const cliente = await findOrCreateCliente({
-        nombre: state.checkoutData.nombre,
-        apellidos: state.checkoutData.apellidos,
-        email: state.checkoutData.email,
-        telefono: state.checkoutData.telefono,
-        direccion: state.checkoutData.direccion,
-        ciudad: state.checkoutData.ciudad,
-        codigo_postal: state.checkoutData.codigo_postal,
-        provincia: state.checkoutData.provincia,
-        pais: state.checkoutData.pais,
+        nombre: checkoutState.checkoutData.nombre,
+        apellidos: checkoutState.checkoutData.apellidos,
+        email: checkoutState.checkoutData.email,
+        telefono: checkoutState.checkoutData.telefono,
+        direccion: checkoutState.checkoutData.direccion,
+        ciudad: checkoutState.checkoutData.ciudad,
+        codigo_postal: checkoutState.checkoutData.codigo_postal,
+        provincia: checkoutState.checkoutData.provincia,
+        pais: checkoutState.checkoutData.pais,
         tipo: 'particular'
       });
 
-      const detalles = state.cartItems.map(item => ({
+      const detalles = checkoutState.cartItems!.map(item => ({
         libro_id: parseInt(item.book.id),
         cantidad: item.quantity,
         precio_unitario: item.book.price
@@ -149,10 +231,10 @@ export default function StripeCheckout() {
         cliente_id: cliente.id,
         tipo: 'interno',
         metodo_pago: actualPaymentMethod,
-        direccion_envio: state.direccionCompleta,
-        transportista: state.shippingMethod === 'standard' ? 'Correos (Estándar)' : 'Mensajería (Express)',
-        coste_envio: state.shippingCost,
-        observaciones: state.checkoutData.observaciones || undefined,
+        direccion_envio: checkoutState.direccionCompleta,
+        transportista: checkoutState.shippingMethod === 'standard' ? 'Correos (Estándar)' : 'Mensajería (Express)',
+        coste_envio: checkoutState.shippingCost,
+        observaciones: checkoutState.checkoutData.observaciones || undefined,
         taxRate: settings.billing.taxRate / 100,
         detalles
       });
@@ -179,7 +261,7 @@ export default function StripeCheckout() {
                 state: {
                   pedidoId: pedido.id,
                   paymentIntentId,
-                  total: state.orderTotal,
+                  total: checkoutState.orderTotal,
                 },
               });
           }
@@ -193,7 +275,7 @@ export default function StripeCheckout() {
         state: {
           pedidoId: pedido.id,
           paymentIntentId,
-          total: state.orderTotal,
+          total: checkoutState.orderTotal,
         },
       });
     } catch (err) {
@@ -264,7 +346,7 @@ export default function StripeCheckout() {
           <div className="checkout-info">
             <h3>{t('orderSummary')}</h3>
             <div className="order-items">
-              {state?.cartItems.map(item => (
+              {checkoutState?.cartItems?.map(item => (
                 <div key={item.book.id} className="order-item">
                   <span>{item.book.title}</span>
                   <span>
@@ -277,21 +359,21 @@ export default function StripeCheckout() {
             <div className="order-summary-details">
               <div className="summary-detail-row">
                 <span className="summary-label">{t('subtotalLabel')}:</span>
-                <span className="summary-value">€{state?.subtotal.toFixed(2)}</span>
+                <span className="summary-value">€{checkoutState?.subtotal.toFixed(2)}</span>
               </div>
               <div className="summary-detail-row">
                 <span className="summary-label">{t('shipping')}:</span>
-                <span className="summary-value">{state?.shippingCost ? `€${state.shippingCost.toFixed(2)}` : t('freeLabel')}</span>
+                <span className="summary-value">{checkoutState?.shippingCost ? `€${checkoutState.shippingCost.toFixed(2)}` : t('freeLabel')}</span>
               </div>
               <div className="summary-detail-row">
                 <span className="summary-label">{t('iva')}:</span>
-                <span className="summary-value">€{state?.taxAmount.toFixed(2)}</span>
+                <span className="summary-value">€{checkoutState?.taxAmount.toFixed(2)}</span>
               </div>
             </div>
 
             <div className="order-total" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '2px solid #eee' }}>
               <strong>{t('checkoutTotal')}:</strong>
-              <strong>€{state?.orderTotal.toFixed(2)}</strong>
+              <strong>€{checkoutState?.orderTotal.toFixed(2)}</strong>
             </div>
           </div>
         </div>
@@ -311,7 +393,7 @@ export default function StripeCheckout() {
             key={actualTheme}
           >
             <StripePaymentForm
-              amount={state?.orderTotal || 0}
+              amount={checkoutState?.orderTotal || 0}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
             />

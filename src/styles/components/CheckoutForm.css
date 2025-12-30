@@ -497,3 +497,16 @@
   border-color: #059669 !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }
+
+/* Force override for select text color in dark mode */
+.dark-mode select.form-input {
+  color: #f1f5f9 !important;
+  opacity: 1; /* Fix for some browsers dimming disabled/select inputs */
+}
+
+/* Ensure placeholder/default options are also visible if needed */
+.dark-mode select.form-input option {
+  color: #f1f5f9;
+  background-color: #0f172a;
+}
+

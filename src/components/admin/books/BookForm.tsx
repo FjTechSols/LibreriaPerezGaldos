@@ -7,6 +7,7 @@ import { supabase } from '../../../lib/supabase'; // Import supabase
 import { obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
+import { buscarEditoriales } from '../../../services/libroService';
 
 interface BookFormProps {
   isOpen: boolean;
@@ -58,6 +59,26 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' = 'info') => {
     setMessageModalConfig({ title, message, type });
     setShowMessageModal(true);
+  };
+
+  // State for Editorial Autocomplete
+  const [editorialSuggestions, setEditorialSuggestions] = useState<string[]>([]);
+  const [showEditorialSuggestions, setShowEditorialSuggestions] = useState(false);
+
+  const handleEditorialChange = async (val: string) => {
+      setFormData({...formData, publisher: val});
+      if (val.length >= 2) {
+          try {
+             const sugs = await buscarEditoriales(val);
+             setEditorialSuggestions(sugs);
+             setShowEditorialSuggestions(true);
+          } catch(e) {
+             console.error(e);
+          }
+      } else {
+          setEditorialSuggestions([]);
+          setShowEditorialSuggestions(false);
+      }
   };
 
 
@@ -291,6 +312,22 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const handleSubmit = async () => {
       setIsSubmitting(true);
       try {
+          // Strict Editorial Check
+          if (formData.publisher && formData.publisher.trim()) {
+             // We must verify exact match against DB to prevent creation
+             const { data: edExists } = await supabase
+                .from('editoriales')
+                .select('id')
+                .ilike('nombre', formData.publisher.trim())
+                .maybeSingle(); // Use maybeSingle to avoid 406 if multiple (shouldn't happen with unique names but robust)
+             
+             if (!edExists) {
+                 showModal('Editorial Desconocida', 'La editorial indicada no existe en la base de datos. Por favor seleccione una de las sugerencias.', 'error');
+                 setIsSubmitting(false);
+                 return;
+             }
+          }
+
           await onSubmit(formData, bookContents);
       } finally {
           setIsSubmitting(false);
@@ -502,15 +539,36 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                       style={{ width: '100%' }}
                     />
                 </div>
-                <div>
+                <div style={{ position: 'relative' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Editorial</label>
                     <input
                       type="text"
                       value={formData.publisher || ''}
-                      onChange={(e) => setFormData({...formData, publisher: e.target.value})}
+                      onChange={(e) => handleEditorialChange(e.target.value)}
+                      onBlur={() => setTimeout(() => setShowEditorialSuggestions(false), 200)}
                       className="form-input"
                       style={{ width: '100%' }}
+                      placeholder="Escribe para buscar..."
+                      autoComplete="off"
                     />
+                    {/* Editorial Suggestions Dropdown */}
+                    {showEditorialSuggestions && editorialSuggestions.length > 0 && (
+                        <ul className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
+                            {editorialSuggestions.map((s, i) => (
+                                <li 
+                                    key={i}
+                                    onClick={() => {
+                                        setFormData({...formData, publisher: s});
+                                        setEditorialSuggestions([]);
+                                        setShowEditorialSuggestions(false);
+                                    }}
+                                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
+                                >
+                                    {s}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
 

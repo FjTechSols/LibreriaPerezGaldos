@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
-import { actualizarEstadoPedido } from '../../../services/pedidoService';
+import { actualizarEstadoPedido, actualizarPedido } from '../../../services/pedidoService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
-import { MessageModal } from '../../MessageModal'; // Import MessageModal
+import { MessageModal } from '../../MessageModal';
+import { RejectionModal } from './RejectionModal';
 
 interface PedidoDetalleProps {
   pedido: Pedido | null;
@@ -15,9 +16,11 @@ interface PedidoDetalleProps {
   onEditar?: () => void;
 }
 
-const ESTADOS: EstadoPedido[] = ['pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
+const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
 
 const ESTADO_LABELS: Record<EstadoPedido, string> = {
+  pending_verification: 'Por Verificar',
+  payment_pending: 'Pendiente Pago',
   pendiente: 'Pendiente',
   procesando: 'Procesando',
   enviado: 'Enviado',
@@ -30,6 +33,14 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
   const { settings } = useSettings();
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
+
+  // State for shipping info editing
+  const [editingShipping, setEditingShipping] = useState(false);
+  const [transportista, setTransportista] = useState(pedido?.transportista || '');
+  const [tracking, setTracking] = useState(pedido?.tracking || '');
+
+  // State for rejection modal
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -56,6 +67,75 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
       setMessageModalConfig({
         title: 'Error',
         message: result.error || 'Hubo un error al actualizar el estado del pedido.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleActualizarEnvio = async () => {
+    if (!pedido) return;
+
+    const success = await actualizarPedido(pedido.id, {
+      transportista: transportista as any,
+      tracking: tracking || undefined
+    });
+
+    if (success) {
+      setMessageModalConfig({
+        title: 'Envío Actualizado',
+        message: 'La información de envío se ha actualizado correctamente.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
+      setEditingShipping(false);
+      onRefresh();
+    } else {
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'Hubo un error al actualizar la información de envío.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleConfirmarStock = async () => {
+    const result = await actualizarEstadoPedido(pedido.id, 'payment_pending');
+    if (result.success) {
+      setMessageModalConfig({
+        title: 'Stock Confirmado',
+        message: 'El pedido ha sido confirmado y movido a Pendiente de Pago.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
+      onRefresh();
+    } else {
+      setMessageModalConfig({
+        title: 'Error',
+        message: result.error || 'Error al confirmar stock.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleRechazarPedido = async (_reason: string) => {
+    const result = await actualizarEstadoPedido(pedido.id, 'cancelado');
+    
+    if (result.success) {
+      setRejectionModalOpen(false);
+      setMessageModalConfig({
+        title: 'Pedido Rechazado',
+        message: 'El pedido ha sido rechazado y cancelado.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
+      onRefresh();
+    } else {
+      setMessageModalConfig({
+        title: 'Error',
+        message: result.error || 'Error al rechazar pedido.',
         type: 'error'
       });
       setShowMessageModal(true);
@@ -414,6 +494,14 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                     {pedido.cliente.email && <p className="info-secundario">{pedido.cliente.email}</p>}
                     {pedido.cliente.telefono && <p className="info-secundario">{pedido.cliente.telefono}</p>}
                   </>
+                ) : pedido?.tipo === 'interno' && pedido?.usuario ? (
+                  <>
+                    <p className="info-principal" style={{ fontStyle: 'italic', opacity: 0.9 }}>
+                      {pedido.usuario.nombre_completo || pedido.usuario.username}
+                    </p>
+                    {pedido.usuario.email && <p className="info-secundario">{pedido.usuario.email}</p>}
+                    {pedido.usuario.telefono && <p className="info-secundario">{pedido.usuario.telefono}</p>}
+                  </>
                 ) : (
                   <p className="info-principal" style={{ color: 'var(--text-tertiary)' }}>Sin cliente asignado</p>
                 )}
@@ -444,17 +532,62 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <h3>Estado</h3>
               </div>
               <div className="info-card-body">
-                <select
-                  value={pedido?.estado || 'pendiente'}
-                  onChange={(e) => handleCambiarEstado(e.target.value as EstadoPedido)}
-                  className="estado-selector-detalle"
-                >
-                  {ESTADOS.map(estado => (
-                    <option key={estado} value={estado}>
-                      {ESTADO_LABELS[estado]}
-                    </option>
-                  ))}
-                </select>
+                {pedido?.estado === 'pending_verification' ? (
+                  <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                    <button
+                      onClick={handleConfirmarStock}
+                      style={{
+                        padding: '0.75rem 1rem',
+                        backgroundColor: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      <Check size={16} />
+                      Confirmar Stock Disponible
+                    </button>
+                    <button
+                      onClick={() => setRejectionModalOpen(true)}
+                      style={{
+                        padding: '0.75rem 1rem',
+                        backgroundColor: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      <XCircle size={16} />
+                      Rechazar - Stock No Disponible
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={pedido?.estado || 'pendiente'}
+                    onChange={(e) => handleCambiarEstado(e.target.value as EstadoPedido)}
+                    className="estado-selector-detalle"
+                  >
+                    {ESTADOS.filter(e => e !== 'pending_verification' && e !== 'pendiente').map(estado => (
+                      <option key={estado} value={estado}>
+                        {ESTADO_LABELS[estado]}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
 
@@ -492,7 +625,138 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               </div>
             )}
 
-            {(pedido?.transportista || pedido?.tracking) && (
+            {pedido?.tipo === 'interno' ? (
+              <div className="info-card">
+                <div className="info-card-header">
+                  <Truck size={20} />
+                  <h3>Envío</h3>
+                  {!editingShipping && (
+                    <button
+                      onClick={() => setEditingShipping(true)}
+                      style={{
+                        marginLeft: 'auto',
+                        padding: '0.25rem 0.5rem',
+                        fontSize: '0.75rem',
+                        background: 'var(--primary-color)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
+                    >
+                      <Edit size={14} />
+                      Editar
+                    </button>
+                  )}
+                </div>
+                <div className="info-card-body">
+                  {editingShipping ? (
+                    <>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Transportista</label>
+                        <select
+                          value={transportista}
+                          onChange={(e) => setTransportista(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            background: 'var(--input-bg)',
+                            color: 'var(--input-text)'
+                          }}
+                        >
+                          <option value="">Seleccionar transportista</option>
+                          <option value="ASM">ASM</option>
+                          <option value="GLS">GLS</option>
+                          <option value="Envialia">Envialia</option>
+                          <option value="Correos">Correos</option>
+                          <option value="Otro">Otro</option>
+                        </select>
+                      </div>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Tracking ID</label>
+                        <input
+                          type="text"
+                          value={tracking}
+                          onChange={(e) => setTracking(e.target.value)}
+                          placeholder="Número de seguimiento"
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            fontSize: '0.875rem',
+                            background: 'var(--input-bg)',
+                            color: 'var(--input-text)'
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          onClick={handleActualizarEnvio}
+                          style={{
+                            flex: 1,
+                            padding: '0.5rem 1rem',
+                            background: '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem'
+                          }}
+                        >
+                          <Save size={16} />
+                          Guardar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingShipping(false);
+                            setTransportista(pedido?.transportista || '');
+                            setTracking(pedido?.tracking || '');
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: '0.5rem 1rem',
+                            background: 'var(--bg-tertiary)',
+                            color: 'var(--text-primary)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {pedido?.transportista ? (
+                        <p className="info-principal">Transportista: {pedido.transportista}</p>
+                      ) : (
+                        <p className="info-principal" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin transportista asignado</p>
+                      )}
+                      {pedido?.tracking ? (
+                        <p className="info-secundario">Tracking: {pedido.tracking}</p>
+                      ) : (
+                        <p className="info-secundario" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin tracking asignado</p>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (pedido?.transportista || pedido?.tracking) && (
               <div className="info-card">
                 <div className="info-card-header">
                   <Truck size={20} />
@@ -566,9 +830,15 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <span>IVA ({taxRateApplied}%):</span>
                 <span className="total-valor">{iva.toFixed(2)} €</span>
               </div>
+              {pedido?.coste_envio !== undefined && pedido.coste_envio > 0 && (
+                <div className="total-row">
+                  <span>Gastos de envío:</span>
+                  <span className="total-valor">{pedido.coste_envio.toFixed(2)} €</span>
+                </div>
+              )}
               <div className="total-row final">
                 <span>Total:</span>
-                <span className="total-valor">{total.toFixed(2)} €</span>
+                <span className="total-valor">{(total + (pedido?.coste_envio || 0)).toFixed(2)} €</span>
               </div>
             </div>
           </div>
@@ -625,6 +895,13 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
           title={messageModalConfig.title}
           message={messageModalConfig.message}
           type={messageModalConfig.type}
+        />
+
+        {/* Rejection Modal Component */}
+        <RejectionModal 
+          isOpen={rejectionModalOpen}
+          onClose={() => setRejectionModalOpen(false)}
+          onConfirm={handleRechazarPedido}
         />
       </div>
     </div>

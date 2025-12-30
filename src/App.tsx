@@ -36,6 +36,7 @@ import { RouteTransitionLoader } from './components/RouteTransitionLoader';
 import { About } from './pages/About';
 import { Location } from './pages/Location';
 import { Contact } from './pages/Contact';
+import OrderConfirmation from './pages/OrderConfirmation';
 
 function AppRoutes() {
   const location = useLocation();
@@ -52,6 +53,7 @@ function AppRoutes() {
           <Route path="/catalogo" element={<Catalog />} />
           <Route path="/libro/:id" element={<BookDetail />} />
           <Route path="/carrito" element={<Cart />} />
+          <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

@@ -879,6 +879,10 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
     const { data: permisosCheck } = await supabase.rpc('can_manage_books');
     const { data: editorCheck } = await supabase.rpc('is_editor');
 
+    if (!permisosCheck && !editorCheck) {
+      throw new Error('No tienes permisos suficientes para editar libros.');
+    }
+
     const { error: updateError } = await supabase
       .from('libros')
       .update(updateData)
@@ -1357,6 +1361,31 @@ export const obtenerSugerencias = async (termino: string): Promise<string[]> => 
 
   } catch (error) {
     console.warn('Error fetching suggestions:', error);
+    return [];
+  }
+};
+
+
+export const buscarEditoriales = async (termino: string): Promise<string[]> => {
+  if (!termino || termino.trim().length < 1) return [];
+
+  try {
+    // Prefer startsWith for autocomplete, fallback to ilike if desired.
+    // User said "segun de las editoriales existentes con esas letras si escribe".
+    // Usually implies "Starts With" or "Contains".
+    // I'll use ilike %term% for broader matching.
+    const { data, error } = await supabase
+      .from('editoriales')
+      .select('nombre')
+      .ilike('nombre', `%${termino}%`)
+      .limit(10)
+      .order('nombre');
+
+    if (error) throw error;
+    
+    return data ? data.map(e => e.nombre) : [];
+  } catch (error) {
+    console.warn('Error searching editorials:', error);
     return [];
   }
 };

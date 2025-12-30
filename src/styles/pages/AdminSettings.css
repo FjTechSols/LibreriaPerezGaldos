@@ -635,3 +635,138 @@
 .btn-nav svg {
   stroke-width: 2.5px;
 }
+
+/* Collapsible Section Styles */
+.settings-section-details {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.settings-section-details[open] {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.settings-section-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  list-style: none;
+  background: #f8fafc;
+  transition: background-color 0.2s;
+}
+
+.settings-section-summary:hover {
+  background: #f1f5f9;
+}
+
+.settings-section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-content h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.summary-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.summary-icon {
+  color: #64748b;
+  transition: transform 0.3s ease;
+}
+
+.settings-section-details[open] .summary-icon {
+  transform: rotate(180deg);
+}
+
+.details-content {
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark Mode Support for Collapsible */
+.dark-mode .settings-section-details {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .settings-section-details[open] {
+  border-color: #475569;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .settings-section-summary {
+  background: #0f172a;
+}
+
+.dark-mode .settings-section-summary:hover {
+  background: #1e293b;
+}
+
+.dark-mode .summary-content h3 {
+  color: #f1f5f9;
+}
+
+.dark-mode .summary-subtitle {
+  color: #94a3b8;
+}
+
+.dark-mode .summary-icon {
+  color: #94a3b8;
+}
+
+.dark-mode .details-content {
+  border-top-color: #334155;
+}
+
+/* Regional Shipping Styles */
+.shipping-region-block {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.region-title {
+  margin-bottom: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.dark-mode .shipping-region-block {
+  border-bottom-color: #334155;
+}
+
+.dark-mode .region-title {
+  color: #f1f5f9;
+}

@@ -44,31 +44,6 @@ export default function CheckoutForm({
   const [saveAsDefault, setSaveAsDefault] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>(initialShippingMethod || 'standard');
 
-  // Calculate Shipping Cost based on rules
-  const getShippingCost = () => {
-    // En lógica "IVA Incluido", el umbral de envío gratis se basa en el precio total de productos (IVA incluido)
-    // subtotal es Base Imponible, iva es la cuota. Sumados dan el bruto.
-    const productsTotalWithTax = subtotal + iva;
-
-    if (shippingMethod === 'standard') {
-      return productsTotalWithTax >= settings.shipping.freeShippingThresholdStandard 
-        ? 0 
-        : settings.shipping.standardShippingCost;
-    } else {
-      return productsTotalWithTax >= settings.shipping.freeShippingThresholdExpress 
-        ? 0 
-        : settings.shipping.expressShippingCost;
-    }
-  };
-
-  const shippingCost = getShippingCost();
-  
-  // Calculate Final Total
-  // subtotal (products) + iva (products) + shippingCost
-  // Note: Assuming shipping cost includes its own tax or is tax-free for simplicity for now, 
-  // or that 'iva' passed prop is only for products.
-  const finalTotal = subtotal + iva + shippingCost;
-
   const [formData, setFormData] = useState<CheckoutData>({
     nombre: '',
     apellidos: '',
@@ -81,6 +56,77 @@ export default function CheckoutForm({
     pais: 'España',
     observaciones: ''
   });
+
+
+
+  // Country Constants
+  const SUPPORTED_COUNTRIES = {
+    europe: ['Alemania', 'Austria', 'Bélgica', 'Dinamarca', 'Francia', 'Grecia', 'Holanda', 'Hungría', 'Irlanda', 'Italia', 'Noruega', 'Polonia', 'Portugal', 'Reino Unido', 'República Checa', 'Rumania', 'Suecia', 'Suiza'],
+    america: ['Argentina', 'Bolivia', 'Brasil', 'Canadá', 'Chile', 'Colombia', 'Costa Rica', 'Ecuador', 'Estados Unidos', 'México', 'Panamá', 'Paraguay', 'Perú', 'Uruguay', 'Venezuela'],
+    asia: ['China', 'Corea del Sur', 'Filipinas', 'Hong Kong', 'India', 'Indonesia', 'Japón', 'Malasia', 'Singapur', 'Tailandia', 'Taiwán', 'Vietnam']
+  };
+
+  // Helper to determine shipping zone
+  const getShippingZone = (country: string): 'national' | 'europe' | 'america' | 'asia' | 'other' => {
+    const lowerCountry = country.toLowerCase().trim();
+    
+    if (['españa', 'spain', 'es'].includes(lowerCountry)) return 'national';
+
+    // Check vs lists
+    if (SUPPORTED_COUNTRIES.europe.some(c => c.toLowerCase() === lowerCountry)) return 'europe';
+    if (SUPPORTED_COUNTRIES.america.some(c => c.toLowerCase() === lowerCountry)) return 'america';
+    if (SUPPORTED_COUNTRIES.asia.some(c => c.toLowerCase() === lowerCountry)) return 'asia';
+    
+    // Fallback for typed inputs (legacy support or if we allow custom)
+    // using the broader lists from previous step if we want to be robust, 
+    // but for the select dropdown, exact match is expected. 
+    // Let's keep the robust check just in case.
+    const europeBroad = ['francia', 'france', 'portugal', 'italia', 'italy', 'alemania', 'germany', 'reino unido', 'uk', 'united kingdom', 'bélgica', 'belgium', 'holanda', 'netherlands', 'países bajos', 'austria', 'dinamarca', 'denmark', 'suecia', 'sweden', 'noruega', 'norway', 'suiza', 'switzerland', 'irlanda', 'ireland', 'grecia', 'greece', 'polonia', 'poland', 'república checa', 'czech republic', 'hungría', 'hungary', 'rumania', 'romania'];
+    if (europeBroad.includes(lowerCountry)) return 'europe';
+
+    return 'other'; 
+  };
+
+  const currentZone = getShippingZone(formData.pais);
+
+  // Calculate Shipping Cost based on rules
+  const getShippingCost = () => {
+    // En lógica "IVA Incluido", el umbral de envío gratis se basa en el precio total de productos (IVA incluido)
+    // subtotal es Base Imponible, iva es la cuota. Sumados dan el bruto.
+    const productsTotalWithTax = subtotal + iva;
+
+    if (currentZone === 'national') {
+       if (shippingMethod === 'standard') {
+            return productsTotalWithTax >= settings.shipping.freeShippingThresholdStandard 
+              ? 0 
+              : settings.shipping.standardShippingCost;
+        } else {
+            return productsTotalWithTax >= settings.shipping.freeShippingThresholdExpress 
+              ? 0 
+              : settings.shipping.expressShippingCost;
+        }
+    } else {
+        // International logic
+        if (!settings.shipping.internationalRates) return 15.00; // Fallback
+        
+        // Use type assertion or access with default because interface might not be perfectly inferred everywhere yet
+        // In settingsService we defined internationalRates with europe, america, asia, other
+        const rates = settings.shipping.internationalRates;
+        const regionRate = rates[currentZone as keyof typeof rates] || rates.other;
+
+        return productsTotalWithTax >= regionRate.freeThreshold ? 0 : regionRate.cost;
+    }
+  };
+
+  const shippingCost = getShippingCost();
+  
+  // Calculate Final Total
+  // subtotal (products) + iva (products) + shippingCost
+  // Note: Assuming shipping cost includes its own tax or is tax-free for simplicity for now, 
+  // or that 'iva' passed prop is only for products.
+  const finalTotal = subtotal + iva + shippingCost;
+
+
 
   // Helper to split full name with basic heuristics
   const splitFullName = (fullName: string) => {
@@ -121,6 +167,20 @@ export default function CheckoutForm({
       }));
     }
   }, [user]);
+
+  // Update shipping method based on country
+  useEffect(() => {
+    const zone = getShippingZone(formData.pais);
+
+    if (zone !== 'national') {
+        setShippingMethod('express'); // Use 'express' as the key for international for simplicity in backend/email templates for now, or add 'international' type later
+    } else {
+        // If switching back to Spain, default to standard potentially? Or keep selection if valid.
+        // If current method was set to 'express' (which we use for intl), and user goes back to Spain, maybe default to standard to avoid high confusion?
+        // Let's safe default to standard when entering Spain
+        setShippingMethod('standard');
+    }
+  }, [formData.pais]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -237,43 +297,7 @@ export default function CheckoutForm({
             <h3>{t('shippingAndAddress')}</h3>
           </div>
 
-          <div className="shipping-methods-container" style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>{t('shippingMethodLabel')}</label>
-            
-            <div 
-              className={`shipping-option ${shippingMethod === 'standard' ? 'selected' : ''}`}
-              onClick={() => setShippingMethod('standard')}
-            >
-              <div className="shipping-option-details">
-                <div className="shipping-option-title">{t('standardShipping')}</div>
-                <div className="shipping-option-subtitle">
-                  {settings.shipping.estimatedDeliveryDays.standard} {t('workingDays')}
-                </div>
-              </div>
-              <div className={`shipping-option-price ${(subtotal + iva) >= settings.shipping.freeShippingThresholdStandard ? 'free' : ''}`}>
-                {(subtotal + iva) >= settings.shipping.freeShippingThresholdStandard 
-                  ? t('freeLabel') 
-                  : formatPrice(settings.shipping.standardShippingCost)}
-              </div>
-            </div>
 
-            <div 
-              className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
-              onClick={() => setShippingMethod('express')}
-            >
-              <div className="shipping-option-details">
-                <div className="shipping-option-title">{t('expressShipping')}</div>
-                <div className="shipping-option-subtitle">
-                  {settings.shipping.estimatedDeliveryDays.express} {t('workingDays')}
-                </div>
-              </div>
-              <div className={`shipping-option-price ${(subtotal + iva) >= settings.shipping.freeShippingThresholdExpress ? 'free' : ''}`}>
-                {(subtotal + iva) >= settings.shipping.freeShippingThresholdExpress 
-                  ? t('freeLabel') 
-                  : formatPrice(settings.shipping.expressShippingCost)}
-              </div>
-            </div>
-          </div>
 
           <div className="form-grid">
             <div className="form-group full-width">
@@ -334,16 +358,29 @@ export default function CheckoutForm({
 
             <div className="form-group">
               <label htmlFor="pais">{t('country')} *</label>
-              <input
-                type="text"
+              <select
                 id="pais"
                 name="pais"
                 value={formData.pais}
                 onChange={handleChange}
                 required
                 className="form-input"
-                placeholder={t('countryPlaceholder')}
-              />
+                style={{ appearance: 'none', backgroundImage: 'none' }} // Ensure consistent styling if needed
+              >
+                <option value="España">España</option>
+                
+                <optgroup label="Europa">
+                    {SUPPORTED_COUNTRIES.europe.map(c => <option key={c} value={c}>{c}</option>)}
+                </optgroup>
+                
+                <optgroup label="América">
+                    {SUPPORTED_COUNTRIES.america.map(c => <option key={c} value={c}>{c}</option>)}
+                </optgroup>
+                
+                <optgroup label="Asia">
+                    {SUPPORTED_COUNTRIES.asia.map(c => <option key={c} value={c}>{c}</option>)}
+                </optgroup>
+              </select>
             </div>
           </div>
           
@@ -363,6 +400,89 @@ export default function CheckoutForm({
               </label>
             </div>
           )}
+        </div>
+
+        {/* Shipping Methods Section - Moved here */}
+        <div className="checkout-section">
+          <div className="section-header">
+            <MapPin size={20} />
+            <h3>{t('shippingMethodLabel')}</h3>
+          </div>
+
+          <div className="shipping-methods-container" style={{ marginBottom: '1.5rem' }}>
+            {['españa', 'spain', 'es'].includes(formData.pais.toLowerCase()) ? (
+              // National Options
+              <>
+                 <div 
+                  className={`shipping-option ${shippingMethod === 'standard' ? 'selected' : ''}`}
+                  onClick={() => setShippingMethod('standard')}
+                >
+                  <div className="shipping-option-details">
+                    <div className="shipping-option-title">{t('standardShipping')} (Nacional)</div>
+                    <div className="shipping-option-subtitle">
+                      {settings.shipping.estimatedDeliveryDays.standard} {t('workingDays')}
+                    </div>
+                  </div>
+                  <div className={`shipping-option-price ${(subtotal + iva) >= settings.shipping.freeShippingThresholdStandard ? 'free' : ''}`}>
+                    {(subtotal + iva) >= settings.shipping.freeShippingThresholdStandard 
+                      ? t('freeLabel') 
+                      : formatPrice(settings.shipping.standardShippingCost)}
+                  </div>
+                </div>
+
+                <div 
+                  className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
+                  onClick={() => setShippingMethod('express')}
+                >
+                  <div className="shipping-option-details">
+                    <div className="shipping-option-title">{t('expressShipping')} (Nacional)</div>
+                    <div className="shipping-option-subtitle">
+                      {settings.shipping.estimatedDeliveryDays.express} {t('workingDays')}
+                    </div>
+                  </div>
+                  <div className={`shipping-option-price ${(subtotal + iva) >= settings.shipping.freeShippingThresholdExpress ? 'free' : ''}`}>
+                    {(subtotal + iva) >= settings.shipping.freeShippingThresholdExpress 
+                      ? t('freeLabel') 
+                      : formatPrice(settings.shipping.expressShippingCost)}
+                  </div>
+                </div>
+              </>
+            ) : (
+              // International Options
+              (() => {
+                  const rates = settings.shipping.internationalRates;
+                  const zone = getShippingZone(formData.pais);
+                  // Default to 'other' if settings not loaded or zone weird
+                  const rate = rates ? (rates[zone as keyof typeof rates] || rates.other) : { cost: 15, days: 10, freeThreshold: 100 };
+                  
+                  const zoneNameMap: Record<string, string> = {
+                      'europe': 'Europa',
+                      'america': 'América',
+                      'asia': 'Asia',
+                      'other': 'Resto del mundo'
+                  };
+
+                  return (
+                    <div 
+                        className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
+                        onClick={() => setShippingMethod('express')}
+                        >
+                        <div className="shipping-option-details">
+                            <div className="shipping-option-title">Envío Internacional ({zoneNameMap[zone] || 'General'})</div>
+                            <div className="shipping-option-subtitle">
+                            {rate.days} {t('workingDays')}
+                            </div>
+                        </div>
+                        <div className={`shipping-option-price ${(subtotal + iva) >= rate.freeThreshold ? 'free' : ''}`}>
+                            {(subtotal + iva) >= rate.freeThreshold 
+                            ? t('freeLabel') 
+                            : formatPrice(rate.cost)}
+                        </div>
+                    </div>
+                  );
+              })()
+            )}
+          </div>
         </div>
 
         <div className="checkout-section">

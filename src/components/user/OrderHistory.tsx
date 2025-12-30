@@ -6,11 +6,13 @@ import { obtenerPedidos } from '../../services/pedidoService';
 import { Package, FileText, X, MapPin, CreditCard } from 'lucide-react';
 import { Pedido } from '../../types';
 import { Pagination } from '../Pagination';
+import { useNavigate } from 'react-router-dom';
 
 export function OrderHistory() {
   const { user } = useAuth();
   const { settings } = useSettings();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null);
@@ -49,7 +51,9 @@ export function OrderHistory() {
       enviado: { class: 'status-shipped', label: 'Enviado' },
       entregado: { class: 'status-delivered', label: 'Entregado' },
       cancelado: { class: 'status-canceled', label: 'Cancelado' },
-      devolucion: { class: 'status-canceled', label: 'Devolución' }
+      devolucion: { class: 'status-canceled', label: 'Devolución' },
+      pending_verification: { class: 'status-pending', label: 'Pendiente de Verificación' },
+      payment_pending: { class: 'status-processing', label: 'Pendiente de Pago' }
     };
 
     const badge = badges[estado] || badges.pendiente;
@@ -69,6 +73,8 @@ export function OrderHistory() {
       'enviado': t('statusShipped'),
       'entregado': t('statusDelivered'),
       'cancelado': t('statusCancelled'),
+      'pending_verification': 'Pendiente de Verificación',
+      'payment_pending': 'Pendiente de Pago',
     };
     return statusMap[status.toLowerCase()] || status;
   };
@@ -121,13 +127,36 @@ export function OrderHistory() {
                       </span>
                     </td>
                     <td>
-                      <button 
-                        className="view-details-btn"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <FileText size={16} />
-                        {t('viewDetails')}
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                            className="view-details-btn"
+                            onClick={() => setSelectedOrder(order)}
+                        >
+                            <FileText size={16} />
+                            {t('viewDetails')}
+                        </button>
+                        {order.estado === 'payment_pending' && (
+                            <button
+                                onClick={() => navigate('/stripe-checkout', { state: { orderId: order.id.toString() } })}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                    padding: '0.5rem 0.75rem',
+                                    backgroundColor: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500
+                                }}
+                            >
+                                <CreditCard size={16} />
+                                Pagar Ahora
+                            </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -160,13 +189,39 @@ export function OrderHistory() {
                   </span>
                 </div>
 
-                <button 
-                  className="view-details-btn"
-                  onClick={() => setSelectedOrder(order)}
-                >
-                  <FileText size={16} />
-                  {t('viewDetails')}
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                    <button 
+                        className="view-details-btn"
+                        onClick={() => setSelectedOrder(order)}
+                        style={{ flex: 1 }}
+                    >
+                    <FileText size={16} />
+                    {t('viewDetails')}
+                    </button>
+                    {order.estado === 'payment_pending' && (
+                        <button
+                            onClick={() => navigate('/stripe-checkout', { state: { orderId: order.id.toString() } })}
+                            style={{
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.25rem',
+                                padding: '0.5rem 0.75rem',
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '0.875rem',
+                                fontWeight: 500
+                            }}
+                        >
+                            <CreditCard size={16} />
+                            Pagar
+                        </button>
+                    )}
+                </div>
               </div>
             ))}
           </div>
@@ -333,6 +388,12 @@ export function OrderHistory() {
                         <span>IVA ({settings.billing.taxRate}%):</span>
                         <span>{((selectedOrder.iva || 0)).toFixed(2)} €</span>
                     </div>
+                    {selectedOrder.coste_envio !== undefined && selectedOrder.coste_envio > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', color: 'var(--text-secondary)' }}>
+                          <span>Gastos de envío:</span>
+                          <span>{selectedOrder.coste_envio.toFixed(2)} €</span>
+                      </div>
+                    )}
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', marginTop: '0.5rem', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text)' }}>
                         <span>Total:</span>
                         <span>{(selectedOrder.total || 0).toFixed(2)} €</span>

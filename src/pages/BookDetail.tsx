@@ -7,7 +7,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
-import { useTheme } from '../context/ThemeContext';
+
 import { ShareModal } from '../components/ShareModal';
 import { ReservationRequestModal } from '../components/ReservationRequestModal';
 import { MessageModal } from '../components/MessageModal';
@@ -29,8 +29,8 @@ export function BookDetail() {
   const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
   const { settings, formatPrice } = useSettings();
-  const { actualTheme } = useTheme();
-  const isDark = actualTheme === 'dark';
+
+
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -285,20 +285,7 @@ export function BookDetail() {
 
           <div className="book-info-section">
             <div className="book-header">
-              {user?.role === 'admin' && book.code && (
-                <div style={{ 
-                  fontSize: '0.85rem', 
-                  color: isDark ? '#9ca3af' : '#6b7280', 
-                  fontFamily: 'monospace',
-                  marginBottom: '0.5rem',
-                  padding: '0.25rem 0.5rem',
-                  backgroundColor: isDark ? '#374151' : '#f3f4f6',
-                  borderRadius: '4px',
-                  display: 'inline-block'
-                }}>
-                  ID: {book.code}
-                </div>
-              )}
+              {/* ID removed from header */}
               <h1 className="book-title">{book.title}</h1>
               <p className="book-author">{language === 'es' ? 'por' : language === 'en' ? 'by' : 'par'} {book.author}</p>
               
@@ -432,6 +419,12 @@ export function BookDetail() {
                       <span className="spec-label">Editorial:</span>
                       <span className="spec-value">{book.publisher}</span>
                     </div>
+                    {book.code && (
+                      <div className="spec-item">
+                        <span className="spec-label">Código Ref.:</span>
+                        <span className="spec-value">{book.code}</span>
+                      </div>
+                    )}
                     {book.isbn && book.isbn.trim() !== '' && (
                       <div className="spec-item">
                         <span className="spec-label">ISBN:</span>

@@ -6,16 +6,20 @@ import { useSettings } from '../../../context/SettingsContext';
 import { TableLoader } from '../../Loader';
 import { Pagination } from '../../Pagination';
 import '../../../styles/components/PedidosList.css';
-import { MessageModal } from '../../MessageModal'; // Import MessageModal
+import { MessageModal } from '../../MessageModal';
+import { RejectionModal } from './RejectionModal';
+import { Check, XCircle } from 'lucide-react';
 
 interface PedidosListProps {
   onVerDetalle: (pedido: Pedido) => void;
   refreshTrigger?: number;
 }
 
-const ESTADOS: EstadoPedido[] = ['pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
+const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
 
 const ESTADO_COLORES: Record<EstadoPedido, string> = {
+  pending_verification: 'naranja',
+  payment_pending: 'azul-claro',
   pendiente: 'amarillo',
   procesando: 'azul',
   enviado: 'morado',
@@ -25,7 +29,9 @@ const ESTADO_COLORES: Record<EstadoPedido, string> = {
 };
 
 const ESTADO_LABELS: Record<EstadoPedido, string> = {
-  pendiente: 'Pendiente',
+  pending_verification: 'Por Verificar',
+  payment_pending: 'Pendiente Pago',
+  pendiente: 'Pendiente (Antiguo)',
   procesando: 'Procesando',
   enviado: 'Enviado',
   completado: 'Completado',
@@ -42,6 +48,8 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [estadisticas, setEstadisticas] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [orderToReject, setOrderToReject] = useState<number | null>(null);
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -87,6 +95,50 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
         type: 'error'
       });
       setShowMessageModal(true);
+    }
+  };
+
+  const handleConfirmarStock = async (pedidoId: number) => {
+    // Moves to 'payment_pending'
+    const result = await actualizarEstadoPedido(pedidoId, 'payment_pending');
+    if (result.success) {
+        cargarPedidos();
+        cargarEstadisticas();
+    } else {
+        setMessageModalConfig({
+            title: 'Error',
+            message: result.error || 'Error al confirmar stock.',
+            type: 'error'
+        });
+        setShowMessageModal(true);
+    }
+  };
+
+  const handleRechazarPedido = async (_reason: string) => {
+    if (!orderToReject) return;
+    
+    // We update to 'cancelado' (or similar) and save the note
+    // Note: We might want to pass the reason to the backend update call if supported
+    // For now we just cancel. Reason saving assumes backend handles it or we update order notes separately.
+    // Ideally update `actualizarEstadoPedido` to accept reason/notes but let's assume we can update the notes first.
+    
+    // Logic: Save note -> Cancel
+    // This is simplified. In a real scenario we'd send the reason in the same call or email notification.
+    
+    const result = await actualizarEstadoPedido(orderToReject, 'cancelado');
+    
+    if (result.success) {
+        setRejectionModalOpen(false);
+        setOrderToReject(null);
+        cargarPedidos();
+        cargarEstadisticas();
+    } else {
+        setMessageModalConfig({
+            title: 'Error',
+            message: result.error || 'Error al rechazar pedido.',
+            type: 'error'
+        });
+        setShowMessageModal(true);
     }
   };
 
@@ -141,6 +193,11 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           <div className="stat-card procesando">
             <span className="stat-label">Procesando</span>
             <span className="stat-value">{estadisticas.procesando}</span>
+          </div>
+
+          <div className="stat-card pendiente">
+             <span className="stat-label">Por Verificar</span>
+             <span className="stat-value">{estadisticas.pending_verification || 0}</span>
           </div>
 
           <div className="stat-card enviado">
@@ -228,6 +285,15 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                   </span>
                   {pedido.cliente.email && <span className="cliente-email">{pedido.cliente.email}</span>}
                 </div>
+              ) : pedido.tipo === 'interno' && pedido.usuario ? (
+                <div className="cliente-info">
+                  <span className="cliente-nombre" style={{ fontStyle: 'italic', opacity: 0.9 }}>
+                    {pedido.usuario.nombre_completo || pedido.usuario.username}
+                  </span>
+                  <span className="cliente-email" style={{ fontSize: '0.75rem' }}>
+                    {pedido.usuario.email}
+                  </span>
+                </div>
               ) : (
                 <span style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>-</span>
               )}
@@ -272,18 +338,49 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                 Ver
               </button>
 
-              <select
-                value={pedido.estado || 'pendiente'}
-                onChange={(e) => handleCambiarEstado(pedido.id, e.target.value as EstadoPedido)}
-                className={`estado-selector ${ESTADO_COLORES[pedido.estado || 'pendiente']}`}
-                title="Cambiar estado"
-              >
-                {ESTADOS.map(estado => (
-                  <option key={estado} value={estado}>
-                    {ESTADO_LABELS[estado]}
-                  </option>
-                ))}
-              </select>
+              {pedido.estado === 'pending_verification' && pedido.tipo === 'interno' ? (
+                 <div className="verification-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                        onClick={() => handleConfirmarStock(pedido.id)}
+                        className="btn-accion"
+                        style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '0.25rem 0.5rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        title="Confirmar: Stock disponible"
+                    >
+                        <Check size={16} /> Confirmar
+                    </button>
+                    <button
+                        onClick={() => {
+                            setOrderToReject(pedido.id);
+                            setRejectionModalOpen(true);
+                        }}
+                        className="btn-accion"
+                        style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '0.25rem 0.5rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        title="Rechazar: Stock no disponible"
+                    >
+                        <XCircle size={16} /> Rechazar
+                    </button>
+                 </div>
+              ) : (
+                <select
+                    value={pedido.estado || 'pendiente'}
+                    onChange={(e) => handleCambiarEstado(pedido.id, e.target.value as EstadoPedido)}
+                    className={`estado-selector ${ESTADO_COLORES[pedido.estado || 'pendiente']}`}
+                    title="Cambiar estado"
+                >
+                    {ESTADOS.filter(estado => {
+                      // Para pedidos internos: excluir pending_verification y pendiente
+                      if (pedido.tipo === 'interno') {
+                        return estado !== 'pending_verification' && estado !== 'pendiente';
+                      }
+                      // Para otros pedidos: excluir pending_verification y payment_pending
+                      return estado !== 'pending_verification' && estado !== 'payment_pending';
+                    }).map(estado => (
+                      <option key={estado} value={estado}>
+                        {ESTADO_LABELS[estado]}
+                      </option>
+                    ))}
+                </select>
+              )}
             </div>
           </div>
         ))}
@@ -316,6 +413,15 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
         title={messageModalConfig.title}
         message={messageModalConfig.message}
         type={messageModalConfig.type}
+      />
+
+      <RejectionModal 
+        isOpen={rejectionModalOpen}
+        onClose={() => {
+            setRejectionModalOpen(false);
+            setOrderToReject(null);
+        }}
+        onConfirm={handleRechazarPedido}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion';
+export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion' | 'pending_verification' | 'payment_pending';
 export type TipoPedido = 'interno' | 'iberlibro' | 'uniliber' | 'perez_galdos' | 'galeon';
 export type MetodoPago = 'tarjeta' | 'paypal' | 'bizum' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'Correos' | 'Otro' | 'otro';
@@ -22,6 +22,7 @@ export interface Usuario {
   activo?: boolean;
   nombre_completo?: string;
   fecha_nacimiento?: string;
+  telefono?: string;
 }
 
 export interface Cliente {
@@ -395,7 +396,7 @@ export interface Order {
   shipping: number;
   tax: number;
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'pending_verification' | 'payment_pending';
   trackingNumber?: string;
   notes?: string;
 }

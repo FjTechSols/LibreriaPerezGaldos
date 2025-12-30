@@ -6,7 +6,7 @@ import {
   Building2, Mail, Phone, Globe, FileText, DollarSign,
   Truck, Bell, Database, Shield, Settings as SettingsIcon,
   Package, Download, HardDrive, Check, MapPin,
-  Home, LayoutDashboard, X, Megaphone
+  Home, LayoutDashboard, X, Megaphone, ChevronDown
 } from 'lucide-react';
 
 import { GestionUbicaciones } from '../components/admin/books/GestionUbicaciones';
@@ -89,7 +89,14 @@ export function AdminSettings() {
     shippingZones: [] as string[],
     estimatedDeliveryDays: {
       standard: 5,
-      express: 2
+      express: 2,
+      international: 10
+    },
+    internationalRates: {
+        europe: { cost: 15.00, freeThreshold: 100.00, days: 7 },
+        america: { cost: 25.00, freeThreshold: 150.00, days: 12 },
+        asia: { cost: 30.00, freeThreshold: 180.00, days: 15 },
+        other: { cost: 35.00, freeThreshold: 200.00, days: 20 }
     }
   });
 
@@ -118,7 +125,13 @@ export function AdminSettings() {
       setShippingData({
         ...settings.shipping,
         freeShippingThresholdStandard: settings.shipping.freeShippingThresholdStandard ?? 30,
-        freeShippingThresholdExpress: settings.shipping.freeShippingThresholdExpress ?? 50
+        freeShippingThresholdExpress: settings.shipping.freeShippingThresholdExpress ?? 50,
+        internationalRates: settings.shipping.internationalRates || {
+            europe: { cost: 15.00, freeThreshold: 100.00, days: 7 },
+            america: { cost: 25.00, freeThreshold: 150.00, days: 12 },
+            asia: { cost: 30.00, freeThreshold: 180.00, days: 15 },
+            other: { cost: 35.00, freeThreshold: 200.00, days: 20 }
+        }
       });
       setSystemData(settings.system);
       setSecurityData(settings.security);
@@ -162,8 +175,10 @@ export function AdminSettings() {
     // Ensure we are passing the correct structure expected by ShippingSettings interface
     const success = await updateShippingSettings({
       ...shippingData,
+      ...shippingData,
       freeShippingThresholdStandard: shippingData.freeShippingThresholdStandard, 
-      freeShippingThresholdExpress: shippingData.freeShippingThresholdExpress
+      freeShippingThresholdExpress: shippingData.freeShippingThresholdExpress,
+      internationalRates: shippingData.internationalRates
     } as any); 
     
     if (success) {
@@ -487,92 +502,273 @@ export function AdminSettings() {
                 <h2>Configuración de Envíos</h2>
                 <form onSubmit={handleShippingUpdate} className="settings-form">
                   {/* Fila Estándar */}
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="standardShipping">
-                        <Package size={16} />
-                        Envío estándar
-                      </label>
-                      <input
-                        id="standardShipping"
-                        type="number"
-                        step="0.01"
-                        value={shippingData.standardShippingCost ?? ''}
-                        onChange={(e) => setShippingData({ ...shippingData, standardShippingCost: Number(e.target.value) })}
-                      />
-                    </div>
+                  {/* Seccion Envíos Nacionales */}
+                  <details className="settings-section-details" open>
+                    <summary className="settings-section-summary">
+                      <div className="summary-content">
+                        <h3>Envíos Nacionales</h3>
+                        <span className="summary-subtitle">Configuración para envíos dentro de España</span>
+                      </div>
+                      <ChevronDown className="summary-icon" size={20} />
+                    </summary>
+                    
+                    <div className="details-content">
+                      {/* Fila Estándar */}
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="standardShipping">
+                            <Package size={16} />
+                            Envío estándar
+                          </label>
+                          <input
+                            id="standardShipping"
+                            type="number"
+                            step="0.01"
+                            value={shippingData.standardShippingCost ?? ''}
+                            onChange={(e) => setShippingData({ ...shippingData, standardShippingCost: Number(e.target.value) })}
+                          />
+                        </div>
 
-                    <div className="form-group">
-                      <label htmlFor="standardDelivery">Días entrega estándar</label>
-                      <input
-                        id="standardDelivery"
-                        type="number"
-                        value={shippingData.estimatedDeliveryDays.standard ?? ''}
-                        onChange={(e) => setShippingData({
-                          ...shippingData,
-                          estimatedDeliveryDays: {
-                            ...shippingData.estimatedDeliveryDays,
-                            standard: Number(e.target.value)
-                          }
-                        })}
-                      />
-                    </div>
+                        <div className="form-group">
+                          <label htmlFor="standardDelivery">Días entrega estándar</label>
+                          <input
+                            id="standardDelivery"
+                            type="number"
+                            value={shippingData.estimatedDeliveryDays.standard ?? ''}
+                            onChange={(e) => setShippingData({
+                              ...shippingData,
+                              estimatedDeliveryDays: {
+                                ...shippingData.estimatedDeliveryDays,
+                                standard: Number(e.target.value)
+                              }
+                            })}
+                          />
+                        </div>
 
-                    <div className="form-group">
-                      <label htmlFor="freeShippingStandard">Envío estándar gratis desde</label>
-                      <input
-                        id="freeShippingStandard"
-                        type="number"
-                        step="0.01"
-                        value={shippingData.freeShippingThresholdStandard ?? ''}
-                        onChange={(e) => setShippingData({ ...shippingData, freeShippingThresholdStandard: Number(e.target.value) })}
-                      />
-                    </div>
-                  </div>
+                        <div className="form-group">
+                          <label htmlFor="freeShippingStandard">Envío estándar gratis desde</label>
+                          <input
+                            id="freeShippingStandard"
+                            type="number"
+                            step="0.01"
+                            value={shippingData.freeShippingThresholdStandard ?? ''}
+                            onChange={(e) => setShippingData({ ...shippingData, freeShippingThresholdStandard: Number(e.target.value) })}
+                          />
+                        </div>
+                      </div>
 
-                  {/* Fila Express */}
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="expressShipping">
-                        <Truck size={16} />
-                        Envío express
-                      </label>
-                      <input
-                        id="expressShipping"
-                        type="number"
-                        step="0.01"
-                        value={shippingData.expressShippingCost ?? ''}
-                        onChange={(e) => setShippingData({ ...shippingData, expressShippingCost: Number(e.target.value) })}
-                      />
-                    </div>
+                      {/* Fila Express */}
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="expressShipping">
+                            <Truck size={16} />
+                            Envío express
+                          </label>
+                          <input
+                            id="expressShipping"
+                            type="number"
+                            step="0.01"
+                            value={shippingData.expressShippingCost ?? ''}
+                            onChange={(e) => setShippingData({ ...shippingData, expressShippingCost: Number(e.target.value) })}
+                          />
+                        </div>
 
-                    <div className="form-group">
-                      <label htmlFor="expressDelivery">Días entrega express</label>
-                      <input
-                        id="expressDelivery"
-                        type="number"
-                        value={shippingData.estimatedDeliveryDays.express ?? ''}
-                        onChange={(e) => setShippingData({
-                          ...shippingData,
-                          estimatedDeliveryDays: {
-                            ...shippingData.estimatedDeliveryDays,
-                            express: Number(e.target.value)
-                          }
-                        })}
-                      />
-                    </div>
+                        <div className="form-group">
+                          <label htmlFor="expressDelivery">Días entrega express</label>
+                          <input
+                            id="expressDelivery"
+                            type="number"
+                            value={shippingData.estimatedDeliveryDays.express ?? ''}
+                            onChange={(e) => setShippingData({
+                              ...shippingData,
+                              estimatedDeliveryDays: {
+                                ...shippingData.estimatedDeliveryDays,
+                                express: Number(e.target.value)
+                              }
+                            })}
+                          />
+                        </div>
 
-                    <div className="form-group">
-                      <label htmlFor="freeShippingExpress">Envío express gratis desde</label>
-                      <input
-                        id="freeShippingExpress"
-                        type="number"
-                        step="0.01"
-                        value={shippingData.freeShippingThresholdExpress ?? ''}
-                        onChange={(e) => setShippingData({ ...shippingData, freeShippingThresholdExpress: Number(e.target.value) })}
-                      />
+                        <div className="form-group">
+                          <label htmlFor="freeShippingExpress">Envío express gratis desde</label>
+                          <input
+                            id="freeShippingExpress"
+                            type="number"
+                            step="0.01"
+                            value={shippingData.freeShippingThresholdExpress ?? ''}
+                            onChange={(e) => setShippingData({ ...shippingData, freeShippingThresholdExpress: Number(e.target.value) })}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </details>
+
+                  {/* Seccion Envíos Internacionales */}
+                  <details className="settings-section-details">
+                    <summary className="settings-section-summary">
+                      <div className="summary-content">
+                        <h3>Envíos Internacionales</h3>
+                        <span className="summary-subtitle">Configuración por regiones (Europa, América, Asia)</span>
+                      </div>
+                      <ChevronDown className="summary-icon" size={20} />
+                    </summary>
+                    
+                    <div className="details-content">
+                        {/* Zone: Europa */}
+                        <div className="shipping-region-block">
+                            <h4 className="region-title">Europa</h4>
+                            <div className="form-row">
+                                <div className="form-group">
+                                <label>Costo Envío</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={shippingData.internationalRates.europe.cost}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            europe: { ...shippingData.internationalRates.europe, cost: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Días entrega</label>
+                                <input
+                                    type="number"
+                                    value={shippingData.internationalRates.europe.days}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            europe: { ...shippingData.internationalRates.europe, days: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Envío gratis desde</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={shippingData.internationalRates.europe.freeThreshold}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            europe: { ...shippingData.internationalRates.europe, freeThreshold: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                            </div>
+                        </div>
+
+                         {/* Zone: America */}
+                         <div className="shipping-region-block">
+                            <h4 className="region-title">América</h4>
+                            <div className="form-row">
+                                <div className="form-group">
+                                <label>Costo Envío</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={shippingData.internationalRates.america.cost}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            america: { ...shippingData.internationalRates.america, cost: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Días entrega</label>
+                                <input
+                                    type="number"
+                                    value={shippingData.internationalRates.america.days}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            america: { ...shippingData.internationalRates.america, days: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Envío gratis desde</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={shippingData.internationalRates.america.freeThreshold}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            america: { ...shippingData.internationalRates.america, freeThreshold: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                            </div>
+                        </div>
+
+                         {/* Zone: Asia */}
+                         <div>
+                            <h4 className="region-title">Asia</h4>
+                            <div className="form-row">
+                                <div className="form-group">
+                                <label>Costo Envío</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={shippingData.internationalRates.asia.cost}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            asia: { ...shippingData.internationalRates.asia, cost: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Días entrega</label>
+                                <input
+                                    type="number"
+                                    value={shippingData.internationalRates.asia.days}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            asia: { ...shippingData.internationalRates.asia, days: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Envío gratis desde</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={shippingData.internationalRates.asia.freeThreshold}
+                                    onChange={(e) => setShippingData({
+                                        ...shippingData,
+                                        internationalRates: {
+                                            ...shippingData.internationalRates,
+                                            asia: { ...shippingData.internationalRates.asia, freeThreshold: Number(e.target.value) }
+                                        }
+                                    })}
+                                />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                  </details>
 
                   <button type="submit" className="btn-primary">
                     Guardar configuración

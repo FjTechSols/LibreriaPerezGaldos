@@ -187,6 +187,27 @@ const translations: Record<Language, Record<string, string>> = {
     statusCancelled: 'Cancelado',
     actions: 'Acciones',
     
+    // Check out flow new keys
+    requestOrder: 'Solicitar Pedido',
+    validatingCart: 'Validando...',
+    proceedToCheckout: 'Ir a Caja',
+    verifyingStock: 'Verificando Stock',
+    verifyStockMessage: 'Tu pedido ha sido recibido. Verificaremos el stock y te notificaremos en 24-48h.' ,
+    pendingVerification: 'Pendiente de Verificación',
+    paymentPending: 'Pendiente de Pago',
+    payNow: 'Pagar Ahora',
+
+    // Order Confirmation Page
+    orderReceived: '¡Pedido Recibido!',
+    orderReceivedSubtitle: 'Hemos recibido tu solicitud correctamente.',
+    nextSteps: '¿Qué sucede ahora?',
+    verificationStep: 'Verificación de Stock',
+    verificationDesc: 'En las próximas 24-48 horas, verificaremos que los libros estén en perfecto estado en nuestro almacén.',
+    paymentStep: 'Confirmación y Pago',
+    paymentDesc: 'Te enviaremos un email cuando estemos listos. Podrás acceder a tu cuenta y completar el pago.',
+    shippingStep: 'Envío',
+    shippingDesc: 'Una vez pagado, prepararemos y enviaremos tu paquete inmediatamente.',
+    goToMyOrders: 'Ir a Mis Pedidos',
     // About Page
     aboutUsTitle: 'Sobre Nosotros',
     aboutUsSubtitle: 'Más de 100 años difundiendo cultura y pasión por la lectura',
@@ -262,11 +283,11 @@ const translations: Record<Language, Record<string, string>> = {
     estimatedTotalLabel: 'Total Estimado',
     addMoreForFreeShipping: 'Añade {0} más para envío estándar gratuito',
     loginToCompletePurchase: 'Inicia sesión para completar tu compra',
-    validatingCart: 'Validando...',
-    proceedToCheckout: 'Proceder al Checkout',
     securePayment: 'Compra 100% segura',
     fastShipping: 'Envío en 24-48h',
     freeReturns: 'Devolución gratis',
+    calculatedAtCheckout: 'Se calculará al finalizar',
+    continue: 'Continuar al Pago',
     
     // Checkout Form
     personalInformation: 'Información Personal',
@@ -566,11 +587,11 @@ const translations: Record<Language, Record<string, string>> = {
     estimatedTotalLabel: 'Estimated Total',
     addMoreForFreeShipping: 'Add {0} more for free standard shipping',
     loginToCompletePurchase: 'Log in to complete your purchase',
-    validatingCart: 'Validating...',
-    proceedToCheckout: 'Proceed to Checkout',
     securePayment: '100% secure payment',
     fastShipping: 'Shipping in 24-48h',
     freeReturns: 'Free returns',
+    calculatedAtCheckout: 'Calculated at checkout',
+    continue: 'Continue to Payment',
     
     // Checkout Form
     personalInformation: 'Personal Information',
@@ -616,6 +637,18 @@ const translations: Record<Language, Record<string, string>> = {
     payAmount: 'Pay',
     securePaymentByStripe: 'Secure payment processed by Stripe',
     pleaseWaitDoNotClose: 'Please wait. Do not close or reload this page while we process your payment.',
+    
+    // Order Confirmation Page
+    orderReceived: 'Order Received!',
+    orderReceivedSubtitle: 'We have successfully received your request.',
+    nextSteps: 'What happens now?',
+    verificationStep: 'Stock Verification',
+    verificationDesc: 'In the next 24-48 hours, we will verify that the books are in perfect condition in our warehouse.',
+    paymentStep: 'Confirmation & Payment',
+    paymentDesc: 'We will send you an email when we are ready. You can then access your account and complete the payment.',
+    shippingStep: 'Shipping',
+    shippingDesc: 'Once paid, we will prepare and ship your package immediately.',
+    goToMyOrders: 'Go to My Orders',
   },
   fr: {
     home: 'Accueil',
@@ -789,6 +822,18 @@ const translations: Record<Language, Record<string, string>> = {
     date: 'Date',
     status: 'Statut',
     statusPending: 'En Attente',
+    
+    // Order Confirmation Page
+    orderReceived: 'Commande Reçue !',
+    orderReceivedSubtitle: 'Nous avons bien reçu votre demande.',
+    nextSteps: 'Que se passe-t-il maintenant ?',
+    verificationStep: 'Vérification du Stock',
+    verificationDesc: 'Dans les prochaines 24-48 heures, nous vérifierons que les livres sont en parfait état dans notre entrepôt.',
+    paymentStep: 'Confirmation et Paiement',
+    paymentDesc: 'Nous vous enverrons un email lorsque nous serons prêts. Vous pourrez alors accéder à votre compte et effectuer le paiement.',
+    shippingStep: 'Expédition',
+    shippingDesc: 'Une fois payé, nous préparerons et expédierons votre colis immédiatement.',
+    goToMyOrders: 'Aller à Mes Commandes',
     statusProcessing: 'En Traitement',
     statusShipped: 'Expédié',
     statusDelivered: 'Livré',
@@ -870,11 +915,11 @@ const translations: Record<Language, Record<string, string>> = {
     estimatedTotalLabel: 'Total Estimé',
     addMoreForFreeShipping: 'Ajoutez {0} de plus pour la livraison standard gratuite',
     loginToCompletePurchase: 'Connectez-vous pour finaliser votre achat',
-    validatingCart: 'Validation...',
-    proceedToCheckout: 'Procéder au Paiement',
     securePayment: 'Paiement 100% sécurisé',
     fastShipping: 'Expédition en 24-48h',
     freeReturns: 'Retours gratuits',
+    calculatedAtCheckout: 'Calculé au moment du paiement',
+    continue: 'Continuer vers le paiement',
     
     // Checkout Form
     personalInformation: 'Informations Personnelles',

@@ -164,7 +164,7 @@
 
 .pedidos-table .table-header {
   display: grid;
-  grid-template-columns: 90px minmax(150px, 1fr) minmax(150px, 1fr) 100px 110px 100px 90px 110px 110px 170px;
+  grid-template-columns: 90px minmax(150px, 1fr) minmax(150px, 1fr) 100px 110px 100px 90px 110px 110px 250px;
   gap: 0.75rem;
   padding: 1rem;
   background: var(--bg-tertiary);
@@ -172,18 +172,18 @@
   font-size: 0.8125rem;
   color: var(--text-secondary);
   border-bottom: 2px solid var(--border-color);
-  min-width: 1250px;
+  min-width: 1330px;
 }
 
 .pedidos-table .table-row {
   display: grid;
-  grid-template-columns: 90px minmax(150px, 1fr) minmax(150px, 1fr) 100px 110px 100px 90px 110px 110px 170px;
+  grid-template-columns: 90px minmax(150px, 1fr) minmax(150px, 1fr) 100px 110px 100px 90px 110px 110px 250px;
   gap: 0.75rem;
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
   transition: background 0.15s;
-  min-width: 1250px;
+  min-width: 1330px;
   color: var(--text-primary);
 }
 
@@ -245,6 +245,16 @@
   display: inline-block;
 }
 
+.estado-badge.naranja {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.estado-badge.azul-claro {
+  background: #e0f2fe;
+  color: #075985;
+}
+
 .estado-badge.amarillo {
   background: #fef3c7;
   color: #92400e;
@@ -292,6 +302,7 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .btn-accion {
@@ -326,6 +337,18 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.estado-selector.naranja {
+  background: #ffedd5;
+  color: #9a3412;
+  border-color: #fb923c;
+}
+
+.estado-selector.azul-claro {
+  background: #e0f2fe;
+  color: #075985;
+  border-color: #38bdf8;
 }
 
 .estado-selector.amarillo {

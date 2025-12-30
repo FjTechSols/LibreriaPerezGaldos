@@ -38,7 +38,20 @@ export interface ShippingSettings {
   estimatedDeliveryDays: {
     standard: number;
     express: number;
+    international: number;
   };
+  internationalRates: {
+    europe: ZoneRate;
+    america: ZoneRate;
+    asia: ZoneRate;
+    other: ZoneRate;
+  };
+}
+
+export interface ZoneRate {
+  cost: number;
+  freeThreshold: number;
+  days: number;
 }
 
 export interface SystemSettings {
@@ -199,6 +212,7 @@ class SettingsService {
       { key: 'express_shipping_cost', value: settings.expressShippingCost, category },
       { key: 'shipping_zones', value: settings.shippingZones, category },
       { key: 'estimated_delivery_days', value: settings.estimatedDeliveryDays, category },
+      { key: 'international_rates', value: settings.internationalRates, category },
     ];
 
     return this.updateMultipleSettings(updates);
@@ -300,7 +314,14 @@ class SettingsService {
         shippingZones: ['España', 'Portugal', 'Francia', 'Italia'],
         estimatedDeliveryDays: {
           standard: 5,
-          express: 2
+          express: 2,
+          international: 10
+        },
+        internationalRates: {
+            europe: { cost: 15.00, freeThreshold: 100.00, days: 7 },
+            america: { cost: 25.00, freeThreshold: 150.00, days: 12 },
+            asia: { cost: 30.00, freeThreshold: 180.00, days: 15 },
+            other: { cost: 35.00, freeThreshold: 200.00, days: 20 }
         }
       },
       system: {

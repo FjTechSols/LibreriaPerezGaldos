@@ -14,26 +14,34 @@ export interface CartItemDB {
 
 export const saveCartToSupabase = async (userId: string, items: CartItem[]): Promise<boolean> => {
   try {
-    const { error: deleteError } = await supabase
-      .from('carritos')
-      .delete()
-      .eq('user_id', userId);
-
-    if (deleteError) {
-      console.error('Error clearing cart:', deleteError);
-      return false;
-    }
-
+    // Si no hay items, simplemente limpiamos el carrito
     if (items.length === 0) {
+      const { error: deleteError } = await supabase
+        .from('carritos')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (deleteError) {
+        console.error('Error clearing cart:', deleteError);
+        return false;
+      }
       return true;
     }
 
-    const validItems: Array<{ user_id: string; libro_id: number; cantidad: number }> = [];
+    const validItemsMap = new Map<number, { user_id: string; libro_id: number; cantidad: number }>();
 
+    // Procesar items y deduplicar
     for (const item of items) {
       const libroId = parseInt(item.book.id);
 
       if (isNaN(libroId)) {
+        continue;
+      }
+
+      // Si ya validamos este libro en esta iteración, solo sumamos cantidad
+      if (validItemsMap.has(libroId)) {
+        const existing = validItemsMap.get(libroId)!;
+        existing.cantidad += item.quantity;
         continue;
       }
 
@@ -47,24 +55,55 @@ export const saveCartToSupabase = async (userId: string, items: CartItem[]): Pro
         continue;
       }
 
-      validItems.push({
+      validItemsMap.set(libroId, {
         user_id: userId,
         libro_id: libroId,
         cantidad: item.quantity
       });
     }
 
+    const validItems = Array.from(validItemsMap.values());
+    
+    // Si no quedaron items válidos después de filtrar, limpiamos todo y terminamos
     if (validItems.length === 0) {
+      const { error: deleteError } = await supabase
+      .from('carritos')
+      .delete()
+      .eq('user_id', userId);
+
+      if (deleteError) {
+        console.error('Error clearing invalid cart:', deleteError);
+        return false;
+      }
       return true;
     }
 
-    const { error: insertError } = await supabase
+    // 1. Usar UPSERT en lugar de INSERT para manejar duplicados/actualizaciones atómicas
+    // Esto resuelve el error 409 Conflict
+    const { error: upsertError } = await supabase
       .from('carritos')
-      .insert(validItems);
+      .upsert(validItems, { onConflict: 'user_id, libro_id' });
 
-    if (insertError) {
-      console.error('Error saving cart:', insertError);
+    if (upsertError) {
+      console.error('Error upserting cart:', upsertError);
       return false;
+    }
+
+    // 2. Eliminar items que ya no están en el carrito
+    // Usamos el filtro 'not.in' para borrar todo lo que no sea parte de los items válidos actuales
+    const validIds = validItems.map(i => i.libro_id);
+    if (validIds.length > 0) {
+        const { error: cleanupError } = await supabase
+            .from('carritos')
+            .delete()
+            .eq('user_id', userId)
+            .not('libro_id', 'in', `(${validIds.join(',')})`);
+            
+        if (cleanupError) {
+             console.error('Error cleaning up removed items:', cleanupError);
+             // No retornamos false aquí porque el upsert principal fue exitoso, 
+             // esto es solo limpieza.
+        }
     }
 
     return true;

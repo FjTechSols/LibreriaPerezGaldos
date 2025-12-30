@@ -83,7 +83,7 @@ export interface OrderEmailData {
  */
 export const sendOrderConfirmationEmail = async (orderData: OrderEmailData): Promise<EmailResult> => {
   try {
-    const { data, error } = await supabase.functions.invoke('send-order-confirmation', {
+    const { data, error } = await supabase.functions.invoke('send-order-emails', {
       body: { orderData }
     });
 
