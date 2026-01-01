@@ -315,7 +315,10 @@ export const obtenerLibros = async (
     
     // If default view, we DO NOT request a count from DB to save massive resources.
     // The UI handles this by using the separately loaded total count.
-    const countStrategy = isDefaultView ? undefined : 'exact';
+    // CRITICAL OPTIMIZATION: For searches/filters on large dataset with low IOPS, 'exact' count causes timeouts.
+    // We switch to 'estimated' (uses DB stats) or 'planned' which is faster but less accurate.
+    // This tradeoff is necessary to ensure the query returns AT ALL.
+    const countStrategy = isDefaultView ? undefined : 'estimated';
 
     let query = supabase
       .from('libros')
@@ -383,44 +386,22 @@ export const obtenerLibros = async (
               if (terms.length === 0) {
                  // Empty? Should not happen due to trim() check above
               } else {
-                 for (const term of terms) {
-                     // Check if term matches an Editorial first (Optional optimization or just include in OR?)
-                     // OR logic via string: `titulo.ilike.%term%,autor.ilike.%term%,...`
-                     // Note: To match Publisher Name, we still need IDs.
-                     
-                     // Optimization: Searching Editorials for 5 terms is expensive.
-                     // Compromise: We check Publisher ONLY for the FULL string or single significant terms if cheap.
-                     // OR we just rely on Title/Author/ISBN for split terms.
-                     // User asked for "Editorial and Author".("Planeta Cervantes")
-                     // We need to match Planeta in Publisher.
-                     
-                     // Let's do a lightweight Publisher ID lookup for THIS term
-                     // We can't await inside this loop easily if we want to build a synchronous query chain?
-                     // Supabase query builder IS synchronous in construction. Await is for execution.
-                     // BUT we need `await` to fetch editorial IDs.
-                     // We must fetch editorial IDs for ALL terms beforehand?
-                     
-                     // Correction: We can await inside the loop because the surrounding function `obtenerLibros` is async.
-                     
-                     let subQuery = `titulo.ilike.%${term}%,autor.ilike.%${term}%,legacy_id.ilike.%${term}%`;
-                     
-                     // ISBN check (usually one chunk, but fine to check)
-                     if (term.length > 3) subQuery += `,isbn.ilike.%${term}%`;
-
-                     // Publisher Check
-                     const { data: edData } = await supabase
-                        .from('editoriales')
-                        .select('id')
-                        .ilike('nombre', `%${term}%`)
-                        .limit(5);
-
-                     if (edData && edData.length > 0) {
-                         const ids = edData.map(e => e.id);
-                         subQuery += `,editorial_id.in.(${ids.join(',')})`;
-                     }
-
-                     query = query.or(subQuery);
-                 }
+                  // Tokenized Search Strategy optimized for performance
+                  // Join terms with & for AND-like behavior in constructing the query, 
+                  // but Supabase .or() adds filters with AND logic between chain calls?
+                  // No, multiple .or() calls are ANDed. 
+                  // So query.or(A).or(B) means "Must satisfy A AND Must satisfy B".
+                  
+                  // We removed the expensive 'await editoriales' lookup here.
+                  // It was causing massive latency (n requests per n words) and timeouts.
+                  // Now we simple check Title, Author, LegacyID, ISBN.
+                  
+                  for (const term of terms) {
+                      let subQuery = `titulo.ilike.%${term}%,autor.ilike.%${term}%,legacy_id.ilike.%${term}%`;
+                      if (term.length > 3) subQuery += `,isbn.ilike.%${term}%`;
+                      
+                      query = query.or(subQuery);
+                  }
               }
           }
        }
