@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido } from '../../../services/pedidoService';
+import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
@@ -103,11 +104,37 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
   const handleConfirmarStock = async () => {
     const result = await actualizarEstadoPedido(pedido.id, 'payment_pending');
     if (result.success) {
-      setMessageModalConfig({
-        title: 'Stock Confirmado',
-        message: 'El pedido ha sido confirmado y movido a Pendiente de Pago.',
-        type: 'info'
-      });
+      // Send payment ready email
+      if (pedido.usuario?.email) {
+        const paymentUrl = `${window.location.origin}/stripe-checkout?orderId=${pedido.id}`;
+        const emailResult = await sendPaymentReadyEmail(
+          pedido.id.toString(),
+          pedido.usuario.email,
+          pedido.usuario.nombre_completo || pedido.usuario.username || 'Cliente',
+          pedido.total || 0,
+          paymentUrl
+        );
+        
+        if (emailResult.success) {
+          setMessageModalConfig({
+            title: 'Stock Confirmado',
+            message: 'El pedido ha sido confirmado y se ha enviado un email al cliente para que realice el pago.',
+            type: 'info'
+          });
+        } else {
+          setMessageModalConfig({
+            title: 'Stock Confirmado',
+            message: 'El pedido ha sido confirmado, pero hubo un error al enviar el email. Por favor, contacte al cliente manualmente.',
+            type: 'info'
+          });
+        }
+      } else {
+        setMessageModalConfig({
+          title: 'Stock Confirmado',
+          message: 'El pedido ha sido confirmado y movido a Pendiente de Pago.',
+          type: 'info'
+        });
+      }
       setShowMessageModal(true);
       onRefresh();
     } else {

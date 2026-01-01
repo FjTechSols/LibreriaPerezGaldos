@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Eye, Package, Filter } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
+import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { TableLoader } from '../../Loader';
 import { Pagination } from '../../Pagination';
@@ -99,18 +100,53 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   };
 
   const handleConfirmarStock = async (pedidoId: number) => {
+    // Find the pedido to get user email
+    const pedido = pedidos.find(p => p.id === pedidoId);
+    
     // Moves to 'payment_pending'
     const result = await actualizarEstadoPedido(pedidoId, 'payment_pending');
     if (result.success) {
-        cargarPedidos();
-        cargarEstadisticas();
-    } else {
+      // Send payment ready email
+      if (pedido?.usuario?.email) {
+        const paymentUrl = `${window.location.origin}/stripe-checkout?orderId=${pedidoId}`;
+        const emailResult = await sendPaymentReadyEmail(
+          pedidoId.toString(),
+          pedido.usuario.email,
+          pedido.usuario.nombre_completo || pedido.usuario.username || 'Cliente',
+          pedido.total || 0,
+          paymentUrl
+        );
+        
+        if (emailResult.success) {
+          setMessageModalConfig({
+            title: 'Stock Confirmado',
+            message: 'El pedido ha sido confirmado y se ha enviado un email al cliente.',
+            type: 'info'
+          });
+        } else {
+          setMessageModalConfig({
+            title: 'Stock Confirmado',
+            message: 'El pedido ha sido confirmado, pero hubo un error al enviar el email.',
+            type: 'info'
+          });
+        }
+      } else {
         setMessageModalConfig({
-            title: 'Error',
-            message: result.error || 'Error al confirmar stock.',
-            type: 'error'
+          title: 'Stock Confirmado',
+          message: 'El pedido ha sido confirmado y movido a Pendiente de Pago.',
+          type: 'info'
         });
-        setShowMessageModal(true);
+      }
+      setShowMessageModal(true);
+      cargarPedidos();
+      cargarEstadisticas();
+    } else {
+      setMessageModalConfig({
+        title: 'Error',
+        message: result.error || 'Error al confirmar stock.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
     }
   };
 

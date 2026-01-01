@@ -60,20 +60,22 @@ export const sendReservationEmail = async (
 };
 
 export interface OrderEmailData {
+  emailType: 'order_confirmation' | 'payment_ready';
   orderId: string;
   customerEmail: string;
   customerName: string;
-  items: Array<{
+  items?: Array<{
     title: string;
     quantity: number;
     price: number;
   }>;
-  subtotal: number;
-  tax: number;
-  taxRate: number;
-  shipping: number;
+  subtotal?: number;
+  tax?: number;
+  taxRate?: number;
+  shipping?: number;
   total: number;
-  shippingAddress: string;
+  shippingAddress?: string;
+  paymentUrl?: string;
 }
 
 /**
@@ -81,10 +83,11 @@ export interface OrderEmailData {
  * @param orderData Order details for email
  * @returns Promise with success status
  */
-export const sendOrderConfirmationEmail = async (orderData: OrderEmailData): Promise<EmailResult> => {
+export const sendOrderConfirmationEmail = async (orderData: Omit<OrderEmailData, 'emailType'>): Promise<EmailResult> => {
   try {
+    const emailData: OrderEmailData = { ...orderData, emailType: 'order_confirmation' };
     const { data, error } = await supabase.functions.invoke('send-order-emails', {
-      body: { orderData }
+      body: { orderData: emailData }
     });
 
     if (error) {
@@ -100,6 +103,53 @@ export const sendOrderConfirmationEmail = async (orderData: OrderEmailData): Pro
     return { success: true };
   } catch (error: any) {
     console.error('❌ Exception sending order confirmation email:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send payment ready email to customer
+ * @param orderId Order ID
+ * @param customerEmail Customer email address
+ * @param customerName Customer name
+ * @param total Total amount to pay
+ * @param paymentUrl URL to payment page
+ * @returns Promise with success status
+ */
+export const sendPaymentReadyEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number,
+  paymentUrl: string
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'payment_ready',
+      orderId,
+      customerEmail,
+      customerName,
+      total,
+      paymentUrl
+    };
+
+    const { data, error } = await supabase.functions.invoke('send-order-emails', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error invoking send-payment-ready-email function:', error);
+      return { success: false, error: error.message };
+    }
+
+    if (!data?.success) {
+      console.error('❌ Email sending failed:', data?.error);
+      return { success: false, error: data?.error || 'Unknown error' };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('❌ Exception sending payment ready email:', error);
     return { success: false, error: error.message };
   }
 };

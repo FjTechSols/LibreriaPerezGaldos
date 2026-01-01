@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { NewYearFireworks } from './components/NewYearFireworks';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -123,26 +124,70 @@ function AppRoutes() {
 }
 
 function App() {
+  const [showFireworks, setShowFireworks] = useState(true); // Show by default
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    // Check if fireworks have been shown in this session
+    const hasSeenFireworks = sessionStorage.getItem('hasSeenNewYearFireworks');
+    
+    if (hasSeenFireworks) {
+      // If already seen, don't show fireworks
+      setShowFireworks(false);
+      setHasLoaded(true);
+    } else {
+      // Show fireworks as initial loader
+      setShowFireworks(true);
+      
+      // IMPORTANT: Prevent AuthContext from showing its own splash screen
+      // by setting this flag immediately
+      sessionStorage.setItem('hasLoadedBefore', 'true');
+      
+      // Prevent scrolling while fireworks are shown
+      document.body.style.overflow = 'hidden';
+      
+      // Mark as loaded after a short delay to ensure smooth transition
+      setTimeout(() => setHasLoaded(true), 500);
+    }
+  }, []);
+
+  const handleCloseFireworks = () => {
+    setShowFireworks(false);
+    // Restore scrolling
+    document.body.style.overflow = '';
+    // Mark as seen for this session
+    sessionStorage.setItem('hasSeenNewYearFireworks', 'true');
+  };
+
   return (
-    <Router>
-      <RouteTransitionProvider>
-        <ThemeProvider>
-          <LanguageProvider>
-            <SettingsProvider>
-              <AuthProvider>
-                <CartProvider>
-                  <WishlistProvider>
-                    <InvoiceProvider>
-                      <AppRoutes />
-                    </InvoiceProvider>
-                  </WishlistProvider>
-                </CartProvider>
-              </AuthProvider>
-            </SettingsProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </RouteTransitionProvider>
-    </Router>
+    <>
+      {showFireworks && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2147483647 }}>
+          <NewYearFireworks onClose={handleCloseFireworks} />
+        </div>
+      )}
+      {hasLoaded && (
+        <Router>
+          <RouteTransitionProvider>
+            <ThemeProvider>
+              <LanguageProvider>
+                <SettingsProvider>
+                  <AuthProvider>
+                    <CartProvider>
+                      <WishlistProvider>
+                        <InvoiceProvider>
+                          <AppRoutes />
+                        </InvoiceProvider>
+                      </WishlistProvider>
+                    </CartProvider>
+                  </AuthProvider>
+                </SettingsProvider>
+              </LanguageProvider>
+            </ThemeProvider>
+          </RouteTransitionProvider>
+        </Router>
+      )}
+    </>
   );
 }
 

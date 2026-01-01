@@ -65,12 +65,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         : Promise.resolve();
       
       // Start auth check
+      // Start auth check with safety timeout (5s) due to potential slow DB
+      // If DB is slow (Disk IO exhausted), we shouldn't block the UI forever
       const authCheckPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) => 
+          setTimeout(() => {
+              console.warn('⚠️ Auth check timed out (slow DB), defaulting to unauthenticated');
+              resolve({ data: { session: null } });
+          }, 5000)
+      );
       
-      // Process auth immediately when done
-      const sessionData = await authCheckPromise;
+      // Process auth immediately when done (or timeout)
+      const sessionData = await Promise.race([authCheckPromise, timeoutPromise]) as any;
       if (sessionData.data.session?.user) {
-        await loadUserData(sessionData.data.session.user.id);
+        // Also timeout the profile fetch if DB is dying
+        const profileLoadPromise = loadUserData(sessionData.data.session.user.id);
+        const profileTimeoutPromise = new Promise((resolve) => 
+            setTimeout(() => {
+                console.warn('⚠️ User profile load timed out (slow DB), continuing without detailed profile');
+                resolve(null);
+            }, 5000)
+        );
+        await Promise.race([profileLoadPromise, profileTimeoutPromise]);
       }
       
       // Auth is ready, allow app to mount (fetching data in background)
