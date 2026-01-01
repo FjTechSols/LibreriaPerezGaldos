@@ -72,6 +72,27 @@ export const obtenerOcrearEditorial = async (nombre: string): Promise<number | n
   }
 };
 
+// Public search for autocomplete
+export const buscarEditoriales = async (query: string): Promise<{ id: number; nombre: string }[]> => {
+  if (!query || query.trim().length < 2) return [];
+  
+  try {
+    const { data, error } = await supabase
+      .from('editoriales')
+      .select('id, nombre')
+      .ilike('nombre', `%${query.trim()}%`)
+      .limit(10)
+      .order('nombre');
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error searching editoriales:', error);
+    return [];
+  }
+};
+
+// Internal use: Get or Create
 // Strict lookup only, as categories are fixed in the UI
 export const obtenerCategoriaId = async (nombre: string): Promise<number | null> => {
   if (!nombre) return null;
@@ -480,26 +501,20 @@ export const obtenerLibros = async (
        if (filters.endYear !== undefined) query = query.lte('anio', filters.endYear);
 
        if (filters.publisher) {
-          // Filtering by related table is tricky with simple query builder without modifying the select to !inner
-          // But our select is: '*, editoriales(id, nombre)...'
-          // If we want to filter ONLY books with that publisher, we MUST use !inner join.
-          // However, modifying the top-level .select() might be cleaner.
-          // Let's rely on caching or strict ID if possible? No, user might type.
-          // NOTE: Supabase client 'query' object is mutable?
-          // Actually, we can't easily change the join type dynamically on the fly unless we rebuild the chain.
-          // Workaround: We can search `editorial_id` if we had it.
-          // If we only have text, we use `editoriales!inner(nombre)` syntax inside the filter?
-          // query = query.filter('editoriales.nombre', 'ilike', `%${filters.publisher}%`) NO, needs inner join
-          // Let's assume for now the user will select from a list if we implement that, 
-          // OR standard search covers publisher in "text search".
-          // If advanced filter is "Publisher Name", we might process it.
-          // Let's skip deep publisher filtering for now or use `editorial_id` if we pass that.
-          // Wait, I can try `!inner` in the initial select if I knew I needed it.
-          // But I don't want to break standard queries.
-          // Let's leave Publisher for now as "Use Search Bar". Or try to filter by ID if we get dropdown.
-          // Actually, `AdminDashboard` doesn't have editorial dropdown.
-          // I'll skip Publisher specific filter implementation inside this block for now to avoid breaking SQL 
-          // and suggest user uses General Search for Publisher name.
+          // Optimization: Resolve publisher Name to IDs first, then filter by editorial_id
+          // This avoids complex !inner joins and scales better with the "Estimated Count" strategy
+          const { data: eds } = await supabase
+            .from('editoriales')
+            .select('id')
+            .ilike('nombre', `%${filters.publisher.trim()}%`)
+            .limit(50); // increased limit to catch variations
+
+          if (eds && eds.length > 0) {
+              query = query.in('editorial_id', eds.map(e => e.id));
+          } else {
+              // User searched for a publisher that doesn't exist -> No results
+              query = query.eq('id', -1); 
+          }
        }
 
        // Sorting
@@ -1032,33 +1047,15 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
 
       // Standard fuzzy search for 'all' mode
       
-      // 1. First, find matching publishers (Editoriales)
-      let editorialIds: number[] = [];
-      try {
-        const { data: editorialData } = await supabase
-          .from('editoriales')
-          .select('id')
-          .ilike('nombre', `%${query}%`)
-          .limit(5); // Limit to top 5 matching publishers to avoid massive OR strings
-          
-        if (editorialData && editorialData.length > 0) {
-            editorialIds = editorialData.map(e => e.id);
-        }
-      } catch (err) {
-        console.warn('Error fetching matching editorials:', err);
-      }
-
-      // 2. Build Query
-      let orQuery = `titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`;
+      // OPTIMIZATION: Removed recursive Publisher lookup (fetching editorial IDs first)
+      // This caused latency when DB was under load.
+      // Now we search directly on Title, Author, ISBN, LegacyID.
       
-      // If we found matching publishers, include their books in the results
-      if (editorialIds.length > 0) {
-          orQuery += `,editorial_id.in.(${editorialIds.join(',')})`;
-      }
+      const orQuery = `titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`;
 
       const { data, error } = await supabase
         .from('libros')
-        .select('*')
+        .select('*, editoriales(id, nombre), categorias(id, nombre)')
         .eq('activo', true)
         .or(orQuery)
         .order('titulo', { ascending: true })
@@ -1068,6 +1065,8 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
           console.error('Error al buscar libros:', error);
           return [];
         }
+
+        return (data || []).map(mapLibroToBook);
 
         if (!data || data.length === 0) return [];
         return await enrichBooks(data);
@@ -1347,29 +1346,7 @@ export const obtenerSugerencias = async (termino: string): Promise<string[]> => 
 };
 
 
-export const buscarEditoriales = async (termino: string): Promise<string[]> => {
-  if (!termino || termino.trim().length < 1) return [];
 
-  try {
-    // Prefer startsWith for autocomplete, fallback to ilike if desired.
-    // User said "segun de las editoriales existentes con esas letras si escribe".
-    // Usually implies "Starts With" or "Contains".
-    // I'll use ilike %term% for broader matching.
-    const { data, error } = await supabase
-      .from('editoriales')
-      .select('nombre')
-      .ilike('nombre', `%${termino}%`)
-      .limit(10)
-      .order('nombre');
-
-    if (error) throw error;
-    
-    return data ? data.map(e => e.nombre) : [];
-  } catch (error) {
-    console.warn('Error searching editorials:', error);
-    return [];
-  }
-};
 
 export const decrementStock = async (bookId: number, quantity: number = 1): Promise<void> => {
   // Get current stock

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Filter, SlidersHorizontal, Grid2x2 as Grid, List } from 'lucide-react';
 import { FilterState } from '../types';
 import { getCategorias } from '../services/categoriaService';
+import { buscarEditoriales } from '../services/libroService';
 import { useLanguage } from '../context/LanguageContext';
 import '../styles/components/BookFilter.css';
 
@@ -16,6 +17,16 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
   const [isExpanded, setIsExpanded] = useState(false);
   const { language } = useLanguage();
   const [categories, setCategories] = useState<string[]>(['Todos']);
+  const [publisherInput, setPublisherInput] = useState(filters.publisher || '');
+  const [publisherSuggestions, setPublisherSuggestions] = useState<{id: number, nombre: string}[]>([]); 
+
+  useEffect(() => {
+     if (filters.publisher !== undefined && filters.publisher !== publisherInput) {
+         setPublisherInput(filters.publisher);
+     } else if (filters.publisher === undefined && publisherInput !== '') {
+         setPublisherInput('');
+     }
+  }, [filters.publisher]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -127,6 +138,78 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
                 <option key={category} value={category}>{category}</option>
               ))}
             </select>
+          </div>
+
+          <div className="Book-Filter__group relative-group">
+            <label className="Book-Filter__label">{language === 'es' ? 'Editorial' : 'Publisher'}</label>
+            <div className="Book-Filter__autocomplete">
+                <input
+                  type="text"
+                  value={publisherInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setPublisherInput(val);
+                    if (val.length < 2) {
+                        setPublisherSuggestions([]);
+                        return;
+                    }
+                    if (val.length >= 2) {
+                        // Debounce manually or simple call
+                        // For simplicity in this quick implementation, we call directly but ideally debounce
+                        // Considering low traffic, direct call is okay-ish, but debounce is better.
+                        // We'll use a timeout ref if we want, but let's just let it be responsive for now
+                         buscarEditoriales(val).then(setPublisherSuggestions);
+                    }
+                  }}
+                  onBlur={() => {
+                      // Delayed clear to allow click on suggestion
+                      setTimeout(() => {
+                           if (!filters.publisher && publisherInput.length > 0) {
+                               // If user typed but didn't select, apply what they typed?
+                               onFiltersChange({ publisher: publisherInput });
+                           }
+                           setPublisherSuggestions([]);
+                      }, 200);
+                  }}
+                  onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                          onFiltersChange({ publisher: publisherInput });
+                          setPublisherSuggestions([]);
+                      }
+                  }}
+                  placeholder={language === 'es' ? 'Buscar editorial...' : 'Search publisher...'}
+                  className="Book-Filter__input-text"
+                />
+                
+                {publisherSuggestions.length > 0 && (
+                    <div className="Book-Filter__suggestions">
+                        {publisherSuggestions.map(pub => (
+                            <div 
+                                key={pub.id} 
+                                className="Book-Filter__suggestion-item"
+                                onClick={() => {
+                                    setPublisherInput(pub.nombre);
+                                    onFiltersChange({ publisher: pub.nombre });
+                                    setPublisherSuggestions([]);
+                                }}
+                            >
+                                {pub.nombre}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+             {filters.publisher && (
+                  <button 
+                      className="Book-Filter__clear-badg"
+                      onClick={() => {
+                          setPublisherInput('');
+                          onFiltersChange({ publisher: undefined });
+                      }}
+                  >
+                      ✕
+                  </button>
+             )}
           </div>
 
 

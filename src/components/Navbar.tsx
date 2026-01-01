@@ -127,7 +127,7 @@ export function Navbar() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('searchPlaceholder')}
+              placeholder="Buscar por título, autor, ISBN o código..."
               className="search-input"
               onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
             />

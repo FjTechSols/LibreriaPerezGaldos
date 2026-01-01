@@ -326,6 +326,7 @@ export interface FilterState {
   featured?: boolean;
   onSale?: boolean;
   isNew?: boolean;
+  publisher?: string;
 }
 
 export interface Invoice {
