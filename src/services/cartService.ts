@@ -33,8 +33,10 @@ export const saveCartToSupabase = async (userId: string, items: CartItem[]): Pro
     // Procesar items y deduplicar
     for (const item of items) {
       const libroId = parseInt(item.book.id);
+      const MAX_INT4 = 2147483647;
 
-      if (isNaN(libroId)) {
+      if (isNaN(libroId) || libroId > MAX_INT4) {
+        console.warn(`Skipping invalid book ID for cart: ${item.book.id} (Out of range or NaN)`);
         continue;
       }
 

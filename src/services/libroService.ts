@@ -1067,9 +1067,6 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
         }
 
         return (data || []).map(mapLibroToBook);
-
-        if (!data || data.length === 0) return [];
-        return await enrichBooks(data);
     }
   } catch (error) {
     console.error('Error inesperado al buscar libros:', error);
@@ -1153,30 +1150,7 @@ export const obtenerEstadisticasLibros = async () => {
     }
 };
 
-async function enrichBooks(data: LibroSupabase[]) {
-  if (!data || data.length === 0) return [];
 
-  // Recolectar IDs
-  const editorialIds = Array.from(new Set(data.map(b => b.editorial_id).filter(Boolean))) as number[];
-  const categoryIds = Array.from(new Set(data.map(b => b.categoria_id).filter(Boolean))) as number[];
-
-  // Fetch paralelo
-  const [editorialesRes, categoriasRes] = await Promise.all([
-    editorialIds.length > 0 ? supabase.from('editoriales').select('id, nombre').in('id', editorialIds) : { data: [] },
-    categoryIds.length > 0 ? supabase.from('categorias').select('id, nombre').in('id', categoryIds) : { data: [] }
-  ]);
-
-  // Crear mapas
-  const editorialesMap = new Map(editorialesRes.data?.map((e: any) => [e.id, e]) || []);
-  const categoriasMap = new Map(categoriasRes.data?.map((c: any) => [c.id, c]) || []);
-
-  // Enriquecer
-  return data.map(libro => {
-    if (libro.editorial_id) libro.editoriales = editorialesMap.get(libro.editorial_id);
-    if (libro.categoria_id) libro.categorias = categoriasMap.get(libro.categoria_id);
-    return mapLibroToBook(libro);
-  });
-}
 
 export const obtenerTotalUnidadesStock = async (): Promise<number> => {
     try {
