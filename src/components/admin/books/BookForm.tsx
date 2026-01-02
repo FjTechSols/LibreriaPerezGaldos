@@ -30,7 +30,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     price: 0,
     originalPrice: undefined,
     stock: 1,
-    ubicacion: '',
+    ubicacion: 'Almacén',
     category: '', // Changed to empty string initially
     description: '',
     coverImage: '',
@@ -70,7 +70,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
       if (val.length >= 2) {
           try {
              const sugs = await buscarEditoriales(val);
-             setEditorialSuggestions(sugs);
+             setEditorialSuggestions(sugs.map((s: any) => s.nombre));
              setShowEditorialSuggestions(true);
           } catch(e) {
              console.error(e);
@@ -215,7 +215,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         price: 0,
         originalPrice: undefined,
         stock: 1,
-        ubicacion: '',
+        ubicacion: 'Almacén',
         category: '', 
         description: '',
         coverImage: '',
@@ -312,6 +312,13 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const handleSubmit = async () => {
       setIsSubmitting(true);
       try {
+          // Validation: Category is mandatory
+          if (!formData.category) {
+              showModal('Campo Obligatorio', 'Por favor seleccione una categoría para el libro.', 'error');
+              setIsSubmitting(false);
+              return;
+          }
+
           // Strict Editorial Check
           if (formData.publisher && formData.publisher.trim()) {
              // We must verify exact match against DB to prevent creation

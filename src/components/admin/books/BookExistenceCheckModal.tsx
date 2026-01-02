@@ -241,7 +241,7 @@ export function BookExistenceCheckModal({
                     disabled={loading}
                     className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                    {loading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
+                    {loading ? <Loader2 className="animate-spin text-white" size={18} /> : <Search size={18} />}
                     Buscar en Base de Datos
                 </button>
            </div>
