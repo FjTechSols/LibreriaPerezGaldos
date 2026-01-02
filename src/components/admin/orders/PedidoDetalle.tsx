@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
@@ -503,6 +503,32 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               </span>
             </div>
           </div>
+
+          <div className="legacy-id-section" style={{ 
+              marginBottom: '1.5rem', 
+              padding: '1rem', 
+              backgroundColor: 'var(--bg-tertiary)', 
+              borderRadius: '8px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.75rem', 
+              border: '1px solid var(--border-color)'
+            }}>
+              <Hash size={20} style={{ color: 'var(--text-secondary)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Código de Referencia (Libros)</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+                   {
+                     pedido?.detalles && pedido.detalles.length > 0 
+                     ? pedido.detalles
+                        .map(d => d.libro?.legacy_id || d.libro?.codigo)
+                        .filter(Boolean)
+                        .join(', ') || '-'
+                     : '-'
+                   }
+                </span>
+              </div>
+            </div>
 
           <div className="pedido-info-grid">
             <div className="info-card">
