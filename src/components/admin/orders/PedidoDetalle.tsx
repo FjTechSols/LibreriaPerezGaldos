@@ -585,7 +585,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <h3>Estado</h3>
               </div>
               <div className="info-card-body">
-                {pedido?.estado === 'pending_verification' ? (
+                {pedido?.estado === 'pending_verification' && pedido?.tipo === 'interno' ? (
                   <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
                     <button
                       onClick={handleConfirmarStock}
@@ -630,11 +630,27 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                   </div>
                 ) : (
                   <select
-                    value={pedido?.estado || 'pendiente'}
+                     /* 
+                       Visual Fix: If original state is invalid for this type (e.g. pending_verification for non-internal),
+                       fallback to 'pendiente' or 'procesando' to match options.
+                     */
+                    value={(() => {
+                        let val = pedido?.estado || 'pendiente';
+                        if (pedido?.tipo !== 'interno') {
+                             if (val === 'pending_verification') val = 'pendiente';
+                             if (val === 'payment_pending') val = 'procesando';
+                        }
+                        return val;
+                    })()}
                     onChange={(e) => handleCambiarEstado(e.target.value as EstadoPedido)}
                     className="estado-selector-detalle"
                   >
-                    {ESTADOS.filter(e => e !== 'pending_verification' && e !== 'pendiente').map(estado => (
+                    {ESTADOS.filter(estado => {
+                      if (pedido?.tipo === 'interno') {
+                         return estado !== 'pending_verification' && estado !== 'pendiente';
+                      }
+                      return estado !== 'pending_verification' && estado !== 'payment_pending';
+                    }).map(estado => (
                       <option key={estado} value={estado}>
                         {ESTADO_LABELS[estado]}
                       </option>

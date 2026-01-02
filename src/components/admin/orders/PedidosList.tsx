@@ -32,7 +32,7 @@ const ESTADO_COLORES: Record<EstadoPedido, string> = {
 const ESTADO_LABELS: Record<EstadoPedido, string> = {
   pending_verification: 'Por Verificar',
   payment_pending: 'Pendiente Pago',
-  pendiente: 'Pendiente (Antiguo)',
+  pendiente: 'Pendiente',
   procesando: 'Procesando',
   enviado: 'Enviado',
   completado: 'Completado',
@@ -346,9 +346,19 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                 : '-'}
             </span>
             <span className="pedido-estado">
-              <span className={`estado-badge ${ESTADO_COLORES[pedido.estado || 'pendiente']}`}>
-                {ESTADO_LABELS[pedido.estado || 'pendiente']}
-              </span>
+              {(() => {
+                let estadoToShow = pedido.estado || 'pendiente';
+                // Visual fix: Map statuses for non-internal orders to match allowed dropdown options
+                if (pedido.tipo !== 'interno') {
+                  if (estadoToShow === 'pending_verification') estadoToShow = 'pendiente';
+                  if (estadoToShow === 'payment_pending') estadoToShow = 'procesando';
+                }
+                return (
+                  <span className={`estado-badge ${ESTADO_COLORES[estadoToShow]}`}>
+                    {ESTADO_LABELS[estadoToShow]}
+                  </span>
+                );
+              })()}
             </span>
             <span className="pedido-tipo">
                <span className="badge-tipo">
