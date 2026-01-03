@@ -23,7 +23,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       try {
         // Always load from localStorage first for immediate display
-        const localCart = getLocalCart();
+        const rawLocalCart = getLocalCart();
+        // Sanitize corrupted items immediately
+        const localCart = rawLocalCart.filter(item => {
+           const qty = Number(item.quantity);
+           const id = Number(item.book.id);
+           const isValid = !isNaN(qty) && qty > 0 && qty < 10000 && !isNaN(id) && id > 0 && id < 2147483647;
+           if (!isValid) console.warn('Removing corrupted item from local cart during load:', item);
+           return isValid;
+        });
+
+        // If we filtered anything, update localStorage immediately to stop the loop
+        if (localCart.length !== rawLocalCart.length) {
+            saveLocalCart(localCart); 
+        }
         
         if (isAuthenticated && user) {
           // Show local cart immediately

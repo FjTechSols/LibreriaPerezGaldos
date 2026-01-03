@@ -53,11 +53,26 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const [messageModalConfig, setMessageModalConfig] = useState<{
     title: string;
     message: string;
-    type: 'info' | 'error' | 'success';
+    type: 'info' | 'error' | 'success' | 'warning';
+    onConfirm?: () => void;
+    showCancel?: boolean;
+    buttonText?: string;
   }>({ title: '', message: '', type: 'info' });
 
-  const showModal = (title: string, message: string, type: 'info' | 'error' | 'success' = 'info') => {
-    setMessageModalConfig({ title, message, type });
+  const showModal = (
+      title: string, 
+      message: string, 
+      type: 'info' | 'error' | 'success' | 'warning' = 'info',
+      onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ 
+        title, 
+        message, 
+        type, 
+        onConfirm,
+        showCancel: !!onConfirm,
+        buttonText: onConfirm ? 'Sí, Crear' : 'Aceptar'
+    });
     setShowMessageModal(true);
   };
 
@@ -319,19 +334,35 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
               return;
           }
 
-          // Strict Editorial Check
+          // Publisher Verification with Smart Confirmation
           if (formData.publisher && formData.publisher.trim()) {
-             // We must verify exact match against DB to prevent creation
-             const { data: edExists } = await supabase
+             const cleanPub = formData.publisher.trim();
+             // Check if it exists (robust check for trailing spaces or case)
+             // We use a wildcard to find candidates, then match strictly in JS (ignoring whitespace differences)
+             const { data: candidates } = await supabase
                 .from('editoriales')
-                .select('id')
-                .ilike('nombre', formData.publisher.trim())
-                .maybeSingle(); // Use maybeSingle to avoid 406 if multiple (shouldn't happen with unique names but robust)
+                .select('nombre')
+                .ilike('nombre', `${cleanPub}%`)
+                .limit(10);
              
-             if (!edExists) {
-                 showModal('Editorial Desconocida', 'La editorial indicada no existe en la base de datos. Por favor seleccione una de las sugerencias.', 'error');
-                 setIsSubmitting(false);
-                 return;
+             // Check if any candidate matches the cleaned name (case insensitive, whitespace insensitive)
+             const match = candidates?.some(c => c.nombre.trim().toLowerCase() === cleanPub.toLowerCase());
+
+             if (!match) {
+                 // It's a new publisher. Ask for confirmation to prevent typos.
+                 setIsSubmitting(false); // Pause submission
+                 showModal(
+                    'Nueva Editorial', 
+                    `La editorial "${cleanPub}" no existe. ¿Desea crearla automáticamente? \n\nSi es un error tipográfico, pulse Cancelar y corríjalo.`, 
+                    'warning',
+                    () => {
+                        // User confirmed. Proceed with submission.
+                        setIsSubmitting(true);
+                        onSubmit(formData, bookContents).finally(() => setIsSubmitting(false)); 
+                        setShowMessageModal(false);
+                    }
+                 );
+                 return; // Stop here, wait for modal callback
              }
           }
 
@@ -791,6 +822,9 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         title={messageModalConfig.title}
         message={messageModalConfig.message}
         type={messageModalConfig.type as any}
+        onConfirm={messageModalConfig.onConfirm}
+        showCancel={messageModalConfig.showCancel}
+        buttonText={messageModalConfig.buttonText}
       />
     </div>
 

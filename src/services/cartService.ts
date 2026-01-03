@@ -35,8 +35,13 @@ export const saveCartToSupabase = async (userId: string, items: CartItem[]): Pro
       const libroId = parseInt(item.book.id);
       const MAX_INT4 = 2147483647;
 
-      if (isNaN(libroId) || libroId > MAX_INT4) {
-        console.warn(`Skipping invalid book ID for cart: ${item.book.id} (Out of range or NaN)`);
+      if (isNaN(libroId) || libroId > MAX_INT4 || libroId <= 0) {
+        console.warn(`Skipping invalid book ID for cart: ${item.book.id} (Out of range, negative or NaN)`);
+        continue;
+      }
+
+      if (!item.quantity || item.quantity <= 0 || item.quantity > 10000) {
+        console.warn(`Skipping invalid quantity for cart item: ${item.book.id}, qty: ${item.quantity}`);
         continue;
       }
 
@@ -135,7 +140,10 @@ export const loadCartFromSupabase = async (userId: string): Promise<CartItem[]> 
     }
 
     return data
-      .filter(item => item.libro)
+      .filter(item => {
+        const id = Number(item.libro?.id);
+        return item.libro && !isNaN(id) && id > 0 && id < 2147483647;
+      })
       .map(item => ({
         book: {
           id: item.libro.id.toString(),

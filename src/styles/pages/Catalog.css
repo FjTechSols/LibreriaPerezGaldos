@@ -31,7 +31,8 @@
 .search-section {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem; /* Increased spacing */
+  padding: 0 1rem;
 }
 
 .catalog-results {

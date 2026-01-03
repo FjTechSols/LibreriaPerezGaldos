@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Book } from '../types';
-import { generarCodigoLibro, actualizarCodigoPorUbicacion } from '../utils/codigoHelper';
+import { generarCodigoLibro, actualizarCodigoPorUbicacion, obtenerSufijoUbicacion } from '../utils/codigoHelper';
 import { discountService, DiscountRule } from './discountService';
 
 export interface LibroSupabase {
@@ -57,15 +57,15 @@ export const obtenerOcrearEditorial = async (nombre: string): Promise<number | n
     if (error) throw error;
     if (data) return data.id;
 
-    // 2. Create if not exists
-    const { data: newData, error: createError } = await supabase
+    // 2. Create   if (!data) {
+    const { data: newEd, error: createError } = await supabase
       .from('editoriales')
       .insert({ nombre: nombreNormalizado })
       .select('id')
       .single();
 
     if (createError) throw createError;
-    return newData ? newData.id : null;
+    return newEd ? newEd.id : null;
   } catch (error) {
     console.error('Error handling editorial:', error);
     return null;
@@ -95,14 +95,14 @@ export const buscarEditoriales = async (query: string): Promise<{ id: number; no
 // Internal use: Get or Create
 // Strict lookup only, as categories are fixed in the UI
 export const obtenerCategoriaId = async (nombre: string): Promise<number | null> => {
-  if (!nombre) return null;
-  const nombreNormalizado = nombre.trim();
+  if (!nombre || !nombre.trim()) return null;
+  const nombreLimpio = nombre.trim();
   
   try {
     const { data, error } = await supabase
       .from('categorias')
       .select('id')
-      .ilike('nombre', nombreNormalizado) // Use ilike for robustness even if select matches
+      .ilike('nombre', nombreLimpio) // Use ilike for robustness even if select matches
       .maybeSingle();
 
     if (error) throw error;
@@ -309,6 +309,12 @@ export const verificarExistenciaLibro = async (
     return data ? data.map(mapLibroToBook) : [];
 };
 
+// Helper for fuzzy search (Smart Vowels)
+const transformToWildcard = (term: string) => {
+  if (term.length <= 3) return term;
+  return term.replace(/[aeiouáéíóúü]/gi, '_');
+};
+
 export const obtenerLibros = async (
   page: number = 1, 
   itemsPerPage: number = 12, 
@@ -345,7 +351,7 @@ export const obtenerLibros = async (
       .from('libros')
       // Removed Joins to prevent massive timeout on deep pagination (page 15k+)
       // We only fetch the core table now. The UI will have to rely on IDs or we fetch details separately if needed.
-      .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: countStrategy as any })
+      .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id, descripcion', { count: countStrategy as any })
       .eq('activo', true);
 
     // Apply Filters
@@ -395,39 +401,38 @@ export const obtenerLibros = async (
                  query = query.or(`and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
               }
           } else {
+
               // Tokenized Search Strategy:
               // Split query (e.g. "Planeta Galdos") into ["Planeta", "Galdos"]
               // AND logic: Match(Planeta) AND Match(Galdos)
-              // Match(Term) = Title OR Author OR ISBN OR LegacyID matches Term
               
-              // Key Fix: Sanitize terms to remove PostgREST reserved chars like (, ), , that break the parser
-              const cleanSearchTerm = searchTerm.replace(/[(),.]/g, ' '); 
+              // Key Fix: Sanitize terms more aggressively to prevent regex breakage
+              const cleanSearchTerm = searchTerm.replace(/[(),.\-\/]/g, ' '); 
               const terms = cleanSearchTerm.split(/\s+/).filter(t => t.length > 0);
 
-              if (terms.length === 0) {
-                 // Empty? Should not happen due to trim() check above
-              } else {
-                  // Tokenized Search Strategy optimized for performance
-                  // Join terms with & for AND-like behavior in constructing the query, 
-                  // but Supabase .or() adds filters with AND logic between chain calls?
-                  // No, multiple .or() calls are ANDed. 
-                  // So query.or(A).or(B) means "Must satisfy A AND Must satisfy B".
-                  
-                  // We removed the expensive 'await editoriales' lookup here.
-                  // It was causing massive latency (n requests per n words) and timeouts.
-                  // Now we simple check Title, Author, LegacyID, ISBN.
-                  
+              if (terms.length > 0) {
                   for (const term of terms) {
-                      let subQuery = `titulo.ilike.%${term}%,autor.ilike.%${term}%,legacy_id.ilike.%${term}%`;
-                      if (term.length > 3) subQuery += `,isbn.ilike.%${term}%`;
+                      // Apply Smart Vowel wildcard for text fields
+                      // e.g. "Perez" -> "P_r_z" matching "Pérez" and "Perez"
+                      const fuzzyTerm = transformToWildcard(term);
+
+                      let subQuery = `titulo.ilike.%${fuzzyTerm}%,autor.ilike.%${fuzzyTerm}%,descripcion.ilike.%${fuzzyTerm}%`;
+                      
+                      // Legacy ID usually implies strict substring (digits/codes) so we keep original term
+                      subQuery += `,legacy_id.ilike.%${term}%`;
+
+                      if (term.length > 3) {
+                          subQuery += `,isbn.ilike.%${term}%`;
+                      }
                       
                       query = query.or(subQuery);
                   }
               }
-          }
-       }
-     }
+      }
 
+      }
+
+      }
        if (filters.category && filters.category !== 'Todos') {
             // Resolve Category Name to ID
             // Optimisation: We could cache this or pass ID from UI, but for now we look it up.
@@ -539,7 +544,8 @@ export const obtenerLibros = async (
             // Usually 'Default' implies 'Newest First' (LIFO). 
             // But if UI says 'Ascendente' and user selects 'Default', they might get Oldest First (ID 1).
             // Let's fallback to respecting sortOrder.
-            query = query.order('id', { ascending: filters.sortOrder === 'asc' });
+            query = query.order('legacy_id', { ascending: filters.sortOrder === 'asc' });
+            query = query.order('id', { ascending: false }); // Secondary sort for stability
             break;
           // Rating is not in DB schema shown, ignoring for now
           default:
@@ -673,7 +679,7 @@ export const obtenerLibroPorId = async (id: string | number): Promise<Book | nul
   }
 };
 
-export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: string[]): Promise<Book | null> => {
+export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: string[]): Promise<LibroSupabase | null> => {
   try {
     // Primero insertamos sin legacy_id para obtener el ID autogenerado
     const { data: libroTemp, error: insertError } = await supabase
@@ -726,64 +732,102 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
       }
     }
 
-    // Generar el código basado en el ID y la ubicación
-    // Helper to get suffix based on location
-    const obtenerSufijo = (ubicacion: string): string => {
-      // Normalización agresiva para coincidir con cualquier input
-      const normalizada = ubicacion.toLowerCase()
-        .trim()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // "almacén" -> "almacen"
-      
-      switch (normalizada) {
-        case 'almacen': return '';
-        case 'galeon': return 'G';
-        case 'hortaleza': return 'H';
-        case 'reina': return 'R';
-        case 'abebooks': return 'Ab';
-        case 'general': return 'Gen'; // Assumption: General -> Gen to differentiate
-        case 'uniliber': return 'UL'; // UniLiber suffix
-        case 'almacen general': return ''; // Assumption: Same as Almacen? Or 'AG'? 
-                                           // User said "Almacen General" in dropdown. 
-                                           // Usually "Almacen" is the main series.
-                                           // Let's assume Almacen General == Almacen (No suffix)
-        default: return ''; 
-      }
-    };
-
     // New Universal Generator
-    const obtenerSiguienteCodigo = async (ubicacion: string): Promise<string> => {
-      const sufijo = obtenerSufijo(ubicacion);
+    const obtenerSiguienteCodigo = async (ubicacionNombre: string): Promise<string> => {
+      // Use shared helper
+      const sufijo = obtenerSufijoUbicacion(ubicacionNombre);
       
-      let query = supabase.from('libros').select('legacy_id');
+      let startNum = 1; 
+      // Default padding heuristic: 8 digits seems standard across locations (Hortaleza, Almacen)
+      let padding = 8;
+      
+      // Strategy: Fetch recent books (to find active sequence) AND high legacy_ids (to find max)
+      // We do this to avoid full-table scans that timeout.
+      
+      const pRecent = supabase
+        .from('libros')
+        .select('legacy_id, ubicacion') // Fetch location to filter in JS
+        .order('created_at', { ascending: false })
+        .limit(500);
 
-      if (sufijo) {
-        query = query.like('legacy_id', `%${sufijo}`);
-      } else {
-         query = query.like('legacy_id', '02%').lt('legacy_id', '02300000');
+      const pMaxStr = supabase
+        .from('libros')
+        .select('legacy_id, ubicacion')
+        .lt('legacy_id', '1') // Focus on padded numeric codes (starting with 0) as these are common
+        .order('legacy_id', { ascending: false })
+        .limit(500);
+
+      const [resRecent, resMax] = await Promise.all([pRecent, pMaxStr]);
+      
+      // Combine results
+      const allRows = [ ...(resRecent.data || []), ...(resMax.data || []) ];
+      
+      if (allRows.length > 0) {
+           // Filter for current location validation strictly in JS
+           // This bypasses the DB timeout on 'ubicacion' column filtering
+           const locationRows = allRows.filter(r => 
+                // Flexible match: Exact string OR normalized (if needed)
+                // Assuming 'Hortaleza' matches 'Hortaleza'
+                r.ubicacion === ubicacionNombre 
+           );
+
+           // Strict Numeric Filter: digits + suffix
+           const pattern = new RegExp(`^\\d+${sufijo}$`);
+           const numericCodes = locationRows
+                .map(d => d.legacy_id)
+                .filter(code => code && pattern.test(code));
+
+           if (numericCodes.length > 0) {
+                let maxVal = 0;
+                for (const code of numericCodes) {
+                    const numbStr = sufijo ? code.slice(0, -sufijo.length) : code;
+                    const val = parseInt(numbStr, 10);
+                    if (!isNaN(val)) {
+                         if (val > maxVal) {
+                             maxVal = val;
+                             // Adopt existing padding if valid
+                             padding = numbStr.length; 
+                         }
+                    }
+                }
+                if (maxVal > 0) {
+                    startNum = maxVal + 1;
+                }
+           }
       }
-
-      // Order and limit MUST be applied after filters to be effective on the whole dataset
-      query = query.order('legacy_id', { ascending: false }).limit(5);
-
-      const { data, error } = await query;
       
-      if (error || !data || data.length === 0) {
-          console.warn(`No legacy codes found for ${ubicacion} (Suffix: ${sufijo}). using fallback 1.`);
-          return sufijo ? `1${sufijo}` : '02290000';
+      // Enforce minimums
+      if (padding < 8) padding = 8;
+
+      // Collision Check Loop
+      let candidateCode = '';
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      while (attempts < maxAttempts) {
+           const candidateNumStr = startNum.toString().padStart(padding, '0');
+           candidateCode = `${candidateNumStr}${sufijo}`;
+
+           const { data: exists } = await supabase
+               .from('libros')
+               .select('id')
+               .eq('legacy_id', candidateCode)
+               .maybeSingle();
+           
+           if (!exists) {
+               return candidateCode;
+           }
+
+           startNum++;
+           attempts++;
       }
-
-      const lastCode = data[0].legacy_id;
-      const numbStr = lastCode.replace(/\D/g, ''); 
-      const num = parseInt(numbStr, 10);
       
-      if (isNaN(num)) return sufijo ? `1${sufijo}` : '000001';
-
-      const nextNum = num + 1;
-      return `${nextNum.toString().padStart(numbStr.length, '0')}${sufijo}`;
+      throw new Error(`Could not generate unique code after ${maxAttempts} attempts.`);
     };
 
     // Generar el código basado en UNIVERSAL LEGACY LOGIC
-    const ubicacion = libro.ubicacion || 'almacen';
+    const ubicacion = libro.ubicacion || 'Almacén'; // Default Capitalized to match Helper expectation if case-sensitive (though helper handles lower)
+    console.log(`[crearLibro] Generando código para Ubicación: "${libro.ubicacion}" -> Resolved: "${ubicacion}"`);
     let codigoGenerado: string;
 
     if (libro.legacy_id) {
@@ -811,7 +855,7 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
       return null;
     }
 
-    return data ? mapLibroToBook(data) : null;
+    return data;
   } catch (error) {
     console.error('Error inesperado al crear libro:', error);
     return null;

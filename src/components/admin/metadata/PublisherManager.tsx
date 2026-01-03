@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, X } from 'lucide-react';
-import { getEditoriales, createEditorial, updateEditorial, deleteEditorial } from '../../../services/editorialService';
+import { getEditoriales, createEditorial, updateEditorial, deleteEditorial, searchEditoriales } from '../../../services/editorialService';
 import { Editorial } from '../../../types';
 import '../../../styles/components/MetadataManager.css';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
@@ -45,19 +45,21 @@ export function PublisherManager() {
   };
 
   useEffect(() => {
-    loadPublishers();
-  }, []);
+    const delayDebounceFn = setTimeout(() => {
+      loadPublishers();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
 
   const loadPublishers = async () => {
     setLoading(true);
-    const data = await getEditoriales();
+    const data = await searchEditoriales(searchTerm);
     setPublishers(data);
     setLoading(false);
   };
 
-  const filteredPublishers = publishers.filter(pub => 
-    pub.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPublishers = publishers;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

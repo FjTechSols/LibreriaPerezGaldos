@@ -103,7 +103,9 @@ export function BooksManager() {
     endYear: '',
     isbn: '',
     publisher: '',
-    searchMode: false
+    searchMode: false,
+    sortBy: 'default', // 'default' allows backend choice (legacy_id)
+    sortOrder: 'desc' // Default to descending (Highest code first)
   });
   const [advancedMode, setAdvancedMode] = useState(false);
 
@@ -170,6 +172,8 @@ export function BooksManager() {
           isbn: filters.isbn || undefined,
           publisher: filters.publisher || undefined,
           searchMode: filters.searchMode ? 'full' as const : 'default' as const,
+          sortBy: (filters.sortBy as any) || undefined,
+          sortOrder: (filters.sortOrder as any) || undefined,
           forceCount: true
         };
 
@@ -289,8 +293,32 @@ export function BooksManager() {
         } as any, contents);
         
         if (nuevo) {
+          // Map DB response to UI Book object to ensure Modal works
+          const mappedBook: Book = {
+             id: nuevo.id.toString(),
+             code: nuevo.legacy_id || '',
+             title: nuevo.titulo,
+             author: nuevo.autor,
+             publisher: nuevo.editoriales?.nombre || '',
+             pages: nuevo.paginas || 0,
+             publicationYear: nuevo.anio || 0,
+             isbn: nuevo.isbn || '',
+             price: nuevo.precio,
+             originalPrice: nuevo.precio_original,
+             stock: nuevo.stock,
+             ubicacion: nuevo.ubicacion, 
+             category: '', 
+             description: nuevo.descripcion || '',
+             coverImage: nuevo.imagen_url || '',
+             featured: nuevo.destacado || false,
+             isNew: nuevo.novedad || false,
+             isOnSale: nuevo.oferta || false,
+             rating: 0,
+             reviews: []
+          };
+
           // Show Success Modal instead of Alert
-          setCreatedBook(nuevo);
+          setCreatedBook(mappedBook);
           setRefreshTrigger(prev => prev + 1);
           setIsModalOpen(false); // Close the modal (resets form by unmounting)
         }
@@ -505,7 +533,7 @@ export function BooksManager() {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }}>
           {/* Top Row: Key Filters */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
              <div style={{ flex: '0 1 auto' }}>
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Categoría</label>
                 <div className="relative">
@@ -520,7 +548,7 @@ export function BooksManager() {
                 </div>
              </div>
              
-             <div style={{ flex: '0 1 180px' }}>
+             <div style={{ flex: '0 1 140px' }}>
                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Stock</label>
                  <select 
                     value={filters.stockStatus} 
@@ -533,7 +561,27 @@ export function BooksManager() {
                  </select>
              </div>
 
-             <div className="flex items-center gap-4 ml-auto pb-1">
+              <div style={{ flex: '0 1 180px' }}>
+                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Orden</label>
+                 <select 
+                    value={`${filters.sortBy}-${filters.sortOrder}`} 
+                    onChange={(e) => {
+                       const [sortBy, sortOrder] = e.target.value.split('-');
+                       setFilters(prev => ({...prev, sortBy: sortBy as any, sortOrder: sortOrder as any}));
+                    }} 
+                    className="form-select w-full h-auto py-2 text-sm rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                 >
+                   <option value="default-desc">Código (Mayor a Menor)</option>
+                   <option value="default-asc">Código (Menor a Mayor)</option>
+                   <option value="newest-desc">Creación (Más Recientes)</option>
+                   <option value="newest-asc">Creación (Más Antiguos)</option>
+                   <option value="title-asc">Título (A-Z)</option>
+                   <option value="price-asc">Precio (Menor a Mayor)</option>
+                   <option value="price-desc">Precio (Mayor a Menor)</option>
+                 </select>
+              </div>
+
+             <div className="flex items-center gap-4 ml-auto">
                  <button 
                     onClick={() => {
                         setFilters({
@@ -553,7 +601,9 @@ export function BooksManager() {
                           endYear: '',
                           isbn: '',
                           publisher: '',
-                          searchMode: false
+                          searchMode: false,
+                          sortBy: 'default',
+                          sortOrder: 'desc'
                         });
                         setLocalSearchTerm('');
                         setAdvancedMode(false);
@@ -765,7 +815,9 @@ export function BooksManager() {
                        endYear: '',
                        isbn: '',
                        publisher: '',
-                       searchMode: false
+                       searchMode: false,
+                       sortBy: 'default',
+                       sortOrder: 'desc'
                      });
                      setLocalSearchTerm('');
                      setAdvancedMode(false);

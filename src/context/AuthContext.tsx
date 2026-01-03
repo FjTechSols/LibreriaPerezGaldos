@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => {
               console.warn('⚠️ Auth check timed out (slow DB), defaulting to unauthenticated');
               resolve({ data: { session: null } });
-          }, 5000)
+          }, 15000)
       );
       
       // Process auth immediately when done (or timeout)
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setTimeout(() => {
                 console.warn('⚠️ User profile load timed out (slow DB), continuing without detailed profile');
                 resolve(null);
-            }, 5000)
+            }, 15000)
         );
         await Promise.race([profileLoadPromise, profileTimeoutPromise]);
       }

@@ -16,6 +16,28 @@ export const getEditoriales = async (): Promise<Editorial[]> => {
   }
 };
 
+export const searchEditoriales = async (term: string): Promise<Editorial[]> => {
+  try {
+    let query = supabase
+      .from('editoriales')
+      .select('*')
+      .order('nombre', { ascending: true })
+      .limit(50); // Limit results for performance
+
+    if (term) {
+      query = query.ilike('nombre', `%${term}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error searching publishers:', error);
+    return [];
+  }
+};
+
 export const createEditorial = async (editorial: Partial<Editorial>): Promise<Editorial | null> => {
   try {
     const { data, error } = await supabase

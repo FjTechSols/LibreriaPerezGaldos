@@ -19,6 +19,7 @@ export function obtenerSufijoUbicacion(ubicacion: string): string {
 
   switch (ubicacionNormalizada) {
     case 'almacen':
+    case 'almacén':
       return '';
     case 'galeon':
       return 'G';
@@ -28,6 +29,8 @@ export function obtenerSufijoUbicacion(ubicacion: string): string {
       return 'R';
     case 'abebooks':
       return 'Ab';
+    case 'uniliber':
+      return 'UL';
     default:
       return '';
   }
@@ -138,10 +141,10 @@ export function obtenerUbicacionPorCodigo(codigo: string): string | null {
   if (c.endsWith('G')) return 'Galeon';
   if (c.endsWith('H')) return 'Hortaleza';
   if (c.endsWith('R')) return 'Reina';
-  if (c.endsWith('UL')) return 'Uniliber'; // Assuming this exists based on previous file analysis
+  if (c.endsWith('UL')) return 'UniLiber'; // Assuming this exists based on previous file analysis
   
-  // If no suffix and contains only digits, assume Almacen
-  if (/^\d+$/.test(c)) return 'Almacen';
+  // If no suffix and contains only digits, assume Almacén
+  if (/^\d+$/.test(c)) return 'Almacén';
 
   return null; // Unknown format
 }
