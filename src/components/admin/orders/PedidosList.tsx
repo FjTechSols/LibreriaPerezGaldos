@@ -240,12 +240,22 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   };
 
   const pedidosFiltrados = pedidos.filter(pedido => {
-    const matchSearch =
+    const searchTermLower = searchTerm.toLowerCase();
+    
+    // Basic fields
+    const matchesBasic = 
       pedido.id.toString().includes(searchTerm) ||
-      pedido.usuario?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pedido.usuario?.email.toLowerCase().includes(searchTerm.toLowerCase());
+      pedido.usuario?.username?.toLowerCase().includes(searchTermLower) ||
+      pedido.usuario?.email?.toLowerCase().includes(searchTermLower);
 
-    return matchSearch;
+    // Client fields (if exists)
+    const matchesClient = pedido.cliente ? (
+      pedido.cliente.nombre?.toLowerCase().includes(searchTermLower) ||
+      pedido.cliente.apellidos?.toLowerCase().includes(searchTermLower) ||
+      pedido.cliente.email?.toLowerCase().includes(searchTermLower)
+    ) : false;
+
+    return matchesBasic || matchesClient;
   });
 
   // Pagination calculations
@@ -325,7 +335,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           <Filter size={18} />
           <input
             type="text"
-            placeholder="Buscar por Nº, usuario o email..."
+            placeholder="Buscar por Nº, usuario, email o cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="filter-input"
