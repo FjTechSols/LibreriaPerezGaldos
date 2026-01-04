@@ -466,3 +466,25 @@
 .dark-mode .btn-cancelar:hover {
   background: #475569;
 }
+
+@media (max-width: 768px) {
+  .dark-mode .detalles-table .table-row > span::before {
+    color: #94a3b8;
+  }
+  
+  .dark-mode .detalles-table {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+  
+  .dark-mode .detalles-table .table-row {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .dark-mode .detalles-table .table-row:last-child {
+    border-bottom: none;
+  }
+}

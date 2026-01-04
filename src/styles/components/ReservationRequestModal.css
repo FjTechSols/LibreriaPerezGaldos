@@ -16,9 +16,7 @@
 
 .reservation-modal {
   background-color: #ffffff;
-  background-color: var(--bg-primary);
   color: #1f2937;
-  color: var(--text-primary);
   width: 100%;
   max-width: 500px;
   border-radius: 16px;

@@ -732,66 +732,66 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
     const obtenerSiguienteCodigo = async (ubicacionNombre: string): Promise<string> => {
       // Use shared helper
       const sufijo = obtenerSufijoUbicacion(ubicacionNombre);
-      
+      console.log(`[CODE_GEN] Ubicacion Input: "${ubicacionNombre}" | Sufijo: "${sufijo}"`);
+
       
 
 
       try {
-        const [recentResult, highLegacyResult, lowRangeResult] = await Promise.all([
-          // Query 1: Most recently created (likely to have high IDs)
-          supabase
+        // Query 1: Most recently created (likely to have high IDs)
+        const recentPromise = supabase
             .from('libros')
             .select('legacy_id, ubicacion')
             .order('created_at', { ascending: false })
-            .limit(1000),
+            .limit(1000);
 
-          // Query 2: Highest legacy IDs globally (Standard High Range)
-          supabase
+         // Query 2: Specific Standard Range using efficient prefix scan
+         // 'like' is case-sensitive and index-friendly, unlike 'ilike'.
+         const standardRangePromise = supabase
             .from('libros')
             .select('legacy_id, ubicacion')
-            .lt('legacy_id', '1') // Start with 0
+            .like('legacy_id', '0000%') // Efficient B-tree range scan for '0000...'
             .order('legacy_id', { ascending: false })
-            .limit(1000),
-      
-          // Query 3: Specific Low Range for Legacy Codes (Catch-all for '0000xxxx' dense regions)
-          // This is necessary because globally high codes (009...) push small codes (0000...) out of Top 1000
-          supabase
-            .from('libros')
-            .select('legacy_id, ubicacion')
-            .lt('legacy_id', '00005000') // Safe upper bound for standard legacy codes
-            .order('legacy_id', { ascending: false })
-            .limit(1000)
+            .limit(1000);
+
+        const [recentResult, standardRangeResult] = await Promise.all([
+             recentPromise,
+             standardRangePromise
         ]);
 
     const recentBooks = recentResult.data || [];
-    const highLegacyBooks = highLegacyResult.data || [];
-    const lowRangeBooks = lowRangeResult.data || [];
-
-    // Combine all sources
-    const allCandidates = [...recentBooks, ...highLegacyBooks, ...lowRangeBooks];
+    const standardRangeBooks = standardRangeResult.data || [];
+    // Combine and deduplicate logic    // Combine all results
+    const allBooks = [...recentBooks, ...standardRangeBooks];
     
     // Filter by location (case-insensitive check if needed, but DB is normalized usually)
-    const locationBooks = allCandidates.filter(b => 
+    const locationBooks = allBooks.filter((b: any) => 
         b.ubicacion === ubicacionNombre
     );
 
         // Extract numeric parts
         const regex = new RegExp(`^0*(\\d+)${sufijo}$`);
+        console.log(`[CODE_GEN] Regex: ${regex}`);
+        
         const codes = locationBooks
-            .map(b => b.legacy_id)
-            .filter(code => code && regex.test(code))
-            .map(code => {
+            .map((b: any) => b.legacy_id)
+            .filter((code: string) => code && regex.test(code))
+            .map((code: string) => {
                 const match = code!.match(regex);
                 return match ? parseInt(match[1]) : 0;
             })
             // Safety: Filter out outliers (e.g. 01585534H) that might exist due to errors
             // Hortaleza/Galeon are expected to be < 50000 for foreseeable future.
-            .filter(num => {
-                if (ubicacionNombre === 'Hortaleza' || ubicacionNombre === 'Galeon') {
+            .filter((num: number) => {
+                const loc = ubicacionNombre.toLowerCase().trim();
+                // Check common variations
+                if (loc === 'hortaleza' || loc === 'galeon' || loc === 'galeón') {
                     return num < 50000;
                 }
                 return true;
             });
+        
+        console.log(`[CODE_GEN] Filtered Numeric Codes (Max 10):`, codes.sort((a: number,b: number)=>b-a).slice(0, 10));
 
     let maxNum = 0;
     if (codes.length > 0) {
@@ -811,6 +811,7 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
     const padding = 8;
     
     let nextCode = nextNum.toString().padStart(padding, '0') + sufijo;
+    console.log(`[CODE_GEN] MaxNum: ${maxNum} | NextNum: ${nextNum} | NextCode: ${nextCode}`);
     
     // Collision Check Loop (Safety Net)
     let attempts = 0;
@@ -857,15 +858,85 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
     }
 
     // Actualizar el libro con el código generado
-    const { data, error: updateError } = await supabase
+    // Actualizar el libro con el código generado
+    
+    // Wrap update in retry loop for legacy_id assignment
+    let updateSuccess = false;
+    let attempts = 0;
+    let finalUpdateError = null;
+    const MAX_RETRIES = 50; // Increase to 50 to punch through dense ghost record blocks
+
+    while (!updateSuccess && attempts < MAX_RETRIES) {
+        try {
+            // Actualizar el libro con el código generado
+            const { error: updateError } = await supabase
+                .from('libros')
+                .update({ legacy_id: codigoGenerado })
+                .eq('id', libroTemp.id);
+
+            if (updateError) {
+                // If duplicate key, throw to catch block below to retry
+                if (updateError.code === '23505') { 
+                    throw new Error('DUPLICATE_CODE_RETRY');
+                }
+                throw updateError;
+            }
+            
+            updateSuccess = true;
+
+        } catch (err: any) {
+            attempts++;
+            if (err.message === 'DUPLICATE_CODE_RETRY' && attempts < MAX_RETRIES) {
+                console.warn(`Collision for code ${codigoGenerado}, retrying (${attempts}/${MAX_RETRIES})...`);
+                
+                // Smart Retry: If we collided, the code exists but was hidden from our view.
+                // We must manually increment based on the failed code to move forward.
+                if (codigoGenerado) {
+                    const numericPartMatch = codigoGenerado.match(/^0*(\d+)/); // Match leading zeros and then digits
+                    const numericPart = numericPartMatch ? parseInt(numericPartMatch[1]) : NaN;
+                    
+                    if (!isNaN(numericPart) && numericPart > 0) {
+                        const nextVal = numericPart + 1;
+                        const originalSuffix = codigoGenerado.replace(/^[0-9]+/, ''); // Extract suffix (e.g., 'H')
+                        
+                        // Force logic to try next number directly
+                        const padding = 8; // Assuming 8 digits padding as per obtenerSiguienteCodigo
+                        codigoGenerado = nextVal.toString().padStart(padding, '0') + originalSuffix;
+                        console.log(`[CODE_GEN] Smart Retry -> Trying forced next code: ${codigoGenerado}`);
+                        
+                        // Continue to next iteration to try update again with new codigoGenerado
+                        continue; 
+                    }
+                }
+                
+                // Fallback if parsing failed or for other retryable errors
+                await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+                continue;
+            }
+            // If other error or max attempts, cleanup and throw
+            console.error('Error assigning code, deleting temp book:', err);
+            // Critical Safety: Delete the temp book so we don't leave it without a legacy_id
+            await supabase.from('libros').delete().eq('id', libroTemp.id);
+            throw new Error(`Error al asignar código único: ${err.message}`);
+        }
+    }
+
+    if (!updateSuccess) {
+        console.error('Error al actualizar código del libro después de reintentos:', finalUpdateError);
+        // If we reach here, it means all retries failed, and the book was deleted by the catch block.
+        // So, we should return null as the book creation ultimately failed.
+        return null;
+    }
+
+    // Fetch the updated book to return, as the previous update call didn't return data
+    const { data, error: fetchUpdatedError } = await supabase
       .from('libros')
-      .update({ legacy_id: codigoGenerado })
-      .eq('id', libroTemp.id)
       .select()
+      .eq('id', libroTemp.id)
       .single();
 
-    if (updateError) {
-      console.error('Error al actualizar código del libro:', updateError);
+    if (fetchUpdatedError) {
+      console.error('Error al obtener libro actualizado después de asignar código:', fetchUpdatedError);
       return null;
     }
 
@@ -937,14 +1008,49 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
       throw new Error('No tienes permisos suficientes para editar libros.');
     }
 
-    const { error: updateError } = await supabase
-      .from('libros')
-      .update(updateData)
-      .eq('id', id);
+    // Wrap update in retry loop
+    let updateSuccess = false;
+    let attempts = 0;
+    let finalUpdateError = null;
 
-    if (updateError) {
-      console.error('Error al actualizar libro:', updateError);
-      throw new Error(`Error de base de datos: ${updateError.message}`);
+    while (!updateSuccess && attempts < 3) {
+        try {
+            const { error: updateError } = await supabase
+                .from('libros')
+                .update(updateData)
+                .eq('id', id);
+
+            if (updateError) {
+                // If duplicate key, throw to catch block below to retry
+                if (updateError.code === '23505' && updateError.details?.includes('legacy_id')) { 
+                    throw new Error('DUPLICATE_LEGACY_ID_RETRY');
+                }
+                throw updateError;
+            }
+            
+            updateSuccess = true;
+
+        } catch (err: any) {
+            attempts++;
+            if (err.message === 'DUPLICATE_LEGACY_ID_RETRY' && attempts < 3) {
+                console.warn(`Collision for legacy_id during update, retrying (${attempts}/3)...`);
+                // Wait small random delay to avoid lockstep race
+                await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+                // If the collision was on legacy_id, and it was generated, we might need to re-generate it.
+                // This logic assumes updateData.legacy_id might have been generated.
+                // If it was manually provided, retrying with the same value will fail again.
+                // For now, we just retry the update with the same data.
+                // A more robust solution would involve re-generating legacy_id if it was auto-generated.
+                continue;
+            }
+            finalUpdateError = err;
+            break; // Break if it's not a retryable error or max attempts reached
+        }
+    }
+
+    if (!updateSuccess) {
+        console.error('Error al actualizar libro después de reintentos:', finalUpdateError);
+        throw new Error(`Error de base de datos: ${finalUpdateError?.message || 'Unknown error'}`);
     }
 
     // Actualizar contenidos si se proporcionan

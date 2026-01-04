@@ -32,6 +32,7 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
 
 export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEditar }: PedidoDetalleProps) {
   const { settings } = useSettings();
+  const { createInvoice } = useInvoice();
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
 
@@ -168,8 +169,6 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
       setShowMessageModal(true);
     }
   };
-
-  const { createInvoice } = useInvoice();
 
   // Lógica híbrida para totales:
   // 1. Calculamos el total teórico sumando los precios de los ítems (que incluyen impuestos).
@@ -877,10 +876,10 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               {pedido?.detalles && pedido.detalles.length > 0 ? (
                 pedido.detalles.map(detalle => (
                   <div key={detalle.id} className="table-row">
-                    <span className="libro-titulo">{detalle.libro?.titulo || 'Sin título'}</span>
-                    <span className="cantidad">{detalle.cantidad}</span>
-                    <span className="precio">{detalle.precio_unitario.toFixed(2)} €</span>
-                    <span className="subtotal">
+                    <span className="libro-titulo" data-label="Título">{detalle.libro?.titulo || 'Sin título'}</span>
+                    <span className="cantidad" data-label="Cantidad">{detalle.cantidad}</span>
+                    <span className="precio" data-label="Precio Unitario">{detalle.precio_unitario.toFixed(2)} €</span>
+                    <span className="subtotal" data-label="Subtotal">
                       {(detalle.cantidad * detalle.precio_unitario).toFixed(2)} €
                     </span>
                   </div>
