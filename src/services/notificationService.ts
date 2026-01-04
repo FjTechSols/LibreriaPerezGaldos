@@ -148,7 +148,15 @@ export const markAllAdminNotificationsAsRead = async (userId: string): Promise<v
   if (error) throw error;
 };
 
-export const createAdminOrderNotification = async (orderId: number, clientName: string): Promise<void> => {
+export const createAdminOrderNotification = async (
+  orderId: number, 
+  clientName: string,
+  username: string = 'Usuario',
+  source: string = 'Desconocido',
+  status: string = 'pendiente',
+  userIdDisplay: string = '',
+  itemsSummary: string = ''
+): Promise<void> => {
   try {
     // 1. Get all users with admin role (rol_id = 1 is standard admin, check if there are others)
     const { data: admins, error: adminError } = await supabase
@@ -159,11 +167,27 @@ export const createAdminOrderNotification = async (orderId: number, clientName: 
     if (adminError) throw adminError;
     if (!admins?.length) return;
 
+    // Custom formatting based on Source
+    let title = 'Nuevo Pedido';
+    let message = '';
+    const formattedSource = source === 'interno' ? 'Cliente Web' : source.replace('_', ' ').toUpperCase();
+
+    if (source === 'interno') {
+       title = 'Nueva Compra Solicitada';
+       // "El usuario (id y username) ha realizado la solicitud de la compra..."
+       // We append "del libro" only if itemsSummary doesn't already allow for it contextually, but user asked for it.
+       // "solicitud de la compra (titulo y legacy_id) del libro."
+       message = `El usuario (${userIdDisplay} - ${username}) ha realizado la solicitud de la compra ${itemsSummary} del libro.`;
+    } else {
+       // Standard/Manual format
+       message = `El usuario ${username} ha creado un nuevo pedido #${orderId} (${formattedSource}). Estado: ${status}`;
+    }
+
     const notifications = admins.map(admin => ({
       usuario_id: admin.id,
-      tipo: 'pedido',
-      titulo: 'Nuevo Pedido',
-      mensaje: `Nuevo pedido #${orderId} recibido de ${clientName}`
+      tipo: 'pedido', // Keeping 'pedido' type for icon/filtering logic
+      titulo: title,
+      mensaje: message
     }));
 
     const { error } = await supabase

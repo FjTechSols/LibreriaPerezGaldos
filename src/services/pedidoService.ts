@@ -165,7 +165,9 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
     const pedidoData = {
       usuario_id: input.usuario_id,
       cliente_id: input.cliente_id,
-      estado: 'pending_verification' as EstadoPedido,
+      // Logic: Web orders ('interno') go to 'pending_verification' for stock check.
+      // Manual/External orders ('perez_galdos', etc) are assumed verified/trusted -> 'pendiente' (or process directly)
+      estado: (input.tipo && input.tipo !== 'interno') ? 'pendiente' : 'pending_verification' as EstadoPedido,
       tipo: input.tipo || 'interno',
       subtotal,
       iva,
@@ -219,18 +221,46 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       throw detallesError;
     }
 
-    // Send notification to admins
-    // We don't await this to avoid blocking the response if it fails or takes time
-    createAdminOrderNotification(pedido.id, 'Cliente Web').catch(err => 
-      console.error('Error sending admin notification:', err)
-    );
+    // 4. Update: Fetch FULL order first to get User details for Notification
+    const fullOrder = await obtenerPedidoPorId(pedido.id);
 
-    // Send notification to USER
-    createOrderNotification(pedido.usuario_id, pedido.id, 'pendiente').catch(err =>
-      console.error('Error sending user notification:', err)
-    );
+    if (fullOrder) {
+        // Send notification to admins with detailed info
+        const userObj = fullOrder.usuario;
+        const username = userObj?.username || 'Desconocido';
+        const clientName = userObj?.nombre_completo || username;
+        // User ID Display: Prefer Legacy ID if exists, otherwise Supabase UUID (shortened?) or just 'ID'
+        const userIdDisplay = userObj?.legacy_id ? `ID: ${userObj.legacy_id}` : `ID: ${userObj?.id?.slice(0, 8)}...`;
+        
+        // Generate Items Summary: "Título (Code)"
+        // "solicitud de la compra (titulo y legacy_id) del libro"
+        const itemsSummary = fullOrder.detalles?.map(d => {
+            const title = d.libro?.titulo || d.nombre_externo || 'Producto';
+            const code = d.libro?.legacy_id || 'S/C';
+            return `${title} (${code})`;
+        }).join(', ') || 'varios artículos';
+        
+        createAdminOrderNotification(
+            pedido.id, 
+            clientName,
+            username,
+            pedido.tipo || 'interno',
+            pedido.estado || 'pendiente',
+            userIdDisplay,
+            itemsSummary
+        ).catch(err => 
+            console.error('Error sending admin notification:', err)
+        );
 
-    return await obtenerPedidoPorId(pedido.id);
+        // Send notification to USER
+        createOrderNotification(pedido.usuario_id, pedido.id, pedido.estado || 'pendiente').catch(err =>
+            console.error('Error sending user notification:', err)
+        );
+        
+        return fullOrder;
+    }
+
+    return await obtenerPedidoPorId(pedido.id); // Fallback if first fetch failed (unlikely)
   } catch (error) {
     console.error('❌ Error en crearPedido:', error);
     return null;

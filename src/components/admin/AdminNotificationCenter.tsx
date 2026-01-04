@@ -12,6 +12,7 @@ import {
   Calendar
 } from 'lucide-react';
 import '../../styles/components/AdminNotifications.css';
+import { supabase } from '../../lib/supabase';
 
 interface AdminNotificationCenterProps {
   onNotificationsChange?: () => void;
@@ -23,9 +24,41 @@ export default function AdminNotificationCenter({ onNotificationsChange }: Admin
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread' | 'pedido' | 'reserva'>('all');
 
+
+
   useEffect(() => {
     if (user) {
       loadNotifications();
+
+      // Subscribe to realtime changes
+      const subscription = supabase
+        .channel('admin_notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: '*', // INSERT, UPDATE
+            schema: 'public',
+            table: 'notificaciones',
+            filter: `usuario_id=eq.${user.id}`
+          },
+          (payload: any) => {
+            if (payload.eventType === 'INSERT') {
+               const newNotif = payload.new as Notificacion;
+               setNotifications(prev => [newNotif, ...prev]);
+               if (onNotificationsChange) onNotificationsChange();
+               // Optional: audio beep?
+            } else if (payload.eventType === 'UPDATE') {
+               const updated = payload.new as Notificacion;
+               setNotifications(prev => prev.map(n => n.id === updated.id ? updated : n));
+               if (onNotificationsChange) onNotificationsChange();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, [user]);
 

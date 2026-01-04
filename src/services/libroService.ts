@@ -540,12 +540,8 @@ export const obtenerLibros = async (
             break;
           case 'default':
             // Fast Default: Sort by ID (PK index). Respect user direction.
-            // Defaulting to DESC (newest) if user hasn't touched it (though UI defaults to ASC... user might want ASC IDs?)
-            // Usually 'Default' implies 'Newest First' (LIFO). 
-            // But if UI says 'Ascendente' and user selects 'Default', they might get Oldest First (ID 1).
-            // Let's fallback to respecting sortOrder.
-            query = query.order('legacy_id', { ascending: filters.sortOrder === 'asc' });
-            query = query.order('id', { ascending: false }); // Secondary sort for stability
+            // This prevents timeouts on large filtered datasets (e.g. location filter)
+            query = query.order('id', { ascending: filters.sortOrder === 'asc' });
             break;
           // Rating is not in DB schema shown, ignoring for now
           default:
@@ -737,93 +733,111 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
       // Use shared helper
       const sufijo = obtenerSufijoUbicacion(ubicacionNombre);
       
-      let startNum = 1; 
-      // Default padding heuristic: 8 digits seems standard across locations (Hortaleza, Almacen)
-      let padding = 8;
       
-      // Strategy: Fetch recent books (to find active sequence) AND high legacy_ids (to find max)
-      // We do this to avoid full-table scans that timeout.
+
+
+      try {
+        const [recentResult, highLegacyResult, lowRangeResult] = await Promise.all([
+          // Query 1: Most recently created (likely to have high IDs)
+          supabase
+            .from('libros')
+            .select('legacy_id, ubicacion')
+            .order('created_at', { ascending: false })
+            .limit(1000),
+
+          // Query 2: Highest legacy IDs globally (Standard High Range)
+          supabase
+            .from('libros')
+            .select('legacy_id, ubicacion')
+            .lt('legacy_id', '1') // Start with 0
+            .order('legacy_id', { ascending: false })
+            .limit(1000),
       
-      const pRecent = supabase
-        .from('libros')
-        .select('legacy_id, ubicacion') // Fetch location to filter in JS
-        .order('created_at', { ascending: false })
-        .limit(500);
+          // Query 3: Specific Low Range for Legacy Codes (Catch-all for '0000xxxx' dense regions)
+          // This is necessary because globally high codes (009...) push small codes (0000...) out of Top 1000
+          supabase
+            .from('libros')
+            .select('legacy_id, ubicacion')
+            .lt('legacy_id', '00005000') // Safe upper bound for standard legacy codes
+            .order('legacy_id', { ascending: false })
+            .limit(1000)
+        ]);
 
-      const pMaxStr = supabase
-        .from('libros')
-        .select('legacy_id, ubicacion')
-        .lt('legacy_id', '1') // Focus on padded numeric codes (starting with 0) as these are common
-        .order('legacy_id', { ascending: false })
-        .limit(500);
+    const recentBooks = recentResult.data || [];
+    const highLegacyBooks = highLegacyResult.data || [];
+    const lowRangeBooks = lowRangeResult.data || [];
 
-      const [resRecent, resMax] = await Promise.all([pRecent, pMaxStr]);
-      
-      // Combine results
-      const allRows = [ ...(resRecent.data || []), ...(resMax.data || []) ];
-      
-      if (allRows.length > 0) {
-           // Filter for current location validation strictly in JS
-           // This bypasses the DB timeout on 'ubicacion' column filtering
-           const locationRows = allRows.filter(r => 
-                // Flexible match: Exact string OR normalized (if needed)
-                // Assuming 'Hortaleza' matches 'Hortaleza'
-                r.ubicacion === ubicacionNombre 
-           );
+    // Combine all sources
+    const allCandidates = [...recentBooks, ...highLegacyBooks, ...lowRangeBooks];
+    
+    // Filter by location (case-insensitive check if needed, but DB is normalized usually)
+    const locationBooks = allCandidates.filter(b => 
+        b.ubicacion === ubicacionNombre
+    );
 
-           // Strict Numeric Filter: digits + suffix
-           const pattern = new RegExp(`^\\d+${sufijo}$`);
-           const numericCodes = locationRows
-                .map(d => d.legacy_id)
-                .filter(code => code && pattern.test(code));
-
-           if (numericCodes.length > 0) {
-                let maxVal = 0;
-                for (const code of numericCodes) {
-                    const numbStr = sufijo ? code.slice(0, -sufijo.length) : code;
-                    const val = parseInt(numbStr, 10);
-                    if (!isNaN(val)) {
-                         if (val > maxVal) {
-                             maxVal = val;
-                             // Adopt existing padding if valid
-                             padding = numbStr.length; 
-                         }
-                    }
+        // Extract numeric parts
+        const regex = new RegExp(`^0*(\\d+)${sufijo}$`);
+        const codes = locationBooks
+            .map(b => b.legacy_id)
+            .filter(code => code && regex.test(code))
+            .map(code => {
+                const match = code!.match(regex);
+                return match ? parseInt(match[1]) : 0;
+            })
+            // Safety: Filter out outliers (e.g. 01585534H) that might exist due to errors
+            // Hortaleza/Galeon are expected to be < 50000 for foreseeable future.
+            .filter(num => {
+                if (ubicacionNombre === 'Hortaleza' || ubicacionNombre === 'Galeon') {
+                    return num < 50000;
                 }
-                if (maxVal > 0) {
-                    startNum = maxVal + 1;
-                }
-           }
-      }
-      
-      // Enforce minimums
-      if (padding < 8) padding = 8;
+                return true;
+            });
 
-      // Collision Check Loop
-      let candidateCode = '';
-      let attempts = 0;
-      const maxAttempts = 50;
+    let maxNum = 0;
+    if (codes.length > 0) {
+        maxNum = Math.max(...codes);
+    } 
 
-      while (attempts < maxAttempts) {
-           const candidateNumStr = startNum.toString().padStart(padding, '0');
-           candidateCode = `${candidateNumStr}${sufijo}`;
+    if (maxNum === 0 && (ubicacionNombre === 'Hortaleza' || ubicacionNombre === 'Galeon')) {
+         // Fallback safety: If we found 0 via the range queries, maybe we truly have 0.
+         // But verifying against a known min? No, 0 implies start from 1.
+    }
 
-           const { data: exists } = await supabase
-               .from('libros')
-               .select('id')
-               .eq('legacy_id', candidateCode)
-               .maybeSingle();
-           
-           if (!exists) {
-               return candidateCode;
-           }
+    const nextNum = maxNum + 1;
+    
+    // Default Padding: 8 digits (standardized)
+    // If specific location has different pattern, adapt?
+    // We stick to 8 digits as requested.
+    const padding = 8;
+    
+    let nextCode = nextNum.toString().padStart(padding, '0') + sufijo;
+    
+    // Collision Check Loop (Safety Net)
+    let attempts = 0;
+    while (attempts < 10) {
+        // ... (collision logic remains same)
+        const { data } = await supabase
+            .from('libros')
+            .select('id')
+            .eq('legacy_id', nextCode)
+            .maybeSingle();
+            
+        if (!data) return nextCode;
+        
+        // Use loop var to increment
+        const nextLoopNum = nextNum + attempts + 1;
+        nextCode = nextLoopNum.toString().padStart(padding, '0') + sufijo;
+        attempts++;
+    }
 
-           startNum++;
-           attempts++;
-      }
-      
-      throw new Error(`Could not generate unique code after ${maxAttempts} attempts.`);
-    };
+    return nextCode;
+  } catch (error) {
+    console.error('Error generating code:', error);
+    // Fallback: Random timestamp based to prevent hard crash?
+    // Or just start small?
+    return Math.floor(Date.now() / 1000).toString().padStart(8, '0') + sufijo;
+  }
+};
 
     // Generar el código basado en UNIVERSAL LEGACY LOGIC
     const ubicacion = libro.ubicacion || 'Almacén'; // Default Capitalized to match Helper expectation if case-sensitive (though helper handles lower)

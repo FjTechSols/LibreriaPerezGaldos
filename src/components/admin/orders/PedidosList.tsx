@@ -69,12 +69,73 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
     setLoading(true);
     const filtros: any = {};
 
+    // Logic to align DB Status with Visual Status
+    // DB: pending_verification -> Manual Orders visually appear as 'pendiente'
+    // DB: pending_verification -> Internal Orders visually appear as 'pending_verification' (Por Verificar)
+
     if (filtroEstado) {
-      filtros.estado = filtroEstado;
+      if (filtroEstado === 'pending_verification') {
+         // User selected "Por Verificar" filter
+         // We only want Internal orders that are genuinely pending verification
+         filtros.estado = 'pending_verification';
+         // We'll filter by type 'interno' after fetch (since API might not support complex ORs easily here without rewriting service)
+      } else if (filtroEstado === 'pendiente') {
+         // User selected "Pendiente" filter
+         // We want DB 'pendiente' OR (DB 'pending_verification' AND type != 'interno')
+         // We can't trivially ask API for OR, so specific logic?
+         // For now, let's NOT send estado filter to API if it's 'pendiente' and filter strictly in client, 
+         // OR better: fetch both states if possible? 
+         // Since pagination is tricky with client-side filters on partial data, 
+         // and limit is 10000 (effectively all pending), let's fetch all and filter client side.
+         // It's not ideal for millions of records but fine for thousands.
+         // Let's rely on client side filtering for these complicated mapped states.
+         // BUT wait, fetching ALL orders every time is heavy.
+         
+         // compromise: 
+         // If filtering 'pendiente', we can try to fetch just the relevant ones?
+         // No, simpler: 
+         // Just handle 'pending_verification' specially first as that's the user complaint.
+      } else {
+         filtros.estado = filtroEstado;
+      }
     }
 
-    const { data } = await obtenerPedidos({ ...filtros, limit: 10000 });
-    setPedidos(data);
+    // Simplest approach satisfying current constraint: Fetch potentially relevant statuses and filter in JS.
+    let dataToFilter = [];
+    
+    if (filtroEstado === 'pending_verification') {
+        // Fetch raw pending_verification
+        const { data } = await obtenerPedidos({ estado: 'pending_verification', limit: 10000 });
+        // Client filter: Only 'interno' are truly 'Por Verificar' visually
+        dataToFilter = data.filter(p => p.tipo === 'interno');
+    } else if (filtroEstado === 'pendiente') {
+         // Fetch 'pendiente' AND 'pending_verification' (since manual manual ones hide there)
+         // Note: obtenerPedidos doesn't support array for status? 
+         // Let's check service. It accepts 'EstadoPedido'. It uses .eq().
+         // So we make two requests? Or fetch all?
+         // Given "limit: 10000" usage, the app seems designed for client-side heavy lifting currently.
+         // Fetching ALL is safest to guarantee UI match.
+         const { data } = await obtenerPedidos({ limit: 10000 }); // Fetch all
+         dataToFilter = data.filter(p => {
+             // Replicate visual mapping logic
+             let visualStatus = p.estado || 'pendiente';
+             if (p.tipo !== 'interno') {
+                 if (visualStatus === 'pending_verification') visualStatus = 'pendiente';
+                 if (visualStatus === 'payment_pending') visualStatus = 'procesando';
+             }
+             return visualStatus === 'pendiente';
+         });
+    } else if (filtroEstado) {
+        // Simple case
+         const { data } = await obtenerPedidos({ estado: filtroEstado, limit: 10000 });
+         dataToFilter = data;
+    } else {
+        // No filter
+        const { data } = await obtenerPedidos({ limit: 10000 });
+        dataToFilter = data;
+    }
+
+    setPedidos(dataToFilter);
     setLoading(false);
   };
 
