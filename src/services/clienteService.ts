@@ -1,6 +1,11 @@
 import { supabase } from '../lib/supabase';
 import { Cliente } from '../types';
 
+export interface PagedClientes {
+  data: Cliente[];
+  count: number;
+}
+
 export interface ClienteFormData {
   nombre: string;
   apellidos: string;
@@ -20,26 +25,37 @@ export interface ClienteFormData {
   web?: string;
 }
 
-export const getClientes = async (tipo?: string): Promise<Cliente[]> => {
+export const getClientes = async (
+  page: number = 1,
+  pageSize: number = 12,
+  tipo?: string
+): Promise<PagedClientes> => {
   try {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
     let query = supabase
       .from('clientes')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('apellidos', { ascending: true })
-      .order('nombre', { ascending: true });
+      .order('nombre', { ascending: true })
+      .range(from, to);
 
     if (tipo && tipo !== 'all') {
       query = query.eq('tipo', tipo);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Error fetching clients:', error);
       throw error;
     }
 
-    return data || [];
+    return {
+      data: data || [],
+      count: count || 0
+    };
   } catch (error) {
     console.error('Error in getClientes:', error);
     throw error;
@@ -183,29 +199,39 @@ export const desactivarCliente = async (id: string): Promise<Cliente | null> => 
   }
 };
 
-export const buscarClientes = async (query: string, tipo?: string): Promise<Cliente[]> => {
+export const buscarClientes = async (
+  query: string,
+  page: number = 1,
+  pageSize: number = 12,
+  tipo?: string
+): Promise<PagedClientes> => {
   try {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
     let queryBuilder = supabase
       .from('clientes')
-      .select('*')
+      .select('*', { count: 'exact' })
       .or(`nombre.ilike.%${query}%,apellidos.ilike.%${query}%,email.ilike.%${query}%,nif.ilike.%${query}%,telefono.ilike.%${query}%,persona_contacto.ilike.%${query}%,cargo.ilike.%${query}%`)
-      .eq('activo', true)
       .order('apellidos', { ascending: true })
       .order('nombre', { ascending: true })
-      .limit(50);
+      .range(from, to);
 
     if (tipo && tipo !== 'all') {
       queryBuilder = queryBuilder.eq('tipo', tipo);
     }
 
-    const { data, error } = await queryBuilder;
+    const { data, error, count } = await queryBuilder;
 
     if (error) {
       console.error('Error searching clients:', error);
       throw error;
     }
 
-    return data || [];
+    return {
+      data: data || [],
+      count: count || 0
+    };
   } catch (error) {
     console.error('Error in buscarClientes:', error);
     throw error;

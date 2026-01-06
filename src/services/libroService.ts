@@ -114,7 +114,7 @@ export const obtenerCategoriaId = async (nombre: string): Promise<number | null>
 };
 
 
-const DEFAULT_BOOK_COVER = 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=400';
+const DEFAULT_BOOK_COVER = '/default-book-cover.png';
 
 export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   id: libro.id.toString(),

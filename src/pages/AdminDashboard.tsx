@@ -68,7 +68,7 @@ import { AdminNotificationCenter } from '../components/admin';
 type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'reservations' | 'clients' | 'marketing' | 'discounts' | 'isbn' | 'titles' | 'covers' | 'metadata' | 'notifications';
 
 export function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const { invoices } = useInvoice(); // Invoices context
   const { theme, actualTheme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -219,7 +219,7 @@ export function AdminDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (user?.role !== 'admin') {
+  if (!isAdmin) {
     return (
       <div className="admin-dashboard">
         <div className="container">

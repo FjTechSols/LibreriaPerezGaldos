@@ -4,6 +4,7 @@ import { Cliente } from '../../../types';
 import { getClientes, crearCliente, actualizarCliente, eliminarCliente, buscarClientes, ClienteFormData } from '../../../services/clienteService';
 import '../../../styles/components/GestionClientes.css';
 import { MessageModal } from '../../MessageModal';
+import { Pagination } from '../../Pagination';
 
 const initialFormState: ClienteFormData = {
   nombre: '',
@@ -34,6 +35,11 @@ export function GestionClientes() {
   const [filterType, setFilterType] = useState('all');
   const [error, setError] = useState<string | null>(null);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalCount, setTotalCount] = useState(0);
+
   // MessageModal State
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageModalConfig, setMessageModalConfig] = useState<{
@@ -62,29 +68,31 @@ export function GestionClientes() {
     setShowMessageModal(true);
   };
 
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType]);
+
   useEffect(() => {
     if (searchTerm.trim().length >= 2) {
-        // Debounce handling could be better but sticking to current pattern
         const timer = setTimeout(() => {
-             handleSearch(searchTerm);
+             handleSearch(searchTerm, currentPage);
         }, 300);
         return () => clearTimeout(timer);
     } else {
-        loadClientes();
+        loadClientes(currentPage);
     }
-  }, [filterType]);
+  }, [filterType, currentPage, pageSize]);
 
-  // Initial load
-  useEffect(() => {
-      loadClientes();
-  }, []);
+  // Initial count load if needed, but the effect above handles it
 
 
-  const loadClientes = async () => {
+  const loadClientes = async (page: number = 1) => {
     try {
       setLoading(true);
-      const data = await getClientes(filterType);
+      const { data, count } = await getClientes(page, pageSize, filterType);
       setClientes(data);
+      setTotalCount(count);
       setError(null);
     } catch (err) {
       console.error('Error loading clients:', err);
@@ -94,18 +102,29 @@ export function GestionClientes() {
     }
   };
 
-  const handleSearch = async (value: string) => {
+  const handleSearch = async (value: string, page: number = 1) => {
     setSearchTerm(value);
     if (value.trim().length >= 2) {
       try {
-        const results = await buscarClientes(value, filterType);
+        const { data: results, count } = await buscarClientes(value, page, pageSize, filterType);
         setClientes(results);
+        setTotalCount(count);
       } catch (err) {
         console.error('Error searching clients:', err);
       }
     } else if (value.trim().length === 0) {
-      loadClientes();
+      loadClientes(page);
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
   };
 
   const handleOpenModal = (cliente?: Cliente) => {
@@ -270,7 +289,7 @@ export function GestionClientes() {
                 onChange={(e) => handleSearch(e.target.value)}
             />
             {searchTerm && (
-                <button onClick={() => handleSearch('')} className="cliente-clear-search">
+                <button onClick={() => { setSearchTerm(''); setCurrentPage(1); }} className="cliente-clear-search">
                 <X size={16} />
                 </button>
             )}
@@ -371,6 +390,17 @@ export function GestionClientes() {
           </div>
         )}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={Math.ceil(totalCount / pageSize)}
+        itemsPerPage={pageSize}
+        totalItems={totalCount}
+        onPageChange={handlePageChange}
+        onItemsPerPageChange={handlePageSizeChange}
+        showItemsPerPageSelector={true}
+        itemsPerPageOptions={[12, 24, 48, 96]}
+      />
 
       {showModal && (
         <div className="cliente-modal-overlay" onClick={handleCloseModal}>

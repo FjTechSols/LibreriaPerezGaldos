@@ -285,10 +285,14 @@ export function UserDashboard() {
             <div>
               <label>Rol</label>
               <p className="role-badge">
-                {user.rolPrincipal?.nombre === 'super_admin' 
+                  {user.rolPrincipal?.nombre === 'super_admin' 
                   ? 'Super Administrador' 
                   : user.rolPrincipal?.nombre === 'admin' 
                   ? 'Administrador' 
+                  : user.rolPrincipal?.nombre === 'editor'
+                  ? 'Editor'
+                  : user.rolPrincipal?.nombre === 'visualizador'
+                  ? 'Visualizador'
                   : user.role === 'admin' 
                   ? 'Administrador' 
                   : 'Usuario'}

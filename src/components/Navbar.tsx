@@ -21,7 +21,7 @@ export function Navbar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const { user, logout, hasRole } = useAuth();
+  const { user, logout, hasRole, isAdmin } = useAuth();
   const { items: cartItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const { t } = useLanguage();
@@ -96,7 +96,7 @@ export function Navbar() {
       if (user) {
         try {
           // Use admin-specific function for admins, regular function for users
-          const count = (hasRole('admin') || hasRole('super_admin'))
+          const count = isAdmin
             ? await getAdminUnreadCount(user.id)
             : await getUnreadCount(user.id);
           setUnreadNotifications(count);
@@ -246,7 +246,7 @@ export function Navbar() {
                     </div>
                   </div>
                   <div className="account-menu-divider" />
-                  {(hasRole('admin') || hasRole('super_admin')) && (
+                  {isAdmin && (
                     <Link
                       to="/admin"
                       className="account-menu-item"
@@ -272,7 +272,7 @@ export function Navbar() {
                       )}
                     </Link>
                   )}
-                  {(hasRole('admin') || hasRole('super_admin')) && (
+                  {isAdmin && (
                     <Link
                       to="/admin/ajustes"
                       className="account-menu-item"
@@ -407,12 +407,12 @@ export function Navbar() {
                   {t('dashboard')}
                 </Link>
               )}
-              {(hasRole('admin') || hasRole('super_admin')) && (
+              {isAdmin && (
                 <Link to="/admin" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
                   {t('adminPanel')}
                 </Link>
               )}
-              {(hasRole('admin') || hasRole('super_admin')) && (
+              {isAdmin && (
                 <Link to="/admin/ajustes" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
                   {t('adminSettings')}
                 </Link>

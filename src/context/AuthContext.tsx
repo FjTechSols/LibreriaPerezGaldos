@@ -127,9 +127,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const permisos = await obtenerPermisosDeUsuario(authUserId);
       const rolPrincipal = await obtenerRolPrincipal(authUserId);
 
-      const roleType = rolPrincipal?.nombre === 'super_admin' || rolPrincipal?.nombre === 'admin'
+      const roleType = rolPrincipal?.nombre === 'super_admin' || rolPrincipal?.nombre === 'admin' || rolPrincipal?.nombre === 'editor' || rolPrincipal?.nombre === 'visualizador'
         ? 'admin'
-        : (userData?.rol_id === 1 ? 'admin' : 'user');
+        : ([1, 2, 3, 4, 5].includes(userData?.rol_id || 0) ? 'admin' : 'user');
 
       setUser({
         id: userData?.id || authUserId,
@@ -224,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           fullName: userData.nombre_completo,
           birthDate: userData.fecha_nacimiento,
           createdAt: userData.fecha_registro,
-          role: userData.rol_id === 1 ? 'admin' : 'user'
+          role: (userData.rol_id === 1 || userData.rol_id === 2 || userData.rol_id === 3 || userData.rol_id === 4 || userData.rol_id === 5) ? 'admin' : 'user' // 1:super_admin, 2:admin, 3:editor, 4:visualizador, 5:visualizador_legacy
         });
         return true;
       }
@@ -300,7 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user.roles?.some(r => r.nombre === rol) || false;
   };
 
-  const isAdmin = hasRole('admin') || hasRole('super_admin');
+  const isAdmin = hasRole('admin') || hasRole('super_admin') || hasRole('editor') || hasRole('visualizador');
   const isSuperAdmin = hasRole('super_admin');
 
   // Render overlay if splash is active

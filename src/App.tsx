@@ -70,7 +70,7 @@ function AppRoutes() {
           <Route
             path="/stripe-checkout"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireRole="usuario">
                 <StripeCheckout />
               </ProtectedRoute>
             }
@@ -78,7 +78,7 @@ function AppRoutes() {
           <Route
             path="/pago-completado"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireRole="usuario">
                 <PaymentSuccess />
               </ProtectedRoute>
             }
@@ -86,7 +86,7 @@ function AppRoutes() {
           <Route
             path="/mi-cuenta"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireRole="usuario">
                 <UserDashboard />
               </ProtectedRoute>
             }
@@ -102,7 +102,7 @@ function AppRoutes() {
           <Route
             path="/ajustes"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireRole="usuario">
                 <UserSettings />
               </ProtectedRoute>
             }
