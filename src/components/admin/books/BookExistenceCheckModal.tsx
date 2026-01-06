@@ -31,6 +31,11 @@ export function BookExistenceCheckModal({
   const [error, setError] = useState('');
   const [updatingStockId, setUpdatingStockId] = useState<string | null>(null);
 
+  // Pagination State
+  const [limit] = useState(20);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageModalConfig, setMessageModalConfig] = useState<{
@@ -47,7 +52,7 @@ export function BookExistenceCheckModal({
   // if (!isOpen) return null; // MOVED to return statement to fix Hook rules
   // Do NOT return here.
 
-  const handleSearch = async () => {
+  const handleSearch = async (isLoadMore = false) => {
     // Basic validation: need at least one field
     if (!Object.values(searchParams).some(val => val.trim() !== '')) {
       setError('Por favor ingresa al menos un criterio de búsqueda');
@@ -56,49 +61,36 @@ export function BookExistenceCheckModal({
 
     setLoading(true);
     setError('');
-    setHasSearched(false);
+    
+    // If new search, reset everything
+    if (!isLoadMore) {
+        setHasSearched(false);
+        setResults([]);
+        setOffset(0);
+        setHasMore(true);
+    }
     
     try {
-      // Mapping params to filter structure
-      // Note: 'code' usually maps to legacy_id search (or general search in 'active admin')
-      // but here we want specific field matching.
-      // obtenerLibros supports 'search' (general) or specific fields if we enhanced it.
-      // Our previous enhancement added specific fields to LibroFilters but logic might need verify.
-      // Actually, looking at libroService logic:
-      // - search: string -> uses legacy_id OR title/author/isbn depending on mode.
-      // - We want MULTI-FIELD filtering (AND/OR logic).
-      // 'obtenerLibros' applies AND logic for fields like category, publisher... 
-      // but doesn't have specific 'title' or 'author' strict filters exposed in the main Query building block 
-      // (except deeply nested in 'search' logic which mixes them).
-      //
-      // Wait, I saw 'filters.isbn' in the previous file view.
-      // I saw 'filters.publisher'.
-      // I DO NOT see 'filters.title' or 'filters.author' being used as strict filters in the 'filters' object in `obtenerLibros`.
-      // The `LibroFilters` interface HAS them (I recall adding them to interface or seeing them?), 
-      // let's re-verify libroService implementation in next step. 
-      // FOR NOW, I will implement this assuming I might need to make a specific call or update `obtenerLibros` to handle title/author specifically 
-      // if passing them in `search` isn't enough.
-      //
-      // STRATEGY: Use `obtenerLibros` with `forceCount: true`. 
-      // Pass `isbn` to `isbn`.
-      // For Code/Title/Author, if `obtenerLibros` doesn't strictly checking them as filters, 
-      // I might need to abuse the `search` param or fetch and filter, OR use `buscarLibros`?
-      // `buscarLibros` does text search.
+      // Calculate current offset based on mode
+      const currentOffset = isLoadMore ? offset : 0;
+
+      const foundBooks = await searchForExistence(searchParams, limit, currentOffset);
       
-      // Let's try to construct a smart query.
-      // If code is present -> Search by 'search' = code (Mode: default/code)
-      // If no code, but title -> Search by 'search' = title (Mode: full)
-      // This might be insufficient if user fills ALL 4.
+      if (isLoadMore) {
+          setResults(prev => [...prev, ...foundBooks]);
+      } else {
+          setResults(foundBooks);
+      }
+
+      // Update offset for next load
+      if (foundBooks.length < limit) {
+          setHasMore(false);
+      } else {
+          setOffset(currentOffset + limit);
+          setHasMore(true);
+      }
       
-      // Better approach for strict existence check: 
-      // Create a targeted query here using Supabase client directly OR add a dedicated function `checkBookExistence` in service.
-      // Adding a dedicated function is cleaner and safer.
-      // I'll assume I will create `searchBookForExistence` in service.
-      
-      // Placeholder for now, calling a new function I will add.
-      const foundBooks = await searchForExistence(searchParams);
-      setResults(foundBooks);
-      setHasSearched(true);
+      if (!isLoadMore) setHasSearched(true);
       
     } catch (e) {
       console.error('Error searching:', e);
@@ -109,13 +101,15 @@ export function BookExistenceCheckModal({
   };
 
   // Temporary local helper until I add it to service
-  const searchForExistence = async (params: typeof searchParams) => {
+  const searchForExistence = async (params: typeof searchParams, limit: number, offset: number) => {
       // Use the dedicated service function
       const data = await verificarExistenciaLibro({
           code: params.code || undefined,
           isbn: params.isbn || undefined,
           title: params.title || undefined,
-          author: params.author || undefined
+          author: params.author || undefined,
+          limit,
+          offset
       });
       return data;
   };
@@ -161,72 +155,79 @@ export function BookExistenceCheckModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+        <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Verificar existencia</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Verificar existencia</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">Busca si el libro ya existe antes de crearlo</p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
-            <X size={20} className="text-gray-500" />
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
+            <X size={24} className="text-gray-500" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 flex-1 overflow-y-auto">
+        <div className="p-8 flex-1 overflow-y-auto">
            {/* Search Form */}
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-500 uppercase">Código</label>
-                    <div className="relative">
-                        <Hash className="absolute left-3 top-2.5 text-gray-400" size={16} />
-                        <input 
-                            type="text" 
-                            className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="Ej. 021005"
-                            value={searchParams.code}
-                            onChange={e => setSearchParams({...searchParams, code: e.target.value})}
-                            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                        />
+           <div className="space-y-6 mb-8">
+                {/* Row 1: Identifiers */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Código</label>
+                        <div className="relative group">
+                            <Hash className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <input 
+                                type="text" 
+                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                placeholder="Ej. 021005"
+                                value={searchParams.code}
+                                onChange={e => setSearchParams({...searchParams, code: e.target.value})}
+                                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">ISBN</label>
+                        <div className="relative group">
+                            <Barcode className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <input 
+                                type="text" 
+                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                placeholder="Ej. 978..."
+                                value={searchParams.isbn}
+                                onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
+                                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                            />
+                        </div>
                     </div>
                 </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-500 uppercase">ISBN</label>
-                    <div className="relative">
-                        <Barcode className="absolute left-3 top-2.5 text-gray-400" size={16} />
+
+                {/* Row 2: Title (Full Width) */}
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Título</label>
+                    <div className="relative group">
+                        <BookOpen className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
                         <input 
                             type="text" 
-                            className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="Ej. 978..."
-                            value={searchParams.isbn}
-                            onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
-                            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                        />
-                    </div>
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-500 uppercase">Título</label>
-                    <div className="relative">
-                        <BookOpen className="absolute left-3 top-2.5 text-gray-400" size={16} />
-                        <input 
-                            type="text" 
-                            className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="Título del libro..."
+                            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
+                            placeholder="Título completo del libro..."
                             value={searchParams.title}
                             onChange={e => setSearchParams({...searchParams, title: e.target.value})}
                             onKeyDown={e => e.key === 'Enter' && handleSearch()}
                         />
                     </div>
                 </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-500 uppercase">Autor</label>
-                    <div className="relative">
-                        <User className="absolute left-3 top-2.5 text-gray-400" size={16} />
+
+                {/* Row 3: Author (Full Width) */}
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Autor</label>
+                    <div className="relative group">
+                        <User className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
                         <input 
                             type="text" 
-                            className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="Autor del libro..."
+                            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            placeholder="Nombre del autor..."
                             value={searchParams.author}
                             onChange={e => setSearchParams({...searchParams, author: e.target.value})}
                             onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -237,7 +238,7 @@ export function BookExistenceCheckModal({
 
            <div className="flex justify-end mb-6">
                 <button 
-                    onClick={handleSearch}
+                    onClick={() => handleSearch(false)}
                     disabled={loading}
                     className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
@@ -331,6 +332,19 @@ export function BookExistenceCheckModal({
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+                
+                {hasSearched && hasMore && results.length > 0 && (
+                    <div className="flex justify-center pt-2 pb-4">
+                        <button
+                            onClick={() => handleSearch(true)}
+                            disabled={loading}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                        >
+                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                            Cargar más resultados
+                        </button>
                     </div>
                 )}
            </div>

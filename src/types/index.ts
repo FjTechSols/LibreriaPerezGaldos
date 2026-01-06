@@ -121,6 +121,9 @@ export interface Libro {
   destacado?: boolean;
   es_nuevo?: boolean;
   en_oferta?: boolean;
+  descatalogado?: boolean;
+  estado?: 'nuevo' | 'leido';
+  idioma?: string;
   created_at?: string;
   updated_at?: string;
   categoria?: Categoria;
@@ -260,6 +263,9 @@ export interface Book {
   featured?: boolean;
   isNew?: boolean;
   isOnSale?: boolean;
+  isOutOfPrint?: boolean;
+  condition?: 'nuevo' | 'leido';
+  language?: string;
   contents?: string[];
 }
 

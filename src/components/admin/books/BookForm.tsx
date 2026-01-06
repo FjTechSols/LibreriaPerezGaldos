@@ -36,7 +36,10 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     coverImage: '',
     featured: false,
     isNew: false,
-    isOnSale: false
+    isOnSale: false,
+    isOutOfPrint: false,
+    condition: 'leido',
+    language: 'Español'
   });
 
   const [bookContents, setBookContents] = useState<string[]>([]);
@@ -628,6 +631,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                       style={{ width: '100%' }}
                     />
                 </div>
+
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Páginas</label>
                     <input
@@ -758,7 +762,65 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   />
                   Oferta
                 </label>
+                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#dc2626', fontWeight: 500 }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.isOutOfPrint || false}
+                    onChange={(e) => setFormData({...formData, isOutOfPrint: e.target.checked})}
+                  />
+                  Descatalogado
+                </label>
               </div>
+            </div>
+
+            <div style={{ 
+                marginTop: '1rem', 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: '2rem', 
+                alignItems: 'flex-start', 
+                borderTop: '1px dashed var(--border-color)', 
+                paddingTop: '1rem',
+                marginBottom: '1rem' 
+            }}>
+                  {/* Estado / Condición */}
+                  <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Estado Físico</label>
+                      <div style={{ display: 'flex', gap: '1rem', height: '38px', alignItems: 'center' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                              <input 
+                                  type="radio" 
+                                  name="condition" 
+                                  value="nuevo"
+                                  checked={formData.condition === 'nuevo'}
+                                  onChange={() => setFormData({...formData, condition: 'nuevo'})}
+                              />
+                              Nuevo
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                              <input 
+                                  type="radio" 
+                                  name="condition" 
+                                  value="leido"
+                                  checked={!formData.condition || formData.condition === 'leido'}
+                                  onChange={() => setFormData({...formData, condition: 'leido'})}
+                              />
+                              Leído
+                          </label>
+                      </div>
+                  </div>
+
+                  {/* Idioma */}
+                  <div style={{ flex: 1, maxWidth: '200px' }}>
+                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Idioma</label>
+                     <input
+                       type="text"
+                       value={formData.language || 'Español'}
+                       onChange={(e) => setFormData({...formData, language: e.target.value})}
+                       className="form-input"
+                       style={{ width: '100%' }}
+                     />
+                  </div>
             </div>
 
             {formData.isOnSale && (

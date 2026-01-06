@@ -35,6 +35,9 @@ export interface LibroSupabase {
   destacado?: boolean;
   novedad?: boolean;
   oferta?: boolean;
+  descatalogado?: boolean;
+  estado?: 'nuevo' | 'leido';
+  idioma?: string;
   libros_contenidos?: {
     titulo: string;
     numero_volumen: number;
@@ -137,6 +140,9 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   featured: libro.destacado || false,
   isNew: libro.novedad || false,
   isOnSale: libro.oferta || false,
+  isOutOfPrint: libro.descatalogado || false,
+  condition: (libro.estado as 'nuevo' | 'leido') || 'leido',
+  language: libro.idioma || 'Español',
   contents: libro.libros_contenidos 
     ? libro.libros_contenidos
         .sort((a, b) => a.numero_volumen - b.numero_volumen)
@@ -238,7 +244,7 @@ const getNextSearchTerm = (term: string): string => {
 
 // New function to check for book existence with simplified, targeted query
 export const verificarExistenciaLibro = async (
-    criteria: { code?: string; isbn?: string; title?: string; author?: string }
+    criteria: { code?: string; isbn?: string; title?: string; author?: string; limit?: number; offset?: number }
 ): Promise<Book[]> => {
     let query = supabase
         .from('libros')
@@ -298,8 +304,12 @@ export const verificarExistenciaLibro = async (
         }
     }
 
-    // Default limit
-    query = query.limit(20);
+
+    // Pagination (Default limit 20, but expandable)
+    const limit = criteria.limit || 20;
+    const offset = criteria.offset || 0;
+    
+    query = query.range(offset, offset + limit - 1);
 
     const { data, error } = await query;
 
@@ -735,6 +745,9 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
         destacado: libro.destacado || false,
         novedad: libro.novedad || false,
         oferta: libro.oferta || false,
+        descatalogado: libro.descatalogado || false,
+        estado: libro.estado || 'leido',
+        idioma: libro.idioma || 'Español',
         fecha_ingreso: new Date().toISOString().split('T')[0],
         updated_at: new Date().toISOString()
       })
@@ -1028,6 +1041,9 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
     if (libro.destacado !== undefined) updateData.destacado = libro.destacado;
     if (libro.novedad !== undefined) updateData.novedad = libro.novedad;
     if (libro.oferta !== undefined) updateData.oferta = libro.oferta;
+    if (libro.descatalogado !== undefined) updateData.descatalogado = libro.descatalogado;
+    if (libro.estado !== undefined) updateData.estado = libro.estado;
+    if (libro.idioma !== undefined) updateData.idioma = libro.idioma;
 
     // Si se cambia la ubicación, actualizar el código
     if (libro.ubicacion !== undefined) {
