@@ -113,10 +113,67 @@
       .book-page:nth-child(2) { animation-delay: 0.3s; }
       .book-page:nth-child(3) { animation-delay: 0.6s; }
 
+      /* BOOK ANIMATION (Enhanced) */
+      .book-loader {
+        position: relative;
+        width: 80px;
+        height: 100px;
+        perspective: 1500px;
+        margin: 0 auto;
+      }
+      .book-page {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform-origin: left center;
+        border-radius: 3px 8px 8px 3px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3), inset 3px 0px 5px rgba(0,0,0,0.1);
+        transform-style: preserve-3d;
+        /* Default Page Style (Paper) */
+        background: 
+            /* Lines of text */
+            linear-gradient(transparent 90%, #cbd5e1 90%) 0 0 / 100% 12px,
+            /* Paper texture */
+            linear-gradient(to right, #f1f5f9 0%, #e2e8f0 100%);
+        border: 1px solid #94a3b8;
+        animation: flip 2.4s infinite ease-in-out;
+      }
+      
+      /* Cover Style (First and Last elements if we wanted, but here we style the pages themselves) */
+      /* Let's make the pages look like they have content "glowing" or distinct colors */
+      .book-page:nth-child(1) { 
+          animation-delay: 0s; 
+          z-index: 3;
+          /* Cover-like appearance for the top page */
+          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+          border: 1px solid #1e40af;
+      }
+      .book-page:nth-child(2) { 
+          animation-delay: 0.4s; 
+          z-index: 2; 
+      }
+      .book-page:nth-child(3) { 
+          animation-delay: 0.8s; 
+          z-index: 1; 
+      }
+
       @keyframes flip {
-        0% { transform: rotateY(0deg); z-index: 1; }
-        50% { transform: rotateY(-180deg); z-index: 10; background: linear-gradient(to left, #e2e8f0 0%, #cbd5e1 100%); }
-        100% { transform: rotateY(-180deg); z-index: 1; }
+        0% { transform: rotateY(0deg); }
+        20% { transform: rotateY(-160deg);  } /* Open quickly */
+        40% { transform: rotateY(-180deg); opacity: 0; } /* Fade out slightly when fully flat/behind */
+        100% { transform: rotateY(-180deg); opacity: 0; } /* Stay hidden */
+      }
+      
+      /* Add a static back cover for context */
+      .book-loader::after {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: #1e293b; /* Dark Slate back cover */
+          border-radius: 3px 8px 8px 3px;
+          z-index: 0;
+          box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+          border: 1px solid #334155;
       }
     </style>
   </head>
