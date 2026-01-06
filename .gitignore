@@ -47,4 +47,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-laboratorio/
+# laboratorio/ (Allowed for galdos-laboratory branch)
+laboratorio/volumes/
+laboratorio/*.sql
+!.env.development.laboratory

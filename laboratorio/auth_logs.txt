@@ -1,0 +1,200 @@
+{"args":[0.030791774],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:30Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:30Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:50:30Z"}
+{"args":[0.029882562],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:30Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:30Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:50:31Z"}
+{"args":[0.030020249],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:31Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:31Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:50:33Z"}
+{"args":[0.034092071],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:33Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:33Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:50:37Z"}
+{"args":[0.03118521],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:37Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:37Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:50:43Z"}
+{"args":[0.033892094],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:43Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:43Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:50:56Z"}
+{"args":[0.030415245],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:50:57Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:50:57Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:51:22Z"}
+{"args":[0.032031453],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:51:22Z"}
+{"level":"fatal","msg":"running db migrations: Migrator: problem creating schema migrations: could not execute CREATE TABLE \"schema_migrations\" (\n\"version\" VARCHAR (14) NOT NULL,\nPRIMARY KEY(\"version\")\n);\nCREATE UNIQUE INDEX \"schema_migrations_version_idx\" ON \"schema_migrations\" (version);: ERROR: permission denied for schema public (SQLSTATE 42501)","time":"2026-01-05T10:51:22Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:05Z"}
+{"args":["init_auth_schema"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["alter_users"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["adds_confirmed_at"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_email_change_confirmed"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["create_identities_table"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_refresh_token_parent"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["create_user_id_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["update_auth_functions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["update_auth_uid"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["update_user_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_banned_until"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["update_auth_functions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_user_reauthentication"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_unique_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_auth_jwt_function"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_ip_address_to_audit_log"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_sessions_table"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_mfa_schema"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_aal_and_factor_id_to_sessions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_mfa_indexes"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_sessions_user_id_index"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_refresh_tokens_session_id_revoked_index"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_saml"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_identities_user_id_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["add_session_not_after_column"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["remove_parent_foreign_key_refresh_tokens"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":["backfill_email_identity"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:52:05Z"}
+{"args":[0.383137171],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:05Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:05Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:06Z"}
+{"args":[0.045391472],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:06Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:06Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:06Z"}
+{"args":[0.041584628],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:06Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:06Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:07Z"}
+{"args":[0.044620614],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:07Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:07Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:08Z"}
+{"args":[0.04414762],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:08Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:08Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:10Z"}
+{"args":[0.042675519],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:10Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:10Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:13Z"}
+{"args":[0.042966264],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:13Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:13Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:20Z"}
+{"args":[0.049543396],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:20Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:20Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:33Z"}
+{"args":[0.052391071],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:33Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:33Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:52:59Z"}
+{"args":[0.050000562],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:52:59Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: operator does not exist: uuid = text (SQLSTATE 42883)","time":"2026-01-05T10:52:59Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:32Z"}
+{"args":[0.047768626],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:32Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:32Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:33Z"}
+{"args":[0.04376645],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:33Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:33Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:33Z"}
+{"args":[0.043787429],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:33Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:33Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:34Z"}
+{"args":[0.041630742],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:34Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:34Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:35Z"}
+{"args":[0.041791422],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:35Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:35Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:37Z"}
+{"args":[0.044917482],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:37Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:37Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:40Z"}
+{"args":[0.044576129],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:41Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:41Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:53:47Z"}
+{"args":[0.050413185],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:53:47Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:53:47Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:54:00Z"}
+{"args":[0.072648635],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:54:00Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:54:00Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:54:26Z"}
+{"args":[0.045292997],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:54:26Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:54:26Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:17Z"}
+{"args":[0.04972451],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:17Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:17Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:41Z"}
+{"args":[0.05002004],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:41Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:41Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:42Z"}
+{"args":[0.043704785],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:42Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:42Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:42Z"}
+{"args":[0.042875945],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:42Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:42Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:43Z"}
+{"args":[0.043421679],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:43Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:43Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:44Z"}
+{"args":[0.043319666],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:44Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:44Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:46Z"}
+{"args":[0.044977357],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:46Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:46Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:49Z"}
+{"args":[0.043196065],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:49Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:49Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:55:56Z"}
+{"args":[0.041071968],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:55:56Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:55:56Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:56:09Z"}
+{"args":[0.043222775],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:56:09Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:56:09Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:56:35Z"}
+{"args":[0.044804067],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:56:35Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:56:35Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:57:26Z"}
+{"args":[0.044342858],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:57:26Z"}
+{"level":"fatal","msg":"running db migrations: error executing /usr/local/etc/auth/migrations/20221208132122_backfill_email_last_sign_in_at.up.sql, sql: -- previous backfill migration left last_sign_in_at to be null, which broke some projects\n\nupdate auth.identities\n  set last_sign_in_at = '2022-11-25'\n  where\n    last_sign_in_at is null and\n    created_at = '2022-11-25' and\n    updated_at = '2022-11-25' and\n    provider = 'email' and\n    id = user_id::text;\n: ERROR: relation \"auth.identities\" does not exist (SQLSTATE 42P01)","time":"2026-01-05T10:57:26Z"}
+{"level":"info","msg":"Go runtime metrics collection started","time":"2026-01-05T10:57:50Z"}
+{"args":["init_auth_schema"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["alter_users"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["adds_confirmed_at"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_email_change_confirmed"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["create_identities_table"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_refresh_token_parent"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["create_user_id_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["update_auth_functions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["update_auth_uid"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["update_user_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_banned_until"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["update_auth_functions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_user_reauthentication"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_unique_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_auth_jwt_function"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_ip_address_to_audit_log"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_sessions_table"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_mfa_schema"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_aal_and_factor_id_to_sessions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_mfa_indexes"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_sessions_user_id_index"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_refresh_tokens_session_id_revoked_index"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_saml"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_identities_user_id_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_session_not_after_column"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["remove_parent_foreign_key_refresh_tokens"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["backfill_email_identity"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["backfill_email_last_sign_in_at"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["modify_users_email_unique_index"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_identities_email_column"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["remove_sso_sessions"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["alter_phone_type"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_deleted_at"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["backfill_invite_identities"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_flow_state_table"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_authentication_method_to_flow_state_table"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["remove_duplicate_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_cleanup_indexes"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_mfa_challenge_cleanup_index"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:51Z"}
+{"args":["add_flow_state_to_relay_state"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:52Z"}
+{"args":["add_mfa_factors_user_id_idx"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:52Z"}
+{"args":["add_session_refresh_columns"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:52Z"}
+{"args":["add_sessions_tag"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:52Z"}
+{"args":["add_id_pkey_identities"],"component":"pop","level":"info","msg":"\u003e %s","time":"2026-01-05T10:57:52Z"}
+{"args":[44],"component":"pop","level":"info","msg":"Successfully applied %d migrations.","time":"2026-01-05T10:57:52Z"}
+{"args":[1.200502957],"component":"pop","level":"info","msg":"%.4f seconds","time":"2026-01-05T10:57:52Z"}
+{"level":"info","msg":"GoTrue migrations applied successfully","time":"2026-01-05T10:57:52Z"}
+{"component":"api","level":"warning","msg":"DEPRECATION NOTICE: GOTRUE_JWT_ADMIN_GROUP_NAME not supported by Supabase's GoTrue, will be removed soon","time":"2026-01-05T10:57:52Z"}
+{"component":"api","level":"warning","msg":"DEPRECATION NOTICE: GOTRUE_JWT_DEFAULT_GROUP_NAME not supported by Supabase's GoTrue, will be removed soon","time":"2026-01-05T10:57:52Z"}
+{"level":"info","msg":"GoTrue API started on: 0.0.0.0:9999","time":"2026-01-05T10:57:52Z"}
+{"component":"api","level":"info","method":"POST","msg":"request started","path":"/signup","referer":"http://localhost:5173/verificacion-email","remote_addr":"172.18.0.1","time":"2026-01-05T10:59:02Z","timestamp":"2026-01-05T10:59:02Z"}
+{"component":"api","error":"unable to find identity by email for duplicates: unable to fetch records: ERROR: relation \"identities\" does not exist (SQLSTATE 42P01)","level":"error","method":"POST","msg":"500: Database error finding user","path":"/signup","referer":"http://localhost:5173/verificacion-email","remote_addr":"172.18.0.1","time":"2026-01-05T10:59:02Z","timestamp":"2026-01-05T10:59:02Z"}
+{"component":"api","duration":32682755,"level":"info","method":"POST","msg":"request completed","path":"/signup","referer":"http://localhost:5173/verificacion-email","remote_addr":"172.18.0.1","status":500,"time":"2026-01-05T10:59:02Z","timestamp":"2026-01-05T10:59:02Z"}
