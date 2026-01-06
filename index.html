@@ -90,6 +90,34 @@
       ::-webkit-scrollbar-thumb:hover {
         background: #475569;
       }
+
+      /* BOOK ANIMATION */
+      .book-loader {
+        position: relative;
+        width: 60px;
+        height: 80px;
+        perspective: 1000px;
+        margin: 0 auto;
+      }
+      .book-page {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, #e2e8f0 0%, #cbd5e1 100%);
+        transform-origin: left center;
+        border-radius: 2px 6px 6px 2px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        animation: flip 2s infinite ease-in-out;
+      }
+      .book-page:nth-child(1) { animation-delay: 0s; }
+      .book-page:nth-child(2) { animation-delay: 0.3s; }
+      .book-page:nth-child(3) { animation-delay: 0.6s; }
+
+      @keyframes flip {
+        0% { transform: rotateY(0deg); z-index: 1; }
+        50% { transform: rotateY(-180deg); z-index: 10; background: linear-gradient(to left, #e2e8f0 0%, #cbd5e1 100%); }
+        100% { transform: rotateY(-180deg); z-index: 1; }
+      }
     </style>
   </head>
   <body class="min-h-screen text-white overflow-x-hidden font-sans">
@@ -104,117 +132,24 @@
       <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-[2px]"></div>
     </div>
 
-    <!-- Intro Animation Overlay -->
-    <div
-      id="intro-overlay"
-      class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 transition-opacity duration-1000"
-    >
-      <!-- Step 1: Loading -->
-      <div id="step-1" class="intro-step flex flex-col items-center gap-8">
-        <div class="relative w-32 h-32">
-          <!-- Outer Ring -->
-          <div
-            class="absolute inset-0 border-t-4 border-blue-500 rounded-full animate-spin"
-          ></div>
-          <!-- Inner Ring -->
-          <div
-            class="absolute inset-4 border-r-4 border-purple-500 rounded-full animate-spin-slow"
-          ></div>
-          <!-- Center Logo -->
-          <div class="absolute inset-0 flex items-center justify-center">
-            <div
-              class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20"
-            >
-              <span class="text-2xl font-bold text-white">PG</span>
+    <!-- Intro Animation Overlay (Removed) -->
+
+    <!-- Maintenance Loader Overlay -->
+    <div id="maintenance-loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-700">
+        <div class="scale-150 mb-8">
+            <div class="book-loader">
+                <div class="book-page"></div>
+                <div class="book-page"></div>
+                <div class="book-page"></div>
             </div>
-          </div>
         </div>
-        <div class="flex flex-col items-center gap-3">
-          <p
-            class="text-blue-400 font-mono tracking-[0.2em] text-sm uppercase animate-pulse"
-          >
-            Cargando...
-          </p>
-          <div class="w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-progress"
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Access Granted -->
-      <div
-        id="step-2"
-        class="intro-step hidden flex-col items-center gap-8 animate-fade-up"
-      >
-        <div class="relative">
-          <div
-            class="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.2)]"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-12 w-12 text-green-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <div
-            class="absolute inset-0 border-green-500/20 rounded-full animate-ping"
-          ></div>
-        </div>
-        <div class="text-center space-y-2">
-          <h2
-            class="text-3xl md:text-4xl font-bold text-white tracking-widest font-mono"
-          >
-            ACCESO
-          </h2>
-          <h2
-            class="text-3xl md:text-4xl font-bold text-green-400 tracking-widest font-mono"
-          >
-            CONCEDIDO
-          </h2>
-        </div>
-      </div>
-
-      <!-- Step 3: Welcome Slogan -->
-      <div
-        id="step-3"
-        class="intro-step hidden flex-col items-center text-center px-6 max-w-4xl animate-fade-in space-y-8"
-      >
-        <h1
-          class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.3)]"
-        >
-          Librería Pérez Galdós
-        </h1>
-        <div class="relative py-6">
-          <div
-            class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"
-          ></div>
-          <p
-            class="text-2xl md:text-3xl text-gray-200 italic font-light tracking-wide"
-          >
-            "Donde las historias cobran vida."
-          </p>
-          <div
-            class="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"
-          ></div>
-        </div>
-      </div>
+        <p class="text-blue-400 font-mono tracking-[0.2em] text-sm uppercase animate-pulse">Iniciando Modo Mantenimiento...</p>
     </div>
 
     <!-- Main Content (Hidden Initially) -->
     <div
       id="main-content"
-      class="opacity-0 transition-opacity duration-1000 min-h-screen flex items-center justify-center p-4"
+      class="opacity-0 translate-y-8 transition-all duration-1000 min-h-screen flex items-center justify-center p-4"
     >
       <div
         class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden p-8 md:p-12 text-center relative border border-white/10 bg-slate-900 shadow-slate-950/50"
@@ -223,26 +158,13 @@
           class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600"
         ></div>
 
-        <!-- Icon/Logo -->
+        <!-- Animated Book Icon -->
         <div class="mb-8 flex justify-center">
-          <div
-            class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300 border border-white/10 group"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
+            <div class="book-loader">
+                <div class="book-page"></div>
+                <div class="book-page"></div>
+                <div class="book-page"></div>
+            </div>
         </div>
 
         <!-- Headings -->
@@ -374,41 +296,26 @@
     <!-- Scripts -->
     <script>
       // INTRO ANIMATION ORCHESTRATION
+      // (Removed as per user request to replace with new animation)
+      // MAINTENANCE ENTRY ANIMATION
       document.addEventListener("DOMContentLoaded", () => {
-        const overlay = document.getElementById("intro-overlay");
-        const mainContent = document.getElementById("main-content");
-        const step1 = document.getElementById("step-1");
-        const step2 = document.getElementById("step-2");
-        const step3 = document.getElementById("step-3");
+         const loader = document.getElementById("maintenance-loader");
+         const mainContent = document.getElementById("main-content");
 
-        // Sequence
-        // Step 1: Loading starts immediately (0s)
-
-        // Step 2: Access Granted after 2.5s
-        setTimeout(() => {
-          step1.classList.add("hidden");
-          step2.classList.remove("hidden");
-          step2.classList.add("flex");
-        }, 2500);
-
-        // Step 3: Welcome Slogan after 4.5s
-        setTimeout(() => {
-          step2.classList.add("hidden");
-          step2.classList.remove("flex");
-          step3.classList.remove("hidden");
-          step3.classList.add("flex");
-        }, 5000);
-
-        // Step 4: Reveal Main Content after 8.5s
-        setTimeout(() => {
-          overlay.classList.add("opacity-0");
-          // Allow pointer events to pass through after fade out
-          setTimeout(() => {
-            overlay.style.display = "none";
-          }, 1000);
-
-          mainContent.classList.remove("opacity-0");
-        }, 9000);
+         // 1. Wait a bit for the loader to be seen
+         setTimeout(() => {
+             // 2. Fade out loader
+             loader.classList.add('opacity-0');
+             
+             // 3. Remove loader from DOM after fade
+             setTimeout(() => {
+                 loader.style.display = 'none';
+                 
+                 // 4. Reveal Main Content with Slide Up
+                 mainContent.classList.remove("opacity-0");
+                 mainContent.classList.remove("translate-y-8");
+             }, 700);
+         }, 2500); // 2.5s duration for loader
       });
 
       // (Countdown removed)
