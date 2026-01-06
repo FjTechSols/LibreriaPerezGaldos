@@ -366,6 +366,13 @@ export function BooksManager() {
            editorialId = null;
       }
 
+      let categoriaId: number | null | undefined = undefined;
+      if (bookData.category && bookData.category.trim().length > 0) {
+          categoriaId = await obtenerCategoriaId(bookData.category);
+      } else if (bookData.category === '') {
+          categoriaId = null;
+      }
+
       // Map UI fields (Book) to DB fields (LibroSupabase)
       const mappedUpdate = {
         titulo: bookData.title,
@@ -382,11 +389,8 @@ export function BooksManager() {
         destacado: bookData.featured,
         novedad: bookData.isNew,
         oferta: bookData.isOnSale,
-        editorial_id: editorialId, // Add resolved ID here
-        // categoria_id would be similar, but let's stick to publisher focus for now or if bookData.category provides a name we need to resolve it too.
-        // bookData.category is string. 
-        // We probably should resolve category too if we want it to save.
-        // ...
+        editorial_id: editorialId,
+        categoria_id: categoriaId,
       };
 
       const updated = await actualizarLibro(parseInt(selectedBook.id), mappedUpdate as any, contents); // Use selectedBook
