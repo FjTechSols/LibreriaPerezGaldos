@@ -1,0 +1,50 @@
+# Logs
+logs
+*.log
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# User requested exclusions
+docs/
+scripts/
+supabase/
+
+# Temporary & Layout files
+lint_output.txt
+construccion.html
+vercel-construccion.json
+
+# Large Data Files (Ignored to prevent git push errors)
+scripts/files/*.json
+scripts/files/*.txt
+scripts/files/*.jsonl
+scripts/gestion_libros/resultados/*.json
+scripts/gestion_libros/resultados/*.txt
+
+# Development Tools (not for production)
+src/dev-tools/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+laboratorio/

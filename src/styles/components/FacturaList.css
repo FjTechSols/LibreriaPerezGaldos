@@ -1,0 +1,589 @@
+.factura-list-container {
+  width: 100%;
+}
+
+.factura-loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.125rem;
+  color: #64748b;
+}
+
+.factura-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.factura-stats .stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
+}
+
+.factura-stats .stat-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  border-color: #cbd5e1;
+}
+
+.factura-stats .stat-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.factura-stats .stat-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.factura-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-input,
+.filter-select {
+  padding: 0.625rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-crear-factura {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-crear-factura:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.factura-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.factura-table .table-header {
+  display: grid;
+  grid-template-columns: 140px 100px 150px 120px 100px 100px 100px 120px 100px 150px;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.factura-table .table-row {
+  display: grid;
+  grid-template-columns: 140px 100px 150px 120px 100px 100px 100px 120px 100px 150px;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.factura-table .table-row:hover {
+  background: #fafbfc;
+}
+
+.factura-table .table-row.anulada {
+  opacity: 0.6;
+  background: #fef2f2;
+}
+
+.factura-table .table-row.rectificativa {
+  background: #fefce8;
+}
+
+.factura-numero {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.tipo-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.tipo-badge.normal {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.tipo-badge.rectificativa {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.total-amount {
+  font-weight: 700;
+  color: #059669;
+  font-size: 1rem;
+}
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.estado-badge.activa {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.estado-badge.anulada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.factura-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-action.ver {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.btn-action.ver:hover {
+  background: #bfdbfe;
+  transform: translateY(-1px);
+}
+
+.btn-action.descargar {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.btn-action.descargar:hover {
+  background: #a7f3d0;
+  transform: translateY(-1px);
+}
+
+.btn-action.anular {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-action.anular:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+.no-facturas {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.modal-anular {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-anular .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-anular .modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+.modal-anular .close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.modal-anular .close-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.modal-anular .modal-body {
+  padding: 1.5rem;
+}
+
+.warning-text {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  transition: all 0.2s;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.factura-info {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.factura-info p {
+  margin: 0.5rem 0;
+  color: #475569;
+  font-size: 0.875rem;
+}
+
+.modal-anular .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-cancelar,
+.btn-confirmar {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.btn-cancelar {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.btn-cancelar:hover {
+  background: #e2e8f0;
+}
+
+.btn-confirmar {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-confirmar:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.btn-confirmar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1200px) {
+  .factura-table .table-header,
+  .factura-table .table-row {
+    grid-template-columns: 120px 90px 120px 100px 80px 80px 80px 100px 80px 120px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .factura-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .factura-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .btn-crear-factura {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .factura-table {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .factura-table .table-header {
+    display: none;
+  }
+
+  .factura-table .table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "number status"
+      "date client"
+      "origin type"
+      "total total"
+      "sub iva"
+      "actions actions";
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    align-items: center;
+  }
+
+  /* 1. Number */
+  .factura-table .table-row .factura-numero {
+    grid-area: number;
+    font-size: 1rem;
+    justify-self: start;
+  }
+
+  /* 9. Status (Moved to top right) - Was 8 */
+  .factura-table .table-row > span:nth-child(9) {
+    grid-area: status;
+    justify-self: end;
+  }
+
+  /* 2. Date */
+  .factura-table .table-row > span:nth-child(2) {
+    grid-area: date;
+    font-size: 0.875rem;
+    color: #64748b;
+    display: flex;
+    gap: 0.25rem;
+  }
+  .factura-table .table-row > span:nth-child(2)::before {
+    content: '📅';
+    font-size: 0.8rem;
+  }
+
+  /* 3. Client */
+  .factura-table .table-row > span:nth-child(3) {
+    grid-area: client;
+    font-size: 0.875rem;
+    font-weight: 500;
+    justify-self: end;
+    text-align: right;
+    color: #334155;
+  }
+
+  /* 4. Origin (New) */
+  .factura-table .table-row > span:nth-child(4) {
+    grid-area: origin;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #64748b;
+    justify-self: start;
+  }
+  
+  /* 5. Type (Was 4) */
+  .factura-table .table-row > span:nth-child(5) {
+    grid-area: type;
+    justify-self: end;
+  }
+
+  /* 8. Total (Was 7) */
+  .factura-table .table-row > span:nth-child(8) {
+    grid-area: total;
+    font-size: 1.25rem;
+    justify-self: center;
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+  }
+
+  /* 6. Subtotal (Was 5) */
+  .factura-table .table-row > span:nth-child(6) {
+    grid-area: sub;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: flex;
+    gap: 0.25rem;
+  }
+  .factura-table .table-row > span:nth-child(6)::before {
+    content: 'Sub:';
+    font-weight: 600;
+  }
+
+  /* 7. IVA (Was 6) */
+  .factura-table .table-row > span:nth-child(7) {
+    grid-area: iva;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    justify-self: end;
+    display: flex;
+    gap: 0.25rem;
+  }
+  .factura-table .table-row > span:nth-child(7)::before {
+    content: 'IVA:';
+    font-weight: 600;
+  }
+
+  /* 10. Actions (Was 9) */
+  .factura-actions {
+    grid-area: actions;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .btn-action {
+    flex: 1; /* Stretch buttons */
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+}
+
+/* Ensure Dark Mode background for mobile cards */
+.dark-mode .factura-table .table-row {
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+.dark-mode .factura-table {
+    background: transparent; 
+}
+
+/* Dark Mode Text Overrides */
+.dark-mode .factura-table .table-header span,
+.dark-mode .factura-table .table-row span,
+.dark-mode .factura-table .table-row div,
+.dark-mode .factura-info p,
+.dark-mode .factura-info strong {
+  color: #f1f5f9 !important;
+}
+
+/* Specific overrides for badges to keep their contrast */
+.dark-mode .factura-table .table-row span.tipo-badge,
+.dark-mode .factura-table .table-row span.estado-badge {
+    color: inherit !important;
+}
+
+.dark-mode .factura-table .table-row span.factura-numero {
+    color: #60a5fa !important; /* Light blue for link/number */
+}
+
+/* Ensure actions don't get forced white if they are buttons */
+.dark-mode .btn-action {
+    color: inherit !important;
+}

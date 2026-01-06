@@ -1,0 +1,88 @@
+.books-manager-search {
+  flex: 1 1 300px;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.books-manager-search .search-input-wrapper {
+  position: relative;
+  flex-grow: 1;
+}
+
+.books-manager-search .admin-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.books-manager-search .admin-search-input {
+  width: 100%;
+  padding-left: 2.5rem;
+}
+
+.books-manager-search .search-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+/* Light Mode Overrides */
+:root:not(.dark-mode) .books-manager-search .admin-search-input {
+  border: 2px solid #e5e7eb;
+}
+
+:root:not(.dark-mode) .books-manager-search .search-btn {
+  color: #1f2937;
+}
+
+/* Light mode borders for filter selects */
+:root:not(.dark-mode) .form-select {
+  border: 2px solid #e5e7eb;
+}
+
+/* Light mode tonal variations for cards/containers */
+:root:not(.dark-mode) .books-manager {
+  background: #f1f5f9;
+}
+
+:root:not(.dark-mode) .filters-container {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+:root:not(.dark-mode) .data-table {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+:root:not(.dark-mode) .admin-book-row {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+:root:not(.dark-mode) .table-header {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  .books-manager-search {
+    flex-direction: column;
+    width: 100%;
+    flex: 1 1 100%;
+    align-items: stretch;
+  }
+
+  .books-manager-search .search-input-wrapper {
+    width: 100%;
+  }
+
+  .books-manager-search .search-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,261 @@
+.reservation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.reservation-modal {
+  background-color: #ffffff;
+  color: #1f2937;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--border-color);
+}
+
+/* Explicit Dark Mode Overrides */
+.dark-mode .reservation-modal,
+.dark .reservation-modal {
+  background-color: #0f172a; /* Force dark background */
+  color: #f1f5f9; /* Force light text */
+  border-color: #334155;
+}
+
+.reservation-modal__header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fafb;
+  background-color: var(--bg-secondary);
+}
+
+.dark-mode .reservation-modal__header,
+.dark .reservation-modal__header {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.reservation-modal__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dark-mode .reservation-modal__title,
+.dark .reservation-modal__title {
+  color: #f1f5f9;
+}
+
+.reservation-modal__close-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-mode .reservation-modal__close-btn,
+.dark .reservation-modal__close-btn {
+  color: #94a3b8;
+}
+
+.reservation-modal__close-btn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.dark-mode .reservation-modal__close-btn:hover,
+.dark .reservation-modal__close-btn:hover {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+.reservation-modal__content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reservation-modal__info {
+  background-color: #f8fafc;
+  background-color: var(--bg-secondary);
+  padding: 1.25rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-color, #3b82f6);
+}
+
+.dark-mode .reservation-modal__info,
+.dark .reservation-modal__info {
+  background-color: #1e293b;
+}
+
+.reservation-modal__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.dark-mode .reservation-modal__text,
+.dark .reservation-modal__text {
+  color: #cbd5e1;
+}
+
+.reservation-modal__text:last-child {
+  margin-bottom: 0;
+}
+
+.reservation-modal__text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.dark-mode .reservation-modal__text strong,
+.dark .reservation-modal__text strong {
+  color: #f1f5f9;
+}
+
+.reservation-modal__warning {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: rgba(245, 158, 11, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #d97706;
+}
+
+.dark-mode .reservation-modal__warning,
+.dark .reservation-modal__warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.reservation-modal__warning-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.reservation-modal__footer {
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.dark-mode .reservation-modal__footer,
+.dark .reservation-modal__footer {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.reservation-modal__btn--cancel {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.dark-mode .reservation-modal__btn--cancel,
+.dark .reservation-modal__btn--cancel {
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+.reservation-modal__btn--cancel:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.dark-mode .reservation-modal__btn--cancel:hover,
+.dark .reservation-modal__btn--cancel:hover {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+.reservation-modal__btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reservation-modal__btn--cancel {
+  background-color: transparent;
+  border: 1px solid var(--border-color, #d1d5db);
+  color: var(--text-secondary, #4b5563);
+}
+
+.reservation-modal__btn--cancel:hover {
+  background-color: var(--bg-hover, #f3f4f6);
+  border-color: var(--text-secondary, #9ca3af);
+  color: var(--text-primary, #1f2937);
+}
+
+.reservation-modal__btn--confirm {
+  background-color: var(--primary-color, #2563eb);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.reservation-modal__btn--confirm:hover {
+  background-color: var(--primary-hover, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+}
+
+.reservation-modal__btn--confirm:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .reservation-modal__warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24; /* Amber 400 */
+}
