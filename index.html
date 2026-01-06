@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Librería Pérez Galdós - Próximamente</title>
+    <title>Librería Pérez Galdós - En Mantenimiento</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap"
@@ -11,47 +11,47 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                    },
-                    animation: {
-                        'gradient-xy': 'gradient-xy 15s ease infinite',
-                        'spin-slow': 'spin 3s linear infinite',
-                        'fade-in': 'fadeIn 1s ease-out forwards',
-                        'fade-up': 'fadeUp 1s ease-out forwards',
-                        'progress': 'progress 2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        'gradient-xy': {
-                            '0%, 100%': {
-                                'background-size': '400% 400%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'right center'
-                            }
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        fadeUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        progress: {
-                            '0%': { width: '0%', marginLeft: '0%' },
-                            '50%': { width: '100%', marginLeft: '0%' },
-                            '100%': { width: '0%', marginLeft: '100%' },
-                        }
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Outfit", "sans-serif"],
+            },
+            animation: {
+              "gradient-xy": "gradient-xy 15s ease infinite",
+              "spin-slow": "spin 3s linear infinite",
+              "fade-in": "fadeIn 1s ease-out forwards",
+              "fade-up": "fadeUp 1s ease-out forwards",
+              progress: "progress 2s ease-in-out infinite",
+            },
+            keyframes: {
+              "gradient-xy": {
+                "0%, 100%": {
+                  "background-size": "400% 400%",
+                  "background-position": "left center",
+                },
+                "50%": {
+                  "background-size": "200% 200%",
+                  "background-position": "right center",
+                },
+              },
+              fadeIn: {
+                "0%": { opacity: "0" },
+                "100%": { opacity: "1" },
+              },
+              fadeUp: {
+                "0%": { opacity: "0", transform: "translateY(20px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+              progress: {
+                "0%": { width: "0%", marginLeft: "0%" },
+                "50%": { width: "100%", marginLeft: "0%" },
+                "100%": { width: "0%", marginLeft: "100%" },
+              },
+            },
+          },
+        },
+      };
     </script>
     <style>
       .glass {
@@ -68,139 +68,202 @@
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
-      
+
       /* Custom scrollbar for webkit */
       ::-webkit-scrollbar {
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #0f172a; 
+        background: #0f172a;
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155; 
+        background: #334155;
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
+        background: #475569;
       }
     </style>
   </head>
   <body class="min-h-screen text-white overflow-x-hidden font-sans">
     <!-- Animated Background -->
     <div class="fixed inset-0 -z-10 bg-slate-950">
-      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80');"></div>
+      <div
+        class="absolute inset-0 bg-cover bg-center"
+        style="
+          background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80');
+        "
+      ></div>
       <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-[2px]"></div>
     </div>
 
     <!-- Intro Animation Overlay -->
-    <div id="intro-overlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 transition-opacity duration-1000">
-      
+    <div
+      id="intro-overlay"
+      class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 transition-opacity duration-1000"
+    >
       <!-- Step 1: Loading -->
       <div id="step-1" class="intro-step flex flex-col items-center gap-8">
         <div class="relative w-32 h-32">
-            <!-- Outer Ring -->
-            <div class="absolute inset-0 border-t-4 border-blue-500 rounded-full animate-spin"></div>
-            <!-- Inner Ring -->
-            <div class="absolute inset-4 border-r-4 border-purple-500 rounded-full animate-spin-slow"></div>
-            <!-- Center Logo -->
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <span class="text-2xl font-bold text-white">PG</span>
-                </div>
+          <!-- Outer Ring -->
+          <div
+            class="absolute inset-0 border-t-4 border-blue-500 rounded-full animate-spin"
+          ></div>
+          <!-- Inner Ring -->
+          <div
+            class="absolute inset-4 border-r-4 border-purple-500 rounded-full animate-spin-slow"
+          ></div>
+          <!-- Center Logo -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div
+              class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20"
+            >
+              <span class="text-2xl font-bold text-white">PG</span>
             </div>
+          </div>
         </div>
         <div class="flex flex-col items-center gap-3">
-            <p class="text-blue-400 font-mono tracking-[0.2em] text-sm uppercase animate-pulse">Cargando...</p>
-            <div class="w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-progress"></div>
-            </div>
+          <p
+            class="text-blue-400 font-mono tracking-[0.2em] text-sm uppercase animate-pulse"
+          >
+            Cargando...
+          </p>
+          <div class="w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-progress"
+            ></div>
+          </div>
         </div>
       </div>
 
       <!-- Step 2: Access Granted -->
-      <div id="step-2" class="intro-step hidden flex-col items-center gap-8 animate-fade-up">
+      <div
+        id="step-2"
+        class="intro-step hidden flex-col items-center gap-8 animate-fade-up"
+      >
         <div class="relative">
-            <div class="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.2)]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            <div class="absolute inset-0 border-green-500/20 rounded-full animate-ping"></div>
+          <div
+            class="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.2)]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-12 w-12 text-green-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <div
+            class="absolute inset-0 border-green-500/20 rounded-full animate-ping"
+          ></div>
         </div>
         <div class="text-center space-y-2">
-            <h2 class="text-3xl md:text-4xl font-bold text-white tracking-widest font-mono">
-                ACCESO
-            </h2>
-            <h2 class="text-3xl md:text-4xl font-bold text-green-400 tracking-widest font-mono">
-                CONCEDIDO
-            </h2>
+          <h2
+            class="text-3xl md:text-4xl font-bold text-white tracking-widest font-mono"
+          >
+            ACCESO
+          </h2>
+          <h2
+            class="text-3xl md:text-4xl font-bold text-green-400 tracking-widest font-mono"
+          >
+            CONCEDIDO
+          </h2>
         </div>
       </div>
 
       <!-- Step 3: Welcome Slogan -->
-      <div id="step-3" class="intro-step hidden flex-col items-center text-center px-6 max-w-4xl animate-fade-in space-y-8">
-        <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.3)]">
-            Librería Pérez Galdós
+      <div
+        id="step-3"
+        class="intro-step hidden flex-col items-center text-center px-6 max-w-4xl animate-fade-in space-y-8"
+      >
+        <h1
+          class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-400 drop-shadow-[0_0_15px_rgba(96,165,250,0.3)]"
+        >
+          Librería Pérez Galdós
         </h1>
         <div class="relative py-6">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-            <p class="text-2xl md:text-3xl text-gray-200 italic font-light tracking-wide">
-                "Donde las historias cobran vida."
-            </p>
-            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+          <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"
+          ></div>
+          <p
+            class="text-2xl md:text-3xl text-gray-200 italic font-light tracking-wide"
+          >
+            "Donde las historias cobran vida."
+          </p>
+          <div
+            class="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"
+          ></div>
         </div>
       </div>
     </div>
 
     <!-- Main Content (Hidden Initially) -->
-    <div id="main-content" class="opacity-0 transition-opacity duration-1000 min-h-screen flex items-center justify-center p-4">
-      <div class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden p-8 md:p-12 text-center relative border border-white/10 bg-slate-900 shadow-slate-950/50">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600"></div>
+    <div
+      id="main-content"
+      class="opacity-0 transition-opacity duration-1000 min-h-screen flex items-center justify-center p-4"
+    >
+      <div
+        class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden p-8 md:p-12 text-center relative border border-white/10 bg-slate-900 shadow-slate-950/50"
+      >
+        <div
+          class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600"
+        ></div>
 
         <!-- Icon/Logo -->
         <div class="mb-8 flex justify-center">
-          <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300 border border-white/10 group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          <div
+            class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300 border border-white/10 group"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
             </svg>
           </div>
         </div>
 
         <!-- Headings -->
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight">
+        <h1
+          class="text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight"
+        >
           Librería Pérez Galdós
         </h1>
-        <!-- Countdown Timer -->
-        <div id="countdown" class="flex flex-wrap justify-center gap-4 mb-8">
-            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
-                <span id="days" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Días</span>
-            </div>
-            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
-                <span id="hours" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Horas</span>
-            </div>
-            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
-                <span id="minutes" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Min</span>
-            </div>
-            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-w-[90px] backdrop-blur-sm shadow-lg shadow-black/20 flex flex-col items-center group hover:border-blue-500/30 transition-all duration-300">
-                <span id="seconds" class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-indigo-400 font-mono tab-num">00</span>
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1 font-medium">Seg</span>
-            </div>
-        </div>
-
         <p class="text-gray-300 mb-8 max-w-md mx-auto leading-relaxed">
-          Estamos construyendo una nueva experiencia digital para ti. Mientras
-          tanto, puedes consultar nuestro catálogo disponible en tiempo real.
+          Estamos trabajando para ofrecer un mejor servicio. El sitio se
+          encuentra actualmente en mantenimiento.
+          <br class="hidden md:block" />
+          Volveremos a ofrecer nuestros servicios lo antes posible.
         </p>
 
         <!-- Search Section -->
         <div class="max-w-md mx-auto mb-10 text-left">
-          <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ml-1">Consultar Existencias</label>
+          <label
+            class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ml-1"
+            >Consultar Existencias</label
+          >
           <div class="relative group">
             <input
               type="text"
@@ -226,26 +289,68 @@
 
         <!-- Feature Grid (Small) -->
         <div class="grid grid-cols-3 gap-4 mb-8">
-          <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col items-center gap-2 hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default">
-            <div class="w-10 h-10 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center border border-green-500/20">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          <div
+            class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col items-center gap-2 hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center border border-green-500/20"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
               </svg>
             </div>
             <span class="text-xs font-medium text-gray-400">Catálogo</span>
           </div>
-          <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col items-center gap-2 hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default">
-            <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          <div
+            class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col items-center gap-2 hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
               </svg>
             </div>
             <span class="text-xs font-medium text-gray-400">Pedidos</span>
           </div>
-          <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col items-center gap-2 hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default">
-            <div class="w-10 h-10 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center border border-orange-500/20">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <div
+            class="p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col items-center gap-2 hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center border border-orange-500/20"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
               </svg>
             </div>
             <span class="text-xs font-medium text-gray-400">Lepe</span>
@@ -254,8 +359,14 @@
 
         <div class="border-t border-slate-800 pt-6">
           <p class="text-sm text-gray-500 mb-1">Contacto:</p>
-          <a href="mailto:info@perezgaldos.com" class="text-blue-400 font-semibold hover:text-blue-300 transition-colors">info@perezgaldos.com</a>
-          <p class="text-xs text-slate-600 mt-6">&copy; 2024 Librería Pérez Galdós. Todos los derechos reservados.</p>
+          <a
+            href="mailto:info@perezgaldos.com"
+            class="text-blue-400 font-semibold hover:text-blue-300 transition-colors"
+            >info@perezgaldos.com</a
+          >
+          <p class="text-xs text-slate-600 mt-6">
+            &copy; 2024 Librería Pérez Galdós. Todos los derechos reservados.
+          </p>
         </div>
       </div>
     </div>
@@ -263,87 +374,49 @@
     <!-- Scripts -->
     <script>
       // INTRO ANIMATION ORCHESTRATION
-      document.addEventListener('DOMContentLoaded', () => {
-        const overlay = document.getElementById('intro-overlay');
-        const mainContent = document.getElementById('main-content');
-        const step1 = document.getElementById('step-1');
-        const step2 = document.getElementById('step-2');
-        const step3 = document.getElementById('step-3');
+      document.addEventListener("DOMContentLoaded", () => {
+        const overlay = document.getElementById("intro-overlay");
+        const mainContent = document.getElementById("main-content");
+        const step1 = document.getElementById("step-1");
+        const step2 = document.getElementById("step-2");
+        const step3 = document.getElementById("step-3");
 
         // Sequence
         // Step 1: Loading starts immediately (0s)
-        
+
         // Step 2: Access Granted after 2.5s
         setTimeout(() => {
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
-            step2.classList.add('flex');
+          step1.classList.add("hidden");
+          step2.classList.remove("hidden");
+          step2.classList.add("flex");
         }, 2500);
 
         // Step 3: Welcome Slogan after 4.5s
         setTimeout(() => {
-            step2.classList.add('hidden');
-            step2.classList.remove('flex');
-            step3.classList.remove('hidden');
-            step3.classList.add('flex');
+          step2.classList.add("hidden");
+          step2.classList.remove("flex");
+          step3.classList.remove("hidden");
+          step3.classList.add("flex");
         }, 5000);
 
         // Step 4: Reveal Main Content after 8.5s
         setTimeout(() => {
-            overlay.classList.add('opacity-0');
-            // Allow pointer events to pass through after fade out
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 1000);
-            
-            mainContent.classList.remove('opacity-0');
+          overlay.classList.add("opacity-0");
+          // Allow pointer events to pass through after fade out
+          setTimeout(() => {
+            overlay.style.display = "none";
+          }, 1000);
+
+          mainContent.classList.remove("opacity-0");
         }, 9000);
       });
-      
-      // COUNTDOWN TIMER LOGIC
-      (function() {
-          const countDownDate = new Date("Jan 1, 2026 08:00:00").getTime();
-          
-          function updateTimer() {
-              const now = new Date().getTime();
-              const distance = countDownDate - now;
 
-              if (distance < 0) {
-                  const countdownEl = document.getElementById("countdown");
-                  if (countdownEl) {
-                      countdownEl.innerHTML = `
-                        <div class="inline-block px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full text-white font-bold tracking-wider uppercase shadow-lg shadow-blue-500/30 animate-pulse">
-                            ¡Ya estamos aquí!
-                        </div>`;
-                  }
-                  return;
-              }
-
-              const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-              const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-              const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-              const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-              const dayEl = document.getElementById("days");
-              const hourEl = document.getElementById("hours");
-              const minEl = document.getElementById("minutes");
-              const secEl = document.getElementById("seconds");
-
-              if (dayEl) dayEl.innerText = days < 10 ? "0" + days : days;
-              if (hourEl) hourEl.innerText = hours < 10 ? "0" + hours : hours;
-              if (minEl) minEl.innerText = minutes < 10 ? "0" + minutes : minutes;
-              if (secEl) secEl.innerText = seconds < 10 ? "0" + seconds : seconds;
-          }
-
-          // Initial call
-          updateTimer();
-          // Update every second
-          setInterval(updateTimer, 1000);
-      })();
+      // (Countdown removed)
 
       // SUPABASE CONFIGURATION
       const SUPABASE_URL = "https://weaihscsaqxadxjgsfbt.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlYWloc2NzYXF4YWR4amdzZmJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzIwOTUsImV4cCI6MjA3NDg0ODA5NX0.uKzFp5yYPrbcjpDiKTKugfG6QzJ7raVf-swAPMsau9E"; 
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlYWloc2NzYXF4YWR4amdzZmJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzIwOTUsImV4cCI6MjA3NDg0ODA5NX0.uKzFp5yYPrbcjpDiKTKugfG6QzJ7raVf-swAPMsau9E";
 
       const { createClient } = supabase;
       const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -369,7 +442,7 @@
             .from("libros")
             .select("titulo, autor, stock, precio")
             .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%`)
-            .gt('stock', 0)
+            .gt("stock", 0)
             .limit(5);
 
           if (error) {
