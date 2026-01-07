@@ -329,3 +329,16 @@
     color: #e2e8f0;
     background-color: #334155;
 }
+
+:root[class~="dark"] .mark-all-btn,
+:root[class~="dark-mode"] .mark-all-btn {
+  color: #f8fafc;
+  border-color: #60a5fa;
+  background-color: transparent;
+}
+
+:root[class~="dark"] .mark-all-btn:hover,
+:root[class~="dark-mode"] .mark-all-btn:hover {
+  background-color: #60a5fa;
+  color: #1e293b;
+}

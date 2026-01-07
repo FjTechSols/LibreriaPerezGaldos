@@ -43,6 +43,12 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
     onClose();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   const handleClear = () => {
     setCriteria({
       titulo: '',
@@ -81,6 +87,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
               value={criteria.titulo}
               onChange={(e) => handleInputChange('titulo', e.target.value)}
               placeholder="Ej: Don Quijote de la Mancha"
+              onKeyDown={handleKeyDown}
               className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400 text-base"
             />
           </div>
@@ -96,6 +103,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                 value={criteria.autor}
                 onChange={(e) => handleInputChange('autor', e.target.value)}
                 placeholder="Ej: Miguel de Cervantes"
+                onKeyDown={handleKeyDown}
                 className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400 text-base"
               />
             </div>
@@ -110,6 +118,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                 value={criteria.editorial}
                 onChange={(e) => handleInputChange('editorial', e.target.value)}
                 placeholder="Ej: Alfaguara"
+                onKeyDown={handleKeyDown}
                 className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400 text-base"
               />
             </div>
@@ -126,6 +135,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                 value={criteria.isbn}
                 onChange={(e) => handleInputChange('isbn', e.target.value)}
                 placeholder="Ej: 9781234567890"
+                onKeyDown={handleKeyDown}
                 className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400 text-base"
               />
             </div>
@@ -140,6 +150,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
                 value={criteria.legacy_id || ''}
                 onChange={(e) => handleInputChange('legacy_id', e.target.value)}
                 placeholder="Ej: 0229..."
+                onKeyDown={handleKeyDown}
                 className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400 text-base"
               />
             </div>
@@ -155,6 +166,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
               value={criteria.descripcion}
               onChange={(e) => handleInputChange('descripcion', e.target.value)}
               placeholder="Palabras clave en la descripción..."
+              onKeyDown={handleKeyDown}
               className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400 text-base"
             />
           </div>

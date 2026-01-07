@@ -558,14 +558,36 @@ export const obtenerLibros = async (
         }
 
         if (filters.titulo) {
-            const fuzzy = transformToWildcard(filters.titulo);
-            query = query.ilike('titulo', `%${fuzzy}%`);
+            // Optimized FTS for Title
+             const ftsQuery = filters.titulo
+                .trim()
+                .split(/\s+/)
+                .map(term => `'${term}':*`)
+                .join(' & ');
+             
+             if (ftsQuery) {
+                query = query.textSearch('titulo', ftsQuery, { config: 'spanish' });
+             } else {
+                query = query.ilike('titulo', `%${filters.titulo}%`);
+             }
         }
         if (filters.autor) {
-            const fuzzy = transformToWildcard(filters.autor);
-            query = query.ilike('autor', `%${fuzzy}%`);
+            // Optimized FTS for Author (Leveraging idx_libros_autor_fts)
+             const ftsQuery = filters.autor
+                .trim()
+                .split(/\s+/)
+                .map(term => `'${term}':*`)
+                .join(' & ');
+             
+             if (ftsQuery) {
+                query = query.textSearch('autor', ftsQuery, { config: 'spanish' });
+             } else {
+                const fuzzy = transformToWildcard(filters.autor);
+                query = query.ilike('autor', `%${fuzzy}%`);
+             }
         }
         if (filters.descripcion) {
+            // Description doesn't have FTS index yet, use fuzzy ILIKE
             const fuzzy = transformToWildcard(filters.descripcion);
             query = query.ilike('descripcion', `%${fuzzy}%`);
         }
