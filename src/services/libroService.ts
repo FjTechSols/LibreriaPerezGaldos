@@ -1109,7 +1109,9 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
 
             if (updateError) {
                 // If duplicate key, throw to catch block below to retry
-                if (updateError.code === '23505' && updateError.details?.includes('legacy_id')) { 
+                // details might be null, so check message too
+                if (updateError.code === '23505' && 
+                   (updateError.details?.includes('legacy_id') || updateError.message?.includes('unique_legacy_id'))) { 
                     throw new Error('DUPLICATE_LEGACY_ID_RETRY');
                 }
                 throw updateError;
@@ -1120,14 +1122,25 @@ export const actualizarLibro = async (id: number, libro: Partial<LibroSupabase>,
         } catch (err: any) {
             attempts++;
             if (err.message === 'DUPLICATE_LEGACY_ID_RETRY' && attempts < 3) {
-                console.warn(`Collision for legacy_id during update, retrying (${attempts}/3)...`);
-                // Wait small random delay to avoid lockstep race
+                console.warn(`Collision for legacy_id during update, retrying (${attempts}/3) with new ID...`);
+                // Wait small random delay
                 await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
-                // If the collision was on legacy_id, and it was generated, we might need to re-generate it.
-                // This logic assumes updateData.legacy_id might have been generated.
-                // If it was manually provided, retrying with the same value will fail again.
-                // For now, we just retry the update with the same data.
-                // A more robust solution would involve re-generating legacy_id if it was auto-generated.
+                
+                // Regenerate legacy_id if explicitly failed on it
+                if (updateData.legacy_id && updateData.ubicacion) {
+                    // Extract base number
+                    const currentCode = updateData.legacy_id;
+                    const baseMatch = currentCode.match(/\d+/);
+                    if (baseMatch) {
+                         const baseNum = baseMatch[0];
+                         // Appending a random 4-digit suffix to the number to ensure uniqueness
+                         // We keep the first part of the number to allow some traceability or just generate completely new?
+                         // Ideally we want a new unique ID. Adding 4 random digits works.
+                         const newBase = baseNum + Math.floor(1000 + Math.random() * 9000).toString();
+                         updateData.legacy_id = actualizarCodigoPorUbicacion(newBase, updateData.ubicacion);
+                         console.log(`Regenerated legacy_id from ${currentCode} to ${updateData.legacy_id}`);
+                    }
+                }
                 continue;
             }
             finalUpdateError = err;
