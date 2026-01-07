@@ -179,7 +179,7 @@ export default function CrearPedido({
                   return;
               }
               filters.search = libroSearch;
-              filters.searchMode = 'default'; 
+              // filters.searchMode = 'default'; // Removed to use Full Search (Title + Code + etc) 
           } else {
               if (advancedBookFilters.codigo) {
                   filters.search = advancedBookFilters.codigo;
@@ -1265,7 +1265,7 @@ export default function CrearPedido({
           {modoEntrada === "manual" && (
               <>
               <div className="form-section">
-                <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="order-section-header">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <User size={20} />
                     <h3>Información del Cliente</h3>
@@ -1395,7 +1395,7 @@ export default function CrearPedido({
               </div>
 
               <div className="form-section">
-                <div className="section-header">
+                <div className="order-section-header">
                   <MapPin size={20} />
                   <h3>Información de Envío</h3>
                 </div>
@@ -1443,95 +1443,95 @@ export default function CrearPedido({
               </div>
 
               <div className="form-section">
-                <div className="section-header">
+                <div className="order-section-header">
                   <ShoppingCart size={20} />
                   <h3>Productos del Pedido</h3>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <label
-                    className="label-tipo-producto"
-                  >
-
-                    Tipo de Producto
-                  </label>
-                  <div style={{ display: "flex", gap: "1rem" }}>
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        value="interno"
-                        checked={tipoProducto === "interno"}
-                        onChange={(e) =>
-                          setTipoProducto(
-                            e.target.value as "interno" | "externo"
-                          )
-                        }
-                      />
-                      <span>Producto Interno (Base de Datos)</span>
+                  <div style={{ marginBottom: "1rem" }}>
+                    <label className="label-tipo-producto">
+                      Tipo de Producto
                     </label>
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        value="externo"
-                        checked={tipoProducto === "externo"}
-                        onChange={(e) =>
-                          setTipoProducto(
-                            e.target.value as "interno" | "externo"
-                          )
-                        }
-                      />
-                      <span>Producto Externo (A pedir)</span>
-                    </label>
+                    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          value="interno"
+                          checked={tipoProducto === "interno"}
+                          onChange={(e) =>
+                            setTipoProducto(
+                              e.target.value as "interno" | "externo"
+                            )
+                          }
+                        />
+                        <span>Producto Interno (Base de Datos)</span>
+                      </label>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          value="externo"
+                          checked={tipoProducto === "externo"}
+                          onChange={(e) =>
+                            setTipoProducto(
+                              e.target.value as "interno" | "externo"
+                            )
+                          }
+                        />
+                        <span>Producto Externo (A pedir)</span>
+                      </label>
+                    </div>
                   </div>
-                </div>
 
                 {tipoProducto === "interno" ? (
                   <>
                   <div className="buscar-libro-container">
-                      <div className="search-header">
+                      <div className="search-header" style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "0.5rem" }}>
                          <label className="label-tipo-producto">Buscar Libro (Base de Datos)</label> 
                          <button 
                             type="button" 
                             onClick={() => setBookSearchMode(prev => prev === 'simple' ? 'advanced' : 'simple')}
                             className="btn-link"
+                            style={{ whiteSpace: 'nowrap' }}
                          >
                             {bookSearchMode === 'simple' ? 'Búsqueda Avanzada' : 'Búsqueda Simple'}
                          </button>
                       </div>
 
                       {bookSearchMode === 'simple' ? (
-                          <div className="simple-search-layout" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                              <div style={{ flex: 1, position: 'relative' }}>
+                          <div className="simple-search-layout" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                              <div style={{ flex: '1 1 300px', position: 'relative' }}>
                                   <div className="search-input-wrapper">
-                                    <Search className="search-icon-absolute" size={18} />
-                                    <input
-                                      type="text"
-                                      placeholder="Buscar por Código o ID..."
-                                      value={libroSearch}
-                                      onChange={(e) => setLibroSearch(e.target.value)}
-                                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchLibros())}
-                                      className="input-search-simple"
-                                      autoFocus={false}
-                                    />
+                                    <div className="search-field-container" style={{ position: 'relative', flex: 1 }}>
+                                      <Search className="search-icon-absolute" size={18} />
+                                      <input
+                                        type="text"
+                                        placeholder="Buscar por Código o ID..."
+                                        value={libroSearch}
+                                        onChange={(e) => setLibroSearch(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchLibros())}
+                                        className="input-search-simple"
+                                        style={{ width: '100%' }}
+                                        autoFocus={false}
+                                      />
+                                    </div>
                                     <button 
                                         type="button"
                                         onClick={searchLibros}
                                         className="btn-search-trigger"
-                                        style={{ marginLeft: '0.5rem' }}
                                     >
                                         Buscar
                                     </button>
@@ -1575,7 +1575,7 @@ export default function CrearPedido({
                               </div>
 
                               {/* Quantity & Add (Inline for Simple Mode) */}
-                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flex: '1 1 auto', justifyContent: 'flex-start' }}>
                                   <label style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>Cant:</label>
                                   <input
                                       type="text"
@@ -1588,13 +1588,14 @@ export default function CrearPedido({
                                       }}
                                       className="form-input"
                                       placeholder="1"
-                                      style={{ width: '80px', textAlign: 'center', padding: '0.5rem' }}
+                                      style={{ width: '100px', textAlign: 'center', padding: '0.5rem' }} 
                                   />
                                   <button
                                     type="button"
                                     onClick={agregarLinea}
                                     className="btn-agregar-linea"
                                     disabled={!libroSeleccionado}
+                                    style={{ whiteSpace: 'nowrap' }}
                                   >
                                     <Plus size={18} />
                                     Agregar
@@ -1734,8 +1735,8 @@ export default function CrearPedido({
                       Ingrese los detalles del producto externo que necesita
                       pedir.
                     </p>
-                    <div className="agregar-producto-externo">
-                      <div className="form-group" style={{ flex: 2 }}>
+                    <div className="agregar-producto-externo" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                      <div className="form-group" style={{ flex: '1 1 300px' }}>
                         <label>Nombre del Producto *</label>
                         <input
                           type="text"
@@ -1747,7 +1748,7 @@ export default function CrearPedido({
                         />
                       </div>
 
-                      <div className="form-group" style={{ flex: 2 }}>
+                      <div className="form-group" style={{ flex: '1 1 300px' }}>
                         <label>URL de Compra *</label>
                         <input
                           type="url"
@@ -1759,7 +1760,7 @@ export default function CrearPedido({
                         />
                       </div>
 
-                      <div className="form-group" style={{ width: "120px" }}>
+                      <div className="form-group" style={{ flex: '1 1 120px' }}>
                         <label>Cantidad *</label>
                         <input
                           type="number"
@@ -1770,10 +1771,11 @@ export default function CrearPedido({
                           }
                           className="form-input"
                           placeholder="Cant."
+                          style={{ width: '100%' }}
                         />
                       </div>
 
-                      <div className="form-group" style={{ width: "120px" }}>
+                      <div className="form-group" style={{ flex: '1 1 120px' }}>
                         <label>Precio *</label>
                         <input
                           type="number"
@@ -1785,12 +1787,13 @@ export default function CrearPedido({
                           }
                           className="form-input"
                           placeholder="0.00"
+                          style={{ width: '100%' }}
                         />
                       </div>
 
                       <div
                         className="form-group"
-                        style={{ alignSelf: "flex-end" }}
+                        style={{ flex: '0 0 auto' }}
                       >
                         <button
                           type="button"

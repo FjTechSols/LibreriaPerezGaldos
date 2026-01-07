@@ -180,7 +180,7 @@ export function BooksManager() {
           titulo: filters.titulo || undefined,
           autor: filters.autor || undefined,
           descripcion: filters.descripcion || undefined,
-          searchMode: filters.searchMode ? 'full' as const : 'default' as const,
+          searchMode: filters.searchMode ? 'full' as const : 'title_legacy' as const,
           sortBy: (filters.sortBy as any) || undefined,
           sortOrder: (filters.sortOrder as any) || undefined,
           forceCount: true
@@ -205,7 +205,7 @@ export function BooksManager() {
 
   // Handlers
   const handleSearch = () => {
-    setFilters(prev => ({ ...prev, search: localSearchTerm }));
+    setFilters(prev => ({ ...prev, search: localSearchTerm, searchMode: false }));
     setCurrentPage(1); // Reset to page 1 on search
     setLocalSearchTerm(''); // Optional: clear or keep? Usually keep. User might want to edit.
     // Actually, usually we keep it. The original code cleared it?
@@ -225,7 +225,7 @@ export function BooksManager() {
       isbn: criteria.isbn || '',
       descripcion: criteria.descripcion || '',
       legacy_id: criteria.legacy_id || '',
-      searchMode: true // Force full search mode logic in backend if needed
+      searchMode: false // Keep main search in simple mode
     }));
     setCurrentPage(1);
   };
@@ -500,7 +500,7 @@ export function BooksManager() {
                 <Search className="admin-search-icon" size={20} />
                 <input
                   type="text"
-                  placeholder={filters.searchMode ? "Buscar por Título, Autor, Editorial e ISBN (separados por espacio)..." : "Introduzca el código del libro..."}
+                  placeholder="Buscar por Código o Título..."
                   value={localSearchTerm}
                   onChange={(e) => setLocalSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
@@ -528,7 +528,7 @@ export function BooksManager() {
                            onClick={() => {
                               setLocalSearchTerm(suggestion);
                               // Force Full Search Mode when selecting a suggestion (since suggestions are Titles/Authors)
-                              setFilters(prev => ({ ...prev, search: suggestion, searchMode: true }));
+                              setFilters(prev => ({ ...prev, search: suggestion, searchMode: false }));
                               setCurrentPage(1); // Trigger search
                               setSuggestions([]);
                               setShowSuggestions(false);

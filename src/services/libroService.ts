@@ -224,7 +224,7 @@ export interface LibroFilters {
    maxPages?: number;
    startYear?: number;
    endYear?: number;
-   searchMode?: 'default' | 'full'; 
+   searchMode?: 'default' | 'full' | 'title_legacy'; 
    titulo?: string;
    autor?: string;
    descripcion?: string;
@@ -398,6 +398,23 @@ export const obtenerLibros = async (
               query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
           } else {
               query = query.ilike('legacy_id', `${searchTerm}%`);
+          }
+       } else if (filters.searchMode === 'title_legacy') {
+          // Custom Admin Search: Title + Legacy ID + ID (strictly requested "Legacy Code y Titulo" but ID is usually implied/needed for exact matches)
+          const cleanSearchTerm = searchTerm.trim();
+          
+          if (isNumeric) {
+             // For numeric, usually it's an ID or Legacy ID
+             // or(id.eq.NUM,legacy_id.ilike.NUM%,titulo.ilike.%NUM%)
+             query = query.or(`id.eq.${numericId},legacy_id.ilike.${cleanSearchTerm}%,titulo.ilike.%${cleanSearchTerm}%`);
+          } else {
+             // For text: Legacy ID (start?) or Title (contains?)
+             // User said "Legacy Code and Title". 
+             // Legacy Code: usually prefix match is best, but "contains" is safer? 
+             // "legacy_id.ilike.%term%" vs "legacy_id.ilike.term%"
+             // Let's use ILIKE %term% for both to be most flexible given "don't appear" issues previously.
+             const fuzzy = transformToWildcard(cleanSearchTerm);
+             query = query.or(`legacy_id.ilike.%${cleanSearchTerm}%,titulo.ilike.%${fuzzy}%`);
           }
        } else {
           // Full Search Mode (Title, Author, ISBN, etc.)
