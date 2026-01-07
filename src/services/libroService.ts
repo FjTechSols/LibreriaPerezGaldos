@@ -352,12 +352,14 @@ export const obtenerLibros = async (
         !filters.forceCount
     );
     
-    // If default view, we DO NOT request a count from DB to save massive resources.
-    // The UI handles this by using the separately loaded total count.
-    // CRITICAL OPTIMIZATION: For searches/filters on large dataset with low IOPS, 'exact' count causes timeouts.
-    // We switch to 'estimated' (uses DB stats) or 'planned' which is faster but less accurate.
-    // This tradeoff is necessary to ensure the query returns AT ALL.
-    const countStrategy = isDefaultView ? undefined : 'estimated';
+    // OPTIMIZATION:
+    // For Full Text Search (FTS), counting rows is extremely expensive (3s+ for 'sistema').
+    // We skip counting for text searches to ensure "Instant" feel.
+    // We only count if it's a default view or specific filter where count is cheap.
+    // 'exact' count forces a full scan matching the filter.
+    
+    const isTextSearch = !!filters?.search && !/^\d+$/.test(filters.search.trim());
+    const countStrategy = (isDefaultView || !isTextSearch) ? 'exact' : undefined;
 
     let query = supabase
       .from('libros')
@@ -423,8 +425,21 @@ export const obtenerLibros = async (
              // For now, use the term as provided but with Range Query.
              query = query.gte('legacy_id', cleanSearchTerm).lt('legacy_id', nextTerm);
           } else {
-             // Pure Text: Title Search (Contains)
-             query = query.ilike('titulo', `%${cleanSearchTerm}%`);
+             // Pure Text: Title Search using FTS (Full Text Search)
+             // Optimized logic: "Don Qui" -> "'Don':* & 'Qui':*"
+             // Now backed by GIN indexes (idx_libros_titulo_fts) for high performance.
+             const ftsQuery = cleanSearchTerm
+                .trim()
+                .split(/\s+/)
+                .map(term => `'${term}':*`)
+                .join(' & ');
+             
+             if (ftsQuery) {
+                // Use 'spanish' config to match the index definition
+                query = query.textSearch('titulo', ftsQuery, { config: 'spanish' });
+             } else {
+                query = query.ilike('titulo', `%${cleanSearchTerm}%`);
+             }
           }
        } else {
           // Full Search Mode (Title, Author, ISBN, etc.)
@@ -703,9 +718,21 @@ export const obtenerLibros = async (
             return applyDiscountsToBookWithId(mappedBook, activeDiscounts, book.categoria_id);
         });
 
+
+         let finalCount = count;
+         if (count === null && isTextSearch) {
+             // If we found a full page, assume there are more pages.
+             if ((data as any[]).length === itemsPerPage) {
+                  finalCount = (page * itemsPerPage) + 100; 
+             } else {
+                  // If less than full page, we know the exact count
+                  finalCount = ((page - 1) * itemsPerPage) + (data as any[]).length;
+             }
+         }
+
          return {
            data: books,
-           count: count || 0
+           count: finalCount ?? 0
          };
     }
 
