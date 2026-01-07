@@ -123,7 +123,7 @@ export const obtenerPedidos = async (filtros?: {
     return { data: [], count: 0 };
   }
 
-  return { data: data || [], count: count || 0 };
+  return { data: (data && Array.isArray(data)) ? data : [], count: count || 0 };
 };
 
 export const obtenerPedidoPorId = async (id: number): Promise<Pedido | null> => {
@@ -549,6 +549,11 @@ export const obtenerEstadisticasPedidos = async () => {
 
   if (error) {
     console.error('Error al obtener estadísticas:', error);
+    return null;
+  }
+
+  if (!pedidos || !Array.isArray(pedidos)) {
+    console.error('Error: pedidos no es un array', pedidos);
     return null;
   }
 

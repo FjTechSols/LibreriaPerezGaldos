@@ -247,8 +247,8 @@ export default function CrearPedido({
 
   const cargarClientes = async () => {
     try {
-      const data = await getClientes();
-      setClientes(data);
+      const response = await getClientes();
+      setClientes(response.data || []);
     } catch (error) {
       console.error("Error loading clients:", error);
     }
@@ -1057,6 +1057,7 @@ export default function CrearPedido({
         // Send email if customer has email
         if (clientEmail) {
           const orderEmailData: OrderEmailData = {
+            emailType: 'order_confirmation',
             orderId: String(pedido.id),
             customerEmail: clientEmail,
             customerName: clientName,
