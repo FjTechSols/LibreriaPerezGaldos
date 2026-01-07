@@ -215,6 +215,7 @@ export function BooksManager() {
     setShowSuggestions(false);
   };
 
+
   const handleAdvancedSearch = (criteria: AdvancedSearchCriteria) => {
     setFilters(prev => ({
       ...prev,
@@ -229,6 +230,8 @@ export function BooksManager() {
     }));
     setCurrentPage(1);
   };
+
+
 
   // Autocomplete Effect
   useEffect(() => {

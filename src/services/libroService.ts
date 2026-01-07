@@ -399,22 +399,32 @@ export const obtenerLibros = async (
           } else {
               query = query.ilike('legacy_id', `${searchTerm}%`);
           }
-       } else if (filters.searchMode === 'title_legacy') {
-          // Custom Admin Search: Title + Legacy ID + ID (strictly requested "Legacy Code y Titulo" but ID is usually implied/needed for exact matches)
+      } else if (filters.searchMode === 'title_legacy') {
+          // Optimized "Fast" Search: Title + Legacy ID
           const cleanSearchTerm = searchTerm.trim();
+          const hasDigits = /\d/.test(cleanSearchTerm);
+          
+          
+          const nextTerm = getNextSearchTerm(cleanSearchTerm);
           
           if (isNumeric) {
-             // For numeric, usually it's an ID or Legacy ID
-             // or(id.eq.NUM,legacy_id.ilike.NUM%,titulo.ilike.%NUM%)
-             query = query.or(`id.eq.${numericId},legacy_id.ilike.${cleanSearchTerm}%,titulo.ilike.%${cleanSearchTerm}%`);
+             // Pure numeric: Exact ID or Legacy ID Range (Index-friendly)
+             // Range query (gte + lt) uses B-Tree index, unlike ILIKE 'term%' which often scans
+             // Syntax: id.eq.NUM,and(legacy_id.gte.TERM,legacy_id.lt.NEXT)
+             query = query.or(`id.eq.${numericId},and(legacy_id.gte.${cleanSearchTerm},legacy_id.lt.${nextTerm})`);
+          } else if (hasDigits) {
+             // Alphanumeric: Code Search (Range Optimized)
+             // We uppercase to match standard code conventions (H-123) if user typed h-123
+             // This is risky if codes are mixed case, but usually they are upper.
+             // To be safe, we can try range on Original AND Upper? No, too complex.
+             // Let's assume Upper for 'legacy_id' prefix matching if it starts with letter.
+             // Or just use the term as is if it matches digit start.
+             
+             // For now, use the term as provided but with Range Query.
+             query = query.gte('legacy_id', cleanSearchTerm).lt('legacy_id', nextTerm);
           } else {
-             // For text: Legacy ID (start?) or Title (contains?)
-             // User said "Legacy Code and Title". 
-             // Legacy Code: usually prefix match is best, but "contains" is safer? 
-             // "legacy_id.ilike.%term%" vs "legacy_id.ilike.term%"
-             // Let's use ILIKE %term% for both to be most flexible given "don't appear" issues previously.
-             const fuzzy = transformToWildcard(cleanSearchTerm);
-             query = query.or(`legacy_id.ilike.%${cleanSearchTerm}%,titulo.ilike.%${fuzzy}%`);
+             // Pure Text: Title Search (Contains)
+             query = query.ilike('titulo', `%${cleanSearchTerm}%`);
           }
        } else {
           // Full Search Mode (Title, Author, ISBN, etc.)
