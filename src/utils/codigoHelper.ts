@@ -68,13 +68,27 @@ export function generarCodigoLibro(
   ubicacion: string,
   paddingLength: number = 6
 ): string {
+  // Determine padding based on location rules
+  let actualPadding = paddingLength;
+  
+  // Rules defined by user: General, Hortaleza, Almacen, Galeon -> 8 digits.
+  const ubicacionNorm = ubicacion.toLowerCase().trim();
+  if (ubicacionNorm === 'general' || 
+      ubicacionNorm === 'hortaleza' || 
+      ubicacionNorm === 'almacen' || 
+      ubicacionNorm === 'almacén' || 
+      ubicacionNorm === 'galeon' || 
+      ubicacionNorm === 'galeón') {
+      actualPadding = 8;
+  }
+  
   // Convertir a string y extraer solo los números
   const numeroStr = numeroBase.toString();
   const numeros = numeroStr.match(/\d+/);
   const numero = numeros ? numeros[0] : numeroStr;
 
   // Aplicar padding con ceros a la izquierda
-  const numeroPadded = numero.padStart(paddingLength, '0');
+  const numeroPadded = numero.padStart(actualPadding, '0');
 
   // Obtener el sufijo según la ubicación
   const sufijo = obtenerSufijoUbicacion(ubicacion);
