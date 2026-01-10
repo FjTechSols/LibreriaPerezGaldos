@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Pedido, EstadoPedido, Usuario, Libro, TipoPedido } from '../types';
 import { createAdminOrderNotification, createOrderNotification } from './notificationService';
+import { settingsService } from './settingsService';
 
 export interface CrearPedidoInput {
   usuario_id: string;
@@ -438,6 +439,28 @@ export const eliminarDetallePedido = async (detalleId: number): Promise<boolean>
   }
 };
 
+export const actualizarDetallePedido = async (
+  detalleId: number,
+  datos: { cantidad?: number; precio_unitario?: number }
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('pedido_detalles')
+      .update(datos)
+      .eq('id', detalleId);
+
+    if (error) {
+      console.error('Error al actualizar detalle:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error en actualizarDetallePedido:', error);
+    return false;
+  }
+};
+
 export const agregarDetallePedido = async (
   pedidoId: number,
   libroId: number,
@@ -484,7 +507,7 @@ export const obtenerLibros = async (filtro?: string): Promise<Libro[]> => {
   if (!filtro) {
     const { data, error } = await supabase
       .from('libros')
-      .select('*')
+      .select('*, editorial:editoriales(nombre)')
       .eq('activo', true)
       .order('titulo')
       .limit(20); // Reduced limit for initial load optimization
@@ -502,14 +525,14 @@ export const obtenerLibros = async (filtro?: string): Promise<Libro[]> => {
         // 1. Exact Priority Search (ID or Legacy ID)
         supabase
           .from('libros')
-          .select('*')
+          .select('*, editorial:editoriales(nombre)')
           .eq('activo', true)
           .or(`id.eq.${filtro},legacy_id.eq.${filtro}`),
         
         // 2. Standard Fuzzy Search (limit 20 to be faster)
         supabase
           .from('libros')
-          .select('*')
+          .select('*, editorial:editoriales(nombre)')
           .eq('activo', true)
           .or(`titulo.ilike.%${filtro}%,autor.ilike.%${filtro}%,isbn.ilike.%${filtro}%`)
           .limit(20)
@@ -527,7 +550,7 @@ export const obtenerLibros = async (filtro?: string): Promise<Libro[]> => {
       // Non-numeric search: Standard fuzzy search
       const { data, error } = await supabase
         .from('libros')
-        .select('*')
+        .select('*, editorial:editoriales(nombre)')
         .eq('activo', true)
         .or(`titulo.ilike.%${filtro}%,autor.ilike.%${filtro}%,isbn.ilike.%${filtro}%,legacy_id.ilike.%${filtro}%`)
         .order('titulo')
@@ -617,3 +640,147 @@ export const getPendingOrdersCount = async (): Promise<number> => {
   if (error) throw error;
   return count || 0;
 };
+
+// Express Order Creation
+export interface ExpressOrderInput {
+  clientName: string;
+  clientPhone: string;
+  pickupLocation: string;
+  bookId: number;
+  quantity: number;
+  adminUserId: string;
+  clientId?: string; // Optional: if client was selected from autocomplete
+  isDeposit?: boolean;
+  depositAmount?: number;
+}
+
+export const crearPedidoExpress = async (input: ExpressOrderInput) => {
+  try {
+    let clienteId: string;
+    
+    // If clientId was provided (selected from autocomplete), use it directly
+    if (input.clientId) {
+      clienteId = input.clientId;
+    } else {
+      // Otherwise, search for existing client by phone or create new one
+      const { data: existingClients } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('telefono', input.clientPhone)
+        .limit(1);
+      
+      if (existingClients && existingClients.length > 0) {
+        // Client exists, use it
+        clienteId = existingClients[0].id;
+      } else {
+        // Create new client
+        const { data: newClient, error: clientError } = await supabase
+          .from('clientes')
+          .insert({
+            nombre: input.clientName,
+            telefono: input.clientPhone,
+            email: null,
+            direccion: null
+          })
+          .select()
+          .single();
+        
+        if (clientError || !newClient) {
+          throw new Error('Error al crear cliente: ' + clientError?.message);
+        }
+        
+        clienteId = newClient.id;
+      }
+    }
+    
+    // 2. Get book details for price
+    const { data: book, error: bookError } = await supabase
+      .from('libros')
+      .select('precio')
+      .eq('id', input.bookId)
+      .single();
+    
+    if (bookError || !book) {
+      throw new Error('Libro no encontrado');
+    }
+    
+    // 3. Calculate totals
+    // Fetch tax rate from settings
+    const settings = await settingsService.getAllSettings();
+    const taxPercentage = settings?.billing?.taxRate ?? 21; // Default to 21% if not found
+    const taxRate = taxPercentage / 100;
+
+    const precioUnitario = book.precio;
+    const subtotal = precioUnitario * input.quantity;
+    
+    // Calculate IVA from the total amount (assuming book.precio is VAT inclusive)
+    const iva = subtotal - (subtotal / (1 + taxRate));
+    const total = subtotal;
+    
+    // 4. Create order
+    const { data: pedido, error: pedidoError } = await supabase
+      .from('pedidos')
+      .insert({
+        cliente_id: clienteId,
+        usuario_id: input.adminUserId,
+        tipo_pedido: 'express',
+        estado: 'pendiente',
+        punto_recogida: input.pickupLocation,
+        metodo_pago: 'efectivo', // Default for express orders
+        subtotal,
+        iva,
+        total,
+        fecha_pedido: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (pedidoError || !pedido) {
+      throw new Error('Error al crear pedido: ' + pedidoError?.message);
+    }
+    
+    // 5. Add order line
+    const { error: detalleError } = await supabase
+      .from('pedidos_detalles')
+      .insert({
+        pedido_id: pedido.id,
+        libro_id: input.bookId,
+        cantidad: input.quantity,
+        precio_unitario: precioUnitario
+      });
+    
+    if (detalleError) {
+      // Rollback: delete the order
+      await supabase.from('pedidos').delete().eq('id', pedido.id);
+      throw new Error('Error al añadir detalle del pedido: ' + detalleError.message);
+    }
+    
+    // 6. Handle Deposit (Señal)
+    if (input.isDeposit && input.depositAmount && input.depositAmount > 0) {
+        // Option A: Update order with signal metadata (simplest and consistent with CrearPedido)
+        const { error: depositError } = await supabase
+            .from('pedidos')
+            .update({
+                es_senal: true,
+                importe_senal: input.depositAmount,
+                // If deposit covers full amount, should we mark as paid? Usually signal is partial.
+                // We leave status as 'pendiente' but with signal info.
+            })
+            .eq('id', pedido.id);
+
+        if (depositError) {
+             console.error('Error recording deposit:', depositError);
+             // We don't rollback the whole order for this, but worth logging.
+        }
+    }
+
+    // 7. Create notification for admin
+    await createAdminOrderNotification(pedido.id, input.adminUserId);
+    
+    return pedido;
+  } catch (error) {
+    console.error('Error in crearPedidoExpress:', error);
+    throw error;
+  }
+};
+

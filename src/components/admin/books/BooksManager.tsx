@@ -19,6 +19,7 @@ import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
 import { getCategorias } from '../../../services/categoriaService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useTheme } from '../../../context/ThemeContext';
+import { useAuth } from '../../../context/AuthContext';
 import { Pagination } from '../../Pagination';
 import { BookTable } from './BookTable';
 import { BookForm } from './BookForm';
@@ -27,6 +28,7 @@ import { BookExistenceCheckModal } from './BookExistenceCheckModal';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import AdvancedSearchModal from '../../AdvancedSearchModal';
 import { AdvancedSearchCriteria } from '../../../types';
+import { ExpressOrderModal, ExpressOrderData } from './ExpressOrderModal';
 
 // Import sub-tools if we want to render them as tabs inside Manager (Optional, but planned for future)
 // For now we focus on the Catalog section logic.
@@ -34,6 +36,7 @@ import { AdvancedSearchCriteria } from '../../../types';
 export function BooksManager() {
   const { actualTheme } = useTheme();
   const { settings } = useSettings();
+  const { user } = useAuth();
   
   // State
   const [books, setBooks] = useState<Book[]>([]);
@@ -84,6 +87,10 @@ export function BooksManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null); // Replaces editingBook
   const [createdBook, setCreatedBook] = useState<Book | null>(null); // For Success Modal
+  
+  // Express Order Modal State
+  const [isExpressOrderOpen, setIsExpressOrderOpen] = useState(false);
+  const [expressOrderBook, setExpressOrderBook] = useState<Book | null>(null);
 
   // Filters State
   const [localSearchTerm, setLocalSearchTerm] = useState('');
@@ -463,6 +470,39 @@ export function BooksManager() {
     );
   };
 
+  const handleExpressOrder = (book: Book) => {
+    setExpressOrderBook(book);
+    setIsExpressOrderOpen(true);
+  };
+
+  const handleExpressOrderSubmit = async (data: ExpressOrderData) => {
+    if (!expressOrderBook || !user) return;
+    
+    try {
+      const { crearPedidoExpress } = await import('../../../services/pedidoService');
+      
+      const pedido = await crearPedidoExpress({
+        clientName: data.clientName,
+        clientPhone: data.clientPhone,
+        pickupLocation: data.pickupLocation,
+        bookId: parseInt(expressOrderBook.id),
+        quantity: data.quantity,
+        adminUserId: user.id,
+        isDeposit: data.isDeposit,
+        depositAmount: data.depositAmount
+      });
+      
+      if (pedido) {
+        showModal('¡Pedido Express Creado!', `Pedido #${pedido.id} creado correctamente para ${data.clientName}. Punto de recogida: ${data.pickupLocation}`, 'success');
+        setIsExpressOrderOpen(false);
+        setExpressOrderBook(null);
+      }
+    } catch (error) {
+      console.error('Error creating express order:', error);
+      showModal('Error', 'No se pudo crear el pedido express. Inténtalo de nuevo.', 'error');
+    }
+  };
+
   const loadBooks = () => {
     setRefreshTrigger(prev => prev + 1);
   };
@@ -813,6 +853,7 @@ export function BooksManager() {
            }} 
            onDelete={handleDelete}
            onStockUpdate={handleStockUpdate}
+           onExpressOrder={handleExpressOrder}
          />
        ) : (
          <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
@@ -938,11 +979,21 @@ export function BooksManager() {
         showCancel={messageModalConfig.showCancel}
         buttonText={messageModalConfig.buttonText}
       />
-       <AdvancedSearchModal 
-         isOpen={isAdvancedSearchOpen}
-         onClose={() => setIsAdvancedSearchOpen(false)}
-         onSearch={handleAdvancedSearch}
-       />
-    </div>
+        <AdvancedSearchModal 
+          isOpen={isAdvancedSearchOpen}
+          onClose={() => setIsAdvancedSearchOpen(false)}
+          onSearch={handleAdvancedSearch}
+        />
+        <ExpressOrderModal 
+          isOpen={isExpressOrderOpen}
+          book={expressOrderBook}
+          onClose={() => {
+            setIsExpressOrderOpen(false);
+            setExpressOrderBook(null);
+          }}
+          onSubmit={handleExpressOrderSubmit}
+        />
+     </div>
   );
 }
+``

@@ -1,5 +1,5 @@
 export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion' | 'pending_verification' | 'payment_pending';
-export type TipoPedido = 'interno' | 'iberlibro' | 'uniliber' | 'perez_galdos' | 'galeon';
+export type TipoPedido = 'interno' | 'iberlibro' | 'uniliber' | 'perez_galdos' | 'galeon' | 'express';
 export type MetodoPago = 'tarjeta' | 'paypal' | 'bizum' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'Correos' | 'Otro' | 'otro';
 export type TipoFactura = 'normal' | 'rectificativa';
@@ -148,6 +148,9 @@ export interface Pedido {
   tracking?: string;
   observaciones?: string;
   legacy_id?: number;
+  es_senal?: boolean;
+  importe_senal?: number;
+  punto_recogida?: string;
   created_at?: string;
   updated_at?: string;
   usuario?: Usuario;

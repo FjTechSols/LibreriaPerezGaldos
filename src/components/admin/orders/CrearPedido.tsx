@@ -9,7 +9,8 @@ import {
   MapPin,
   CreditCard,
   Building2, 
-  School
+  School,
+  Truck
 } from "lucide-react";
 import { Libro, Cliente } from "../../../types";
 import {
@@ -138,6 +139,13 @@ export default function CrearPedido({
   const [modoEntrada, setModoEntrada] = useState<"manual" | "pegar">("manual");
   const [plataformaOrigen, setPlataformaOrigen] = useState<'iberlibro' | 'uniliber' | null>(null);
   const [datosPegados, setDatosPegados] = useState("");
+  
+  // Shipping Type State
+  const [tipoEnvio, setTipoEnvio] = useState<'envio' | 'recogida'>('envio');
+
+  // Signal / Deposit State
+  const [esSenal, setEsSenal] = useState(false);
+  const [importeSenal, setImporteSenal] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -208,7 +216,8 @@ export default function CrearPedido({
               // Minimal required fields for UI
               editorial: { id: 0, nombre: b.publisher }, 
               categoria_id: 0, 
-              legacy_id: b.code
+              legacy_id: b.code,
+              descripcion: b.description
           } as any));
 
           setFilteredLibros(mappedLibros);
@@ -1035,6 +1044,16 @@ export default function CrearPedido({
         return;
       }
 
+      // Logic: Prepend Signal info to Observaciones if applicable
+      let finalObservaciones = observaciones || "";
+      const importeSenalNum = parseFloat(importeSenal) || 0;
+      
+      if (esSenal && importeSenalNum > 0) {
+          const restante = Math.max(0, total - importeSenalNum);
+          const senalInfo = `[PAGO Y SEÑAL: ${importeSenalNum.toFixed(2)}€ | RESTANTE: ${restante.toFixed(2)}€]`;
+          finalObservaciones = `${senalInfo}\n${finalObservaciones}`.trim();
+      }
+
       const pedido = await crearPedido({
         usuario_id: user.id,
         cliente_id: finalClienteId,
@@ -1043,7 +1062,7 @@ export default function CrearPedido({
         direccion_envio: direccionEnvio || undefined,
         transportista: transportista || undefined,
         tracking: tracking || undefined,
-        observaciones: observaciones || undefined,
+        observaciones: finalObservaciones || undefined,
         detalles,
       });
 
@@ -1122,6 +1141,14 @@ export default function CrearPedido({
     setNombreExterno("");
     setUrlExterna("");
     setPrecioExterno(0);
+    
+    // Reset new states
+    setTipoEnvio('envio');
+    setEsSenal(false);
+    setImporteSenal("");
+    setModoEntrada("manual");
+    setDatosPegados("");
+    setPlataformaOrigen(null);
   };
 
   const taxRate = settings.billing.taxRate / 100; // Convert percentage to decimal
@@ -1266,184 +1293,6 @@ export default function CrearPedido({
               <>
               <div className="form-section">
                 <div className="order-section-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <User size={20} />
-                    <h3>Información del Cliente</h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleOpenClienteModal}
-                    className="btn-secondary"
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                  >
-                    <Plus size={16} />
-                    Nuevo Cliente
-                  </button>
-                </div>
-
-
-
-                    <div className="form-grid">
-                      <div
-                        className="form-group full-width"
-                        ref={clienteAutocompleteRef}
-                        style={{ position: "relative" }}
-                      >
-                        <label>Buscar Cliente *</label>
-                        <div style={{ position: "relative" }}>
-                          <input
-                            type="text"
-                            value={clienteSearch}
-                            onChange={(e) => {
-                              setClienteSearch(e.target.value);
-                              setShowClienteSuggestions(true);
-                              if (!e.target.value.trim()) {
-                                setClienteSeleccionado(null);
-                                setDireccionEnvio("");
-                              }
-                            }}
-                            onFocus={() => setShowClienteSuggestions(true)}
-                            placeholder="Buscar por nombre, email o NIF..."
-                            className="form-input"
-                            style={{ paddingLeft: "2.5rem" }}
-                          />
-                          <Search
-                            size={18}
-                            style={{
-                              position: "absolute",
-                              left: "0.75rem",
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                              pointerEvents: "none",
-                            }}
-                          />
-                        </div>
-
-                        {showClienteSuggestions && clienteSearch.trim() && (
-                          <div className="autocomplete-suggestions">
-                            {filteredClientes.length > 0 ? (
-                              filteredClientes.slice(0, 8).map((cliente) => (
-                                <div
-                                  key={cliente.id}
-                                  className="suggestion-item"
-                                  onClick={() => handleSelectCliente(cliente)}
-                                >
-                                  <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    {cliente.tipo === 'empresa' && <Building2 size={14} />}
-                                    {cliente.tipo === 'institucion' && <School size={14} />}
-                                    {(!cliente.tipo || cliente.tipo === 'particular') && <User size={14} />}
-                                    {cliente.nombre} {cliente.tipo === 'particular' ? cliente.apellidos : ''}
-                                  </div>
-                                  <div
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      marginTop: "0.125rem",
-                                      opacity: 0.8
-                                    }}
-                                  >
-                                    {cliente.email || "Sin email"}{" "}
-                                    {cliente.nif && `• NIF: ${cliente.nif}`}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div
-                                style={{
-                                  padding: "0.75rem",
-                                  fontSize: "0.875rem",
-                                  opacity: 0.8
-                                }}
-                              >
-                                No se encontraron clientes
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-
-                  <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label>Tipo de Pedido</label>
-                    <select
-                      value={tipo}
-                      onChange={(e) => setTipo(e.target.value)}
-                      className="form-select"
-                    >
-                      <option value="perez_galdos">Pérez Galdós</option>
-                      <option value="galeon">Galeón</option>
-                      <option value="iberlibro">IberLibro</option>
-                      <option value="uniliber">Uniliber</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Método de Pago *</label>
-                    <select
-                      value={metodoPago}
-                      onChange={(e) => setMetodoPago(e.target.value)}
-                      className="form-select"
-                      required
-                    >
-                      <option value="tarjeta">Tarjeta</option>
-                      <option value="paypal">PayPal</option>
-                      <option value="transferencia">Transferencia</option>
-                      <option value="reembolso">Reembolso</option>
-                      <option value="efectivo">Efectivo</option>
-                    </select>
-                  </div>
-              </div>
-
-              <div className="form-section">
-                <div className="order-section-header">
-                  <MapPin size={20} />
-                  <h3>Información de Envío</h3>
-                </div>
-
-                <div className="form-grid">
-                    <div className="form-group full-width">
-                    <label>Dirección de Envío</label>
-                    <textarea
-                      value={direccionEnvio}
-                      onChange={(e) => setDireccionEnvio(e.target.value)}
-                      className="form-textarea"
-                      rows={2}
-                      placeholder="Calle, número, piso, código postal, ciudad..."
-                      maxLength={500}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Transportista</label>
-                    <select
-                      value={transportista}
-                      onChange={(e) => setTransportista(e.target.value)}
-                      className="form-select"
-                    >
-                      <option value="">Seleccione...</option>
-                      <option value="MRW">MRW</option>
-                      <option value="GLS">GLS</option>
-                      <option value="Correos">Correos</option>
-                      <option value="Otro">Otro</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Número de Tracking</label>
-                    <input
-                      type="text"
-                      value={tracking}
-                      onChange={(e) => setTracking(e.target.value)}
-                      className="form-input"
-                      placeholder="Ej: 1234567890"
-                      maxLength={50}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <div className="order-section-header">
                   <ShoppingCart size={20} />
                   <h3>Productos del Pedido</h3>
                 </div>
@@ -1557,11 +1406,25 @@ export default function CrearPedido({
                                             ) : (
                                                 <div style={{ width: '30px', height: '45px', background: '#e2e8f0', borderRadius: '4px' }}></div>
                                             )}
-                                            <div>
+                                            <div style={{ flex: 1, minWidth: 0, paddingRight: '10px' }}>
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{libro.titulo}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                                                    {libro.autor} • Code: {libro.legacy_id || libro.id} • Stock: {libro.stock}
-                                                </div>
+                                                <div style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.9rem' }}>{libro.precio?.toFixed(2)}€</div>
+                                              </div>
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginTop: '2px' }}>
+                                                <span>{libro.autor}</span>
+                                                <span>•</span>
+                                                <span>Code: {libro.legacy_id || libro.id}</span>
+                                                <span>•</span>
+                                                <span style={{ backgroundColor: '#ef4444', color: 'white', padding: '1px 8px', borderRadius: '12px', fontWeight: 700, fontSize: '0.75rem' }}>
+                                                    Stock: {libro.stock}
+                                                </span>
+                                            </div>
+                                              {libro.descripcion && (
+                                                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                      {libro.descripcion.length > 100 ? `${libro.descripcion.substring(0, 100)}...` : libro.descripcion}
+                                                  </div>
+                                              )}
                                             </div>
                                           </div>
                                         ))}
@@ -1675,11 +1538,25 @@ export default function CrearPedido({
                                         ) : (
                                             <div style={{ width: '30px', height: '45px', background: '#e2e8f0', borderRadius: '4px' }}></div>
                                         )}
-                                        <div>
-                                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{libro.titulo}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                                                {libro.autor} • Code: {libro.legacy_id || libro.id} • Stock: {libro.stock}
+                                        <div style={{ flex: 1, minWidth: 0, paddingRight: '10px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{libro.titulo}</div>
+                                              <div style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '0.9rem' }}>{libro.precio?.toFixed(2)}€</div>
                                             </div>
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginTop: '2px' }}>
+                                                <span>{libro.autor}</span>
+                                                <span>•</span>
+                                                <span>Code: {libro.legacy_id || libro.id}</span>
+                                                <span>•</span>
+                                                <span style={{ backgroundColor: '#ef4444', color: 'white', padding: '1px 8px', borderRadius: '12px', fontWeight: 700, fontSize: '0.75rem' }}>
+                                                    Stock: {libro.stock}
+                                                </span>
+                                            </div>
+                                            {libro.descripcion && (
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                    {libro.descripcion.length > 100 ? `${libro.descripcion.substring(0, 100)}...` : libro.descripcion}
+                                                </div>
+                                            )}
                                         </div>
                                       </div>
                                     ))}
@@ -1919,6 +1796,321 @@ export default function CrearPedido({
                   </div>
                 )}
               </div>
+
+              <div className="form-section">
+                <div className="order-section-header">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <User size={20} />
+                    <h3>Información del Cliente</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleOpenClienteModal}
+                    className="btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                  >
+                    <Plus size={16} />
+                    Nuevo Cliente
+                  </button>
+                </div>
+
+
+
+                    <div className="form-grid">
+                      <div
+                        className="form-group full-width"
+                        ref={clienteAutocompleteRef}
+                        style={{ position: "relative" }}
+                      >
+                        <label>Buscar Cliente *</label>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="text"
+                            value={clienteSearch}
+                            onChange={(e) => {
+                              setClienteSearch(e.target.value);
+                              setShowClienteSuggestions(true);
+                              if (!e.target.value.trim()) {
+                                setClienteSeleccionado(null);
+                                setDireccionEnvio("");
+                              }
+                            }}
+                            onFocus={() => setShowClienteSuggestions(true)}
+                            placeholder="Buscar por nombre, email o NIF..."
+                            className="form-input"
+                            style={{ paddingLeft: "2.5rem" }}
+                          />
+                          <Search
+                            size={18}
+                            style={{
+                              position: "absolute",
+                              left: "0.75rem",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        </div>
+
+                        {showClienteSuggestions && clienteSearch.trim() && (
+                          <div className="autocomplete-suggestions">
+                            {filteredClientes.length > 0 ? (
+                              filteredClientes.slice(0, 8).map((cliente) => (
+                                <div
+                                  key={cliente.id}
+                                  className="suggestion-item"
+                                  onClick={() => handleSelectCliente(cliente)}
+                                >
+                                  <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    {cliente.tipo === 'empresa' && <Building2 size={14} />}
+                                    {cliente.tipo === 'institucion' && <School size={14} />}
+                                    {(!cliente.tipo || cliente.tipo === 'particular') && <User size={14} />}
+                                    {cliente.nombre} {cliente.tipo === 'particular' ? cliente.apellidos : ''}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      marginTop: "0.125rem",
+                                      opacity: 0.8
+                                    }}
+                                  >
+                                    {cliente.email || "Sin email"}{" "}
+                                    {cliente.nif && `• NIF: ${cliente.nif}`}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div
+                                style={{
+                                  padding: "0.75rem",
+                                  fontSize: "0.875rem",
+                                  opacity: 0.8
+                                }}
+                              >
+                                No se encontraron clientes
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+
+                  <div className="form-group" style={{ marginTop: '1rem' }}>
+                    <label>Tipo de Pedido</label>
+                    <select
+                      value={tipo}
+                      onChange={(e) => setTipo(e.target.value)}
+                      className="form-select"
+                    >
+                      <option value="perez_galdos">Pérez Galdós</option>
+                      <option value="galeon">Galeón</option>
+                      <option value="iberlibro">IberLibro</option>
+                      <option value="uniliber">Uniliber</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Método de Pago *</label>
+                    <select
+                      value={metodoPago}
+                      onChange={(e) => setMetodoPago(e.target.value)}
+                      className="form-select"
+                      required
+                    >
+                      <option value="tarjeta">Tarjeta</option>
+                      <option value="paypal">PayPal</option>
+                      <option value="transferencia">Transferencia</option>
+                      <option value="reembolso">Reembolso</option>
+                      <option value="efectivo">Efectivo</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group" style={{ marginTop: '1rem' }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: 600 }}>
+                      <input
+                        type="checkbox"
+                        checked={esSenal}
+                        onChange={(e) => {
+                            setEsSenal(e.target.checked);
+                            if (!e.target.checked) setImporteSenal("");
+                        }}
+                        style={{ width: "1.2rem", height: "1.2rem" }}
+                      />
+                      Pago y Señal (A cuenta)
+                    </label>
+                    
+                    {esSenal && (
+                        <div style={{ marginTop: "0.5rem", display: "flex", gap: "1rem", alignItems: "center", background: "var(--bg-tertiary)", padding: "1rem", borderRadius: "0.5rem", border: "1px solid var(--border-color)" }}>
+                            <div style={{ flex: "0 0 auto" }}>
+                                <label style={{ display: "block", fontSize: "0.875rem", marginBottom: "0.25rem", color: "var(--text-secondary)" }}>Importe Abonado (€)</label>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={importeSenal}
+                                    onChange={(e) => {
+                                        // Allow only numbers and one dot/comma
+                                        const val = e.target.value.replace(',', '.');
+                                        if (!val || /^\d*\.?\d{0,2}$/.test(val)) {
+                                            setImporteSenal(val);
+                                        }
+                                    }}
+                                    placeholder="0.00"
+                                    className="form-input"
+                                    style={{ width: "120px" }}
+                                />
+                            </div>
+                            <div style={{ flex: "1 1 auto", fontSize: "1rem" }}>
+                                <span style={{ color: "var(--text-secondary)", marginRight: "0.5rem" }}>Restante a Pagar:</span>
+                                <span style={{ fontWeight: 700, color: (total - (parseFloat(importeSenal) || 0)) > 0 ? "var(--danger-color)" : "var(--success-color)" }}>
+                                    {formatPrice(Math.max(0, total - (parseFloat(importeSenal) || 0)))}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                  </div>
+              </div>
+
+              <div className="form-section">
+                <div className="order-section-header" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <MapPin size={20} />
+                    <h3>Información de Envío</h3>
+                  </div>
+                  
+                  {/* Shipping Type Toggle */}
+                  <div style={{ display: 'flex', background: 'var(--bg-secondary)', padding: '2px', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                            setTipoEnvio('envio');
+                            if (clienteSeleccionado?.direccion) {
+                                setDireccionEnvio(clienteSeleccionado.direccion);
+                            } else {
+                                setDireccionEnvio("");
+                            }
+                        }}
+                        style={{
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.875rem',
+                            borderRadius: '0.375rem',
+                            border: 'none',
+                            background: tipoEnvio === 'envio' ? 'var(--primary-color)' : 'transparent',
+                            color: tipoEnvio === 'envio' ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            transition: 'all 0.2s'
+                        }}
+                      >
+                         <Truck size={14} /> Envío
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                            setTipoEnvio('recogida');
+                            setDireccionEnvio("RECOGIDA EN LIBRERÍA");
+                            setTransportista("");
+                            setTracking("");
+                        }}
+                        style={{
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.875rem',
+                            borderRadius: '0.375rem',
+                            border: 'none',
+                            background: tipoEnvio === 'recogida' ? 'var(--primary-color)' : 'transparent',
+                            color: tipoEnvio === 'recogida' ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            transition: 'all 0.2s'
+                        }}
+                      >
+                         <Building2 size={14} /> Recogida
+                      </button>
+                  </div>
+                </div>
+
+                {tipoEnvio === 'envio' ? (
+                    <div className="form-grid">
+                        <div className="form-group full-width">
+                        <label>Dirección de Envío</label>
+                        <textarea
+                          value={direccionEnvio}
+                          onChange={(e) => setDireccionEnvio(e.target.value)}
+                          className="form-textarea"
+                          rows={2}
+                          placeholder="Calle, número, piso, código postal, ciudad..."
+                          maxLength={500}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Transportista</label>
+                        <select
+                          value={transportista}
+                          onChange={(e) => setTransportista(e.target.value)}
+                          className="form-select"
+                        >
+                          <option value="">Seleccione...</option>
+                          <option value="MRW">MRW</option>
+                          <option value="GLS">GLS</option>
+                          <option value="Correos">Correos</option>
+                          <option value="Otro">Otro</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Número de Tracking</label>
+                        <input
+                          type="text"
+                          value={tracking}
+                          onChange={(e) => setTracking(e.target.value)}
+                          className="form-input"
+                          placeholder="Ej: 1234567890"
+                          maxLength={50}
+                        />
+                      </div>
+                    </div>
+                ) : (
+                    <div style={{ 
+                        padding: '1.5rem', 
+                        background: 'rgba(34, 197, 94, 0.1)', 
+                        border: '1px solid rgba(34, 197, 94, 0.2)', 
+                        borderRadius: '0.5rem', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '1rem',
+                        color: 'var(--text-primary)'
+                    }}>
+                        <div style={{ 
+                            width: '40px', 
+                            height: '40px', 
+                            borderRadius: '50%', 
+                            background: 'var(--success-color)', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            color: '#fff',
+                            flexShrink: 0
+                        }}>
+                             <Building2 size={24} />
+                        </div>
+                        <div>
+                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Recogida en Librería</h4>
+                            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                El cliente recogerá el pedido en la tienda física. No se requiere envío.
+                            </p>
+                        </div>
+                    </div>
+                )}
+              </div>
+
+
 
               <div className="form-section">
                 <div className="section-header">

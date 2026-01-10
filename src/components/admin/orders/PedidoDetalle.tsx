@@ -1,20 +1,21 @@
-import { useState } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash } from 'lucide-react';
-import { Pedido, EstadoPedido } from '../../../types';
-import { actualizarEstadoPedido, actualizarPedido } from '../../../services/pedidoService';
+import { useState, useEffect } from 'react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Search, Edit2, Building2 } from 'lucide-react';
+import { Pedido, EstadoPedido, Libro } from '../../../types';
+import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido, obtenerLibros } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
+import { EditClientModal } from '../clients/EditClientModal';
+import { Cliente } from '../../../types';
 
 interface PedidoDetalleProps {
   pedido: Pedido | null;
   isOpen: boolean;
   onClose: () => void;
   onRefresh: () => void;
-  onEditar?: () => void;
 }
 
 const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
@@ -30,19 +31,28 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
   devolucion: 'Devolución'
 };
 
-export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEditar }: PedidoDetalleProps) {
-  const { settings } = useSettings();
+export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: PedidoDetalleProps) {
+  const { settings, formatPrice } = useSettings();
   const { createInvoice } = useInvoice();
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
+  
+  // Edit Mode State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedLines, setEditedLines] = useState<any[]>([]); 
+  const [deletedLinesIds, setDeletedLinesIds] = useState<number[]>([]);
+  const [savingChanges, setSavingChanges] = useState(false);
+  
+  // Add Book State
+  const [showAddBook, setShowAddBook] = useState(false);
+  const [bookSearchTerm, setBookSearchTerm] = useState("");
+  const [bookSearchResults, setBookSearchResults] = useState<Libro[]>([]);
+  const [isSearchingBook, setIsSearchingBook] = useState(false);
 
   // State for shipping info editing
   const [editingShipping, setEditingShipping] = useState(false);
   const [transportista, setTransportista] = useState(pedido?.transportista || '');
   const [tracking, setTracking] = useState(pedido?.tracking || '');
-
-  // State for rejection modal
-  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -52,8 +62,51 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
     type: 'info' | 'error';
   }>({ title: '', message: '', type: 'info' });
 
+  // State for rejection modal
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+
+  // State for Edit Client Modal
+  const [showEditClientModal, setShowEditClientModal] = useState(false);
+
+  const handleClientUpdated = (_updatedCliente: Cliente) => {
+      onRefresh();
+      setShowEditClientModal(false);
+  };
+
+  // Initialize editedLines when entering edit mode or when pedido changes
+  useEffect(() => {
+    if (pedido?.detalles) {
+      setEditedLines(pedido.detalles.map(d => ({ ...d })));
+    }
+    setTransportista(pedido?.transportista || '');
+    setTracking(pedido?.tracking || ''); 
+  }, [pedido, isOpen]);
+
+  // Book Search Effect
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+        if (bookSearchTerm.length >= 2) {
+            setIsSearchingBook(true);
+            const results = await obtenerLibros(bookSearchTerm);
+            setBookSearchResults(results);
+            setIsSearchingBook(false);
+        } else {
+            setBookSearchResults([]);
+        }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [bookSearchTerm]);
+
   if (!isOpen || !pedido) return null;
 
+
+
+  // I need to add deletedLineIds state
+  // Let me add it in the next step or rework state declarations above.
+  // I will just use immediate mode for Delete/Add to make it easier? 
+  // No, user said "Al pulsar Guardar Cambios". So it must be batch.
+  
+  // Handlers placeholder (I'll add full logic in next tool call)
   const handleCambiarEstado = async (nuevoEstado: EstadoPedido) => {
     const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
 
@@ -100,6 +153,126 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
       });
       setShowMessageModal(true);
     }
+  };
+
+  const toggleEditMode = () => {
+      if (isEditing) {
+          // Cancel: Reset lines
+          setEditedLines(pedido.detalles ? pedido.detalles.map(d => ({...d})) : []);
+          setDeletedLinesIds([]);
+          setIsEditing(false);
+      } else {
+          // Start Editing
+          setIsEditing(true);
+      }
+  };
+
+  const handleUpdateQuantity = (index: number, newQty: number) => {
+    if (newQty < 1) return;
+    const newLines = [...editedLines];
+    newLines[index].cantidad = newQty;
+    setEditedLines(newLines);
+  };
+
+  const handleDeleteLine = (index: number) => {
+    if (confirm('¿Estás seguro de eliminar este producto del pedido?')) {
+        const line = editedLines[index];
+        if (line.id) {
+           setDeletedLinesIds([...deletedLinesIds, line.id]);
+        }
+        const newLines = [...editedLines];
+        newLines.splice(index, 1);
+        setEditedLines(newLines);
+    }
+  };
+
+  const handleAddBook = (libro: Libro) => {
+      // Check if already exists in editedLines
+      const exists = editedLines.find(l => l.libro_id === libro.id);
+      if (exists) {
+          alert("Este libro ya está en el pedido. Incrementa la cantidad si lo deseas.");
+          return;
+      }
+
+      setEditedLines([...editedLines, {
+          libro_id: libro.id,
+          cantidad: 1,
+          precio_unitario: libro.precio,
+          libro: libro // visual only until save
+      }]);
+      setBookSearchTerm("");
+      setShowAddBook(false);
+  };
+
+  const handleSaveChanges = async () => {
+      if (!monitorChanges()) {
+          setIsEditing(false);
+          return;
+      }
+
+      setSavingChanges(true);
+      try {
+          // 1. Process Deletions
+          for (const id of deletedLinesIds) {
+              await eliminarDetallePedido(id);
+          }
+
+          // 2. Process Updates and Inserts
+          for (const line of editedLines) {
+              if (line.id) {
+                  // Update
+                  await actualizarDetallePedido(line.id, {
+                      cantidad: line.cantidad,
+                      precio_unitario: line.precio_unitario
+                  });
+              } else {
+                  // Insert
+                  await agregarDetallePedido(pedido.id, line.libro_id, line.cantidad, line.precio_unitario);
+              }
+          }
+
+          // 3. Recalculate Totals (Client side logic reused)
+          // Construct 'detalles' for calculation
+          const cleanDetalles = editedLines.map(l => ({
+              cantidad: l.cantidad,
+              precio_unitario: l.precio_unitario
+          }));
+          
+          const { subtotal, iva, total } = calcularTotalesPedido(cleanDetalles, settings.billing.taxRate / 100); // Assuming current rate
+          
+          await actualizarPedido(pedido.id, {
+              subtotal,
+              iva,
+              total: total + (pedido.coste_envio || 0) // Add shipping back
+          });
+
+          setMessageModalConfig({
+              title: 'Pedido Actualizado',
+              message: 'El pedido ha sido actualizado correctamente.',
+              type: 'info'
+          });
+          setShowMessageModal(true);
+          setIsEditing(false);
+          setDeletedLinesIds([]);
+          onRefresh();
+
+      } catch (error) {
+          console.error(error);
+          setMessageModalConfig({
+              title: 'Error',
+              message: 'Hubo un error al guardar los cambios.',
+              type: 'error'
+          });
+          setShowMessageModal(true);
+      } finally {
+          setSavingChanges(false);
+      }
+  };
+
+  const monitorChanges = () => {
+      // Helper to check if any changes actually happened?
+      // For now assume yes if they clicked save.
+      return true;
   };
 
   const handleConfirmarStock = async () => {
@@ -531,9 +704,21 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
 
           <div className="pedido-info-grid">
             <div className="info-card">
-              <div className="info-card-header">
-                <User size={20} />
-                <h3>Cliente</h3>
+              <div className="info-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <User size={20} />
+                  <h3>Cliente</h3>
+                </div>
+                {pedido?.cliente && (
+                    <button 
+                        onClick={() => setShowEditClientModal(true)}
+                        className="btn-icon" 
+                        title="Editar Cliente"
+                        style={{ padding: '4px', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                        <Edit2 size={16} />
+                    </button>
+                )}
               </div>
               <div className="info-card-body">
                 {pedido?.cliente ? (
@@ -698,7 +883,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <div className="info-card-header">
                   <Truck size={20} />
                   <h3>Envío</h3>
-                  {!editingShipping && (
+                  {(!editingShipping && !pedido?.direccion_envio?.includes('RECOGIDA')) && (
                     <button
                       onClick={() => setEditingShipping(true)}
                       style={{
@@ -809,16 +994,31 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                       </div>
                     </>
                   ) : (
+
                     <>
-                      {pedido?.transportista ? (
-                        <p className="info-principal">Transportista: {pedido.transportista}</p>
+                      {/* Special display for Pickup Orders */}
+                      {pedido?.direccion_envio?.includes('RECOGIDA') ? (
+                          <div style={{ padding: '0.5rem', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '6px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <Building2 size={20} style={{ color: 'var(--success-color)' }} />
+                              <div>
+                                  <span style={{ fontWeight: 600, display: 'block' }}>Recogida en Librería</span>
+                                  <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>El cliente recogerá el pedido.</span>
+                              </div>
+                          </div>
                       ) : (
-                        <p className="info-principal" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin transportista asignado</p>
-                      )}
-                      {pedido?.tracking ? (
-                        <p className="info-secundario">Tracking: {pedido.tracking}</p>
-                      ) : (
-                        <p className="info-secundario" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin tracking asignado</p>
+                          <>
+                            {pedido?.transportista ? (
+                                <p className="info-principal">Transportista: {pedido.transportista}</p>
+                            ) : (
+                                <p className="info-principal" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin transportista asignado</p>
+                            )}
+
+                            {pedido?.tracking ? (
+                                <p className="info-secundario">Tracking: {pedido.tracking}</p>
+                            ) : (
+                                <p className="info-secundario" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin tracking asignado</p>
+                            )}
+                          </>
                       )}
                     </>
                   )}
@@ -857,8 +1057,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
           <div className="detalles-section">
             <div className="detalles-header">
               <h3>Productos del Pedido</h3>
-              {onEditar && (
-                <button onClick={onEditar} className="btn-editar-pedido">
+              {!isEditing && (
+                <button onClick={toggleEditMode} className="btn-editar-pedido">
                   <Edit size={16} />
                   Editar Pedido
                 </button>
@@ -871,32 +1071,162 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
                 <span>Cantidad</span>
                 <span>Precio Unitario</span>
                 <span>Subtotal</span>
+                {isEditing && <span>Acciones</span>}
               </div>
 
-              {pedido?.detalles && pedido.detalles.length > 0 ? (
-                pedido.detalles.map(detalle => (
-                  <div key={detalle.id} className="table-row">
-                    <span className="libro-titulo" data-label="Título">{detalle.libro?.titulo || 'Sin título'}</span>
-                    <span className="cantidad" data-label="Cantidad">{detalle.cantidad}</span>
-                    <span className="precio" data-label="Precio Unitario">{detalle.precio_unitario.toFixed(2)} €</span>
-                    <span className="subtotal" data-label="Subtotal">
-                      {(detalle.cantidad * detalle.precio_unitario).toFixed(2)} €
-                    </span>
+              {(isEditing ? editedLines : pedido?.detalles || []).map((detalle, index) => (
+                <div key={detalle.id || `temp-${index}`} className="table-row">
+                  <span className="libro-titulo" data-label="Título">
+                    {detalle.libro?.titulo || detalle.nombre_externo || 'Sin título'}
+                  </span>
+                  
+                  <span className="cantidad" data-label="Cantidad">
+                    {isEditing ? (
+                        <input 
+                            type="number" 
+                            min="1"
+                            value={detalle.cantidad}
+                            onChange={(e) => handleUpdateQuantity(index, parseInt(e.target.value) || 1)}
+                            className="input-cantidad-edit"
+                            style={{ 
+                                width: '60px', 
+                                padding: '6px', 
+                                border: '1px solid #6b7280', // More visible border (gray-500)
+                                borderRadius: '4px',
+                                background: 'var(--bg-tertiary)', // Distinct background
+                                color: 'var(--text-primary)',
+                                textAlign: 'center',
+                                outline: 'none',
+                                transition: 'border-color 0.2s',
+                                fontWeight: '500'
+                            }}
+                        />
+                    ) : (
+                        detalle.cantidad
+                    )}
+                  </span>
+                  
+                  <span className="precio" data-label="Precio Unitario">
+                    {formatPrice(detalle.precio_unitario)}
+                  </span>
+                  
+                  <span className="subtotal" data-label="Subtotal">
+                    {formatPrice(detalle.cantidad * detalle.precio_unitario)}
+                  </span>
+
+                  {isEditing && (
+                      <span className="acciones" data-label="Acciones">
+                          <button 
+                             onClick={() => handleDeleteLine(index)}
+                             title="Eliminar línea"
+                             style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                          >
+                              <Trash size={18} />
+                          </button>
+                      </span>
+                  )}
+                </div>
+              ))}
+              
+              {!pedido?.detalles?.length && !isEditing && (
+                 <div className="no-detalles">No hay productos en este pedido</div>
+              )}
+
+              {isEditing && (
+                  <div className="add-book-row" style={{ padding: '10px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+                      {!showAddBook ? (
+                          <button 
+                             onClick={() => setShowAddBook(true)}
+                             style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                          >
+                              <Plus size={18} /> Añadir Producto
+                          </button>
+                      ) : (
+                          <div className="book-search-container" style={{ position: 'relative' }}>
+                              <div style={{ display: 'flex', gap: '10px' }}>
+                                  <div style={{ position: 'relative', flex: 1 }}>
+                                      <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+                                      <input 
+                                          type="text" 
+                                          placeholder="Buscar libro por título, ISBN, código..." 
+                                          value={bookSearchTerm}
+                                          onChange={(e) => setBookSearchTerm(e.target.value)}
+                                          autoFocus
+                                          style={{ 
+                                              width: '100%', 
+                                              padding: '8px 8px 8px 35px', 
+                                              borderRadius: '6px', 
+                                              border: '1px solid var(--border-color)',
+                                              background: 'var(--input-bg)',
+                                              color: 'var(--input-text)'
+                                          }}
+                                      />
+                                  </div>
+                                  <button onClick={() => setShowAddBook(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                      <X size={20} />
+                                  </button>
+                              </div>
+                              
+                              {(isSearchingBook || bookSearchResults.length > 0 || (bookSearchTerm.length >= 3 && bookSearchResults.length === 0)) && (
+                                  <div className="search-results" style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#1e293b', border: '1px solid var(--border-color)', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', zIndex: 1000, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.4)' }}>
+                                      
+                                      {isSearchingBook && (
+                                          <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                                              Buscando...
+                                          </div>
+                                      )}
+
+                                      {!isSearchingBook && bookSearchResults.length === 0 && (
+                                           <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                                              No se encontraron libros.
+                                          </div>
+                                      )}
+
+                                      {!isSearchingBook && bookSearchResults.map(libro => (
+                                          <div 
+                                              key={libro.id} 
+                                              onClick={() => handleAddBook(libro)}
+                                              style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                              className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                                          >
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                  <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{libro.titulo}</span>
+                                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                      <span>ISBN: {libro.isbn || 'N/A'}</span>
+                                                      {libro.legacy_id && <span>| Ref: {libro.legacy_id}</span>}
+                                                      {libro.editorial?.nombre && <span>| Ed: {libro.editorial.nombre}</span>}
+                                                      {libro.anio && <span>| Año: {libro.anio}</span>}
+                                                      {libro.paginas && <span>| Pags: {libro.paginas}</span>}
+                                                  </div>
+                                                  {libro.descripcion && (
+                                                      <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                          {libro.descripcion.length > 100 ? `${libro.descripcion.substring(0, 100)}...` : libro.descripcion}
+                                                      </span>
+                                                  )}
+                                              </div>
+                                              <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{formatPrice(libro.precio)}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              )}
+                          </div>
+                      )}
                   </div>
-                ))
-              ) : (
-                <div className="no-detalles">No hay productos en este pedido</div>
               )}
             </div>
 
             <div className="totales-section">
               <div className="total-row">
-                <span>Subtotal:</span>
-                <span className="total-valor">{subtotal.toFixed(2)} €</span>
+                <span>Subtotal (Estimado):</span>
+                <span className="total-valor">
+                    {formatPrice(calcularTotalesPedido(isEditing ? editedLines : (pedido?.detalles || []), settings.billing.taxRate / 100).subtotal)}
+                </span>
               </div>
               <div className="total-row">
-                <span>IVA ({taxRateApplied}%):</span>
-                <span className="total-valor">{iva.toFixed(2)} €</span>
+                 <span>IVA (Estimado):</span>
+                 <span className="total-valor">
+                    {formatPrice(calcularTotalesPedido(isEditing ? editedLines : (pedido?.detalles || []), settings.billing.taxRate / 100).iva)}
+                 </span>
               </div>
               {pedido?.coste_envio !== undefined && pedido.coste_envio > 0 && (
                 <div className="total-row">
@@ -906,53 +1236,106 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
               )}
               <div className="total-row final">
                 <span>Total:</span>
-                <span className="total-valor">{(total + (pedido?.coste_envio || 0)).toFixed(2)} €</span>
+                <span className="total-valor">
+                    {formatPrice(calcularTotalesPedido(isEditing ? editedLines : (pedido?.detalles || []), settings.billing.taxRate / 100).total + (pedido?.coste_envio || 0))}
+                </span>
               </div>
+              
+              {pedido?.es_senal && (
+                <>
+                    <div className="total-row" style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)' }}>
+                        <span style={{ color: '#f59e0b', fontWeight: 600 }}>Señal Pagada:</span>
+                        <span className="total-valor" style={{ color: '#f59e0b', fontWeight: 600 }}>
+                            - {formatPrice(pedido.importe_senal || 0)}
+                        </span>
+                    </div>
+                    <div className="total-row final" style={{ marginTop: '0.5rem' }}>
+                        <span>Restante:</span>
+                        <span className="total-valor">
+                            {formatPrice((calcularTotalesPedido(isEditing ? editedLines : (pedido?.detalles || []), settings.billing.taxRate / 100).total + (pedido?.coste_envio || 0)) - (pedido.importe_senal || 0))}
+                        </span>
+                    </div>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         <div className="modal-footer">
-          <button onClick={onClose} className="btn-cancelar">
-            Cerrar
-          </button>
-
-          <button 
-             onClick={handleGenerarAlbaran} 
-             className="btn-generar-albaran"
-             disabled={generandoAlbaran}
-             style={{ 
-               backgroundColor: '#6b7280', 
-               color: 'white',
-               display: 'flex',
-               alignItems: 'center',
-               gap: '0.5rem',
-               padding: '0.75rem 1.5rem',
-               borderRadius: '0.5rem',
-               fontWeight: 600,
-               border: 'none',
-               cursor: 'pointer',
-               marginRight: '0.5rem'
-             }}
-          >
-             <Printer size={16} />
-             {generandoAlbaran ? 'Generando...' : 'Imprimir Albarán/Etiqueta'}
-          </button>
-
-          {tieneFactura ? (
-            <div className="factura-generada">
-              <FileText size={16} />
-              Factura: {typeof pedido?.factura === 'object' ? pedido.factura.numero_factura : ''}
-            </div>
+          {isEditing ? (
+              <>
+                  <button 
+                      onClick={toggleEditMode}
+                      className="btn-cancelar"
+                      disabled={savingChanges}
+                  >
+                      Cancelar Edición
+                  </button>
+                  <button 
+                      onClick={handleSaveChanges}
+                      className="btn-guardar"
+                      disabled={savingChanges}
+                      style={{ 
+                          backgroundColor: '#10b981', 
+                          color: 'white', 
+                          padding: '0.75rem 1.5rem', 
+                          borderRadius: '0.5rem', 
+                          fontWeight: 600, 
+                          border: 'none', 
+                          cursor: 'pointer', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.5rem' 
+                      }}
+                  >
+                      <Save size={16} />
+                      {savingChanges ? 'Guardando...' : 'Guardar Cambios'}
+                  </button>
+              </>
           ) : (
-            <button
-              onClick={handleGenerarFactura}
-              className="btn-generar-factura"
-              disabled={generandoFactura || !pedido?.detalles || pedido.detalles.length === 0}
-            >
-              <FileText size={16} />
-              {generandoFactura ? 'Generando...' : 'Generar Factura'}
-            </button>
+              <>
+                  <button onClick={onClose} className="btn-cancelar">
+                    Cerrar
+                  </button>
+        
+                  <button 
+                     onClick={handleGenerarAlbaran} 
+                     className="btn-generar-albaran"
+                     disabled={generandoAlbaran}
+                     style={{ 
+                       backgroundColor: '#6b7280', 
+                       color: 'white', 
+                       display: 'flex',
+                       alignItems: 'center',
+                       gap: '0.5rem',
+                       padding: '0.75rem 1.5rem',
+                       borderRadius: '0.5rem',
+                       fontWeight: 600,
+                       border: 'none',
+                       cursor: 'pointer',
+                       marginRight: '0.5rem'
+                     }}
+                  >
+                     <Printer size={16} />
+                     {generandoAlbaran ? 'Generando...' : 'Imprimir Albarán/Etiqueta'}
+                  </button>
+        
+                  {tieneFactura ? (
+                    <div className="factura-generada">
+                      <FileText size={16} />
+                      Factura: {typeof pedido?.factura === 'object' ? pedido.factura.numero_factura : ''}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleGenerarFactura}
+                      className="btn-generar-factura"
+                      disabled={generandoFactura || !pedido?.detalles || pedido.detalles.length === 0}
+                    >
+                      <FileText size={16} />
+                      {generandoFactura ? 'Generando...' : 'Generar Factura'}
+                    </button>
+                  )}
+              </>
           )}
         </div>
 
@@ -971,6 +1354,14 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh, onEd
           onClose={() => setRejectionModalOpen(false)}
           onConfirm={handleRechazarPedido}
         />
+        {showEditClientModal && pedido?.cliente && (
+            <EditClientModal
+                cliente={pedido.cliente}
+                isOpen={showEditClientModal}
+                onClose={() => setShowEditClientModal(false)}
+                onClientUpdated={handleClientUpdated}
+            />
+        )}
       </div>
     </div>
   );

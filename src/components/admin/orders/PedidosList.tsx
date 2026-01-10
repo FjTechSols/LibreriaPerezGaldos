@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Package, Filter } from 'lucide-react';
+import { Eye, Package, Filter, Building2 } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
@@ -438,12 +438,24 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
             </span>
             <span className="pedido-total">
               {formatPrice(pedido.total || 0)}
+              {pedido.es_senal && (
+                 <div style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }}></span>
+                    Señal: {formatPrice(pedido.importe_senal || 0)}
+                 </div>
+              )}
             </span>
             <span className="pedido-pago">
               {pedido.metodo_pago || '-'}
             </span>
             <span className="pedido-transportista">
-              {pedido.transportista || '-'}
+              {pedido.direccion_envio?.includes('RECOGIDA') ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--success-color)', fontWeight: 500 }}>
+                      <Building2 size={14} /> Recogida
+                  </span>
+              ) : (
+                  pedido.transportista || '-'
+              )}
             </span>
             <div className="pedido-acciones">
               <button

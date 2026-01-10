@@ -1,4 +1,4 @@
-import { Edit, Trash2, Plus, Minus } from 'lucide-react';
+import { Edit, Trash2, Plus, Minus, Zap } from 'lucide-react';
 import { Book } from '../../../types';
 
 interface BookTableProps {
@@ -6,9 +6,10 @@ interface BookTableProps {
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
   onStockUpdate: (book: Book, amount: number) => void;
+  onExpressOrder: (book: Book) => void;
 }
 
-export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableProps) {
+export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrder }: BookTableProps) {
   return (
     <div className="data-table admin-books-table">
       <div className="table-header">
@@ -81,6 +82,14 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableP
               </button>
            </div>
             <button 
+              onClick={() => onExpressOrder(book)}
+              className="express-btn"
+              title="Pedido Express"
+              aria-label="Crear pedido express"
+            >
+              <Zap size={16} />
+            </button>
+            <button 
               onClick={() => onEdit(book)}
               className="edit-btn"
               aria-label="Editar libro"
@@ -100,3 +109,4 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate }: BookTableP
     </div>
   );
 }
+``
