@@ -8,6 +8,7 @@ import { obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import { buscarEditoriales } from '../../../services/libroService';
+import { BookFormLegacy } from './BookFormLegacy'; // Import Legacy Form
 
 interface BookFormProps {
   isOpen: boolean;
@@ -16,9 +17,13 @@ interface BookFormProps {
   initialData?: Book | null;
   isCreating: boolean;
   ubicaciones: Ubicacion[];
+  viewMode?: 'grid' | 'table';
+  onStockUpdate?: (book: Book, amount: number) => void;
+  onExpressOrder?: (book: Book) => void;
+  onClone?: (book: Book) => void;
 }
 
-export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, ubicaciones }: BookFormProps) {
+export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, ubicaciones, viewMode = 'grid' }: BookFormProps) {
   const [formData, setFormData] = useState<Partial<Book>>({
     code: '',
     title: '',
@@ -387,6 +392,33 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   };
 
   if (!isOpen) return null;
+
+  if (viewMode === 'table') {
+      return (
+          <div className="modal-overlay">
+              <div className="modal create-book-modal" style={{ maxWidth: '800px' }}>
+                  <BookFormLegacy 
+                      formData={formData}
+                      setFormData={setFormData}
+                      onSubmit={handleSubmit}
+                      isSubmitting={isSubmitting}
+                      isCreating={isCreating}
+                      onClose={onClose}
+                      ubicaciones={ubicaciones}
+                      dbCategories={dbCategories}
+                      loadingCategories={loadingCategories}
+                      handleISBNSearch={handleISBNSearch}
+                      searchingISBN={searchingISBN}
+                      handleScanSuccess={handleScanSuccess}
+                      handleEditorialChange={handleEditorialChange}
+                      showEditorialSuggestions={showEditorialSuggestions}
+                      editorialSuggestions={editorialSuggestions}
+                      setShowEditorialSuggestions={setShowEditorialSuggestions}
+                  />
+              </div>
+          </div>
+      );
+  }
 
   return (
     <div className="modal-overlay">

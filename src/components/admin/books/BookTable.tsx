@@ -1,4 +1,5 @@
-import { Edit, Trash2, Plus, Minus, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { Edit, Trash2, Plus, Minus, Zap, Info } from 'lucide-react';
 import { Book } from '../../../types';
 
 interface BookTableProps {
@@ -10,6 +11,8 @@ interface BookTableProps {
 }
 
 export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrder }: BookTableProps) {
+  const [hoveredCode, setHoveredCode] = useState<{ code: string; top: number; left: number } | null>(null);
+  const [hoveredDescription, setHoveredDescription] = useState<{ text: string; top: number; left: number } | null>(null);
   return (
     <div className="data-table admin-books-table">
       <div className="table-header">
@@ -27,7 +30,18 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
 
       {books.map(book => (
         <div key={book.id} className="admin-book-row">
-          <span className="admin-book-code">{book.code || 'N/A'}</span>
+          <div className="relative text-center">
+              <span 
+                  className="admin-book-code cursor-help border-b border-dotted border-gray-400 dark:border-gray-500 inline-block"
+                  onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setHoveredCode({ code: book.code || 'N/A', top: rect.top, left: rect.left });
+                  }}
+                  onMouseLeave={() => setHoveredCode(null)}
+              >
+                  {book.code || 'N/A'}
+              </span>
+          </div>
           <div className="admin-book-cover">
             <img src={book.coverImage} alt={book.title || 'Sin Título'} />
             {(book.featured || book.isNew || book.isOnSale) && (
@@ -38,8 +52,21 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
               </div>
             )}
           </div>
-          <span className="admin-book-title">
-            {book.title || 'N/A'}
+          <span className="admin-book-title flex items-center gap-2">
+            {book.description && (
+                <div className="relative flex-shrink-0">
+                    <Info 
+                        size={16} 
+                        className="text-gray-400 hover:text-blue-500 cursor-help"
+                        onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredDescription({ text: book.description || '', top: rect.top, left: rect.left });
+                        }}
+                        onMouseLeave={() => setHoveredDescription(null)}
+                    />
+                </div>
+            )}
+            <span className="leading-tight" title={book.title}>{book.title || 'N/A'}</span>
             {(book.featured || book.isNew || book.isOnSale) && (
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.75rem' }}>
                 {book.featured && <span style={{ color: '#f59e0b' }} title="Destacado">📌</span>}
@@ -106,6 +133,37 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
           </div>
         </div>
       ))}
+
+      {/* Fixed Code Projection Overlay */}
+      {hoveredCode && (
+        <div 
+            className="fixed z-[9999] bg-white dark:bg-gray-900 border-2 border-blue-600 shadow-2xl rounded-2xl p-6 pointer-events-none animate-in fade-in zoom-in-95 duration-200 pb-8 pr-12 min-w-[max-content] text-left"
+            style={{ 
+                top: hoveredCode.top - 10,
+                left: hoveredCode.left,
+            }}
+        >
+            <span className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1.5 block">Código Legacy</span>
+            <span className="text-6xl font-black text-gray-900 dark:text-white tracking-widest font-mono leading-none block">
+                {hoveredCode.code}
+            </span>
+        </div>
+      )}
+
+      {/* Fixed Description Tooltip Overlay */}
+      {hoveredDescription && (
+        <div 
+            className="fixed z-[9999] bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 max-w-sm pointer-events-none animate-in fade-in zoom-in-95 duration-200"
+            style={{ 
+                top: hoveredDescription.top,
+                left: hoveredDescription.left + 24, // Shift right of icon
+            }}
+        >
+            <div className="font-semibold mb-1 border-b border-gray-700 pb-1">Descripción</div>
+            <p className="leading-relaxed">{hoveredDescription.text}</p>
+             {/* Arrow visual hint (optional, simpler to omit for fixed overlay or mock with pseudo) */}
+        </div>
+      )}
     </div>
   );
 }

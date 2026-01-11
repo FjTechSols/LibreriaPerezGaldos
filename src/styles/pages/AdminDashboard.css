@@ -1006,6 +1006,8 @@
   color: var(--text-primary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
+  min-width: 0; /* Important: Prevents grid blowout */
+  overflow: hidden;
 }
 
 .admin-book-author,

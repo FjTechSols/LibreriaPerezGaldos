@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, LayoutList, Grid } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
 import { supabase } from '../../../lib/supabase';
 import { 
@@ -23,6 +23,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { Pagination } from '../../Pagination';
 import { BookTable } from './BookTable';
 import { BookForm } from './BookForm';
+import { BooksTableLegacy } from './BooksTableLegacy';
 import { BookSuccessModal } from './BookSuccessModal';
 import { BookExistenceCheckModal } from './BookExistenceCheckModal';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
@@ -44,6 +45,16 @@ export function BooksManager() {
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // View Mode State
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>(() => {
+    return (localStorage.getItem('booksManager_viewMode') as 'grid' | 'table') || 'grid';
+  });
+
+  // Persist View Mode
+  useEffect(() => {
+    localStorage.setItem('booksManager_viewMode', viewMode);
+  }, [viewMode]);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -546,6 +557,33 @@ export function BooksManager() {
               })()}
             </p>
           </div>
+           
+           {/* View Toggle */}
+           <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+                title="Vista de Cuadrícula"
+              >
+                <Grid size={20} />
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+                title="Vista de Lista (Legacy)"
+              >
+                <LayoutList size={20} />
+              </button>
+           </div>
+
            <div className="admin-search books-manager-search">
              <div className="search-input-wrapper">
                 <Search className="admin-search-icon" size={20} />
@@ -846,25 +884,35 @@ export function BooksManager() {
        </div>
 
        {/* Table */}
-       {loading ? (
-         <div className="p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-            <p className="mt-4 text-gray-500 font-medium">Cargando catálogo...</p>
-         </div>
-       ) : books.length > 0 ? (
-         <BookTable 
-           books={books} 
-           onEdit={(book) => {
-             setSelectedBook(book);
-             setIsCreating(false);
-             setIsModalOpen(true);
-           }} 
-           onDelete={handleDelete}
-           onStockUpdate={handleStockUpdate}
-           onExpressOrder={handleExpressOrder}
-         />
-       ) : (
-         <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+          {/* Conditional View Rendering */}
+          {loading ? (
+             <div className="flex justify-center items-center py-20">
+               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
+             </div>
+          ) : books.length > 0 ? (
+             viewMode === 'grid' ? (
+             /* Grid View (Original) */
+             <BookTable 
+               books={books} 
+               onEdit={(book) => { setSelectedBook(book); setIsCreating(false); setIsModalOpen(true); }}
+               onDelete={(id) => handleDelete(id)}
+               onStockUpdate={handleStockUpdate}
+               onExpressOrder={handleExpressOrder}
+
+             />
+          ) : (
+             /* Legacy Table View */
+             <BooksTableLegacy 
+               books={books} 
+               onEdit={(book) => { setSelectedBook(book); setIsCreating(false); setIsModalOpen(true); }}
+               onDelete={(id) => handleDelete(id)}
+               onStockUpdate={handleStockUpdate}
+               onExpressOrder={handleExpressOrder}
+
+               loading={loading}
+             />
+          )) : (
+         <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-700">
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
@@ -937,9 +985,10 @@ export function BooksManager() {
           setSelectedBook(null);
         }}
         onSubmit={isCreating ? handleCreateSubmit : handleEditSubmit}
-        initialData={selectedBook}
+        initialData={isCreating ? undefined : (selectedBook || undefined)}
         isCreating={isCreating}
         ubicaciones={ubicaciones}
+        viewMode={viewMode} // Pass viewMode
       />
 
       <BookExistenceCheckModal
@@ -948,11 +997,7 @@ export function BooksManager() {
         onProceedToCreate={(prefillData) => {
           setIsCheckingExistence(false);
           setIsCreating(true);
-          setSelectedBook(prefillData ? {
-            title: prefillData.title,
-            author: prefillData.author,
-            isbn: prefillData.isbn,
-          } as any : null);
+          setSelectedBook(prefillData ? { ...prefillData, id: '', price: 0, stock: 1 } as any : null);
           setIsModalOpen(true);
         }}
         onProceedToEdit={(book) => {
@@ -984,6 +1029,7 @@ export function BooksManager() {
           // But usually you might want to do it once. 
           // Let's keep it open so they see the result, they can close manually.
         }}
+        viewMode={viewMode}
       />
        {createdBook && (
          <BookSuccessModal

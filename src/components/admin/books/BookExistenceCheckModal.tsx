@@ -11,6 +11,7 @@ interface BookExistenceCheckModalProps {
   onProceedToEdit: (book: Book) => void;
   onProceedToClone: (book: Book) => void;
   onStockUpdated: () => void;
+  viewMode?: 'grid' | 'table';
 }
 
 export function BookExistenceCheckModal({
@@ -20,7 +21,8 @@ export function BookExistenceCheckModal({
   onProceedToCreate,
   onProceedToEdit,
   onProceedToClone,
-  onStockUpdated
+  onStockUpdated,
+  viewMode = 'grid'
 }: BookExistenceCheckModalProps) {
   const [searchParams, setSearchParams] = useState({
     code: '',
@@ -153,6 +155,9 @@ export function BookExistenceCheckModal({
     }
   };
 
+  // State for Code Projection
+  const [hoveredCode, setHoveredCode] = useState<{ code: string; top: number; left: number } | null>(null);
+
   // Move early return logic here
   if (!isOpen) return null;
 
@@ -173,82 +178,145 @@ export function BookExistenceCheckModal({
         {/* Body */}
         <div className="p-8 flex-1 overflow-y-auto">
            {/* Search Form */}
-           <div className="space-y-6 mb-8">
-                {/* Row 1: Identifiers */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           {viewMode === 'table' ? (
+               // Legacy Compact View
+               <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                       <div className="col-span-1 md:col-span-2">
+                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">CÓDIGO</label>
+                           <input 
+                               type="text" 
+                               className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                               placeholder="Ej. 021005"
+                               value={searchParams.code}
+                               onChange={e => setSearchParams({...searchParams, code: e.target.value})}
+                               onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                           />
+                       </div>
+                       <div className="col-span-1 md:col-span-3">
+                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">ISBN</label>
+                           <input 
+                               type="text" 
+                               className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                               placeholder="Ej. 978..."
+                               value={searchParams.isbn}
+                               onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
+                               onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                           />
+                       </div>
+                       <div className="col-span-1 md:col-span-4">
+                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">TÍTULO</label>
+                           <input 
+                               type="text" 
+                               className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none font-medium"
+                               placeholder="Título..."
+                               value={searchParams.title}
+                               onChange={e => setSearchParams({...searchParams, title: e.target.value})}
+                               onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                           />
+                       </div>
+                       <div className="col-span-1 md:col-span-3">
+                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">AUTOR</label>
+                           <div className="flex gap-2">
+                               <input 
+                                   type="text" 
+                                   className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                                   placeholder="Autor..."
+                                   value={searchParams.author}
+                                   onChange={e => setSearchParams({...searchParams, author: e.target.value})}
+                                   onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                               />
+                               <button 
+                                   onClick={() => handleSearch(false)}
+                                   disabled={loading}
+                                   className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center min-w-[40px]"
+                                   title="Buscar"
+                               >
+                                   {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+                               </button>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           ) : (
+               // Modern View
+               <div className="space-y-6 mb-8">
+                    {/* Row 1: Identifiers */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Código</label>
+                            <div className="relative group">
+                                <Hash className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                <input 
+                                    type="text" 
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="Ej. 021005"
+                                    value={searchParams.code}
+                                    onChange={e => setSearchParams({...searchParams, code: e.target.value})}
+                                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">ISBN</label>
+                            <div className="relative group">
+                                <Barcode className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                <input 
+                                    type="text" 
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="Ej. 978..."
+                                    value={searchParams.isbn}
+                                    onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
+                                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Row 2: Title (Full Width) */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Código</label>
+                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Título</label>
                         <div className="relative group">
-                            <Hash className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <BookOpen className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
                             <input 
                                 type="text" 
-                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                placeholder="Ej. 021005"
-                                value={searchParams.code}
-                                onChange={e => setSearchParams({...searchParams, code: e.target.value})}
+                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
+                                placeholder="Título completo del libro..."
+                                value={searchParams.title}
+                                onChange={e => setSearchParams({...searchParams, title: e.target.value})}
                                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
                             />
                         </div>
                     </div>
+
+                    {/* Row 3: Author (Full Width) */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">ISBN</label>
+                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Autor</label>
                         <div className="relative group">
-                            <Barcode className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <User className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
                             <input 
                                 type="text" 
                                 className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                placeholder="Ej. 978..."
-                                value={searchParams.isbn}
-                                onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
+                                placeholder="Nombre del autor..."
+                                value={searchParams.author}
+                                onChange={e => setSearchParams({...searchParams, author: e.target.value})}
                                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
                             />
                         </div>
                     </div>
-                </div>
 
-                {/* Row 2: Title (Full Width) */}
-                <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Título</label>
-                    <div className="relative group">
-                        <BookOpen className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
-                        <input 
-                            type="text" 
-                            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
-                            placeholder="Título completo del libro..."
-                            value={searchParams.title}
-                            onChange={e => setSearchParams({...searchParams, title: e.target.value})}
-                            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                        />
-                    </div>
-                </div>
-
-                {/* Row 3: Author (Full Width) */}
-                <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Autor</label>
-                    <div className="relative group">
-                        <User className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
-                        <input 
-                            type="text" 
-                            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Nombre del autor..."
-                            value={searchParams.author}
-                            onChange={e => setSearchParams({...searchParams, author: e.target.value})}
-                            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                        />
-                    </div>
-                </div>
-           </div>
-
-           <div className="flex justify-end mb-6">
-                <button 
-                    onClick={() => handleSearch(false)}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
-                    {loading ? <Loader2 className="animate-spin text-white" size={18} /> : <Search size={18} />}
-                    Buscar en Base de Datos
-                </button>
-           </div>
+                   <div className="flex justify-end mb-6">
+                        <button 
+                            onClick={() => handleSearch(false)}
+                            disabled={loading}
+                            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                        >
+                            {loading ? <Loader2 className="animate-spin text-white" size={18} /> : <Search size={18} />}
+                            Buscar en Base de Datos
+                        </button>
+                   </div>
+               </div>
+           )}
 
            {/* Results Area */}
            <div className="space-y-4">
@@ -291,7 +359,92 @@ export function BookExistenceCheckModal({
                 {results.length > 0 && (
                     <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Resultados ({results.length})</h3>
-                        {results.map(book => (
+                        
+                        {viewMode === 'table' ? (
+                            /* Legacy Table View for Results */
+                            <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-gray-50 dark:bg-gray-700/50">
+                                        <tr>
+                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 w-1/3">Título / Autor / Descripción</th>
+                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200">ISBN / Código</th>
+                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200">Detalles</th>
+                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 text-right">Precio</th>
+                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 text-center">Stock</th>
+                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {results.map(book => (
+                                            <tr key={book.id} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10">
+                                                <td className="px-3 py-2">
+                                                    <div className="font-bold text-gray-900 dark:text-white line-clamp-2">{book.title}</div>
+                                                    <div className="text-gray-600 dark:text-gray-400 text-xs mt-0.5 font-medium">{book.author}</div>
+                                                    {book.description && (
+                                                        <div className="text-gray-500 dark:text-gray-500 text-[11px] mt-1 line-clamp-2 leading-tight">
+                                                            {book.description}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2 align-top">
+                                                    <div 
+                                                        className="text-gray-900 dark:text-gray-300 font-mono text-xs cursor-help border-b border-dotted border-gray-400 dark:border-gray-500 w-fit"
+                                                        onMouseEnter={(e) => {
+                                                            const rect = e.currentTarget.getBoundingClientRect();
+                                                            setHoveredCode({ code: book.code || 'S/C', top: rect.top, left: rect.left });
+                                                        }}
+                                                        onMouseLeave={() => setHoveredCode(null)}
+                                                    >
+                                                        {book.code || 'S/C'}
+                                                    </div>
+                                                    <div className="text-gray-500 dark:text-gray-500 text-xs mt-0.5">{book.isbn}</div>
+                                                </td>
+                                                <td className="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 align-top">
+                                                    <div><span className="font-semibold text-gray-700 dark:text-gray-300">Ed:</span> {book.publisher}</div>
+                                                    <div><span className="font-semibold text-gray-700 dark:text-gray-300">Año:</span> {book.publicationYear}</div>
+                                                    {book.pages > 0 && <div><span className="font-semibold text-gray-700 dark:text-gray-300">Págs:</span> {book.pages}</div>}
+                                                    {book.category && <div><span className="font-semibold text-gray-700 dark:text-gray-300">Cat:</span> {book.category}</div>}
+                                                    {book.language && <div><span className="font-semibold text-gray-700 dark:text-gray-300">Idioma:</span> {book.language}</div>}
+                                                </td>
+                                                <td className="px-3 py-2 text-right font-medium text-gray-900 dark:text-white align-top">
+                                                    {typeof book.price === 'number' ? book.price.toFixed(2) : book.price}€
+                                                </td>
+                                                <td className="px-3 py-2 text-center font-bold align-top">
+                                                    <span className={book.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}>{book.stock}</span>
+                                                </td>
+                                                <td className="px-3 py-2 text-right align-top">
+                                                    <div className="flex justify-end gap-1">
+                                                        <button 
+                                                            onClick={() => onProceedToClone(book)}
+                                                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400 rounded transition-colors"
+                                                            title="Clonar"
+                                                        >
+                                                            <Copy size={16} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => onProceedToEdit(book)}
+                                                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                                            title="Editar"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleStockIncrement(book)}
+                                                            disabled={!!updatingStockId}
+                                                            className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                                                        >
+                                                            {updatingStockId === book.id ? '...' : '+1'}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            /* Grid/Card View (Original) */
+                             results.map(book => (
                             <div key={book.id} className="flex items-center gap-4 p-3 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 transition-colors">
                                 <div className="h-16 w-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
                                      <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover" />
@@ -347,7 +500,8 @@ export function BookExistenceCheckModal({
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                        ))
+                    )}
                     </div>
                 )}
                 
@@ -375,6 +529,22 @@ export function BookExistenceCheckModal({
         message={messageModalConfig.message}
         type={messageModalConfig.type as any}
       />
+
+      {/* Fixed Code Projection Overlay */}
+      {hoveredCode && (
+        <div 
+            className="fixed z-[9999] bg-white dark:bg-gray-900 border-2 border-blue-600 shadow-2xl rounded-2xl p-6 pointer-events-none animate-in fade-in zoom-in-95 duration-200 pb-8 pr-12 min-w-[max-content]"
+            style={{ 
+                top: hoveredCode.top - 10, // Slight offset to cover original partially or float above
+                left: hoveredCode.left,
+            }}
+        >
+            <span className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1.5 block">Código Legacy</span>
+            <span className="text-6xl font-black text-gray-900 dark:text-white tracking-widest font-mono leading-none block">
+                {hoveredCode.code}
+            </span>
+        </div>
+      )}
     </div>
   );
 }
