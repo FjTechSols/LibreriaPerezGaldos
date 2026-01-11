@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Pedido, EstadoPedido, Usuario, Libro, TipoPedido } from '../types';
 import { createAdminOrderNotification, createOrderNotification } from './notificationService';
+import { sendOrderConfirmationEmail } from './emailService';
 import { settingsService } from './settingsService';
 
 export interface CrearPedidoInput {
@@ -258,6 +259,30 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
             console.error('Error sending user notification:', err)
         );
         
+        // Enviar notificación al usuario (Confirmación de pedido por Email)
+        const customerEmail = fullOrder.cliente?.email || fullOrder.usuario?.email;
+        
+        if (customerEmail) {
+           const emailItems = fullOrder.detalles?.map(d => ({
+              title: d.libro?.titulo || d.nombre_externo || 'Producto',
+              quantity: d.cantidad,
+              price: d.precio_unitario
+           })) || [];
+
+           sendOrderConfirmationEmail({
+              orderId: fullOrder.id.toString(),
+              customerEmail,
+              customerName: fullOrder.cliente?.nombre || fullOrder.usuario?.nombre_completo || 'Cliente',
+              items: emailItems,
+              subtotal: fullOrder.subtotal ?? 0,
+              tax: fullOrder.iva ?? 0,
+              taxRate: input.taxRate ? input.taxRate * 100 : 21, // Convert 0.21 to 21
+              shipping: fullOrder.coste_envio ?? 0,
+              total: fullOrder.total ?? 0,
+              shippingAddress: fullOrder.direccion_envio || 'Dirección no especificada'
+           }).catch(err => console.error('Error sending confirmation email:', err));
+        }
+
         return fullOrder;
     }
 

@@ -910,8 +910,9 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
                     return num < 100000;
                 }
                 // Almacén: exclude outliers above 3 million (correct range is 0229xxxx)
-                if (loc === 'almacen' || loc === 'almacén') {
-                    return num < 3000000;
+                if (loc === 'almacen' || loc === 'almacén' || loc === 'general') {
+                    // Allow up to 8 digits (99,999,999) + safety margin. Exclude 21+ billion.
+                    return num < 200000000;
                 }
                 return true;
             });
