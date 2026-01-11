@@ -662,27 +662,30 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
   try {
     let clienteId: string;
     
+    // Sanitize phone number (remove spaces/dashes) to avoid 400 errors if DB expects numeric or clean string
+    const sanitizedPhone = input.clientPhone.replace(/[\s-]/g, '');
+
     // If clientId was provided (selected from autocomplete), use it directly
     if (input.clientId) {
       clienteId = input.clientId;
     } else {
       // Otherwise, search for existing client by phone or create new one
-      const { data: existingClients } = await supabase
+      const { data: existingClient } = await supabase
         .from('clientes')
-        .select('*')
-        .eq('telefono', input.clientPhone)
-        .limit(1);
+        .select('id')
+        .eq('telefono', sanitizedPhone)
+        .maybeSingle(); // Use maybeSingle instead of limit(1)
       
-      if (existingClients && existingClients.length > 0) {
+      if (existingClient) {
         // Client exists, use it
-        clienteId = existingClients[0].id;
+        clienteId = existingClient.id;
       } else {
         // Create new client
         const { data: newClient, error: clientError } = await supabase
           .from('clientes')
           .insert({
             nombre: input.clientName,
-            telefono: input.clientPhone,
+            telefono: sanitizedPhone,
             email: null,
             direccion: null
           })
