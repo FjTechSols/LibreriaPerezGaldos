@@ -870,10 +870,20 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
          // Query 2: Max Legacy ID for this SPECIFIC location
          // This ensures we find the true max even if it's old or outside the recent list
          // We filter by location at DB level for efficiency and correctness
-         const locationMaxPromise = supabase
+         
+         let locationQuery = supabase
             .from('libros')
-            .select('legacy_id, ubicacion')
-            .eq('ubicacion', ubicacionNombre) 
+            .select('legacy_id, ubicacion');
+
+         // Robust handling for 'Almacén' variants (accented vs non-accented)
+         // This fixes the issue where querying specifically for "Almacén" missed books saved as "Almacen"
+         if (ubicacionNombre.toLowerCase() === 'almacén' || ubicacionNombre.toLowerCase() === 'almacen') {
+             locationQuery = locationQuery.in('ubicacion', ['Almacén', 'Almacen', 'almacén', 'almacen']);
+         } else {
+             locationQuery = locationQuery.eq('ubicacion', ubicacionNombre);
+         }
+
+         const locationMaxPromise = locationQuery
             .order('legacy_id', { ascending: false })
             .limit(50);
 
