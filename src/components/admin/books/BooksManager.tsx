@@ -5,14 +5,14 @@ import { supabase } from '../../../lib/supabase';
 import { 
   obtenerLibros, 
   obtenerEstadisticasLibros, 
-  buscarLibroPorISBN, 
   incrementarStockLibro, 
   crearLibro, 
   actualizarLibro, 
   eliminarLibro,
   obtenerOcrearEditorial,
   obtenerCategoriaId,
-  obtenerSugerencias
+  obtenerSugerencias,
+  buscarLibroParaMerge
 } from '../../../services/libroService';
 import '../../../styles/components/BooksManager.css';
 import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
@@ -290,16 +290,24 @@ export function BooksManager() {
 
       // Only check for existing book if we have a real ISBN
       if (finalISBN !== 'N/A') {
-          const libroExistente = await buscarLibroPorISBN(finalISBN);
+          // STRICT MERGE CHECK: Matches ISBN + Location + Price + Condition + Language
+          // This allows users to create "Variants" (e.g. different price) without auto-merging.
+          const libroExistente = await buscarLibroParaMerge(
+              finalISBN,
+              bookData.ubicacion,
+              bookData.price,
+              bookData.condition || 'leido',
+              bookData.language || 'Español'
+          );
 
           if (libroExistente) {
-            const actualizado = await incrementarStockLibro(parseInt(libroExistente.id), 1);
-            if (actualizado) {
-              showModal('Libro Existente', 'El libro ya existe. Stock incrementado correctamente.', 'success');
-              setRefreshTrigger(prev => prev + 1);
-              setIsModalOpen(false); // Close the modal
-              return;
-            }
+             const actualizado = await incrementarStockLibro(parseInt(libroExistente.id), 1);
+             if (actualizado) {
+               showModal('Libro Existente', 'Se encontró una copia exacta (mismos datos y ubicación). Stock incrementado.', 'success');
+               setRefreshTrigger(prev => prev + 1);
+               setIsModalOpen(false); // Close the modal
+               return;
+             }
           }
       }
 
@@ -334,7 +342,10 @@ export function BooksManager() {
           activo: true,
           destacado: bookData.featured,
           novedad: bookData.isNew,
-          oferta: bookData.isOnSale
+          oferta: bookData.isOnSale,
+          descatalogado: bookData.isOutOfPrint,
+          estado: bookData.condition,
+          idioma: bookData.language
         } as any, contents);
         
         if (nuevo) {
@@ -358,6 +369,9 @@ export function BooksManager() {
              featured: nuevo.destacado || false,
              isNew: nuevo.novedad || false,
              isOnSale: nuevo.oferta || false,
+             isOutOfPrint: nuevo.descatalogado || false,
+             condition: nuevo.estado || 'leido',
+             language: nuevo.idioma || 'Español',
              rating: 0,
              reviews: []
           };
@@ -410,6 +424,9 @@ export function BooksManager() {
         destacado: bookData.featured,
         novedad: bookData.isNew,
         oferta: bookData.isOnSale,
+        descatalogado: bookData.isOutOfPrint,
+        estado: bookData.condition,
+        idioma: bookData.language,
         editorial_id: editorialId,
         categoria_id: categoriaId,
       };
@@ -985,7 +1002,7 @@ export function BooksManager() {
           setSelectedBook(null);
         }}
         onSubmit={isCreating ? handleCreateSubmit : handleEditSubmit}
-        initialData={isCreating ? undefined : (selectedBook || undefined)}
+        initialData={selectedBook || undefined}
         isCreating={isCreating}
         ubicaciones={ubicaciones}
         viewMode={viewMode} // Pass viewMode

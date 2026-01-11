@@ -859,63 +859,55 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
       const sufijo = obtenerSufijoUbicacion(ubicacionNombre);
       console.log(`[CODE_GEN] Ubicacion Input: "${ubicacionNombre}" | Sufijo: "${sufijo}"`);
 
-      
-
-
       try {
         // Query 1: Most recently created (likely to have high IDs)
         const recentPromise = supabase
             .from('libros')
             .select('legacy_id, ubicacion')
             .order('created_at', { ascending: false })
-            .limit(1000);
+            .limit(100);
 
-         // Query 2: Specific Standard Range using efficient prefix scan
-         // 'like' is case-sensitive and index-friendly, unlike 'ilike'.
-         const standardRangePromise = supabase
+         // Query 2: Max Legacy ID for this SPECIFIC location
+         // This ensures we find the true max even if it's old or outside the recent list
+         // We filter by location at DB level for efficiency and correctness
+         const locationMaxPromise = supabase
             .from('libros')
             .select('legacy_id, ubicacion')
-            .like('legacy_id', '0000%') // Efficient B-tree range scan for '0000...'
+            .eq('ubicacion', ubicacionNombre) 
             .order('legacy_id', { ascending: false })
-            .limit(1000);
+            .limit(50);
 
-        const [recentResult, standardRangeResult] = await Promise.all([
+        const [recentResult, locationMaxResult] = await Promise.all([
              recentPromise,
-             standardRangePromise
+             locationMaxPromise
         ]);
 
-    const recentBooks = recentResult.data || [];
-    const standardRangeBooks = standardRangeResult.data || [];
-    // Combine and deduplicate logic    // Combine all results
-    const allBooks = [...recentBooks, ...standardRangeBooks];
-    
-    // Filter by location (robust normalized check)
-    const normalize = (s: string) => s ? s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-    const targetNorm = normalize(ubicacionNombre);
-    
-    const locationBooks = allBooks.filter((b: any) => 
-        normalize(b.ubicacion) === targetNorm
-    );
-
-        // Extract numeric parts
-        const regex = new RegExp(`^0*(\\d+)${sufijo}$`);
-        console.log(`[CODE_GEN] Regex: ${regex}`);
+        const recentBooks = recentResult.data || [];
+        const locationBooks = locationMaxResult.data || [];
         
-        const codes = locationBooks
+        // Combine (Location query is the source of truth for Max, Recent is for safety/gap filling)
+        // We actually only care about filtering these to find the numeric max.
+        const allBooks = [...recentBooks, ...locationBooks];
+
+        // Extract numeric parts using Regex
+        // Regex: Starts with optional zeros, captures digits, ends with Suffix
+        // We need to be careful with escaping the suffix if it has special chars (unlikely here)
+        const regex = new RegExp(`^0*(\\d+)${sufijo}$`);
+        
+        const codes = allBooks
             .map((b: any) => b.legacy_id)
-            .filter((code: string) => code && regex.test(code))
+            .filter((code: string) => code && regex.test(code)) // Match pattern
             .map((code: string) => {
                 const match = code!.match(regex);
                 return match ? parseInt(match[1]) : 0;
             })
-            // Safety: Filter out outliers that might exist due to import errors
-            // Hortaleza/Galeon are expected to be < 50000 for foreseeable future.
-            // Almacén should be in 0229xxxx range (< 3000000 to exclude outliers like 18000321)
+            // Safety: Filter out outliers that might exist due to import errors or testing
             .filter((num: number) => {
                 const loc = ubicacionNombre.toLowerCase().trim();
                 // Check common variations (normalized names with accents)
                 if (loc === 'hortaleza' || loc === 'galeon' || loc === 'galeón') {
-                    return num < 50000;
+                    // Start ranges typically < 50000. If we see 1000000, ignore it.
+                    return num < 100000;
                 }
                 // Almacén: exclude outliers above 3 million (correct range is 0229xxxx)
                 if (loc === 'almacen' || loc === 'almacén') {
@@ -924,54 +916,58 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
                 return true;
             });
         
-        console.log(`[CODE_GEN] Filtered Numeric Codes (Max 10):`, codes.sort((a: number,b: number)=>b-a).slice(0, 10));
+        // Deduplicate numbers
+        const uniqueCodes = Array.from(new Set(codes));
+        console.log(`[CODE_GEN] Found ${uniqueCodes.length} codes. Max 5:`, uniqueCodes.sort((a,b)=>b-a).slice(0, 5));
 
-    let maxNum = 0;
-    if (codes.length > 0) {
-        maxNum = Math.max(...codes);
-    } 
+        let maxNum = 0;
+        if (uniqueCodes.length > 0) {
+            maxNum = Math.max(...uniqueCodes);
+        } 
 
-    if (maxNum === 0 && (ubicacionNombre === 'Hortaleza' || ubicacionNombre === 'Galeon' || ubicacionNombre === 'Galeón')) {
-         // Fallback safety: If we found 0 via the range queries, maybe we truly have 0.
-         // But verifying against a known min? No, 0 implies start from 1.
-    }
+        // Fallback: If no books found for location, do we start at 0 or is it an error?
+        // Start at 0 (next is 1) is correct for new location.
 
-    const nextNum = maxNum + 1;
-    
-    // Default Padding: 8 digits (standardized)
-    // If specific location has different pattern, adapt?
-    // We stick to 8 digits as requested.
-    const padding = 8;
-    
-    let nextCode = nextNum.toString().padStart(padding, '0') + sufijo;
-    console.log(`[CODE_GEN] MaxNum: ${maxNum} | NextNum: ${nextNum} | NextCode: ${nextCode}`);
-    
-    // Collision Check Loop (Safety Net)
-    let attempts = 0;
-    while (attempts < 10) {
-        // ... (collision logic remains same)
-        const { data } = await supabase
-            .from('libros')
-            .select('id')
-            .eq('legacy_id', nextCode)
-            .maybeSingle();
-            
-        if (!data) return nextCode;
+        const nextNum = maxNum + 1;
         
-        // Use loop var to increment
-        const nextLoopNum = nextNum + attempts + 1;
-        nextCode = nextLoopNum.toString().padStart(padding, '0') + sufijo;
-        attempts++;
-    }
+        // Default Padding: 8 digits (standardized)
+        const padding = 8;
+        
+        let nextCode = nextNum.toString().padStart(padding, '0') + sufijo;
+        console.log(`[CODE_GEN] MaxNum: ${maxNum} | NextNum: ${nextNum} | NextCode: ${nextCode}`);
+        
+        // Collision Check Loop (Safety Net)
+        // We verify the generated code is truly free.
+        let attempts = 0;
+        // Increase jump size if we hit collisions to skip contiguous blocks quickly?
+        // No, +1 is safer to pack tightly, but if we are in a "hole" inside occupied range, we might collide often.
+        // But since we took MAX, we should be above the range.
+        
+        while (attempts < 20) {
+            const { data } = await supabase
+                .from('libros')
+                .select('id')
+                .eq('legacy_id', nextCode)
+                .maybeSingle();
+                
+            if (!data) return nextCode;
+            
+            console.warn(`[CODE_GEN] Collision detected for ${nextCode}. Incrementing...`);
+            
+            // If collision, it means our Max calculation failed (maybe a book wasn't in the top 50 returned by DB?)
+            // We increment and try again.
+            const nextLoopNum = nextNum + attempts + 1;
+            nextCode = nextLoopNum.toString().padStart(padding, '0') + sufijo;
+            attempts++;
+        }
 
-    return nextCode;
-  } catch (error) {
-    console.error('Error generating code:', error);
-    // Fallback: Random timestamp based to prevent hard crash?
-    // Or just start small?
-    return Math.floor(Date.now() / 1000).toString().padStart(8, '0') + sufijo;
-  }
-};
+        throw new Error(`Failed to generate unique code after ${attempts} attempts`);
+      } catch (error) {
+        console.error('Error generating code:', error);
+        // Fallback: Random timestamp based to prevent hard crash
+        return Math.floor(Date.now() / 1000).toString().padStart(8, '0') + sufijo;
+      }
+    };
 
     // Generar el código basado en UNIVERSAL LEGACY LOGIC
     const ubicacion = libro.ubicacion || 'Almacén'; // Default Capitalized to match Helper expectation if case-sensitive (though helper handles lower)
@@ -1494,6 +1490,41 @@ export const obtenerTotalUnidadesStock = async (): Promise<number> => {
          console.error('Error in obtenerTotalUnidadesStock:', error);
          return 0;
     }
+};
+
+export const buscarLibroParaMerge = async (
+  isbn: string, 
+  ubicacion: string, 
+  precio: number, 
+  estado: string, 
+  idioma: string
+): Promise<Book | null> => {
+  // Normalize ISBNS: remove hyphens/spaces
+  let cleanIsbn = isbn ? isbn.replace(/[-\s]/g, '') : '';
+  if (!cleanIsbn) cleanIsbn = 'N/A';
+
+  // If no ISBN (N/A), stricter check required? 
+  // For safety, we only auto-merge if ISBN is present. 
+  // Merging purely by attributes without ISBN is risky (e.g. two "Untitled" books).
+  if (cleanIsbn === 'N/A') return null;
+
+  const { data, error } = await supabase
+    .from('libros')
+    .select('*, editoriales(id, nombre), categorias(id, nombre)')
+    .eq('activo', true)
+    .eq('isbn', cleanIsbn)
+    .eq('ubicacion', ubicacion)
+    // Handle potential nulls in DB by using 'is' or defaulting in query?
+    // Supabase needs explicit match.
+    // If our DB has 'legacy' nulls, this strict check might miss them.
+    // But for "Merging", strict equality is desired.
+    .eq('estado', estado || 'leido') 
+    .eq('idioma', idioma || 'Español')
+    .eq('precio', precio)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapLibroToBook(data);
 };
 
 export const buscarLibroPorISBN = async (isbn: string): Promise<Book | null> => {

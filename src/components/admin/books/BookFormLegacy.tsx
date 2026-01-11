@@ -41,8 +41,8 @@ export function BookFormLegacy({
 }: BookFormLegacyProps) {
 
     // Helper for rendering horizontal rows
-    const renderField = (label: string, input: React.ReactNode, required = false) => (
-        <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+    const renderField = (label: string, input: React.ReactNode, required = false, customStyle?: React.CSSProperties) => (
+        <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', alignItems: 'center', marginBottom: '4px', ...customStyle }}>
             <label style={{ 
                 fontSize: '0.85rem', 
                 textAlign: 'left',
@@ -175,8 +175,8 @@ export function BookFormLegacy({
                     />
                 ))}
 
-                {/* Row 9: Materia (Category) */}
-                {renderField('Materia', (
+                {/* Row 9: Categoría (Category) */}
+                {renderField('Categoría', (
                     <select
                         value={formData.category || ''}
                         onChange={e => setFormData(prev => ({...prev, category: e.target.value}))}
@@ -191,8 +191,8 @@ export function BookFormLegacy({
                     </select>
                 ), true)}
 
-                 {/* Row 10: Foto URL */}
-                 {renderField('Foto', (
+                 {/* Row 10: Portada URL */}
+                 {renderField('Portada', (
                      <div className="flex gap-2">
                         <input 
                             type="text" 
@@ -204,38 +204,65 @@ export function BookFormLegacy({
                             <img src={formData.coverImage} className="h-6 w-6 object-cover border border-gray-400 dark:border-gray-600" alt="" />
                         )}
                      </div>
-                ))}
+                ), false, { marginBottom: '12px' })}
 
                 <hr className="border-gray-300 dark:border-gray-700 my-2" />
 
                 {/* Row 11: Checkboxes (Grid) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px', paddingLeft: '120px' }}>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
-                        <input type="checkbox" checked={formData.featured || false} onChange={e => setFormData(p => ({...p, featured: e.target.checked}))} />
-                        Oportunidad (Destacado)
-                    </label>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
-                        <input type="checkbox" checked={formData.isNew || false} onChange={e => setFormData(p => ({...p, isNew: e.target.checked}))} />
-                        Nuevo
-                    </label>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
-                        <input type="checkbox" checked={formData.isOutOfPrint || false} onChange={e => setFormData(p => ({...p, isOutOfPrint: e.target.checked}))} />
-                        Descatalogado
-                    </label>
-                     <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
-                        <input type="checkbox" checked={formData.isOnSale || false} onChange={e => setFormData(p => ({...p, isOnSale: e.target.checked}))} />
-                        Oferta / Recomendado
-                    </label>
-                </div>
-                 
-                 {/* Abebooks check mock */}
-                  <div style={{ paddingLeft: '120px', marginBottom: '8px' }}>
-                     <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
-                        <input type="checkbox" defaultChecked />
-                        Enviar a Abebooks
-                    </label>
-                  </div>
+                {renderField('Opciones', (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '4px' }}>
+                        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
+                            <input type="checkbox" checked={formData.featured || false} onChange={e => setFormData(p => ({...p, featured: e.target.checked}))} />
+                            Oportunidad (Destacado)
+                        </label>
+                        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
+                            <input type="checkbox" checked={formData.isNew || false} onChange={e => setFormData(p => ({...p, isNew: e.target.checked}))} />
+                            Nuevo
+                        </label>
+                        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
+                            <input type="checkbox" checked={formData.isOutOfPrint || false} onChange={e => setFormData(p => ({...p, isOutOfPrint: e.target.checked}))} />
+                            Descatalogado
+                        </label>
+                         <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-white">
+                            <input type="checkbox" checked={formData.isOnSale || false} onChange={e => setFormData(p => ({...p, isOnSale: e.target.checked}))} />
+                            Oferta / Recomendado
+                        </label>
+                    </div>
+                ), false, { marginBottom: '12px' })}
 
+                {/* New Row: Estado Físico & Idioma */}
+                {renderField('Estado', (
+                     <div className="flex gap-4 items-center">
+                         <label className="flex items-center gap-2 cursor-pointer">
+                             <input 
+                                type="radio" 
+                                name="condition" 
+                                checked={formData.condition === 'nuevo'} 
+                                onChange={() => setFormData(p => ({...p, condition: 'nuevo'}))} 
+                             />
+                             <span className="text-sm">Nuevo</span>
+                         </label>
+                         <label className="flex items-center gap-2 cursor-pointer">
+                             <input 
+                                type="radio" 
+                                name="condition" 
+                                checked={formData.condition === 'leido'} 
+                                onChange={() => setFormData(p => ({...p, condition: 'leido'}))} 
+                             />
+                             <span className="text-sm">Leído</span>
+                         </label>
+                     </div>
+                ), false, { marginBottom: '12px' })}
+                 {renderField('Idioma', (
+                     <input 
+                        type="text" 
+                        value={formData.language || 'Español'}
+                        onChange={e => setFormData(prev => ({...prev, language: e.target.value}))}
+                        className="w-full px-2 py-1 text-sm border border-gray-400 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                        placeholder="Español"
+                    />
+                ))}
+                 
                 <hr className="border-gray-300 dark:border-gray-700 my-2" />
 
                 {/* Row 12: Price */}
@@ -256,14 +283,6 @@ export function BookFormLegacy({
                         value={formData.stock || 0}
                         onChange={e => setFormData(prev => ({...prev, stock: parseInt(e.target.value)}))}
                         className="w-24 px-2 py-1 text-sm border border-gray-400 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                    />
-                ))}
-
-                 {/* Row 14: Notas */}
-                 {renderField('Notas', (
-                    <input 
-                        type="text" 
-                        className="w-full px-2 py-1 text-sm border border-gray-400 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                 ))}
 
