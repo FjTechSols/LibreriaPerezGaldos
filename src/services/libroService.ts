@@ -879,6 +879,10 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
          // This fixes the issue where querying specifically for "Almacén" missed books saved as "Almacen"
          if (ubicacionNombre.toLowerCase() === 'almacén' || ubicacionNombre.toLowerCase() === 'almacen') {
              locationQuery = locationQuery.in('ubicacion', ['Almacén', 'Almacen', 'almacén', 'almacen']);
+             
+             // HOTFIX: Filter out rogue codes starting with '18' (e.g. 18000324) 
+             // These are erroneous outliers that break the sequence (which should be around 0229...)
+             locationQuery = locationQuery.not('legacy_id', 'like', '18%');
          } else {
              locationQuery = locationQuery.eq('ubicacion', ubicacionNombre);
          }
@@ -906,7 +910,13 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
         
         const codes = allBooks
             .map((b: any) => b.legacy_id)
-            .filter((code: string) => code && regex.test(code)) // Match pattern
+            .filter((code: string) => {
+                 // Double check safety filter for Almacén 18... codes
+                 if ((ubicacionNombre.toLowerCase() === 'almacén' || ubicacionNombre.toLowerCase() === 'almacen') && code && code.startsWith('18')) {
+                     return false;
+                 }
+                 return code && regex.test(code);
+            }) // Match pattern
             .map((code: string) => {
                 const match = code!.match(regex);
                 return match ? parseInt(match[1]) : 0;
