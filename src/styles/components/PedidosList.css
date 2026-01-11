@@ -163,29 +163,41 @@
 }
 
 /* Updated Header with compact columns */
+/* Updated Header with compact columns */
 .pedidos-table .table-header {
   display: grid;
-  grid-template-columns: 70px minmax(130px, 1fr) minmax(130px, 1fr) 95px 100px 100px 80px 100px 100px minmax(150px, auto);
+  grid-template-columns: 80px minmax(140px, 1.5fr) minmax(140px, 1.5fr) 110px 110px 120px 90px 100px 100px 210px;
   gap: 0.5rem;
   padding: 1rem;
   background: var(--bg-tertiary);
   font-weight: 600;
   font-size: 0.75rem;
   color: var(--text-secondary);
-  border-bottom: 2px solid var(--border-color);
-  min-width: 1080px;
+  min-width: 1200px;
 }
+
+/* Specific Alignment Rules */
+.pedidos-table .table-header > span:nth-child(1) { text-align: center; } /* Nº */
+.pedidos-table .table-header > span:nth-child(2) { text-align: left; }   /* Usuario */
+.pedidos-table .table-header > span:nth-child(3) { text-align: left; }   /* Cliente */
+.pedidos-table .table-header > span:nth-child(4) { text-align: center; } /* Fecha */
+.pedidos-table .table-header > span:nth-child(5) { text-align: center; } /* Estado */
+.pedidos-table .table-header > span:nth-child(6) { text-align: center; } /* Tipo */
+.pedidos-table .table-header > span:nth-child(7) { text-align: center; } /* Total */
+.pedidos-table .table-header > span:nth-child(8) { text-align: center; } /* Pago */
+.pedidos-table .table-header > span:nth-child(9) { text-align: center; } /* Transportista */
+.pedidos-table .table-header > span:nth-child(10) { text-align: center; } /* Acciones */
 
 /* Updated Row with compact columns */
 .pedidos-table .table-row {
   display: grid;
-  grid-template-columns: 70px minmax(130px, 1fr) minmax(130px, 1fr) 95px 100px 100px 80px 100px 100px minmax(150px, auto);
+  grid-template-columns: 80px minmax(140px, 1.5fr) minmax(140px, 1.5fr) 110px 110px 120px 90px 100px 100px 210px;
   gap: 0.5rem;
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
   transition: background 0.15s;
-  min-width: 1080px;
+  min-width: 1200px;
   color: var(--text-primary);
 }
 
@@ -196,6 +208,7 @@
 .pedido-numero {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -220,9 +233,8 @@
 .cliente-nombre {
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
   max-width: 100%;
 }
 
@@ -230,9 +242,8 @@
 .cliente-email {
   font-size: 0.75rem;
   color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
   max-width: 100%;
   display: block;
 }
@@ -240,6 +251,15 @@
 .pedido-fecha {
   color: var(--text-secondary);
   font-size: 0.875rem;
+  display: flex;
+  justify-content: center;
+}
+
+.pedido-estado,
+.pedido-tipo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .estado-badge {
@@ -295,6 +315,9 @@
   font-weight: 700;
   color: #059669;
   font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .pedido-pago,
@@ -302,13 +325,16 @@
   color: #475569;
   font-size: 0.875rem;
   text-transform: capitalize;
+  text-align: center;
+  display: block;
 }
 
 .pedido-acciones {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: center;
 }
 
 .btn-accion {
@@ -336,13 +362,17 @@
 }
 
 .estado-selector {
-  padding: 0.375rem 0.5rem;
+  padding: 0 0.5rem;
   border: 2px solid #e2e8f0;
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  height: 34px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .estado-selector.naranja {

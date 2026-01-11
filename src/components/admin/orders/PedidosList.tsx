@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Package, Filter, Building2 } from 'lucide-react';
+import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown } from 'lucide-react';
 import { Pedido, EstadoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
@@ -9,7 +9,7 @@ import { Pagination } from '../../Pagination';
 import '../../../styles/components/PedidosList.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
-import { Check, XCircle } from 'lucide-react';
+
 
 interface PedidosListProps {
   onVerDetalle: (pedido: Pedido) => void;
@@ -51,6 +51,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
+  const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -468,26 +469,80 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
               </button>
 
               {pedido.estado === 'pending_verification' && pedido.tipo === 'interno' ? (
-                 <div className="verification-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                 <div style={{ position: 'relative' }}>
                     <button
-                        onClick={() => handleConfirmarStock(pedido.id)}
-                        className="btn-accion"
-                        style={{ backgroundColor: '#10b981', color: 'white', border: 'none', padding: '0.25rem 0.5rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        title="Confirmar: Stock disponible"
+                        onClick={() => setOpenActionMenuId(openActionMenuId === pedido.id ? null : pedido.id)}
+                        className="estado-selector gris"
+                        style={{ fontWeight: 'bold', minWidth: '120px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}
                     >
-                        <Check size={16} /> Confirmar
+                        <span>Acción</span>
+                        <ChevronDown size={14} />
                     </button>
-                    <button
-                        onClick={() => {
-                            setOrderToReject(pedido.id);
-                            setRejectionModalOpen(true);
-                        }}
-                        className="btn-accion"
-                        style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '0.25rem 0.5rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        title="Rechazar: Stock no disponible"
-                    >
-                        <XCircle size={16} /> Rechazar
-                    </button>
+                    
+                    {openActionMenuId === pedido.id && (
+                        <div style={{ 
+                            position: 'absolute', 
+                            top: '100%', 
+                            right: 0, 
+                            marginTop: '4px', 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e2e8f0', 
+                            borderRadius: '6px', 
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', 
+                            zIndex: 50, 
+                            minWidth: '140px',
+                            overflow: 'hidden'
+                        }} className="dark:bg-slate-800 dark:border-slate-600">
+                             <button
+                                onClick={() => {
+                                    handleConfirmarStock(pedido.id);
+                                    setOpenActionMenuId(null);
+                                }}
+                                style={{ 
+                                    width: '100%', 
+                                    textAlign: 'left', 
+                                    padding: '10px 12px', 
+                                    backgroundColor: '#10b981', 
+                                    color: 'white', 
+                                    border: 'none', 
+                                    cursor: 'pointer', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '8px', 
+                                    fontSize: '0.875rem', 
+                                    fontWeight: 500
+                                }}
+                                className="hover:opacity-90"
+                            >
+                                <Check size={16} /> Confirmar
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setOrderToReject(pedido.id);
+                                    setRejectionModalOpen(true);
+                                    setOpenActionMenuId(null);
+                                }}
+                                style={{ 
+                                    width: '100%', 
+                                    textAlign: 'left', 
+                                    padding: '10px 12px', 
+                                    backgroundColor: '#ef4444', 
+                                    color: 'white', 
+                                    border: 'none', 
+                                    cursor: 'pointer', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '8px', 
+                                    fontSize: '0.875rem', 
+                                    fontWeight: 500,
+                                    borderTop: '1px solid rgba(255,255,255,0.1)'
+                                }}
+                                className="hover:opacity-90"
+                            >
+                                <XCircle size={16} /> Rechazar
+                            </button>
+                        </div>
+                    )}
                  </div>
               ) : (
                 <select
