@@ -68,10 +68,16 @@ export default function CrearPedido({
     title: string;
     message: string;
     type: 'info' | 'error';
+    onConfirm?: () => void;
   }>({ title: '', message: '', type: 'info' });
 
-  const showModal = (title: string, message: string, type: 'info' | 'error' = 'info') => {
-    setMessageModalConfig({ title, message, type });
+  const showModal = (
+    title: string, 
+    message: string, 
+    type: 'info' | 'error' = 'info',
+    onConfirm?: () => void
+  ) => {
+    setMessageModalConfig({ title, message, type, onConfirm });
     setShowMessageModal(true);
   };
   
@@ -1105,14 +1111,32 @@ export default function CrearPedido({
               console.error('❌ Excepción al enviar email:', err);
             });
 
-          showModal('Pedido Creado', `Pedido #${pedido.id} creado correctamente.\n\nSe enviará un email de confirmación a: ${clientEmail}`);
-        } else {
-          showModal('Pedido Creado', `Pedido #${pedido.id} creado correctamente.\n\n⚠️ El cliente no tiene email. No se enviará confirmación automática.`);
-        }
+          const closeCallback = () => {
+              resetForm();
+              onSuccess();
+              onClose();
+          };
 
-        resetForm();
-        onSuccess();
-        onClose();
+          showModal(
+            'Pedido Creado', 
+            `Pedido #${pedido.id} creado correctamente.\n\nSe enviará un email de confirmación a: ${clientEmail}`,
+            'info',
+            closeCallback
+          );
+        } else {
+          const closeCallback = () => {
+              resetForm();
+              onSuccess();
+              onClose();
+          };
+          showModal(
+            'Pedido Creado', 
+            `Pedido #${pedido.id} creado correctamente.\n\n⚠️ El cliente no tiene email. No se enviará confirmación automática.`, 
+            'info',
+            closeCallback
+          );
+        }
+        // Removed explicit calls here, relying on callback
       } else {
         showModal('Error', "Error al crear el pedido", 'error');
       }
@@ -2365,6 +2389,7 @@ export default function CrearPedido({
         title={messageModalConfig.title}
         message={messageModalConfig.message}
         type={messageModalConfig.type}
+        onConfirm={messageModalConfig.onConfirm}
       />
     </div>
   );

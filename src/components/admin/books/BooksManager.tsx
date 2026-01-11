@@ -405,10 +405,14 @@ export function BooksManager() {
 
       const updated = await actualizarLibro(parseInt(selectedBook.id), mappedUpdate as any, contents); // Use selectedBook
       if (updated) {
-        showModal('Éxito', 'Libro actualizado correctamente.', 'success');
         setRefreshTrigger(prev => prev + 1);
         setSelectedBook(null); // Clear selected book
         setIsModalOpen(false); // Close the modal
+        
+        // Delay success modal to ensure previous modal is fully closed/unmounted
+        setTimeout(() => {
+            showModal('Éxito', 'Libro actualizado correctamente.', 'success');
+        }, 300);
       } else {
         throw new Error('No se pudo actualizar.');
       }
@@ -429,8 +433,10 @@ export function BooksManager() {
                 // Ideally we would show a loader but simple replacement works for now.
                 const deleted = await eliminarLibro(parseInt(id));
                 if (deleted) {
-                    showModal('Éxito', 'Libro eliminado correctamente.', 'success');
                     setRefreshTrigger(prev => prev + 1);
+                    setTimeout(() => {
+                        showModal('Éxito', 'Libro eliminado correctamente.', 'success');
+                    }, 300);
                 } else {
                      showModal('Error', 'No se pudo eliminar el libro.', 'error');
                 }
@@ -493,9 +499,11 @@ export function BooksManager() {
       });
       
       if (pedido) {
-        showModal('¡Pedido Express Creado!', `Pedido #${pedido.id} creado correctamente para ${data.clientName}. Punto de recogida: ${data.pickupLocation}`, 'success');
         setIsExpressOrderOpen(false);
         setExpressOrderBook(null);
+        setTimeout(() => {
+            showModal('¡Pedido Express Creado!', `Pedido #${pedido.id} creado correctamente para ${data.clientName}. Punto de recogida: ${data.pickupLocation}`, 'success');
+        }, 300);
       }
     } catch (error) {
       console.error('Error creating express order:', error);
@@ -951,6 +959,22 @@ export function BooksManager() {
           setIsCheckingExistence(false);
           setIsCreating(false);
           setSelectedBook(book);
+          setIsModalOpen(true);
+        }}
+        onProceedToClone={(book) => {
+          setIsCheckingExistence(false);
+          setIsCreating(true);
+          // Create a new book object based on the existing one but clearing unique fields
+          // We cast to any to be flexible with the partial match
+          const cloneData: any = {
+            ...book,
+            id: '', // Clear ID to ensure creation
+            code: '', // Clear code so a new legacy ID is generated
+            stock: 1, // Reset stock for new entry
+            isNew: true, // Default to New? Or keep original? Let's default to New for a new entry.
+            // Keep other fields: Title, Author, Publisher, etc.
+          };
+          setSelectedBook(cloneData);
           setIsModalOpen(true);
         }}
         onStockUpdated={() => {

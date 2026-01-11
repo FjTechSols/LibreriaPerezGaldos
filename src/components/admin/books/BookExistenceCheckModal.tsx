@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, X, Plus, BookOpen, User, Barcode, Hash, Loader2, AlertCircle, Pencil } from 'lucide-react';
+import { Search, X, Plus, BookOpen, User, Barcode, Hash, Loader2, AlertCircle, Pencil, Copy } from 'lucide-react';
 import { Book } from '../../../types';
 import { incrementarStockLibro, verificarExistenciaLibro } from '../../../services/libroService';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
@@ -9,14 +9,17 @@ interface BookExistenceCheckModalProps {
   onClose: () => void;
   onProceedToCreate: (data?: { title: string; author: string; isbn: string }) => void;
   onProceedToEdit: (book: Book) => void;
+  onProceedToClone: (book: Book) => void;
   onStockUpdated: () => void;
 }
 
 export function BookExistenceCheckModal({
+  // Modal for checking book existence - Updated with description and price fields
   isOpen,
   onClose,
   onProceedToCreate,
   onProceedToEdit,
+  onProceedToClone,
   onStockUpdated
 }: BookExistenceCheckModalProps) {
   const [searchParams, setSearchParams] = useState({
@@ -299,17 +302,32 @@ export function BookExistenceCheckModal({
                                     <p className="text-xs text-gray-400 truncate">
                                         {book.publisher} • {book.publicationYear} • {book.pages} págs.
                                     </p>
+                                    {book.description && book.description !== 'Sin descripción disponible' && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 my-1">
+                                            {book.description}
+                                        </p>
+                                    )}
                                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                                         <span className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
                                             {book.code}
                                         </span>
                                         {book.isbn && <span>ISBN: {book.isbn}</span>}
+                                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                                            {typeof book.price === 'number' ? book.price.toFixed(2) : book.price}€
+                                        </span>
                                         <span className={`font-medium ${book.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
                                             Stock: {book.stock}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex-shrink-0 flex items-center gap-2">
+                                    <button 
+                                        onClick={() => onProceedToClone(book)}
+                                        className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded-lg transition-colors"
+                                        title="Clonar / Crear copia"
+                                    >
+                                        <Copy size={18} />
+                                    </button>
                                     <button 
                                         onClick={() => onProceedToEdit(book)}
                                         className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded-lg transition-colors"
@@ -322,12 +340,10 @@ export function BookExistenceCheckModal({
                                         disabled={!!updatingStockId}
                                         className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                                     >
-                                        {updatingStockId === book.id ? (
+                                        {updatingStockId === book.id && (
                                             <Loader2 size={16} className="animate-spin" />
-                                        ) : (
-                                            <Plus size={16} />
                                         )}
-                                        Stock +1
+                                        +1
                                     </button>
                                 </div>
                             </div>

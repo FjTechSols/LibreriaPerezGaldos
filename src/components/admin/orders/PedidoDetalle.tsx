@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Search, Edit2, Building2 } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe } from 'lucide-react';
 import { Pedido, EstadoPedido, Libro } from '../../../types';
-import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido, obtenerLibros } from '../../../services/pedidoService';
+import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
@@ -9,6 +9,7 @@ import '../../../styles/components/PedidoDetalle.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
 import { EditClientModal } from '../clients/EditClientModal';
+import { AddProductToOrderModal } from './AddProductToOrderModal';
 import { Cliente } from '../../../types';
 
 interface PedidoDetalleProps {
@@ -45,14 +46,16 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   
   // Add Book State
   const [showAddBook, setShowAddBook] = useState(false);
-  const [bookSearchTerm, setBookSearchTerm] = useState("");
-  const [bookSearchResults, setBookSearchResults] = useState<Libro[]>([]);
-  const [isSearchingBook, setIsSearchingBook] = useState(false);
+
 
   // State for shipping info editing
   const [editingShipping, setEditingShipping] = useState(false);
   const [transportista, setTransportista] = useState(pedido?.transportista || '');
   const [tracking, setTracking] = useState(pedido?.tracking || '');
+
+  // State for observations editing
+  const [editingObservations, setEditingObservations] = useState(false);
+  const [observations, setObservations] = useState(pedido?.observaciones || '');
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -80,22 +83,11 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     }
     setTransportista(pedido?.transportista || '');
     setTracking(pedido?.tracking || ''); 
+    setObservations(pedido?.observaciones || '');
   }, [pedido, isOpen]);
 
   // Book Search Effect
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-        if (bookSearchTerm.length >= 2) {
-            setIsSearchingBook(true);
-            const results = await obtenerLibros(bookSearchTerm);
-            setBookSearchResults(results);
-            setIsSearchingBook(false);
-        } else {
-            setBookSearchResults([]);
-        }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [bookSearchTerm]);
+
 
   if (!isOpen || !pedido) return null;
 
@@ -137,18 +129,48 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     });
 
     if (success) {
-      setMessageModalConfig({
-        title: 'Envío Actualizado',
-        message: 'La información de envío se ha actualizado correctamente.',
-        type: 'info'
-      });
-      setShowMessageModal(true);
       setEditingShipping(false);
       onRefresh();
+      setTimeout(() => {
+          setMessageModalConfig({
+            title: 'Envío Actualizado',
+            message: 'La información de envío se ha actualizado correctamente.',
+            type: 'info'
+          });
+          setShowMessageModal(true);
+      }, 300);
     } else {
       setMessageModalConfig({
         title: 'Error',
         message: 'Hubo un error al actualizar la información de envío.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleSaveObservations = async () => {
+    if (!pedido) return;
+
+    const success = await actualizarPedido(pedido.id, {
+      observaciones: observations
+    });
+
+    if (success) {
+      setEditingObservations(false);
+      onRefresh();
+      setTimeout(() => {
+          setMessageModalConfig({
+            title: 'Observaciones Actualizadas',
+            message: 'Las observaciones se han actualizado correctamente.',
+            type: 'info'
+          });
+          setShowMessageModal(true);
+      }, 300);
+    } else {
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'Hubo un error al actualizar las observaciones.',
         type: 'error'
       });
       setShowMessageModal(true);
@@ -186,21 +208,32 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     }
   };
 
-  const handleAddBook = (libro: Libro) => {
-      // Check if already exists in editedLines
-      const exists = editedLines.find(l => l.libro_id === libro.id);
-      if (exists) {
-          alert("Este libro ya está en el pedido. Incrementa la cantidad si lo deseas.");
-          return;
+  /* OLD SEARCH LOGIC REMOVED - REPLACED BY MODAL HANDLER */
+  const handleAddProductFromModal = (item: { 
+    libro?: Libro; 
+    nombre_externo?: string; 
+    precio_unitario: number; 
+    cantidad: number;
+    url_externa?: string;
+    isExternal: boolean;
+  }) => {
+      // Check duplicate only for internal books
+      if (!item.isExternal && item.libro) {
+         const exists = editedLines.find(l => l.libro_id === item.libro!.id);
+         if (exists) {
+             alert("Este libro ya está en el pedido. Incrementa la cantidad si lo deseas.");
+             return;
+         }
       }
 
       setEditedLines([...editedLines, {
-          libro_id: libro.id,
-          cantidad: 1,
-          precio_unitario: libro.precio,
-          libro: libro // visual only until save
+          libro_id: item.isExternal ? null : item.libro!.id,
+          cantidad: item.cantidad,
+          precio_unitario: item.precio_unitario,
+          libro: item.libro, // visual
+          nombre_externo: item.nombre_externo,
+          url_externa: item.url_externa
       }]);
-      setBookSearchTerm("");
       setShowAddBook(false);
   };
 
@@ -227,7 +260,14 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                   });
               } else {
                   // Insert
-                  await agregarDetallePedido(pedido.id, line.libro_id, line.cantidad, line.precio_unitario);
+                  await agregarDetallePedido(
+                    pedido.id, 
+                    line.libro_id, 
+                    line.cantidad, 
+                    line.precio_unitario,
+                    line.nombre_externo,
+                    line.url_externa
+                  );
               }
           }
 
@@ -1007,14 +1047,14 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                           </div>
                       ) : (
                           <>
-                            {pedido?.transportista ? (
-                                <p className="info-principal">Transportista: {pedido.transportista}</p>
+                            {transportista ? (
+                                <p className="info-principal">Transportista: {transportista}</p>
                             ) : (
                                 <p className="info-principal" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin transportista asignado</p>
                             )}
 
-                            {pedido?.tracking ? (
-                                <p className="info-secundario">Tracking: {pedido.tracking}</p>
+                            {tracking ? (
+                                <p className="info-secundario">Tracking: {tracking}</p>
                             ) : (
                                 <p className="info-secundario" style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin tracking asignado</p>
                             )}
@@ -1031,27 +1071,101 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                   <h3>Envío</h3>
                 </div>
                 <div className="info-card-body">
-                  {pedido?.transportista && (
-                    <p className="info-principal">Transportista: {pedido.transportista}</p>
+                  {transportista && (
+                    <p className="info-principal">Transportista: {transportista}</p>
                   )}
-                  {pedido?.tracking && (
-                    <p className="info-secundario">Tracking: {pedido.tracking}</p>
+                  {tracking && (
+                    <p className="info-secundario">Tracking: {tracking}</p>
                   )}
                 </div>
               </div>
             )}
 
-            {pedido?.observaciones && (
-              <div className="info-card full-width">
+            <div className="info-card full-width">
                 <div className="info-card-header">
-                  <FileText size={20} />
-                  <h3>Observaciones</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FileText size={20} />
+                    <h3>Observaciones</h3>
+                  </div>
+                  {!editingObservations && (
+                    <button
+                      onClick={() => setEditingObservations(true)}
+                      style={{
+                        marginLeft: 'auto',
+                        padding: '0.25rem 0.5rem',
+                        fontSize: '0.75rem',
+                        background: 'var(--primary-color)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
+                    >
+                      <Edit size={14} />
+                      Editar
+                    </button>
+                  )}
                 </div>
                 <div className="info-card-body">
-                  <p className="info-principal">{pedido.observaciones}</p>
+                  {editingObservations ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <textarea
+                            value={observations}
+                            onChange={(e) => setObservations(e.target.value)}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                            rows={3}
+                            placeholder="Escribe aquí las observaciones..."
+                        />
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => {
+                                    setEditingObservations(false);
+                                    setObservations(pedido?.observaciones || '');
+                                }}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    background: 'var(--bg-tertiary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveObservations}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    background: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                <Save size={16} />
+                                Guardar
+                            </button>
+                        </div>
+                    </div>
+                  ) : (
+                    <p className="info-principal" style={{ whiteSpace: 'pre-wrap' }}>
+                        {observations || <span style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin observaciones</span>}
+                    </p>
+                  )}
                 </div>
               </div>
-            )}
           </div>
 
           <div className="detalles-section">
@@ -1076,8 +1190,31 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
 
               {(isEditing ? editedLines : pedido?.detalles || []).map((detalle, index) => (
                 <div key={detalle.id || `temp-${index}`} className="table-row">
-                  <span className="libro-titulo" data-label="Título">
-                    {detalle.libro?.titulo || detalle.nombre_externo || 'Sin título'}
+                  <span className="libro-titulo" data-label="Título" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {detalle.libro?.titulo || detalle.nombre_externo || 'Sin título'}
+                    </span>
+                    
+                    {/* External Product Indicator & Link */}
+                    {(!detalle.libro && detalle.nombre_externo) && (
+                        <div className="flex items-center gap-2 mt-1">
+                             <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 w-fit">
+                                Externo
+                             </span>
+                             {detalle.url_externa && (
+                                 <a 
+                                    href={detalle.url_externa} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                 >
+                                     <Globe size={12} />
+                                     Ver Enlace
+                                 </a>
+                             )}
+                        </div>
+                    )}
                   </span>
                   
                   <span className="cantidad" data-label="Cantidad">
@@ -1133,85 +1270,43 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
               )}
 
               {isEditing && (
-                  <div className="add-book-row" style={{ padding: '10px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
-                      {!showAddBook ? (
-                          <button 
-                             onClick={() => setShowAddBook(true)}
-                             style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
-                          >
-                              <Plus size={18} /> Añadir Producto
-                          </button>
-                      ) : (
-                          <div className="book-search-container" style={{ position: 'relative' }}>
-                              <div style={{ display: 'flex', gap: '10px' }}>
-                                  <div style={{ position: 'relative', flex: 1 }}>
-                                      <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
-                                      <input 
-                                          type="text" 
-                                          placeholder="Buscar libro por título, ISBN, código..." 
-                                          value={bookSearchTerm}
-                                          onChange={(e) => setBookSearchTerm(e.target.value)}
-                                          autoFocus
-                                          style={{ 
-                                              width: '100%', 
-                                              padding: '8px 8px 8px 35px', 
-                                              borderRadius: '6px', 
-                                              border: '1px solid var(--border-color)',
-                                              background: 'var(--input-bg)',
-                                              color: 'var(--input-text)'
-                                          }}
-                                      />
-                                  </div>
-                                  <button onClick={() => setShowAddBook(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                                      <X size={20} />
-                                  </button>
-                              </div>
-                              
-                              {(isSearchingBook || bookSearchResults.length > 0 || (bookSearchTerm.length >= 3 && bookSearchResults.length === 0)) && (
-                                  <div className="search-results" style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#1e293b', border: '1px solid var(--border-color)', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', zIndex: 1000, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.4)' }}>
-                                      
-                                      {isSearchingBook && (
-                                          <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                                              Buscando...
-                                          </div>
-                                      )}
-
-                                      {!isSearchingBook && bookSearchResults.length === 0 && (
-                                           <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                                              No se encontraron libros.
-                                          </div>
-                                      )}
-
-                                      {!isSearchingBook && bookSearchResults.map(libro => (
-                                          <div 
-                                              key={libro.id} 
-                                              onClick={() => handleAddBook(libro)}
-                                              style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                                              className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                                          >
-                                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                  <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{libro.titulo}</span>
-                                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                      <span>ISBN: {libro.isbn || 'N/A'}</span>
-                                                      {libro.legacy_id && <span>| Ref: {libro.legacy_id}</span>}
-                                                      {libro.editorial?.nombre && <span>| Ed: {libro.editorial.nombre}</span>}
-                                                      {libro.anio && <span>| Año: {libro.anio}</span>}
-                                                      {libro.paginas && <span>| Pags: {libro.paginas}</span>}
-                                                  </div>
-                                                  {libro.descripcion && (
-                                                      <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                          {libro.descripcion.length > 100 ? `${libro.descripcion.substring(0, 100)}...` : libro.descripcion}
-                                                      </span>
-                                                  )}
-                                              </div>
-                                              <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{formatPrice(libro.precio)}</span>
-                                          </div>
-                                      ))}
-                                  </div>
-                              )}
-                          </div>
-                      )}
-                  </div>
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                    <button 
+                        onClick={() => setShowAddBook(true)}
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem',
+                            color: 'var(--primary-color)',
+                            backgroundColor: 'transparent',
+                            border: '1px dashed var(--border-color)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseOver={(e) => {
+                             e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+                             e.currentTarget.style.borderColor = 'var(--primary-color)';
+                        }}
+                        onMouseOut={(e) => {
+                             e.currentTarget.style.backgroundColor = 'transparent';
+                             e.currentTarget.style.borderColor = 'var(--border-color)';
+                        }}
+                    >
+                        <Plus size={16} />
+                        Añadir Producto (Interno o Externo)
+                    </button>
+                    
+                    <AddProductToOrderModal 
+                        isOpen={showAddBook}
+                        onClose={() => setShowAddBook(false)}
+                        onAdd={handleAddProductFromModal}
+                    />
+                </div>
               )}
             </div>
 

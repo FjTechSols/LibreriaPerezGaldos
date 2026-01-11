@@ -67,8 +67,6 @@ export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
           }}
           onRefresh={() => {
             setRefreshTrigger(prev => prev + 1);
-            setIsPedidoDetalleOpen(false);
-            setSelectedPedido(null);
             if (onOrdersChange) onOrdersChange();
           }}
         />

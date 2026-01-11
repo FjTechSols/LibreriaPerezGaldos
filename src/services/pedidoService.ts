@@ -463,18 +463,22 @@ export const actualizarDetallePedido = async (
 
 export const agregarDetallePedido = async (
   pedidoId: number,
-  libroId: number,
+  libroId: number | null,
   cantidad: number,
-  precioUnitario: number
+  precioUnitario: number,
+  nombreExterno?: string,
+  urlExterna?: string
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('pedido_detalles')
       .insert({
         pedido_id: pedidoId,
-        libro_id: libroId,
+        libro_id: libroId, // Can be null now
         cantidad,
-        precio_unitario: precioUnitario
+        precio_unitario: precioUnitario,
+        nombre_externo: nombreExterno,
+        url_externa: urlExterna
       });
 
     if (error) {

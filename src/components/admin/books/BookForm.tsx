@@ -223,29 +223,35 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
       setShowContentInput(!!initialData.contents && initialData.contents.length > 0);
     } else if (isCreating && isOpen) {
       setFormData({
-        code: '',
+        code: '', // Always reset code for new books
         title: initialData?.title || '',
         author: initialData?.author || '',
-        publisher: '',
-        pages: 0,
-        publicationYear: new Date().getFullYear(),
+        publisher: initialData?.publisher || '',
+        pages: initialData?.pages || 0,
+        publicationYear: initialData?.publicationYear || new Date().getFullYear(),
         isbn: initialData?.isbn || '',
-        price: 0,
-        originalPrice: undefined,
-        stock: 1,
-        ubicacion: 'Almacén',
-        category: '', 
-        description: '',
-        coverImage: '',
-        featured: false,
-        isNew: false,
-        isOnSale: false
+        price: initialData?.price || 0,
+        originalPrice: initialData?.originalPrice || undefined,
+        stock: initialData?.stock ?? 1, // Start with 1 if not specified
+        ubicacion: initialData?.ubicacion || 'Almacén',
+        category: initialData?.category || '', 
+        description: initialData?.description || '',
+        coverImage: initialData?.coverImage || '',
+        featured: initialData?.featured || false,
+        isNew: initialData?.isNew || false,
+        isOnSale: initialData?.isOnSale || false,
+        isOutOfPrint: initialData?.isOutOfPrint || false,
+        condition: initialData?.condition || 'leido',
+        language: initialData?.language || 'Español'
       });
       setBookContents([]);
       setShowContentInput(false);
 
       // Si se importó un ISBN válido desde el modal de chequeo, disparamos la búsqueda automática
-      if (initialData?.isbn && initialData.isbn.trim().length >= 10) {
+      // PERO SOLO si no es una copia/clon (si no tiene datos completos como editorial o páginas)
+      const hasFullData = initialData?.publisher || (initialData?.pages && initialData.pages > 0);
+      
+      if (initialData?.isbn && initialData.isbn.trim().length >= 10 && !hasFullData) {
         handleExplicitISBNSearch(initialData.isbn.trim());
       }
     }
