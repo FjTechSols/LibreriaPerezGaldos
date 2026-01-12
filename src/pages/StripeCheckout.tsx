@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { StripePaymentForm } from '../components/StripePaymentForm';
@@ -11,6 +11,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSettings } from '../context/SettingsContext';
 import { crearPedido, confirmOrderAndDeductStock, obtenerPedidoPorId, actualizarEstadoPedido } from '../services/pedidoService';
 import { findOrCreateCliente } from '../services/clienteService';
+import { useInvoice } from '../context/InvoiceContext';
+import { InvoiceFormData } from '../types';
 import { ArrowLeft } from 'lucide-react';
 import { MessageModal } from '../components/MessageModal'; // Import MessageModal
 import '../styles/components/StripePaymentForm.css';
@@ -39,12 +41,14 @@ export default function StripeCheckout() {
   const { actualTheme } = useTheme();
   const { t } = useLanguage();
   const { settings } = useSettings();
+  const { createInvoice, updateInvoiceStatus } = useInvoice(); // Access invoice context
 
   // Extract state passed from Cart
   const locationState = location.state as StripeCheckoutState | undefined;
   
   // Local state to handle potentially fetched order data
   const [checkoutState, setCheckoutState] = useState<StripeCheckoutState | undefined>(locationState);
+  const dataFetchedRef = useRef(false);
 
   const [clientSecret, setClientSecret] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +86,10 @@ export default function StripeCheckout() {
   }), [clientSecret, actualTheme]);
 
   useEffect(() => {
+    // Prevent double execution in Strict Mode
+    if (dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
+
     // If we already have full data from Cart navigation (locationState), use it.
     if (locationState?.cartItems && locationState.cartItems.length > 0) {
        setCheckoutState(locationState); // Explicitly set it
@@ -104,7 +112,7 @@ export default function StripeCheckout() {
         return;
     }
 
-    // Fallback
+    // Fallback logic inside guard: only navigate if we really determine no data
     if (!locationState) {
         navigate('/carrito');
     }
@@ -208,6 +216,58 @@ export default function StripeCheckout() {
           if (!result.success) {
                throw new Error(result.error || "Error al actualizar estado del pedido");
           }
+
+          // --- INVOICE GENERATION START ---
+          try {
+              // We need the full order object to get details for the invoice items
+              const orderIdInt = parseInt(checkoutState.orderId);
+              const fullOrder = await obtenerPedidoPorId(orderIdInt);
+              
+              if (fullOrder && fullOrder.detalles) { 
+                   
+                   // 1. Check if invoice already exists
+                   const { data: existingInvoices } = await supabase
+                        .from('invoices')
+                        .select('id, invoice_number')
+                        .eq('order_id', orderIdInt.toString());
+
+                   if (existingInvoices && existingInvoices.length > 0) {
+                        // UPDATE EXISTING
+                        const existingInvoice = existingInvoices[0];
+                        await updateInvoiceStatus(existingInvoice.id, 'Pagada');
+                        console.log(`✅ Factura existente ${existingInvoice.invoice_number} actualizada a Pagada.`);
+                   } else {
+                        // CREATE NEW
+                        const invoiceData: InvoiceFormData = {
+                             customer_name: `${checkoutState.checkoutData.nombre} ${checkoutState.checkoutData.apellidos}`,
+                             customer_address: checkoutState.checkoutData.direccion || '',
+                             customer_nif: '', // Could be fetched if we had it in CheckoutData or Client
+                             tax_rate: settings.billing.taxRate, // Use global tax rate
+                             payment_method: 'Stripe',
+                             language: 'es',
+                             order_id: checkoutState.orderId,
+                             items: fullOrder.detalles.map(d => ({
+                                  book_id: d.libro_id?.toString() || '0',
+                                  book_title: d.libro?.titulo || d.nombre_externo || 'Producto',
+                                  quantity: d.cantidad,
+                                  unit_price: d.precio_unitario,
+                                  line_total: d.cantidad * d.precio_unitario
+                             })),
+                             shipping_cost: fullOrder.coste_envio
+                        };
+
+                        const newInvoice = await createInvoice(invoiceData);
+                        if (newInvoice) {
+                             await updateInvoiceStatus(newInvoice.id, 'Pagada');
+                             console.log('✅ Nueva factura creada y pagada:', newInvoice.invoice_number);
+                        }
+                   }
+              }
+          } catch (invErr) {
+               // Non-blocking error: don't stop the user from success screen if invoice fails
+               console.error('⚠️ Error generando factura automática:', invErr);
+          }
+          // --- INVOICE GENERATION END ---
 
           navigate('/pago-completado', {
             state: {
