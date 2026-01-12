@@ -755,7 +755,7 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
       .insert({
         cliente_id: clienteId,
         usuario_id: input.adminUserId,
-        tipo_pedido: 'express',
+        tipo: 'express', // Fixed column name from tipo_pedido to tipo
         estado: 'pendiente',
         punto_recogida: input.pickupLocation,
         metodo_pago: 'efectivo', // Default for express orders
@@ -773,7 +773,7 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
     
     // 5. Add order line
     const { error: detalleError } = await supabase
-      .from('pedidos_detalles')
+      .from('pedido_detalles')
       .insert({
         pedido_id: pedido.id,
         libro_id: input.bookId,
