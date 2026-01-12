@@ -693,7 +693,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   const tieneFactura = pedido.factura && !Array.isArray(pedido.factura);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" style={{ zIndex: 1000 }}>
+      {/* Width logic based on whether we are editing or not */}
       <div className="modal-pedido-detalle" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="header-title">

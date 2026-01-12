@@ -421,7 +421,7 @@ export default function GenerarFacturaModal({
   );
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-generar-factura" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>

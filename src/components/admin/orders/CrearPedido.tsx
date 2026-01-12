@@ -10,7 +10,8 @@ import {
   CreditCard,
   Building2, 
   School,
-  Truck
+  Truck,
+  ArrowLeft
 } from "lucide-react";
 import { Libro, Cliente } from "../../../types";
 import {
@@ -184,7 +185,9 @@ export default function CrearPedido({
   const searchLibros = async () => {
       setLoading(true);
       try {
-          const filters: any = {};
+          const filters: any = {
+              availability: 'inStock' // Filter out 0 stock books
+          };
           
           if (bookSearchMode === 'simple') {
               if (!libroSearch.trim()) {
@@ -1187,7 +1190,7 @@ export default function CrearPedido({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal-crear-pedido" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="header-title">
@@ -1270,16 +1273,22 @@ export default function CrearPedido({
                     </div>
                 ) : (
                     <>
-                        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+
+                        <div className="platform-modal-header-row">
                             <button 
                                 type="button" 
                                 onClick={() => setPlataformaOrigen(null)}
-                                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                                className="btn-secondary"
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem' }}
                             >
-                                ← Volver
+                                <ArrowLeft size={16} /> Volver
                             </button>
-                            <span className="badge" style={{ background: '#e0e7ff', color: '#3730a3', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>
-                                {plataformaOrigen === 'iberlibro' ? 'IberLibro' : 'Uniliber'}
+                            <span className="badge-platform">
+                                {plataformaOrigen === 'iberlibro' ? (
+                                    <>📚 IberLibro</>
+                                ) : (
+                                    <>📖 Uniliber</>
+                                )}
                             </span>
                         </div>
 
@@ -1301,7 +1310,8 @@ export default function CrearPedido({
                         <button
                           type="button"
                           onClick={parsearDatosPegados}
-                          className="btn-parse"
+                          className="btn-analyze"
+                          style={{ width: 'auto', display: 'flex', margin: '1rem auto 0 auto', padding: '0.75rem 2rem', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}
                         >
                           <Search size={18} />
                           Analizar y Rellenar Formulario

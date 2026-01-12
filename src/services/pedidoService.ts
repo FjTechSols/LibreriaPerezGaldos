@@ -336,12 +336,20 @@ export const actualizarEstadoPedido = async (
       
       if (!currentOrder) throw new Error("Pedido no encontrado");
 
-      // LOGIC 1: Stock Deduction for Manual Orders (when moving to 'enviado')
-      // Web orders ('interno') are assumed deducted at creation.
-      // Manual orders ('perez_galdos', etc) are deducted only when shipped.
-      if (estado === 'enviado' && currentOrder.tipo !== 'interno') {
-          // Avoid double deduction if already shipped/completed
-          if (currentOrder.estado !== 'enviado' && currentOrder.estado !== 'completado') {
+      // LOGIC 1: Unified Stock Deduction
+      // Deduct stock when order moves to detailed 'committed' states (Processing, Shipped, Completed)
+      // Trigger ONLY if we are transitioning FROM a state where stock was NOT deducted.
+      // Assumed deducted states: procesando, enviado, completado.
+      // Assumed NOT deducted states: pending_verification, payment_pending, pendiente.
+
+      const statesImpliesDeduction: EstadoPedido[] = ['procesando', 'enviado', 'completado'];
+      
+      if (statesImpliesDeduction.includes(estado)) {
+          // Check if we are coming from a state that is NOT in the deducted list
+          // e.g. 'pendiente' -> 'enviado' (DEDUCT)
+          // e.g. 'procesando' -> 'enviado' (ALREADY DEDUCTED, SKIP)
+          if (!statesImpliesDeduction.includes(currentOrder.estado)) {
+               console.log(`[Stock] Deducting stock for order ${id} (Transition: ${currentOrder.estado} -> ${estado})`);
                const res = await deductStockForce(id);
                if (!res.success) {
                    return { success: false, error: "Error al descontar stock (insuficiente): " + res.error };

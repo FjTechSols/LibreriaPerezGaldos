@@ -15,7 +15,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, onSubmit, 
   if (!isOpen) return null;
 
   return (
-    <div className="invoice-modal-overlay" onClick={onClose}>
+    <div className="invoice-modal-overlay">
       <div className="invoice-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="invoice-modal-header">
           <h2>Nueva factura</h2>

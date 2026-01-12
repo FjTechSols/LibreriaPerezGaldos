@@ -416,7 +416,7 @@ export function GestionClientes() {
       />
 
       {showModal && (
-        <div className="cliente-modal-overlay" onClick={handleCloseModal}>
+        <div className="cliente-modal-overlay">
           <div className="cliente-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingCliente ? 'Editar Cliente' : 'Nuevo Cliente'}</h3>

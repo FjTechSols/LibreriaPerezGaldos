@@ -384,7 +384,7 @@ export function GestionUsuariosAdmin() {
       </div>
 
       {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Crear Nuevo Usuario Administrativo</h3>
@@ -475,7 +475,7 @@ export function GestionUsuariosAdmin() {
       )}
 
       {showEditModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Editar Roles de {selectedUser.email}</h3>
@@ -526,7 +526,7 @@ export function GestionUsuariosAdmin() {
       )}
 
       {showPasswordModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowPasswordModal(false)}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Cambiar Contraseña de {selectedUser.email}</h3>

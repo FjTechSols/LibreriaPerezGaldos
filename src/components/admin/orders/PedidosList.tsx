@@ -40,15 +40,16 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
   devolucion: 'Devolución'
 };
 
-const TIPOS: TipoPedido[] = ['interno', 'iberlibro', 'uniliber', 'perez_galdos', 'galeon', 'express'];
+const TIPOS: TipoPedido[] = ['interno', 'perez_galdos', 'express', 'galeon', 'abebooks', 'uniliber'];
 
 const TIPO_LABELS: Record<TipoPedido, string> = {
     interno: 'Interno',
-    iberlibro: 'IberLibro',
+    iberlibro: 'IberLibro', // Keeping for fallback/types even if not in filter list
     uniliber: 'Uniliber',
-    perez_galdos: 'Web',
+    perez_galdos: 'Pérez Galdós',
     galeon: 'Galeón',
-    express: 'Express'
+    express: 'Express',
+    abebooks: 'Abebooks'
 };
 
 export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosListProps) {

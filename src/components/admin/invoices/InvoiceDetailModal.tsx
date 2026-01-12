@@ -56,7 +56,7 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
   };
 
   return (
-    <div className="invoice-detail-overlay" onClick={onClose}>
+    <div className="invoice-detail-overlay">
       <div className="invoice-detail-modal" onClick={(e) => e.stopPropagation()}>
         <div className="invoice-detail-header">
           <h2>Detalle de factura</h2>
