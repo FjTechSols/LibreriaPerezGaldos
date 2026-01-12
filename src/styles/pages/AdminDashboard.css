@@ -147,13 +147,13 @@
     overflow-x: visible !important;
     overflow-y: auto !important;
   }
-  
+
   /* When open, always show expanded (never collapsed on mobile) */
   .dashboard-sidebar.mobile-open {
     display: flex !important;
     animation: slideIn 0.3s ease-out;
   }
-  
+
   /* Force expanded state on mobile - override collapsed class */
   .dashboard-sidebar.collapsed,
   .dashboard-sidebar.collapsed.mobile-open {
@@ -161,7 +161,7 @@
     max-width: 85vw !important;
     overflow-x: visible !important;
   }
-  
+
   /* Show all text on mobile */
   .dashboard-sidebar .nav-item-text,
   .dashboard-sidebar.collapsed .nav-item-text {
@@ -171,7 +171,7 @@
     white-space: nowrap !important;
     display: inline-block !important;
   }
-  
+
   /* Show sidebar title on mobile */
   .dashboard-sidebar .sidebar-title,
   .dashboard-sidebar.collapsed .sidebar-title {
@@ -179,14 +179,14 @@
     width: auto !important;
     display: inline-block !important;
   }
-  
+
   /* Show section title on mobile */
   .dashboard-sidebar .sidebar-section-title,
   .dashboard-sidebar.collapsed .sidebar-section-title {
     display: block !important;
     opacity: 1 !important;
   }
-  
+
   /* Normal nav item layout on mobile */
   .dashboard-sidebar .nav-item,
   .dashboard-sidebar.collapsed .nav-item {
@@ -194,7 +194,7 @@
     padding: 0.75rem 1rem !important;
     gap: 0.75rem !important;
   }
-  
+
   /* Normal header layout on mobile */
   .dashboard-sidebar .sidebar-header,
   .dashboard-sidebar.collapsed .sidebar-header {
@@ -203,7 +203,7 @@
     padding: 1.5rem !important;
     gap: 0.75rem !important;
   }
-  
+
   /* Show logo section properly */
   .dashboard-sidebar .sidebar-logo,
   .dashboard-sidebar.collapsed .sidebar-logo {
@@ -211,7 +211,7 @@
     align-items: center !important;
     gap: 0.75rem !important;
   }
-  
+
   /* Ensure navigation is vertical on mobile */
   .dashboard-sidebar .sidebar-nav,
   .dashboard-sidebar.collapsed .sidebar-nav {
@@ -220,7 +220,7 @@
     overflow-x: hidden !important;
     overflow-y: auto !important;
   }
-  
+
   @keyframes slideIn {
     from {
       transform: translateX(-100%);
@@ -440,7 +440,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -808,19 +809,11 @@
 }
 
 .stat-icon.invoices {
-  background: linear-gradient(
-    135deg,
-    var(--success-color) 0%,
-    #059669 100%
-  );
+  background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
 }
 
 .stat-icon.orders {
-  background: linear-gradient(
-    135deg,
-    var(--warning-color) 0%,
-    #d97706 100%
-  );
+  background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
 }
 
 .stat-icon.revenue {
@@ -966,10 +959,10 @@
   align-items: center;
   grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 200px;
   gap: var(--spacing-4);
-  
+
   /* Separation updates */
   padding: 1rem var(--spacing-6);
-  margin-bottom: 0.75rem; 
+  margin-bottom: 0.75rem;
   background: var(--bg-secondary); /* Give it a subtle bg */
   border: 1px solid var(--border-color); /* Full border instead of just bottom */
   border-radius: 8px; /* Rounded corners */
@@ -1584,15 +1577,16 @@
     /* Rows: Code | Title | Author | Price/Stock | Actions */
     grid-template-rows: auto auto auto auto auto;
     gap: 1rem;
-    
+
     padding: 1.25rem;
     position: relative;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     margin-bottom: 1rem;
     background: var(--bg-secondary);
-    align-items: center; 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   /* 1. TOP ROW: Code (Full Width or standard text) */
@@ -1613,7 +1607,7 @@
   /* 2. MIDDLE RIGHT: Image (Spans Title & Author, Rows 2-3) */
   .admin-book-cover {
     grid-column: 2;
-    grid-row: 2 / 4; 
+    grid-row: 2 / 4;
     width: 100%;
     height: 140px;
     object-fit: cover;
@@ -1631,7 +1625,7 @@
     color: var(--text-primary);
     line-height: 1.3;
     padding-right: var(--spacing-2);
-    align-self: end; 
+    align-self: end;
     margin-bottom: 0.25rem;
   }
 
@@ -1640,28 +1634,28 @@
     grid-row: 3;
     font-size: 0.9rem;
     color: var(--text-secondary);
-    align-self: start; 
+    align-self: start;
   }
 
   /* 3. PRICE & STOCK ROW (Row 4) */
   .admin-book-price {
     grid-column: 1;
     grid-row: 4;
-    font-size: 1.5rem; 
+    font-size: 1.5rem;
     font-weight: 800;
-    color: var(--text-primary); 
-    text-align: left; 
+    color: var(--text-primary);
+    text-align: left;
     align-self: center;
   }
 
   .admin-book-stock {
     grid-column: 2;
     grid-row: 4;
-    
+
     display: flex !important;
     align-items: center;
     justify-content: center;
-    
+
     background: transparent;
     padding: 0;
     border: none;
@@ -1675,12 +1669,12 @@
   .admin-book-actions {
     grid-column: 1 / -1;
     grid-row: 5;
-    
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-    
+
     margin-top: 0.75rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
@@ -1703,46 +1697,54 @@
     justify-content: center;
     transition: all 0.2s;
     border: 1px solid transparent;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     width: auto !important; /* Reset fixed widths */
     max-width: none !important;
   }
 
   /* 1. STOCK INCREASE (+) */
-  .admin-stock-actions .stock-btn.increase { 
-      background: rgba(16, 185, 129, 0.1); 
-      border-color: rgba(16, 185, 129, 0.3); 
-      color: #10b981; 
+  .admin-stock-actions .stock-btn.increase {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #10b981;
   }
-  .admin-stock-actions .stock-btn.increase:active { background: rgba(16, 185, 129, 0.25); }
+  .admin-stock-actions .stock-btn.increase:active {
+    background: rgba(16, 185, 129, 0.25);
+  }
 
   /* 2. STOCK DECREASE (-) */
-  .admin-stock-actions .stock-btn.decrease { 
-      background: rgba(239, 68, 68, 0.1); 
-      border-color: rgba(239, 68, 68, 0.3); 
-      color: #ef4444; 
+  .admin-stock-actions .stock-btn.decrease {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
   }
-  .admin-stock-actions .stock-btn.decrease:active { background: rgba(239, 68, 68, 0.25); }
+  .admin-stock-actions .stock-btn.decrease:active {
+    background: rgba(239, 68, 68, 0.25);
+  }
 
   /* 3. EDIT (Pencil) */
-  .admin-book-actions > .edit-btn { 
-      background: rgba(59, 130, 246, 0.1); 
-      border-color: rgba(59, 130, 246, 0.3); 
-      color: #3b82f6; 
+  .admin-book-actions > .edit-btn {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
   }
-  .admin-book-actions > .edit-btn:active { background: rgba(59, 130, 246, 0.25); }
+  .admin-book-actions > .edit-btn:active {
+    background: rgba(59, 130, 246, 0.25);
+  }
 
   /* 4. DELETE (Trash) */
-  .admin-book-actions > .delete-btn { 
-      background: rgba(239, 68, 68, 0.1); 
-      border-color: rgba(239, 68, 68, 0.3); 
-      color: #ef4444; 
+  .admin-book-actions > .delete-btn {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
   }
-  .admin-book-actions > .delete-btn:active { background: rgba(239, 68, 68, 0.25); }
+  .admin-book-actions > .delete-btn:active {
+    background: rgba(239, 68, 68, 0.25);
+  }
 
   /* Hover states for Desktop/Mouse on Mobile */
   .admin-book-actions button:hover {
-      filter: brightness(0.95);
+    filter: brightness(0.95);
   }
 
   /* Icons size */
@@ -1754,14 +1756,29 @@
   /* Dark mode overrides: slightly brighter text, same bg strategy */
   .dark-mode .admin-book-actions button,
   .dark-mode .admin-stock-actions button {
-     box-shadow: none;
+    box-shadow: none;
   }
-  
-  .dark-mode .admin-stock-actions .stock-btn.increase { color: #34d399; border-color: rgba(52, 211, 153, 0.3); background: rgba(5, 150, 105, 0.15); }
-  .dark-mode .admin-stock-actions .stock-btn.decrease { color: #f87171; border-color: rgba(248, 113, 113, 0.3); background: rgba(220, 38, 38, 0.15); }
-  .dark-mode .admin-book-actions > .edit-btn { color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); background: rgba(37, 99, 235, 0.15); }
-  .dark-mode .admin-book-actions > .delete-btn { color: #f87171; border-color: rgba(248, 113, 113, 0.3); background: rgba(220, 38, 38, 0.15); }
 
+  .dark-mode .admin-stock-actions .stock-btn.increase {
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.3);
+    background: rgba(5, 150, 105, 0.15);
+  }
+  .dark-mode .admin-stock-actions .stock-btn.decrease {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(220, 38, 38, 0.15);
+  }
+  .dark-mode .admin-book-actions > .edit-btn {
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.3);
+    background: rgba(37, 99, 235, 0.15);
+  }
+  .dark-mode .admin-book-actions > .delete-btn {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(220, 38, 38, 0.15);
+  }
 
   /* Hide Desktop columns */
   .admin-book-publisher,
@@ -1775,37 +1792,37 @@
     color: #94a3b8;
     background: rgba(30, 41, 59, 0.5);
   }
-  
+
   .dark-mode .admin-book-title {
     color: #f1f5f9;
   }
-  
+
   .dark-mode .admin-book-author {
     color: #cbd5e1;
   }
-  
+
   .dark-mode .admin-book-stock {
     color: #34d399; /* Keep green for value */
   }
-} 
+}
 
 /* Improve Filters on Mobile */
 @media (max-width: 768px) {
   /* Improve Filters on Mobile */
   .invoice-filters,
   .book-filters,
-  .filters-container { 
+  .filters-container {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
     height: auto !important;
   }
-  
+
   .filter-group {
-      width: 100%;
+    width: 100%;
   }
-  
+
   /* Target the actual classes used in BooksManager */
   .filter-input,
   .filter-select,
@@ -1825,45 +1842,45 @@
 
   /* Reset layout for checkboxes specifically */
   .filters-container input[type="checkbox"] {
-      width: 20px !important;
-      height: 20px !important;
-      padding: 0 !important;
-      margin: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
-  
+
   /* Reset line-height for textareas if any */
   textarea.form-input {
-      line-height: 1.5 !important;
-      padding-top: 0.5rem !important;
+    line-height: 1.5 !important;
+    padding-top: 0.5rem !important;
   }
 
   .admin-search {
     margin: 0 0 1rem 0 !important;
     flex: none !important;
   }
-  
+
   .content-header > div:first-child {
-      margin-bottom: 1rem;
+    margin-bottom: 1rem;
   }
-  
+
   /* Limpiar Filtros button full width */
-  .checkbox-filters-container .clean-filters-btn { 
-      width: 100%;
-      height: 48px;
-      justify-content: center;
-      margin-top: 1rem;
+  .checkbox-filters-container .clean-filters-btn {
+    width: 100%;
+    height: 48px;
+    justify-content: center;
+    margin-top: 1rem;
   }
-  
+
   /* Fix Dark Mode Limpiar Filtros Visibility */
   .dark-mode .clean-filters-btn {
-      color: #f87171;
-      border-color: #f87171;
-      background: rgba(239, 68, 68, 0.1); 
+    color: #f87171;
+    border-color: #f87171;
+    background: rgba(239, 68, 68, 0.1);
   }
 
   /* Title optimization */
   .content-title {
-      font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 }
 
@@ -2529,7 +2546,7 @@ html.dark-mode .create-book-modal,
 }
 
 /* Custom utility for numeric inputs without spinners */
-.form-input.no-spinner::-webkit-outer-spin-button, 
+.form-input.no-spinner::-webkit-outer-spin-button,
 .form-input.no-spinner::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
@@ -2645,14 +2662,14 @@ html.dark-mode .create-book-modal,
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .clean-filters-btn {
     margin-left: 0;
     width: 100%;
     margin-top: 0.5rem;
     text-align: center;
   }
-  
+
   /* Create Book Modal - Mobile Search Optimization */
   .search-actions {
     flex-direction: column;
@@ -2672,8 +2689,8 @@ html.dark-mode .create-book-modal,
   }
 
   /* Improve Touch Targets on Mobile */
-  .form-input, 
-  .form-select, 
+  .form-input,
+  .form-select,
   .search-input {
     font-size: 16px !important; /* Prevent iOS zoom */
     padding: 0.75rem !important;
@@ -2719,7 +2736,7 @@ html.dark-mode .create-book-modal,
 /* Increase (+) Button */
 .stock-btn.increase {
   background: #dcfce7; /* Green-100 */
-  color: #16a34a;      /* Green-600 */
+  color: #16a34a; /* Green-600 */
 }
 
 .stock-btn.increase:hover {
@@ -2730,7 +2747,7 @@ html.dark-mode .create-book-modal,
 /* Decrease (-) Button */
 .stock-btn.decrease {
   background: #fee2e2; /* Red-100 */
-  color: #dc2626;      /* Red-600 */
+  color: #dc2626; /* Red-600 */
 }
 
 .stock-btn.decrease:hover {
@@ -2740,7 +2757,7 @@ html.dark-mode .create-book-modal,
 
 .stock-btn.decrease:disabled {
   background: #f3f4f6; /* Gray-100 */
-  color: #9ca3af;     /* Gray-400 */
+  color: #9ca3af; /* Gray-400 */
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -2772,7 +2789,7 @@ html.dark-mode .create-book-modal,
 
 .dark-mode .stock-btn.decrease:disabled {
   background: #1e293b; /* Slate-800 */
-  color: #475569;      /* Slate-600 */
+  color: #475569; /* Slate-600 */
 }
 
 /* Reservation Manager Styles */
@@ -2942,78 +2959,78 @@ html.dark-mode .create-book-modal,
 
 /* Dark Mode Overrides for Action Buttons */
 .dark-mode .reservation-manager .action-btn.success {
-    background: rgba(34, 197, 94, 0.2);
-    color: #4ade80; /* Lighter green for dark mode */
-    border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80; /* Lighter green for dark mode */
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
 .dark-mode .reservation-manager .action-btn.success:hover {
-    background: #22c55e;
-    color: #ecfdf5; /* Very light green/white */
+  background: #22c55e;
+  color: #ecfdf5; /* Very light green/white */
 }
 
 .dark-mode .reservation-manager .action-btn.danger {
-    background: rgba(239, 68, 68, 0.2);
-    color: #f87171; /* Lighter red for dark mode */
-    border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171; /* Lighter red for dark mode */
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .dark-mode .reservation-manager .action-btn.danger:hover {
-    background: #ef4444;
-    color: #fef2f2;
+  background: #ef4444;
+  color: #fef2f2;
 }
 
 /* Dark Mode Overrides for Reservation Manager */
 .dark-mode .reservation-manager .section-header,
 .dark-mode .reservation-manager .table-container {
-    background: #1f2937; /* Dark gray for containers */
-    border-color: #374151;
+  background: #1f2937; /* Dark gray for containers */
+  border-color: #374151;
 }
 
 .dark-mode .reservation-manager .section-header h2 {
-    color: #f9fafb; /* White text */
+  color: #f9fafb; /* White text */
 }
 
 .dark-mode .reservation-manager .section-header p {
-    color: #9ca3af; /* Light gray text */
+  color: #9ca3af; /* Light gray text */
 }
 
 .dark-mode .reservation-manager .data-table th {
-    background: #111827; /* Darker gray for header */
-    color: #d1d5db; /* Light gray text */
-    border-bottom-color: #374151;
+  background: #111827; /* Darker gray for header */
+  color: #d1d5db; /* Light gray text */
+  border-bottom-color: #374151;
 }
 
 .dark-mode .reservation-manager .data-table td {
-    color: #e5e7eb; /* White-ish text */
-    border-bottom-color: #374151;
+  color: #e5e7eb; /* White-ish text */
+  border-bottom-color: #374151;
 }
 
 .dark-mode .reservation-manager .data-table tr:hover td {
-    background: #374151; /* Hover effect */
+  background: #374151; /* Hover effect */
 }
 
 .dark-mode .reservation-manager .text-gray-500 {
-    color: #9ca3af !important;
+  color: #9ca3af !important;
 }
 
 .dark-mode .reservation-manager .user-info .text-sm {
-    color: #9ca3af;
+  color: #9ca3af;
 }
 
 .dark-mode .reservation-manager .book-info .text-xs {
-    color: #9ca3af;
+  color: #9ca3af;
 }
 
 .dark-mode .reservation-manager .action-btn.warning {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-    border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .dark-mode .reservation-manager .action-btn.warning:hover {
-    background: #f59e0b;
-    color: #fffbeb;
+  background: #f59e0b;
+  color: #fffbeb;
 }
 
 /* Notification Badge */
@@ -3037,19 +3054,24 @@ html.dark-mode .create-book-modal,
 }
 
 /* Sidebar Badge Count */
+/* Sidebar Badge Count - High Specificity */
+.dashboard-sidebar .nav-item .sidebar-badge-count,
 .sidebar-badge-count {
-  background-color: var(--danger-color);
-  color: white;
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0 6px;
   border-radius: 99px;
   min-width: 1.25rem;
   height: 1.25rem;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   margin-left: auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  line-height: normal; /* Fix alignment */
+  z-index: 10;
 }
 
 /* Mobile Reservation Manager */
@@ -3057,10 +3079,10 @@ html.dark-mode .create-book-modal,
   .reservation-manager .data-table thead {
     display: none;
   }
-  
-  .reservation-manager .data-table, 
-  .reservation-manager .data-table tbody, 
-  .reservation-manager .data-table tr, 
+
+  .reservation-manager .data-table,
+  .reservation-manager .data-table tbody,
+  .reservation-manager .data-table tr,
   .reservation-manager .data-table td {
     display: block;
     width: 100%;
@@ -3108,7 +3130,7 @@ html.dark-mode .create-book-modal,
     font-size: 0.875rem;
     white-space: nowrap;
   }
-  
+
   /* Adjust content for specific cells */
   .reservation-manager .data-table td .user-info {
     text-align: right;
@@ -3117,7 +3139,7 @@ html.dark-mode .create-book-modal,
     flex-direction: column;
     max-width: 60%;
   }
-  
+
   .reservation-manager .data-table td .book-info {
     text-align: right;
     align-items: flex-end;
@@ -3135,14 +3157,14 @@ html.dark-mode .create-book-modal,
     line-height: 1.3;
     word-break: break-word; /* Ensure wrapping */
   }
-  
+
   .reservation-manager .data-table td .action-buttons {
     display: flex;
     gap: 0.5rem;
     justify-content: stretch;
     width: 100%;
   }
-  
+
   .reservation-manager .data-table td .action-buttons .action-btn {
     flex: 1;
     justify-content: center;

@@ -42,7 +42,11 @@ export const getClientes = async (
       .range(from, to);
 
     if (tipo && tipo !== 'all') {
-      query = query.eq('tipo', tipo);
+      if (tipo === 'express') {
+        query = query.ilike('notas', '%Express%');
+      } else {
+        query = query.eq('tipo', tipo);
+      }
     }
 
     const { data, error, count } = await query;
@@ -218,7 +222,11 @@ export const buscarClientes = async (
       .range(from, to);
 
     if (tipo && tipo !== 'all') {
-      queryBuilder = queryBuilder.eq('tipo', tipo);
+      if (tipo === 'express') {
+        queryBuilder = queryBuilder.ilike('notas', '%Express%');
+      } else {
+        queryBuilder = queryBuilder.eq('tipo', tipo);
+      }
     }
 
     const { data, error, count } = await queryBuilder;

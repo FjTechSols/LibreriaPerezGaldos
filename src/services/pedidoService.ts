@@ -706,13 +706,21 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
         clienteId = existingClient.id;
       } else {
         // Create new client
+        // Split name into First and Last (Simple heuristic)
+        const nameParts = input.clientName.trim().split(' ');
+        const nombre = nameParts[0];
+        const apellidos = nameParts.slice(1).join(' ') || '.'; // Fallback to '.' if no surname to satisfy constraints
+
         const { data: newClient, error: clientError } = await supabase
           .from('clientes')
           .insert({
-            nombre: input.clientName,
+            nombre: nombre,
+            apellidos: apellidos,
             telefono: sanitizedPhone,
             email: null,
-            direccion: null
+            direccion: null,
+            tipo: 'particular',
+            notas: 'Cliente creado desde Pedido Express'
           })
           .select()
           .single();

@@ -31,7 +31,9 @@ export function BooksTableLegacy({
   }
 
   return (
-    <div className="overflow-x-visible rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+      {/* Desktop View (Table) */}
+      <div className="hidden md:block overflow-x-visible">
       <table className="w-full text-left text-sm relative">
         <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-200 dark:border-gray-700">
            <tr>
@@ -221,19 +223,90 @@ export function BooksTableLegacy({
            )}
         </tbody>
       </table>
+      </div>
 
+      {/* Mobile View (Cards) */}
+      <div className="block md:hidden">
+         <div className="divide-y divide-gray-200 dark:divide-gray-700">
+             {books.map(book => (
+                 <div key={book.id} className="p-4 flex gap-3 relative hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      {/* Left: Cover */}
+                      <div className="flex-shrink-0 w-16 h-24 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden shadow-sm relative">
+                          {book.coverImage ? (
+                              <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover" />
+                          ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No img</div>
+                          )}
+                          {book.isNew && <span className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-bold px-1 rounded-bl">NUEVO</span>}
+                      </div>
+
+                      {/* Right: Info */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                             <div className="flex justify-between items-start">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-tight">
+                                    {book.title}
+                                </h3>
+                                <span className="font-bold text-gray-900 dark:text-white ml-2 shrink-0">
+                                    {book.price.toFixed(2)}€
+                                </span>
+                             </div>
+                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{book.author}</p>
+                             <p className="text-[10px] text-gray-400 font-mono mt-0.5">{book.code || 'S/C'} {book.ubicacion ? `• ${book.ubicacion}` : ''}</p>
+                          </div>
+
+                          <div className="flex items-end justify-between mt-2">
+                              {/* Stock Control */}
+                              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded px-1 py-0.5">
+                                 <button onClick={() => onStockUpdate(book, -1)} className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-600 rounded text-gray-600 dark:text-gray-300 shadow-sm text-sm">-</button>
+                                 <span className={`w-6 text-center text-xs font-bold ${book.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>{book.stock}</span>
+                                 <button onClick={() => onStockUpdate(book, 1)} className="w-6 h-6 flex items-center justify-center bg-white dark:bg-gray-600 rounded text-gray-600 dark:text-gray-300 shadow-sm text-sm">+</button>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex gap-1.5">
+                                 <button 
+                                     onClick={() => onExpressOrder(book)}
+                                     className="p-1.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded hover:bg-yellow-200 transition-colors"
+                                 >
+                                     <Barcode size={16} />
+                                 </button>
+                                 <button 
+                                     onClick={() => onEdit(book)}
+                                     className="p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 transition-colors"
+                                 >
+                                     <Edit2 size={16} />
+                                 </button>
+                                 <button 
+                                     onClick={() => onDelete(book.id)}
+                                     className="p-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded hover:bg-red-200 transition-colors"
+                                 >
+                                     <Trash2 size={16} />
+                                 </button>
+                              </div>
+                          </div>
+                      </div>
+                 </div>
+             ))}
+             {books.length === 0 && (
+                <div className="p-8 text-center text-gray-500">
+                    No hay libros
+                </div>
+             )}
+          </div>
+      </div>
       {/* Fixed Code Projection Overlay */}
       {hoveredCode && (
         <div 
             className="fixed z-[9999] bg-white dark:bg-gray-900 border-2 border-blue-600 shadow-2xl rounded-2xl p-6 pointer-events-none animate-in fade-in zoom-in-95 duration-200 pb-8 pr-12 min-w-[max-content]"
             style={{ 
-                top: hoveredCode.top - 10,
-                left: hoveredCode.left,
+                top: (hoveredCode?.top || 0) - 10,
+                left: hoveredCode?.left || 0,
             }}
         >
             <span className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1.5 block">Código Legacy</span>
             <span className="text-6xl font-black text-gray-900 dark:text-white tracking-widest font-mono leading-none block">
-                {hoveredCode.code}
+                {hoveredCode?.code}
             </span>
         </div>
       )}
@@ -243,12 +316,12 @@ export function BooksTableLegacy({
         <div 
             className="fixed z-[9999] bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 max-w-sm pointer-events-none animate-in fade-in zoom-in-95 duration-200"
             style={{ 
-                top: hoveredDescription.top,
-                left: hoveredDescription.left + 24, // Shift right of icon
+                top: hoveredDescription?.top || 0,
+                left: (hoveredDescription?.left || 0) + 24, // Shift right of icon
             }}
         >
             <div className="font-semibold mb-1 border-b border-gray-700 pb-1">Descripción</div>
-            <p className="leading-relaxed">{hoveredDescription.text}</p>
+            <p className="leading-relaxed">{hoveredDescription?.text}</p>
         </div>
       )}
     </div>

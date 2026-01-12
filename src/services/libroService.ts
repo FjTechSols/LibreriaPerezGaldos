@@ -925,9 +925,14 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
             .filter((num: number) => {
                 const loc = ubicacionNombre.toLowerCase().trim();
                 // Check common variations (normalized names with accents)
-                if (loc === 'hortaleza' || loc === 'galeon' || loc === 'galeón') {
-                    // Start ranges typically < 50000. If we see 1000000, ignore it.
-                    return num < 100000;
+                if (loc === 'hortaleza') {
+                    // FIX: User reported outlier at 4077H and 66964H. Valid sequence is ~1370.
+                    // Set strict limit to 2000 to ignore the 4000+ range.
+                    return num < 2000;
+                }
+                if (loc === 'galeon' || loc === 'galeón') {
+                     // Keep Galeon at 20000 for now (or 100k if needed, but safer low to avoid jumps)
+                     return num < 20000;
                 }
                 // Almacén: exclude outliers above 3 million (correct range is 0229xxxx)
                 if (loc === 'almacen' || loc === 'almacén' || loc === 'general') {

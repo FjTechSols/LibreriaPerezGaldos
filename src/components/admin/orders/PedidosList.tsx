@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown } from 'lucide-react';
-import { Pedido, EstadoPedido } from '../../../types';
+import { Pedido, EstadoPedido, TipoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
@@ -40,11 +40,23 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
   devolucion: 'Devolución'
 };
 
+const TIPOS: TipoPedido[] = ['interno', 'iberlibro', 'uniliber', 'perez_galdos', 'galeon', 'express'];
+
+const TIPO_LABELS: Record<TipoPedido, string> = {
+    interno: 'Interno',
+    iberlibro: 'IberLibro',
+    uniliber: 'Uniliber',
+    perez_galdos: 'Web',
+    galeon: 'Galeón',
+    express: 'Express'
+};
+
 export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosListProps) {
   const { formatPrice } = useSettings();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState<EstadoPedido | ''>('');
+  const [filtroTipo, setFiltroTipo] = useState<TipoPedido | ''>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [estadisticas, setEstadisticas] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -259,16 +271,22 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
     return matchesBasic || matchesClient;
   });
 
+  // Filter by Type
+  const pedidosFiltradosPorTipo = pedidosFiltrados.filter(pedido => {
+      if (!filtroTipo) return true;
+      return pedido.tipo === filtroTipo;
+  });
+
   // Pagination calculations
-  const totalPages = Math.ceil(pedidosFiltrados.length / itemsPerPage);
+  const totalPages = Math.ceil(pedidosFiltradosPorTipo.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const pedidosPaginados = pedidosFiltrados.slice(startIndex, endIndex);
+  const pedidosPaginados = pedidosFiltradosPorTipo.slice(startIndex, endIndex);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filtroEstado]);
+  }, [searchTerm, filtroEstado, filtroTipo]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -352,6 +370,19 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           {ESTADOS.map(estado => (
             <option key={estado} value={estado}>
               {ESTADO_LABELS[estado]}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filtroTipo}
+          onChange={(e) => setFiltroTipo(e.target.value as TipoPedido | '')}
+          className="filter-select"
+        >
+          <option value="">Todos los tipos</option>
+          {TIPOS.map(tipo => (
+            <option key={tipo} value={tipo}>
+              {TIPO_LABELS[tipo]}
             </option>
           ))}
         </select>

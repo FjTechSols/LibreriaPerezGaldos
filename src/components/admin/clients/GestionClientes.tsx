@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit2, Trash2, Search, X, Mail, Phone, MapPin, CreditCard, Building2, School, User } from 'lucide-react';
+import { Zap, Users, Plus, Edit2, Trash2, Search, X, Mail, Phone, MapPin, CreditCard, Building2, School, User } from 'lucide-react';
 import { Cliente } from '../../../types';
 import { getClientes, crearCliente, actualizarCliente, eliminarCliente, buscarClientes, ClienteFormData } from '../../../services/clienteService';
 import '../../../styles/components/GestionClientes.css';
@@ -277,6 +277,19 @@ export function GestionClientes() {
                     className={`filter-pill ${filterType === 'institucion' ? 'active' : ''}`}
                 >
                     Instituciones
+                </button>
+                <div style={{ width: '1px', height: '20px', background: '#eee', margin: '0 8px' }}></div>
+                <button 
+                    onClick={() => setFilterType('express')} 
+                    className={`filter-pill ${filterType === 'express' ? 'active' : ''}`}
+                    style={{ 
+                        background: filterType === 'express' ? '#f97316' : 'transparent',
+                        borderColor: filterType === 'express' ? '#f97316' : '#eee',
+                        color: filterType === 'express' ? 'white' : '#f97316',
+                    }}
+                >
+                    <Zap size={14} style={{ marginRight: '4px' }}/>
+                    Express
                 </button>
             </div>
 

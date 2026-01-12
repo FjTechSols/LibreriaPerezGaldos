@@ -959,19 +959,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                   {(!editingShipping && !pedido?.direccion_envio?.includes('RECOGIDA')) && (
                     <button
                       onClick={() => setEditingShipping(true)}
-                      style={{
-                        marginLeft: 'auto',
-                        padding: '0.25rem 0.5rem',
-                        fontSize: '0.75rem',
-                        background: 'var(--primary-color)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
-                      }}
+                      className="btn-mini-edit"
                     >
                       <Edit size={14} />
                       Editar
@@ -1123,19 +1111,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                   {!editingObservations && (
                     <button
                       onClick={() => setEditingObservations(true)}
-                      style={{
-                        marginLeft: 'auto',
-                        padding: '0.25rem 0.5rem',
-                        fontSize: '0.75rem',
-                        background: 'var(--primary-color)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
-                      }}
+                      className="btn-mini-edit"
                     >
                       <Edit size={14} />
                       Editar
