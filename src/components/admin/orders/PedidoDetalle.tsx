@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe, Link as LinkIcon } from 'lucide-react';
 import { Pedido, EstadoPedido, Libro } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
@@ -313,6 +313,18 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
       // Helper to check if any changes actually happened?
       // For now assume yes if they clicked save.
       return true;
+  };
+
+  const handleCopyPaymentLink = () => {
+    if (!pedido) return;
+    const paymentUrl = `${window.location.origin}/stripe-checkout?orderId=${pedido.id}`;
+    navigator.clipboard.writeText(paymentUrl);
+    setMessageModalConfig({
+        title: 'Enlace Copiado',
+        message: 'El enlace de pago se ha copiado al portapapeles.',
+        type: 'info'
+    });
+    setShowMessageModal(true);
   };
 
   const handleConfirmarStock = async () => {
@@ -902,7 +914,28 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                 <h3>Método de Pago</h3>
               </div>
               <div className="info-card-body">
-                <p className="info-principal">{pedido?.metodo_pago || '-'}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <p className="info-principal">{pedido?.metodo_pago || '-'}</p>
+                    <button
+                        onClick={handleCopyPaymentLink}
+                        title="Copiar enlace de pago manual"
+                        style={{
+                            padding: '0.25rem 0.5rem',
+                            fontSize: '0.75rem',
+                            background: 'var(--bg-secondary)',
+                            color: 'var(--text-primary)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                        }}
+                    >
+                        <LinkIcon size={14} />
+                        Copiar Enlace
+                    </button>
+                </div>
               </div>
             </div>
 

@@ -70,7 +70,7 @@ function AppRoutes() {
           <Route
             path="/stripe-checkout"
             element={
-              <ProtectedRoute requireRole="usuario">
+              <ProtectedRoute>
                 <StripeCheckout />
               </ProtectedRoute>
             }

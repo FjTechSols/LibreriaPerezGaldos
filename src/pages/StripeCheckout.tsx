@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { StripePaymentForm } from '../components/StripePaymentForm';
@@ -35,7 +35,7 @@ export default function StripeCheckout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const { actualTheme } = useTheme();
   const { t } = useLanguage();
   const { settings } = useSettings();
@@ -69,6 +69,18 @@ export default function StripeCheckout() {
     setShowMessageModal(true);
   };
 
+  // Stabilize options to prevent unnecessary re-renders of Elements
+  // Must be declared at top level to satisfy Rules of Hooks
+  const stripeOptions = useMemo(() => ({
+      clientSecret,
+      appearance: {
+          theme: (actualTheme === 'dark' ? 'night' : 'stripe') as 'night' | 'stripe',
+          variables: {
+              colorPrimary: '#2563eb',
+          },
+      },
+  }), [clientSecret, actualTheme]);
+
   useEffect(() => {
     // If we already have full data from Cart navigation (locationState), use it.
     if (locationState?.cartItems && locationState.cartItems.length > 0) {
@@ -83,6 +95,15 @@ export default function StripeCheckout() {
        return;
     }
 
+    // Check for query param (e.g. ?orderId=123)
+    const searchParams = new URLSearchParams(location.search);
+    const queryOrderId = searchParams.get('orderId');
+
+    if (queryOrderId) {
+        initializeExistingOrderPayment(queryOrderId);
+        return;
+    }
+
     // Fallback
     if (!locationState) {
         navigate('/carrito');
@@ -95,6 +116,19 @@ export default function StripeCheckout() {
           const pedido = await obtenerPedidoPorId(parseInt(orderId));
           
           if (!pedido) throw new Error("Pedido no encontrado");
+
+          // Security check: Ensure user owns the order or is a Super Admin
+          if (pedido.usuario_id !== user!.id && !isSuperAdmin) {
+             console.error('Unauthorized access attempt to order:', orderId); // Log security event
+             setError('No tienes permisos para acceder a este pedido.');
+             setIsLoading(false); // Stop loading and prevent further processing
+             return;
+          }
+
+          // If Super Admin is accessing another user's order, log a warning but allow continuation
+          if (isSuperAdmin && pedido.usuario_id !== user!.id) {
+             console.log('Super Admin accessing user order:', orderId);
+          }
 
           // Construct state from existing order
           const loadedState: StripeCheckoutState = {
@@ -333,6 +367,8 @@ export default function StripeCheckout() {
     );
   }
 
+
+
   return (
     <div className="stripe-checkout-container">
       <div className="checkout-content-grid">
@@ -383,15 +419,7 @@ export default function StripeCheckout() {
         <div className="checkout-main">
           <Elements
             stripe={stripePromise}
-            options={{
-              clientSecret,
-              appearance: {
-                theme: actualTheme === 'dark' ? 'night' : 'stripe',
-                variables: {
-                  colorPrimary: '#2563eb',
-                },
-              },
-            }}
+            options={stripeOptions}
             key={actualTheme}
           >
             <StripePaymentForm
@@ -402,7 +430,6 @@ export default function StripeCheckout() {
           </Elements>
         </div>
       </div>
-
 
       <MessageModal
         isOpen={showMessageModal}

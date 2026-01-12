@@ -19,12 +19,19 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
   const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [isReady, setIsReady] = useState(false); // New state for PaymentElement readiness
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
       return;
+    }
+
+    // Ensure PaymentElement is ready before confirming payment
+    if (!isReady) {
+        console.warn("PaymentElement not ready yet.");
+        return;
     }
 
     setIsProcessing(true);
@@ -47,7 +54,7 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
         // Keep isProcessing=true while we handle the success (create order, etc.)
         // This keeps the overlay active until the parent component navigates away.
         await onSuccess(paymentIntent.id);
-        // We DON'T set isProcessing(false) here if successful, 
+        // We DON'T set isProcessing(false) here if successful,
         // to prevent UI flicker before navigation.
       }
     } catch (err) {
@@ -84,7 +91,7 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
         </div>
 
         <div className="payment-element-container">
-          <PaymentElement />
+          <PaymentElement onReady={() => setIsReady(true)} />
         </div>
 
         {errorMessage && (
@@ -95,7 +102,7 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
 
         <button
           type="submit"
-          disabled={!stripe || isProcessing}
+          disabled={!stripe || isProcessing || !isReady}
           className="pay-button"
         >
           {isProcessing ? (
