@@ -141,11 +141,13 @@ export default function StripeCheckout() {
       setIsLoading(true);
 
       // Create payment intent WITHOUT creating the order
-      // Stripe expects amount in cents
-      const amountInCents = Math.round(currentState.orderTotal * 100);
+      // FIX: Stripe service/backend handles conversion or expects units? 
+      // User issue: 39 -> 3900 means backend is multiplying by 100 on TOP of this.
+      // So we send units (39) and let backend do the conversion to cents.
+      const amountToSend = currentState.orderTotal;
       
       const { clientSecret: secret } = await stripeService.createPaymentIntent(
-        amountInCents,
+        amountToSend,
         {
           cliente_email: currentState.checkoutData.email,
           cliente_nombre: `${currentState.checkoutData.nombre} ${currentState.checkoutData.apellidos}`,
