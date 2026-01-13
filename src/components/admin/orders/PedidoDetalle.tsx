@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe, Link as LinkIcon } from 'lucide-react';
 import { Pedido, EstadoPedido, Libro } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido } from '../../../services/pedidoService';
-import { sendPaymentReadyEmail } from '../../../services/emailService';
+import { sendPaymentReadyEmail, sendPaymentConfirmedEmail, sendShippedEmail, sendCompletedEmail, sendStoreOrderProcessingEmail, sendStoreOrderShippedEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
@@ -100,9 +100,108 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   
   // Handlers placeholder (I'll add full logic in next tool call)
   const handleCambiarEstado = async (nuevoEstado: EstadoPedido) => {
-    const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
+    // Validation for Internal Orders when marking as Shipped
+    if (pedido.tipo === 'interno' && nuevoEstado === 'enviado') {
+        if (!transportista.trim() || !tracking.trim()) {
+            setMessageModalConfig({
+                title: 'Faltan datos de envío',
+                message: 'Para marcar el pedido como Enviado, debe indicar el Transportista y el Número de Seguimiento.',
+                type: 'error'
+            });
+            setShowMessageModal(true);
+            return;
+        }
+    }
 
-    if (result.success) {
+    let success = false;
+    let errorMsg = '';
+    
+    // If Internal Order becoming Shipped, save shipping info + status together
+    if (pedido.tipo === 'interno' && nuevoEstado === 'enviado') {
+        // cast transportista to any to avoid strict union check if user typed custom value
+        success = await actualizarPedido(pedido.id, {
+            ...pedido,
+            estado: nuevoEstado,
+            transportista: transportista as any,
+            tracking: tracking
+        });
+        if (!success) errorMsg = 'Error al actualizar el pedido con datos de envío.';
+    } else {
+        const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
+        success = result.success;
+        errorMsg = result.error || '';
+    }
+
+    if (success) {
+      // Email Logic for Internal Orders
+      if (pedido.tipo === 'interno' && pedido.usuario?.email) {
+          const customerEmail = pedido.usuario.email;
+          const customerName = pedido.usuario.nombre_completo || pedido.usuario.username || 'Cliente';
+          const total = pedido.total || 0;
+
+          if (nuevoEstado === 'procesando') {
+             await sendPaymentConfirmedEmail(pedido.id.toString(), customerEmail, customerName, total);
+          } else if (nuevoEstado === 'enviado') {
+             await sendShippedEmail(pedido.id.toString(), customerEmail, customerName, total, transportista || 'Agencia de transporte', tracking || '');
+          } else if (nuevoEstado === 'completado') {
+             await sendCompletedEmail(pedido.id.toString(), customerEmail, customerName, total);
+          }
+
+      // Email Logic for Perez Galdos, Galeon, and Express
+      } else if (['perez_galdos', 'galeon', 'express'].includes(pedido.tipo || '') && pedido.cliente?.email) {
+          const customerEmail = pedido.cliente.email;
+          const customerName = pedido.cliente.tipo === 'empresa' 
+              ? pedido.cliente.nombre 
+              : `${pedido.cliente.nombre} ${pedido.cliente.apellidos}`;
+          const total = pedido.total || 0;
+          
+          let storeName = 'Librería Pérez Galdós';
+          if (pedido.tipo === 'galeon') storeName = 'Librería Galeón';
+          // Express defaults to PG unless specified otherwise, using PG for now
+          
+          // Prepare items summary for email
+          const items = pedido.detalles?.map(d => ({
+              title: d.libro?.titulo || d.nombre_externo || 'Producto',
+              quantity: d.cantidad,
+              price: d.precio_unitario,
+              author: d.libro?.autor,
+              ref: d.libro?.codigo || d.libro?.legacy_id?.toString()
+          })) || [];
+
+          if (nuevoEstado === 'procesando') {
+              // "Su pedido Numero de referencia, titulo, autor, esta siendo procesado en nuestros almacenes"
+              await sendStoreOrderProcessingEmail(
+                  pedido.id.toString(), 
+                  customerEmail, 
+                  customerName, 
+                  total,
+                  items,
+                  storeName
+              );
+
+          } else if (nuevoEstado === 'enviado') {
+              // "el usuario recibira la confirmacion que su pedido ya esta de camino a la libreria que haya elegido"
+              await sendStoreOrderShippedEmail(
+                  pedido.id.toString(),
+                  customerEmail,
+                  customerName,
+                  total,
+                  storeName,
+                  transportista,
+                  tracking
+              );
+
+          } else if (nuevoEstado === 'completado') {
+              // "mensaje de agradecimiento por elegirnos"
+              await sendCompletedEmail(
+                  pedido.id.toString(),
+                  customerEmail,
+                  customerName,
+                  total 
+              );
+          }
+      }
+
       setMessageModalConfig({
         title: 'Estado Actualizado',
         message: 'El estado del pedido se ha actualizado correctamente.',
@@ -113,7 +212,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     } else {
       setMessageModalConfig({
         title: 'Error',
-        message: result.error || 'Hubo un error al actualizar el estado del pedido.',
+        message: errorMsg || 'Hubo un error al actualizar el estado del pedido.',
         type: 'error'
       });
       setShowMessageModal(true);

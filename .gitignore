@@ -8,7 +8,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
+
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -25,7 +25,7 @@ dist-ssr
 # User requested exclusions
 docs/
 scripts/
-supabase/
+
 
 # Temporary & Layout files
 lint_output.txt
@@ -48,3 +48,5 @@ pnpm-debug.log*
 lerna-debug.log*
 
 laboratorio/
+
+supabase/

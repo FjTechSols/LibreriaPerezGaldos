@@ -60,7 +60,7 @@ export const sendReservationEmail = async (
 };
 
 export interface OrderEmailData {
-  emailType: 'order_confirmation' | 'payment_ready';
+  emailType: 'order_confirmation' | 'payment_ready' | 'payment_confirmed' | 'shipped' | 'completed' | 'store_order_registered' | 'store_order_processing' | 'store_order_shipped';
   orderId: string;
   customerEmail: string;
   customerName: string;
@@ -68,6 +68,8 @@ export interface OrderEmailData {
     title: string;
     quantity: number;
     price: number;
+    author?: string;
+    ref?: string;
   }>;
   subtotal?: number;
   tax?: number;
@@ -76,6 +78,9 @@ export interface OrderEmailData {
   total: number;
   shippingAddress?: string;
   paymentUrl?: string;
+  carrier?: string;
+  trackingNumber?: string;
+  storeName?: string;
 }
 
 /**
@@ -93,11 +98,6 @@ export const sendOrderConfirmationEmail = async (orderData: Omit<OrderEmailData,
     if (error) {
       console.error('❌ Error invoking send-order-email function:', error);
       return { success: false, error: error.message };
-    }
-
-    if (!data?.success) {
-      console.error('❌ Email sending failed:', data?.error);
-      return { success: false, error: data?.error || 'Unknown error' };
     }
 
     return { success: true };
@@ -142,14 +142,220 @@ export const sendPaymentReadyEmail = async (
       return { success: false, error: error.message };
     }
 
-    if (!data?.success) {
-      console.error('❌ Email sending failed:', data?.error);
-      return { success: false, error: data?.error || 'Unknown error' };
-    }
-
     return { success: true };
   } catch (error: any) {
     console.error('❌ Exception sending payment ready email:', error);
     return { success: false, error: error.message };
   }
 };
+
+/**
+ * Send payment confirmed email (Procesando)
+ */
+export const sendPaymentConfirmedEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'payment_confirmed',
+      orderId,
+      customerEmail,
+      customerName,
+      total
+    };
+
+    const { error } = await supabase.functions.invoke('send-order-email', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error sending payment confirmed email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send shipped email (Enviado)
+ */
+export const sendShippedEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number,
+  carrier: string,
+  trackingNumber: string
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'shipped',
+      orderId,
+      customerEmail,
+      customerName,
+      total,
+      carrier,
+      trackingNumber
+    };
+
+    const { error } = await supabase.functions.invoke('send-order-email', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error sending shipped email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send completed email (Completado)
+ */
+export const sendCompletedEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'completed',
+      orderId,
+      customerEmail,
+      customerName,
+      total
+    };
+
+    const { error } = await supabase.functions.invoke('send-order-email', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error sending completed email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send store order registered email (Pedido Registrado)
+ */
+export const sendStoreOrderRegisteredEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number,
+  items: Array<{ title: string; quantity: number; price: number; author?: string; ref?: string }>,
+  storeName: string
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'store_order_registered',
+      orderId,
+      customerEmail,
+      customerName,
+      total,
+      items,
+      storeName
+    };
+
+    const { error } = await supabase.functions.invoke('send-order-email', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error sending store order registered email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send store order processing email (Procesando)
+ */
+export const sendStoreOrderProcessingEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number,
+  items: Array<{ title: string; quantity: number; price: number; author?: string; ref?: string }>,
+  storeName: string
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'store_order_processing',
+      orderId,
+      customerEmail,
+      customerName,
+      total,
+      items,
+      storeName
+    };
+
+    const { error } = await supabase.functions.invoke('send-order-email', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error sending store order processing email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send store order shipped email (En camino a librería)
+ */
+export const sendStoreOrderShippedEmail = async (
+  orderId: string,
+  customerEmail: string,
+  customerName: string,
+  total: number,
+  storeName: string,
+  carrier?: string,
+  trackingNumber?: string
+): Promise<EmailResult> => {
+  try {
+    const emailData: OrderEmailData = {
+      emailType: 'store_order_shipped',
+      orderId,
+      customerEmail,
+      customerName,
+      total,
+      storeName,
+      carrier,
+      trackingNumber
+    };
+
+    const { error } = await supabase.functions.invoke('send-order-email', {
+      body: { orderData: emailData }
+    });
+
+    if (error) {
+      console.error('❌ Error sending store order shipped email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+

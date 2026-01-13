@@ -20,7 +20,7 @@ import {
 } from "../../../services/pedidoService";
 import { obtenerLibros, buscarLibros } from "../../../services/libroService";
 import { getClientes, crearCliente } from "../../../services/clienteService";
-import { sendOrderConfirmationEmail, type OrderEmailData } from "../../../services/emailService";
+import { sendOrderConfirmationEmail, sendStoreOrderRegisteredEmail, type OrderEmailData } from "../../../services/emailService";
 import { useAuth } from "../../../context/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
 import "../../../styles/components/CrearPedido.css";
@@ -1102,17 +1102,47 @@ export default function CrearPedido({
             shippingAddress: direccionEnvio || 'Sin dirección especificada'
           };
           // Send email asynchronously (don't block order creation)
-          sendOrderConfirmationEmail(orderEmailData)
-            .then(result => {
-              if (result.success) {
-                // console.log('✅ Email de confirmación enviado correctamente');
-              } else {
-                console.error('❌ Error al enviar email:', result.error);
-              }
-            })
-            .catch(err => {
-              console.error('❌ Excepción al enviar email:', err);
-            });
+          if (['perez_galdos', 'galeon', 'express'].includes(tipo)) {
+              let storeName = 'Librería Pérez Galdós';
+              if (tipo === 'galeon') storeName = 'Librería Galeón';
+
+              const items = lineas.map(l => ({
+                   title: l.libro?.titulo || l.nombre_externo || 'Producto',
+                   quantity: l.cantidad,
+                   price: l.precio_unitario,
+                   author: l.libro?.autor,
+                   ref: l.libro?.codigo || l.libro?.legacy_id?.toString()
+              }));
+
+              // Use new function for Store Orders
+              sendStoreOrderRegisteredEmail(
+                 pedido.id.toString(),
+                 clientEmail,
+                 pedido.cliente?.nombre as string || 'Cliente',
+                 total,
+                 items,
+                 storeName
+              ).then(result => {
+                  if (result.success) {
+                    console.log('✅ Email de registro de pedido enviado');
+                  } else {
+                    console.error('❌ Error enviando email registro:', result.error);
+                  }
+              });
+          } else {
+             // Default / Internal
+             sendOrderConfirmationEmail(orderEmailData)
+                .then(result => {
+                  if (result.success) {
+                    // console.log('✅ Email de confirmación enviado correctamente');
+                  } else {
+                    console.error('❌ Error al enviar email:', result.error);
+                  }
+                })
+                .catch(err => {
+                  console.error('❌ Excepción al enviar email:', err);
+                });
+          }
 
           const closeCallback = () => {
               resetForm();
