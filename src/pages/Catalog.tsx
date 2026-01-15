@@ -5,15 +5,16 @@ import { SearchBar } from '../components/SearchBar';
 import { BookFilter } from '../components/BookFilter';
 import { Pagination } from '../components/Pagination';
 import { Book, FilterState } from '../types';
-import { obtenerLibros, obtenerTotalLibros } from '../services/libroService';
+import { obtenerLibros, obtenerTotalLibros, obtenerSugerenciaOrtografica } from '../services/libroService'; // Import added
 import { useSettings } from '../context/SettingsContext';
 import { BookCardSkeleton } from '../components/BookCardSkeleton';
 import '../styles/pages/Catalog.css';
 
 export function Catalog() {
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams(); // Removed unused setSearchParams
   const { settings } = useSettings();
   const [books, setBooks] = useState<Book[]>([]);
+  const [suggestion, setSuggestion] = useState<string | null>(null); // State for modification
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,17 +59,17 @@ export function Catalog() {
      };
      loadTotalCount();
   }, []);
-
-  // Main Fetch Effect
   useEffect(() => {
     const controller = new AbortController();
     
     const fetchBooks = async () => {
       setLoading(true);
+      setSuggestion(null); // Reset suggestion on new fetch
       try {
-        // Construct Service Filters
+        // ... (filters setup)
         const serviceFilters = {
             search: searchParams.get('search') || undefined,
+            // ... (other filters)
             category: filters.category,
             minPrice: filters.priceRange[0],
             maxPrice: filters.priceRange[1],
@@ -80,34 +81,40 @@ export function Catalog() {
             isNew: filters.isNew
         };
 
-        // Pass signal to service if supported, otherwise just ignore result if aborted
-        // obtenerLibros currently doesn't support signal, so we rely on ignoring setting state.
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, serviceFilters);
         
         if (!controller.signal.aborted) {
             setBooks(data);
             
-            // If default view (no search/filters), override local count with accurate total count
-            // This fixes the "1001" estimate limit issue while keeping load fast.
-            const isDefaultView = !filters.category || filters.category === 'Todos';
+            // Check for spelling suggestion if ZERO results and SEARCH term exists
+            if (data.length === 0 && serviceFilters.search) {
+                 // Only verify if we are on page 1, otherwise it might just be end of pagination
+                 if (currentPage === 1) {
+                     const spelling = await obtenerSugerenciaOrtografica(serviceFilters.search);
+                     console.log('Spelling suggestion result:', spelling); // DEBUG LOG
+                     if (spelling && !controller.signal.aborted) {
+                         setSuggestion(spelling);
+                     }
+                 }
+            }
+
+            // ... (rest of logic for counts)
+             const isDefaultView = !filters.category || filters.category === 'Todos';
             const searchTerm = searchParams.get('search');
             const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale;
             
             if (isTrulyDefault) {
-                // Only overwrite if totalDatabaseBooks is loaded (>0)
-                // If it's 0 (loading), we prefer to keep the current value or wait for the other effect to update it
                 if (totalDatabaseBooks > 0) {
                      setTotalFilteredBooks(totalDatabaseBooks);
                 } 
-                // If totalDatabaseBooks is 0, we do NOTHING. We don't set it to count (0).
-                // This prevents the "0 found" flash on initial load.
             } else {
                  setTotalFilteredBooks(count);
             }
         }
         
       } catch (error) {
-        if (!controller.signal.aborted) {
+         // ... error handling
+         if (!controller.signal.aborted) {
             console.error('Error loading books:', error);
         }
       } finally {
@@ -117,14 +124,16 @@ export function Catalog() {
       }
     };
 
-
-
     fetchBooks();
-
+    
+    // ... cleanup
     return () => {
         controller.abort();
     };
   }, [currentPage, itemsPerPage, filters, searchParams, totalDatabaseBooks]);
+
+
+
 
   // Sync total filtered with total database when default view is active and DB count updates
   // This handles the case where books load faster than the total count, or vice versa.
@@ -171,6 +180,26 @@ export function Catalog() {
             placeholder="Buscar por título, autor, categoría, ISBN o código..."
           />
         </div>
+
+        {suggestion && (
+            <div className="suggestion-box">
+                <span style={{ fontSize: '1.2rem' }}>💡</span>
+                <p>
+                    No encontramos "{searchParams.get('search')}". ¿Quizás quisiste decir: 
+                    <button 
+                        className="suggestion-button"
+                        onClick={() => {
+                            const params = new URLSearchParams(searchParams);
+                            params.set('search', suggestion);
+                            window.location.search = params.toString();
+                        }}
+                    >
+                        {suggestion}
+                    </button>
+                    ?
+                </p>
+            </div>
+        )}
 
         <BookFilter
           filters={filters}
@@ -230,11 +259,15 @@ export function Catalog() {
                           onSale: false,
                           isNew: false
                         });
-                        // Also clear search param if needed, or simple reset filters locally
+                        // Clear search too
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('search');
+                        window.history.pushState({}, '', url);
+                        window.location.href = '/catalogo';
                       }}
                       className="reset-btn"
                     >
-                        Limpiar filtros
+                        Limpiar filtros y búsqueda
                     </button>
                   </div>
                 </div>

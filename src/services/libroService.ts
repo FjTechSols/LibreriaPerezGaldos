@@ -321,11 +321,7 @@ export const verificarExistenciaLibro = async (
     return data ? data.map(mapLibroToBook) : [];
 };
 
-// Helper for fuzzy search (Smart Vowels)
-const transformToWildcard = (term: string) => {
-  if (term.length <= 3) return term;
-  return term.replace(/[aeiouáéíóúü]/gi, '_');
-};
+
 
 export const obtenerLibros = async (
   page: number = 1, 
@@ -370,122 +366,51 @@ export const obtenerLibros = async (
 
     // Apply Filters
     if (filters) {
-     if (filters.search) {
-       const searchTerm = filters.search.trim();
-       const isNumeric = /^\d+$/.test(searchTerm);
-       
-       const numericId = parseInt(searchTerm, 10);
-       const validId = !isNaN(numericId) && numericId < 2147483647;
+      if (filters.search) {
+        const searchTerm = filters.search.trim();
+        const isNumeric = /^\d+$/.test(searchTerm);
+        
+        const numericId = parseInt(searchTerm, 10);
 
-       // Check search mode: 'default' means ONLY legacy_id (and id) search? 
-       if (filters.searchMode === 'default') {
-          // Strict Legacy Code Search
-          if (isNumeric) {
-              // STRATEGY: Try EXACT match first to avoid expensive LIKE scan
-              // If the user pasted a full code, this will hit immediately.
-              const { data: exactLegacy, error: exactError } = await supabase
-                 .from('libros')
-                 .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
-                 .eq('activo', true)
-                 .or(`legacy_id.eq.${searchTerm},id.eq.${numericId}`) // Check both Exact Legacy AND Exact ID
-                 .limit(5);
 
-              if (!exactError && exactLegacy && exactLegacy.length > 0) {
+        // 1. Numeric/Code Priority Search (Legacy compatibility)
+        if (isNumeric && filters.searchMode === 'default') {
+             // Exact match optimization for Barcode scanners
+             const { data: exactLegacy, error: exactError } = await supabase
+                  .from('libros')
+                  .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
+                  .eq('activo', true)
+                  .or(`legacy_id.eq.${searchTerm},id.eq.${numericId}`)
+                  .limit(5);
+
+             if (!exactError && exactLegacy && exactLegacy.length > 0) {
                   return { data: exactLegacy.map(mapLibroToBook), count: exactLegacy.length };
-              }
-
-              // If no exact match, fall back to prefix search optimized with Range Query
-              // LIKE is slow without text_pattern_ops index. GTE/LT is fast on standard B-tree.
-              const nextTerm = getNextSearchTerm(searchTerm);
-              query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
-          } else {
-              query = query.ilike('legacy_id', `${searchTerm}%`);
-          }
-      } else if (filters.searchMode === 'title_legacy') {
-          // Optimized "Fast" Search: Title + Legacy ID
-          const cleanSearchTerm = searchTerm.trim();
-          const hasDigits = /\d/.test(cleanSearchTerm);
-          
-          
-          const nextTerm = getNextSearchTerm(cleanSearchTerm);
-          
-          if (isNumeric) {
-             // Pure numeric: Exact ID or Legacy ID Range (Index-friendly)
-             // Range query (gte + lt) uses B-Tree index, unlike ILIKE 'term%' which often scans
-             // Syntax: id.eq.NUM,and(legacy_id.gte.TERM,legacy_id.lt.NEXT)
-             query = query.or(`id.eq.${numericId},and(legacy_id.gte.${cleanSearchTerm},legacy_id.lt.${nextTerm})`);
-          } else if (hasDigits) {
-             // Alphanumeric: Code Search (Range Optimized)
-             // We uppercase to match standard code conventions (H-123) if user typed h-123
-             // This is risky if codes are mixed case, but usually they are upper.
-             // To be safe, we can try range on Original AND Upper? No, too complex.
-             // Let's assume Upper for 'legacy_id' prefix matching if it starts with letter.
-             // Or just use the term as is if it matches digit start.
-             
-             // For now, use the term as provided but with Range Query.
-             query = query.gte('legacy_id', cleanSearchTerm).lt('legacy_id', nextTerm);
-          } else {
-             // Pure Text: Title Search using FTS (Full Text Search)
-             // Optimized logic: "Don Qui" -> "'Don':* & 'Qui':*"
-             // Now backed by GIN indexes (idx_libros_titulo_fts) for high performance.
-             const ftsQuery = cleanSearchTerm
-                .trim()
-                .split(/\s+/)
-                .map(term => `'${term}':*`)
-                .join(' & ');
-             
-             if (ftsQuery) {
-                // Use 'spanish' config to match the index definition
-                query = query.textSearch('titulo', ftsQuery, { config: 'spanish' });
-             } else {
-                query = query.ilike('titulo', `%${cleanSearchTerm}%`);
              }
-          }
-       } else {
-          // Full Search Mode (Title, Author, ISBN, etc.)
-          if (isNumeric) {
-              // Try exact match first here too? Maybe overly complex for 'full' mode, but safer.
-              if (validId) {
-                 const nextTerm = getNextSearchTerm(searchTerm);
-                 // Optimized range query for legacy_id mixed with other fields using PostgREST logic syntax
-                 // or=(id.eq.X,and(legacy_id.gte.X,legacy_id.lt.Y),isbn.like.X%)
-                 query = query.or(`id.eq.${numericId},and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
-              } else {
-                 const nextTerm = getNextSearchTerm(searchTerm);
-                 query = query.or(`and(legacy_id.gte.${searchTerm},legacy_id.lt.${nextTerm}),isbn.like.${searchTerm}%`);
-              }
-          } else {
+             
+             // Fallback range query for prefix (optimized)
+             const nextTerm = getNextSearchTerm(searchTerm);
+             query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
+             
+        } else {
+             // 2. Universal Multi-Term Text Search (Replaces complex/brittle modes)
+             // Splits query into terms, and enforces that ALL terms must match SOME field.
+             // (Title OR Author OR ISBN) AND (Title OR Author OR ISBN)...
+             
+             const terms = searchTerm.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
 
-              // Tokenized Search Strategy:
-              // Split query (e.g. "Planeta Galdos") into ["Planeta", "Galdos"]
-              // AND logic: Match(Planeta) AND Match(Galdos)
-              
-              // Key Fix: Sanitize terms more aggressively to prevent regex breakage
-              const cleanSearchTerm = searchTerm.replace(/[(),.\-\/]/g, ' '); 
-              const terms = cleanSearchTerm.split(/\s+/).filter(t => t.length > 0);
-
-              if (terms.length > 0) {
-                  for (const term of terms) {
-                      // Apply Smart Vowel wildcard for text fields
-                      // e.g. "Perez" -> "P_r_z" matching "Pérez" and "Perez"
-                      const fuzzyTerm = transformToWildcard(term);
-
-                      let subQuery = `titulo.ilike.%${fuzzyTerm}%,autor.ilike.%${fuzzyTerm}%,descripcion.ilike.%${fuzzyTerm}%`;
+             if (terms.length > 0) {
+                 terms.forEach(term => {
+                      // Apply Smart Vowel wildcard for text fields if needed
+                      // For now, standard ILIKE to match Header Search behavior exactly.
+                      // If the user liked the fuzzy vowel logic, we can re-enable it, but simplicity first.
+                      // The previous Header Search fix just used raw terms (no fuzzy vowel), so we stick to that for consistency.
+                      // Wait, previous file view showed I implemented standard ILIKE in Header.
                       
-                      // Legacy ID usually implies strict substring (digits/codes) so we keep original term
-                      subQuery += `,legacy_id.ilike.%${term}%`;
-
-                      if (term.length > 3) {
-                          subQuery += `,isbn.ilike.%${term}%`;
-                      }
-                      
+                      const subQuery = `titulo.ilike.%${term}%,autor.ilike.%${term}%,descripcion.ilike.%${term}%,legacy_id.ilike.%${term}%,isbn.ilike.%${term}%`;
                       query = query.or(subQuery);
-                  }
-              }
-      }
-
-      }
-
+                 });
+             }
+        }
       }
        if (filters.category && filters.category !== 'Todos') {
             // Resolve Category Name to ID
@@ -558,79 +483,50 @@ export const obtenerLibros = async (
         }
 
         if (filters.titulo) {
-            // Optimized FTS for Title
-             const ftsQuery = filters.titulo
-                .trim()
-                .split(/\s+/)
-                .map(term => `'${term}':*`)
-                .join(' & ');
-             
-             if (ftsQuery) {
-                query = query.textSearch('titulo', ftsQuery, { config: 'spanish' });
-             } else {
-                query = query.ilike('titulo', `%${filters.titulo}%`);
-             }
+            // Use simple ILIKE for each term to ensure consistent "contains" behavior
+            const terms = filters.titulo.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
+            terms.forEach(term => {
+                query = query.ilike('titulo', `%${term}%`);
+            });
         }
+        
         if (filters.autor) {
-            // Optimized FTS for Author (Leveraging idx_libros_autor_fts)
-             const ftsQuery = filters.autor
-                .trim()
-                .split(/\s+/)
-                .map(term => `'${term}':*`)
-                .join(' & ');
-             
-             if (ftsQuery) {
-                query = query.textSearch('autor', ftsQuery, { config: 'spanish' });
-             } else {
-                const fuzzy = transformToWildcard(filters.autor);
-                query = query.ilike('autor', `%${fuzzy}%`);
-             }
+            const terms = filters.autor.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
+            terms.forEach(term => {
+                 // Check if term matches author column
+                 // Smart wildcard logic not needed if using ILIKE for simple case-insensitive substring
+                 query = query.ilike('autor', `%${term}%`);
+            });
         }
+
         if (filters.descripcion) {
-            // Description doesn't have FTS index yet, use fuzzy ILIKE
-            const fuzzy = transformToWildcard(filters.descripcion);
-            query = query.ilike('descripcion', `%${fuzzy}%`);
+            const terms = filters.descripcion.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
+             terms.forEach(term => {
+                query = query.ilike('descripcion', `%${term}%`);
+            });
         }
+
+        if (filters.minPages !== undefined) query = query.gte('paginas', filters.minPages);
+        if (filters.maxPages !== undefined) query = query.lte('paginas', filters.maxPages);
+        
+        if (filters.startYear !== undefined) query = query.gte('anio', filters.startYear);
+        if (filters.endYear !== undefined) query = query.lte('anio', filters.endYear);
+
         if (filters.publisher) {
-            // Multi-step approach for publisher if it's a string filter
-            // PostgREST doesn't support easy ilike on joined table field in a simple query without complex syntax
-            // So we use a subquery approach via 'in'
-            const { data: pubData } = await supabase
+             // Resolve Publisher Name to ID
+             const { data: eds } = await supabase
                 .from('editoriales')
                 .select('id')
-                .ilike('nombre', `%${filters.publisher}%`);
-            
-            if (pubData && pubData.length > 0) {
-                const pubIds = pubData.map(p => p.id);
-                query = query.in('editorial_id', pubIds);
-            } else if (filters.publisher.trim() !== '') {
-                // If publisher filter active but no match, force empty result
-                query = query.eq('id', -1);
-            }
+                .ilike('nombre', `%${filters.publisher.trim()}%`) // ILIKE is case insensitive
+                .limit(50);
+                
+             if (eds && eds.length > 0) {
+                 query = query.in('editorial_id', eds.map(e => e.id));
+             } else {
+                 // No matching publisher found -> No books
+                 query = query.eq('id', -1);
+             }
         }
-
-       if (filters.minPages !== undefined) query = query.gte('paginas', filters.minPages);
-       if (filters.maxPages !== undefined) query = query.lte('paginas', filters.maxPages);
-       
-       if (filters.startYear !== undefined) query = query.gte('anio', filters.startYear);
-       if (filters.endYear !== undefined) query = query.lte('anio', filters.endYear);
-
-       if (filters.publisher) {
-          // Optimization: Resolve publisher Name to IDs first, then filter by editorial_id
-          // This avoids complex !inner joins and scales better with the "Estimated Count" strategy
-          const { data: eds } = await supabase
-            .from('editoriales')
-            .select('id')
-            .ilike('nombre', `%${filters.publisher.trim()}%`)
-            .limit(50); // increased limit to catch variations
-
-          if (eds && eds.length > 0) {
-              query = query.in('editorial_id', eds.map(e => e.id));
-          } else {
-              // User searched for a publisher that doesn't exist -> No results
-              query = query.eq('id', -1); 
-          }
-       }
 
        // Sorting
       if (filters.sortBy) {
@@ -1311,35 +1207,30 @@ export const eliminarLibro = async (id: number): Promise<boolean> => {
 export const buscarLibros = async (query: string, options?: { searchFields?: 'code' | 'all' }): Promise<Book[]> => {
   try {
     const isNumeric = /^\d+$/.test(query);
-    const searchMode = options?.searchFields || 'all'; // Default to all if not specified, but UI sends 'code' for default mode
+    const searchMode = options?.searchFields || 'all'; 
 
+    // 1. Numeric Optimization: Exact Match & Code Ranges
+    // This is critical for performance on legacy_id lookups (barcodes)
     if (isNumeric) {
-      // 1. Exact Priority Search (ID or Legacy ID)
-      // Execute this FIRST to avoid timeout on heavy fuzzy search if exact match exists
+      // Priority: Exact ID or Legacy ID match
       const { data: exactData, error: exactError } = await supabase
           .from('libros')
           .select('*, editoriales(id, nombre), categorias(id, nombre)')
           .eq('activo', true)
           .or(`id.eq.${query},legacy_id.eq.${query}`)
-          .limit(1); // Optimisation: We only need one if it's exact
+          .limit(1);
 
-      if (exactError) console.error('Error finding exact book:', exactError);
-      
-      // If exact match found, return immediately without running expensive fuzzy search
-      if (exactData && exactData.length > 0) {
+      if (!exactError && exactData && exactData.length > 0) {
           return exactData.map(mapLibroToBook);
       }
       
-      // If mode is 'code' (default/simple), we ONLY search legacy_id (and ISBN slightly) for numbers
-      // We do NOT search Title/Author
+      // If code mode, do optimized range query
       if (searchMode === 'code') {
           const nextTerm = getNextSearchTerm(query);
           const { data: codeData, error: codeError } = await supabase
             .from('libros')
             .select('*, editoriales(id, nombre), categorias(id, nombre)')
             .eq('activo', true)
-            // Replace LIKE with Range Query: (legacy_id >= query AND legacy_id < next) OR isbn LIKE query%
-            // Note: ISBN like remains as legacy fallback, or we could optimize it too if ISBNs are indexed cleanly.
             .or(`and(legacy_id.gte.${query},legacy_id.lt.${nextTerm}),isbn.like.${query}%`)
             .order('legacy_id', { ascending: true })
             .limit(10);
@@ -1347,62 +1238,46 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
           if (codeError) console.error('Error finding code books:', codeError);
           return (codeData || []).map(mapLibroToBook);
       }
+    }
 
-      // 2. Standard Fuzzy Search (Only if exact match failed AND mode is 'all')
-      // Even here, we can optimize the legacy_id part
-      const nextTerm = getNextSearchTerm(query);
-      const { data: fuzzyData, error: fuzzyError } = await supabase
-          .from('libros')
-          .select('*, editoriales(id, nombre), categorias(id, nombre)')
-          .eq('activo', true)
-          // or=(titulo.ilike.%,autor.ilike.%,isbn.ilike.%,and(legacy_id.gte.X,legacy_id.lt.Y))
-          .or(`titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,and(legacy_id.gte.${query},legacy_id.lt.${nextTerm})`)
-          .order('titulo', { ascending: true })
-          .limit(20);
-
-      if (fuzzyError) console.error('Error finding fuzzy books:', fuzzyError);
-
-      return (fuzzyData || []).map(mapLibroToBook);
-
-    } else {
-      // Non-numeric search
-      if (searchMode === 'code') {
-          // If mode is 'code' but query is not purely numeric, we still search legacy_id (alphanumeric legacy codes?)
-          // Or we assume user wants to find a code.
-          const { data: codeData, error: codeError } = await supabase
-            .from('libros')
-            .select('*, editoriales(id, nombre), categorias(id, nombre)')
-            .eq('activo', true)
-            .ilike('legacy_id', `${query}%`) // Using ILIKE for flexibility on non-numeric codes
-            .limit(10);
-            
-          if (codeError) console.error('Error finding code books (text):', codeError);
-          return (codeData || []).map(mapLibroToBook);
-      }
-
-      // Standard fuzzy search for 'all' mode
-      
-      // OPTIMIZATION: Removed recursive Publisher lookup (fetching editorial IDs first)
-      // This caused latency when DB was under load.
-      // Now we search directly on Title, Author, ISBN, LegacyID.
-      
-      const orQuery = `titulo.ilike.%${query}%,autor.ilike.%${query}%,isbn.ilike.%${query}%,legacy_id.ilike.%${query}%`;
-
-      const { data, error } = await supabase
+    // 2. Multi-term Text Search (The Fix)
+    // Strategy: Split query into terms. Each term must match AT LEAST ONE field.
+    // Result = (Term1 in Fields) AND (Term2 in Fields) AND ...
+    
+    let queryBuilder = supabase
         .from('libros')
         .select('*, editoriales(id, nombre), categorias(id, nombre)')
-        .eq('activo', true)
-        .or(orQuery)
+        .eq('activo', true);
+
+    // Clean and split terms
+    const terms = query.trim().split(/\s+/).filter(Boolean);
+
+    if (terms.length === 0) return [];
+
+    terms.forEach(term => {
+        // Construct the OR clause for this specific term
+        // We look in: Title, Author, ISBN, Legacy ID (text match)
+        // We use ILIKE for case-insensitivity
+        
+        // Note: For accents, standard ILIKE might fail if DB isn't set up with unaccent extension or collation.
+        // But the user issue "mayusculas/minusculas" is solved by ILIKE.
+        // "La Odisea Homero" -> "La", "Odisea", "Homero"
+        
+        const termFilter = `titulo.ilike.%${term}%,autor.ilike.%${term}%,isbn.ilike.%${term}%,legacy_id.ilike.%${term}%`;
+        queryBuilder = queryBuilder.or(termFilter);
+    });
+
+    const { data, error } = await queryBuilder
         .order('titulo', { ascending: true })
         .limit(20);
 
-        if (error) {
-          console.error('Error al buscar libros:', error);
-          return [];
-        }
-
-        return (data || []).map(mapLibroToBook);
+    if (error) {
+        console.error('Error al buscar libros (Multi-term):', error);
+        return [];
     }
+
+    return (data || []).map(mapLibroToBook);
+
   } catch (error) {
     console.error('Error inesperado al buscar libros:', error);
     return [];
@@ -1721,3 +1596,23 @@ export const decrementStock = async (bookId: number, quantity: number = 1): Prom
   }
 };
 
+
+export const obtenerSugerenciaOrtografica = async (termino: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.rpc('sugerir_correccion', { busqueda: termino });
+    
+    if (error) {
+      console.warn('Error fetching spelling suggestion:', error);
+      return null;
+    }
+    
+    // If suggestion is identical to original (ignoring case), don't show it
+    if (data && data.toLowerCase() !== termino.toLowerCase()) {
+        return data;
+    }
+    return null;
+  } catch (error) {
+    console.warn('Error fetching spelling suggestion:', error);
+    return null;
+  }
+};

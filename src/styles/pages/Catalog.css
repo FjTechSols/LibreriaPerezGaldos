@@ -183,3 +183,47 @@
 .dark-mode .no-results-content p {
   color: #94a3b8;
 }
+
+/* Suggestion Box */
+.suggestion-box {
+  margin: 0 auto 1.5rem auto;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 800px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.suggestion-box p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.suggestion-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 0.5rem;
+  font-size: 1rem;
+  padding: 0;
+}
+
+/* Dark Mode Overrides for Suggestion Box */
+.dark-mode .suggestion-box {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .suggestion-box p {
+  color: #f1f5f9;
+}
