@@ -196,7 +196,7 @@ export default function CrearPedido({
                   return;
               }
               filters.search = libroSearch;
-              // filters.searchMode = 'default'; // Removed to use Full Search (Title + Code + etc) 
+              filters.searchMode = 'default'; // Enable optimized numeric search 
           } else {
               if (advancedBookFilters.codigo) {
                   filters.search = advancedBookFilters.codigo;

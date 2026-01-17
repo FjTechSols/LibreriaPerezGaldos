@@ -102,14 +102,181 @@ export const buscarLibrosOpenLibrary = async (isbn: string): Promise<ISBNBookDat
   }
 };
 
+const mergeBookData = (target: ISBNBookData | null, source: ISBNBookData | null, preferSourceForText: boolean = false): ISBNBookData | null => {
+  if (!target) return source;
+  if (!source) return target;
+
+  return {
+    ...target,
+    title: (preferSourceForText && source.title) ? source.title : (target.title || source.title),
+    authors: (preferSourceForText && source.authors && source.authors.length > 0) ? source.authors : ((target.authors && target.authors.length > 0) ? target.authors : source.authors),
+    publisher: (preferSourceForText && source.publisher) ? source.publisher : (target.publisher || source.publisher),
+    publishedDate: target.publishedDate || source.publishedDate,
+    pageCount: target.pageCount || source.pageCount,
+    description: target.description || source.description, // Keep description from target (usually Google) unless missing
+    categories: (target.categories && target.categories.length > 0) ? target.categories : source.categories,
+    imageUrl: target.imageUrl || source.imageUrl, // Keep image from target (usually Google)
+    language: target.language || source.language,
+    isbn: target.isbn || source.isbn
+  };
+};
+
 export const buscarLibroPorISBNMultiple = async (isbn: string): Promise<ISBNBookData | null> => {
+  const cleanISBN = isbn.replace(/[-\s]/g, '');
+  
+  // Detectar ISBN Español (Empieza por 97884 o 84)
+  const isSpanish = cleanISBN.startsWith('97884') || (cleanISBN.length === 10 && cleanISBN.startsWith('84'));
+
+  if (isSpanish) {
+      // ESTRATEGIA "PREMIUM" ESPAÑA (3 Vías)
+      // Lanzamos las 3 consultas en paralelo para máxima velocidad
+      const [bneResult, googleResult, olResult] = await Promise.all([
+          buscarLibroBNE(isbn),
+          buscarLibroPorISBN(isbn),
+          buscarLibrosOpenLibrary(isbn)
+      ]);
+
+      // Si tenemos resultado de la BNE, es nuestra "Fuente de la Verdad" para el texto
+      if (bneResult) {
+          const finalResult = { ...bneResult };
+
+          // 1. Intentamos enriquecer con Google Books (Prioridad Media: 1)
+          if (googleResult) {
+               // Portada y Sinopsis de Google son mejores
+               if (googleResult.imageUrl) finalResult.imageUrl = googleResult.imageUrl;
+               if (googleResult.description) finalResult.description = googleResult.description;
+               if (googleResult.pageCount > 0) finalResult.pageCount = googleResult.pageCount;
+               // Si la BNE tenía fecha corta (solo año), y Google tiene completa, usamos Google
+               if (finalResult.publishedDate.length < 5 && googleResult.publishedDate.length > 4) {
+                   finalResult.publishedDate = googleResult.publishedDate;
+               }
+          }
+
+          // 2. Si todavía faltan datos, intentamos con OpenLibrary (Prioridad Media: 2)
+          if (olResult) {
+              if (!finalResult.imageUrl && olResult.imageUrl) finalResult.imageUrl = olResult.imageUrl;
+              if (!finalResult.description && olResult.description) finalResult.description = olResult.description;
+              if (!finalResult.pageCount && olResult.pageCount) finalResult.pageCount = olResult.pageCount;
+          }
+
+          return finalResult;
+      }
+      
+      // Si BNE falla (raro en libro español), hacemos fallback al waterfall estándar abajo...
+      // O podemos aprovechar que ya tenemos googleResult y olResult cargados para no repetir:
+      
+      let fallbackResult = googleResult;
+      
+      // Merge Google + OL si falta info
+      if (!fallbackResult) {
+          fallbackResult = olResult;
+      } else {
+          // Google existe, rellenamos huecos con OL
+           const missingData = !fallbackResult.publisher || !fallbackResult.pageCount || !fallbackResult.description;
+           if (missingData && olResult) {
+               fallbackResult = mergeBookData(fallbackResult, olResult);
+           }
+      }
+      
+      return fallbackResult;
+  }
+
+  // ESTRATEGIA INTERNACIONAL (Waterfall Original)
+  // 1. Google Books
   let result = await buscarLibroPorISBN(isbn);
 
-  if (!result) {
-    result = await buscarLibrosOpenLibrary(isbn);
+  // Verificamos si faltan datos críticos
+  const missingPublisher = !result || !result.publisher;
+  const missingDescription = !result || !result.description;
+  const missingPages = !result || !result.pageCount;
+  
+  if (result && !missingPublisher && !missingDescription && !missingPages) {
+      return result;
+  }
+
+  // 2. Open Library
+  if (!result || missingPublisher || missingDescription || missingPages) {
+      const olResult = await buscarLibrosOpenLibrary(isbn);
+      result = mergeBookData(result, olResult);
+  }
+
+  // 3. Fallback BNE (Por si acaso, aunque no tenga prefijo español estándar)
+  const stillMissingPublisher = !result || !result.publisher;
+  if (!result || stillMissingPublisher) {
+      const bneResult = await buscarLibroBNE(isbn);
+      result = mergeBookData(result, bneResult);
   }
 
   return result;
+};
+
+// Nueva función para consultar la BNE via SRU
+export const buscarLibroBNE = async (isbn: string): Promise<ISBNBookData | null> => {
+  try {
+    // Limpieza de ISBN
+    const cleanISBN = isbn.replace(/[-\s]/g, '');
+    
+    // API SRU de la BNE
+    // Usamos un proxy si es necesario por CORS, pero intentamos directo primero.
+    // Nota: La BNE suele permitir acceso, pero si falla por CORS, necesitaríamos un proxy.
+    // Usamos el esquema 'dc' (Dublin Core) que es más fácil de parsear que MARCXML
+    const url = `https://catalogo.bne.es/view/sru/34BNE_INST?version=1.2&operation=searchRetrieve&recordSchema=dc&query=alma.isbn=${cleanISBN}`;
+
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+       return null;
+    }
+
+    const strXml = await response.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(strXml, "text/xml");
+
+    // Verificar si hay resultados
+    const numberOfRecords = xmlDoc.getElementsByTagName("numberOfRecords")[0]?.textContent;
+    if (!numberOfRecords || parseInt(numberOfRecords) === 0) {
+        return null;
+    }
+
+    // Extraer datos del primer registro (Dublin Core)
+    const record = xmlDoc.getElementsByTagName("srw_dc:dc")[0] || xmlDoc.getElementsByTagName("dc:dc")[0]; // Fallback namespace
+    if (!record) return null;
+
+    const getTagVal = (tagName: string) => {
+        const el = record.getElementsByTagName("dc:" + tagName)[0];
+        return el ? el.textContent : '';
+    };
+
+    const title = getTagVal("title") || '';
+    const creator = getTagVal("creator") || getTagVal("contributor") || '';
+    const publisher = getTagVal("publisher") || '';
+    const date = getTagVal("date") || '';
+    const description = getTagVal("description") || '';
+    // Format specifically to just year if it's a full date, BNE often returns "2005" or "[2005]"
+    const cleanDate = date.replace(/[\[\]]/g, '').substring(0, 4); 
+
+    // BNE doesn't provide image URLs easily in DC, nor page count always cleanly.
+    // We prioritize getting the publisher and basic info.
+    
+    const bookData: ISBNBookData = {
+      isbn: cleanISBN,
+      title: title,
+      authors: [creator],
+      publisher: publisher,
+      publishedDate: cleanDate,
+      pageCount: 0, // BNE SRU DC often lacks this or puts it in format fields difficult to parse reliably without MARC.
+      description: description,
+      categories: [],
+      imageUrl: '', // No image in SRU DC
+      language: 'es'
+    };
+
+    return bookData;
+
+  } catch (error) {
+    console.error('Error buscando en BNE:', error);
+    return null;
+  }
 };
 
 export const buscarLibroPorTituloAutor = async (titulo: string, autor: string, anio?: number, editorial?: string): Promise<ISBNBookData | null> => {

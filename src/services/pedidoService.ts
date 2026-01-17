@@ -672,7 +672,7 @@ export const getPendingOrdersCount = async (): Promise<number> => {
   const { count, error } = await supabase
     .from('pedidos')
     .select('*', { count: 'exact', head: true })
-    .in('estado', ['pendiente', 'procesando']);
+    .in('estado', ['pendiente', 'pending_verification', 'payment_pending']);
 
   if (error) throw error;
   return count || 0;

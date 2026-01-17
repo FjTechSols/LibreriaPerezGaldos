@@ -496,25 +496,22 @@ export const obtenerLibros = async (
         }
 
         if (filters.titulo) {
-            // Use FTS for specific field search as well
-            const terms = filters.titulo.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
-            terms.forEach(term => {
-                query = query.textSearch('titulo', term, { config: 'spanish' });
-            });
+            // Optimisation: Use ILIKE which uses the Trigram Index (idx_libros_titulo_trgm)
+            // This is lightning fast for substring matches and doesn't require FTS index
+            query = query.ilike('titulo', `%${filters.titulo.trim()}%`);
         }
         
         if (filters.autor) {
-            const terms = filters.autor.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
-            terms.forEach(term => {
-                 query = query.textSearch('autor', term, { config: 'spanish' });
-            });
+            // Optimisation: Use ILIKE which uses the Trigram Index (idx_libros_autor_trgm)
+            query = query.ilike('autor', `%${filters.autor.trim()}%`);
         }
 
         if (filters.descripcion) {
-            const terms = filters.descripcion.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
-             terms.forEach(term => {
-                query = query.textSearch('descripcion', term, { config: 'spanish' });
-            });
+             // Fallback to simple substring match. 
+             // Note: We removed the heavy description FTS index. 
+             // If this becomes slow, we can effectively search the 'D' weighted items in search_vector,
+             // but ilike is usually sufficient for advanced specific queries.
+             query = query.ilike('descripcion', `%${filters.descripcion.trim()}%`);
         }
 
         if (filters.minPages !== undefined) query = query.gte('paginas', filters.minPages);
@@ -1218,68 +1215,66 @@ export const eliminarLibro = async (id: number): Promise<boolean> => {
 export const buscarLibros = async (query: string, options?: { searchFields?: 'code' | 'all' }): Promise<Book[]> => {
   try {
     const isNumeric = /^\d+$/.test(query);
-    const searchMode = options?.searchFields || 'all'; 
+ 
 
-    // 1. Numeric Optimization: Exact Match & Code Ranges
-    // This is critical for performance on legacy_id lookups (barcodes)
+    // 1. Unified Search Vector (Super Index)
+    // Uses the 'search_vector' column for consistent, relevance-ranked, instant results.
+    // 'websearch' type handles complex queries (quotes, negations) and stopwords automatically.
+    
+    // Check for Numeric (Potential Barcode)
     if (isNumeric) {
-      // Priority: Exact ID or Legacy ID match
-      const { data: exactData, error: exactError } = await supabase
-          .from('libros')
-          .select('*, editoriales(id, nombre), categorias(id, nombre)')
-          .eq('activo', true)
-          .or(`id.eq.${query},legacy_id.eq.${query}`)
-          .limit(1);
+        // Priority A: Strict Legacy ID (Barcode) Match
+        const { data: exactLegacy, error: exactError } = await supabase
+              .from('libros')
+              .select('*, editoriales(id, nombre), categorias(id, nombre)')
+              .eq('activo', true)
+              .eq('legacy_id', query)
+              .limit(5);
 
-      if (!exactError && exactData && exactData.length > 0) {
-          return exactData.map(mapLibroToBook);
-      }
-      
-      // If code mode, do optimized range query
-      if (searchMode === 'code') {
-          const nextTerm = getNextSearchTerm(query);
-          const { data: codeData, error: codeError } = await supabase
-            .from('libros')
-            .select('*, editoriales(id, nombre), categorias(id, nombre)')
-            .eq('activo', true)
-            .or(`and(legacy_id.gte.${query},legacy_id.lt.${nextTerm}),isbn.like.${query}%`)
-            .order('legacy_id', { ascending: true })
-            .limit(10);
-            
-          if (codeError) console.error('Error finding code books:', codeError);
-          return (codeData || []).map(mapLibroToBook);
-      }
+         if (!exactError && exactLegacy && exactLegacy.length > 0) {
+              return exactLegacy.map(mapLibroToBook);
+         }
+         
+         // Priority B: Strict ID (Internal) Match - Optional, but kept for admin flexibility
+         if (options?.searchFields === 'all') { // Only if not strictly code
+             const { data: exactId, error: idError } = await supabase
+                .from('libros')
+                .select('*, editoriales(id, nombre), categorias(id, nombre)')
+                .eq('activo', true)
+                .eq('id', parseInt(query))
+                .limit(1);
+             
+             if (!idError && exactId && exactId.length > 0) {
+                 return exactId.map(mapLibroToBook);
+             }
+         }
     }
 
-    // 2. Multi-term Text Search (The Fix)
-    // Strategy: Split query into terms. Each term must match AT LEAST ONE field.
-    // Result = (Term1 in Fields) AND (Term2 in Fields) AND ...
-    
+    // 2. Text Search (Unified Vector)
     let queryBuilder = supabase
         .from('libros')
         .select('*, editoriales(id, nombre), categorias(id, nombre)')
         .eq('activo', true);
 
-    // Clean and split terms
-    const terms = query.trim().split(/\s+/).filter(Boolean);
-
-    if (terms.length === 0) return [];
-
-    terms.forEach(term => {
-        // Construct the OR clause for this specific term
-        // We look in: Title, Author, ISBN, Legacy ID (text match)
-        // We use ILIKE for case-insensitivity
-        
-        // Note: For accents, standard ILIKE might fail if DB isn't set up with unaccent extension or collation.
-        // But the user issue "mayusculas/minusculas" is solved by ILIKE.
-        // "La Odisea Homero" -> "La", "Odisea", "Homero"
-        
-        const termFilter = `titulo.ilike.%${term}%,autor.ilike.%${term}%,isbn.ilike.%${term}%,legacy_id.ilike.%${term}%`;
-        queryBuilder = queryBuilder.or(termFilter);
+    // Filter stopwords for cleaner query (optional with websearch but good for clarity)
+    const SPANISH_STOPWORDS = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'de', 'del', 'al', 'en', 'con', 'por', 'sobre', 'entre', 'para', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'que', 'se', 'no'];
+    let terms = query.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
+    
+    if (terms.length > 0) { // Only filter if we have terms
+        const filteredTerms = terms.filter(t => !SPANISH_STOPWORDS.includes(t.toLowerCase()));
+        if (filteredTerms.length > 0) {
+            terms = filteredTerms;
+        }
+    }
+    
+    // Use Websearch against the Super Index
+    const finalQuery = terms.length > 0 ? terms.join(' ') : query;
+    queryBuilder = queryBuilder.textSearch('search_vector', finalQuery, {
+         config: 'spanish',
+         type: 'websearch' 
     });
 
     const { data, error } = await queryBuilder
-        .order('titulo', { ascending: true })
         .limit(20);
 
     if (error) {

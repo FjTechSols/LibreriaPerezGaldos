@@ -93,7 +93,12 @@ export function AdminDashboard() {
       const reservationsCount = await getPendingReservationsCount();
       
       // Invoices count (Pending) - derived from context
-      const pendingInvoices = invoices.filter(inv => inv.status?.toLowerCase() === 'pendiente' || inv.status?.toLowerCase() === 'pending').length;
+      // Invoices count (Pending/Actionable)
+      // Logic: Show badge only for statuses needing review/action
+      const pendingInvoices = invoices.filter(inv => {
+          const s = inv.status?.toLowerCase() || '';
+          return s === 'pendiente' || s === 'pending' || s === 'payment_pending' || s === 'por verificar';
+      }).length;
 
       setBadgeCounts({
         total: unreadNotes.length,
@@ -439,12 +444,16 @@ export function AdminDashboard() {
                 >
                   <div className="nav-item-icon-wrapper">
                     <FileText size={20} className="nav-item-icon" />
-                    {unreadInvoices > 0 && <span className="notification-dot"></span>}
+                    {/* Dot removed as badge handles status */}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="flex items-center justify-between w-full">
                       <span className="nav-item-text">Facturas</span>
-                      {badgeCounts.invoices > 0 && <span className="sidebar-badge-count">{badgeCounts.invoices}</span>}
+                      {badgeCounts.invoices > 0 && (
+                          <span className={`sidebar-badge-count ${unreadInvoices === 0 ? 'passive' : ''}`}>
+                            {badgeCounts.invoices}
+                          </span>
+                      )}
                     </div>
                   )}
                 </button>
@@ -456,12 +465,15 @@ export function AdminDashboard() {
                 >
                   <div className="nav-item-icon-wrapper">
                     <ShoppingBag size={20} className="nav-item-icon" />
-                    {unreadOrders > 0 && <span className="notification-dot"></span>}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="flex items-center justify-between w-full">
                      <span className="nav-item-text">Pedidos</span>
-                     {badgeCounts.orders > 0 && <span className="sidebar-badge-count">{badgeCounts.orders}</span>}
+                     {badgeCounts.orders > 0 && (
+                         <span className={`sidebar-badge-count ${unreadOrders === 0 ? 'passive' : ''}`}>
+                            {badgeCounts.orders}
+                         </span>
+                     )}
                     </div>
                   )}
                 </button>
@@ -473,12 +485,15 @@ export function AdminDashboard() {
                 >
                   <div className="nav-item-icon-wrapper">
                     <CalendarClock size={20} className="nav-item-icon" />
-                    {unreadReservations > 0 && <span className="notification-dot"></span>}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="flex items-center justify-between w-full">
                       <span className="nav-item-text">Reservas</span>
-                      {badgeCounts.reservations > 0 && <span className="sidebar-badge-count">{badgeCounts.reservations}</span>}
+                      {badgeCounts.reservations > 0 && (
+                          <span className={`sidebar-badge-count ${unreadReservations === 0 ? 'passive' : ''}`}>
+                            {badgeCounts.reservations}
+                          </span>
+                      )}
                     </div>
                   )}
                 </button>

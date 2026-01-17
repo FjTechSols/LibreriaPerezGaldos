@@ -57,6 +57,19 @@ export default function PaymentSuccess() {
           .maybeSingle();
 
         if (existingInvoice) {
+          // Safety Check: Ensure the invoice is marked as Paid if it was pending
+          if (existingInvoice.status !== 'Pagada') {
+             try {
+                 await supabase
+                  .from('invoices')
+                  .update({ status: 'Pagada' })
+                  .eq('id', existingInvoice.id);
+                 console.log('✅ Factura existente actualizada a Pagada desde PaymentSuccess');
+             } catch (updErr) {
+                 console.error('Error actualizando estado de factura:', updErr);
+             }
+          }
+          
           setFacturaId(existingInvoice.id);
           setIsGenerandoFactura(false);
           return;
