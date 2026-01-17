@@ -370,7 +370,7 @@ export const obtenerLibros = async (
         const searchTerm = filters.search.trim();
         const isNumeric = /^\d+$/.test(searchTerm);
         
-        const numericId = parseInt(searchTerm, 10);
+
 
 
         // 1. Numeric/Code Priority Search (Legacy compatibility)
@@ -380,7 +380,8 @@ export const obtenerLibros = async (
                   .from('libros')
                   .select('id, legacy_id, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id', { count: 'estimated' })
                   .eq('activo', true)
-                  .or(`legacy_id.eq.${searchTerm},id.eq.${numericId}`)
+                  // User requirement: Search ONLY by legacy_id for codes
+                  .eq('legacy_id', searchTerm)
                   .limit(5);
 
              if (!exactError && exactLegacy && exactLegacy.length > 0) {
@@ -392,24 +393,34 @@ export const obtenerLibros = async (
              query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
              
         } else {
-             // 2. Universal Multi-Term Text Search (Replaces complex/brittle modes)
-             // Splits query into terms, and enforces that ALL terms must match SOME field.
-             // (Title OR Author OR ISBN) AND (Title OR Author OR ISBN)...
+             // 2. SUPER INDEX (Unified Search Vector)
+             // Uses the 'search_vector' column for consistent, relevance-ranked, instant results.
+             // 'websearch' type handles complex queries (quotes, negations) and stopwords automatically.
+             // We retain our stopword filter just in case, or we can pass the simpler string.
              
-             const terms = searchTerm.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
+             // Simplification: We can now trust the vector engine.
+             // But to ensure "La mujer" -> "mujer" & "sombra" logic works nicely with websearch:
+             // Websearch parses "La mujer y su sombra" quite well naturally.
              
+             // However, for maximum "Instant" feel (Prefix search), websearch doesn't do :*.
+             // If we want prefix search (finding 'Somb' -> 'Sombra'), we need to be clever.
+             // Let's stick to websearch for robustness first. It's the standard "Google-like" query.
+             
+             // Using filtered terms to clean up query mostly for clarity.
+             const SPANISH_STOPWORDS = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'de', 'del', 'al', 'en', 'con', 'por', 'sobre', 'entre', 'para', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'que', 'se', 'no'];
+             let terms = searchTerm.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
              if (terms.length > 0) {
-                 terms.forEach(term => {
-                      // Usar FTS (Full Text Search) con configuración en español para soportar acentos y derivaciones
-                      // Ejemplo: "camion" encuentra "camión", "historia" encuentra "historias"
-                      // Se añade :* para permitir coincidencia de prefijos (ej. "Gald" encuentra "Galdos")
-                      const ftsTerm = `${term}:*`;
-                      
-                      // Nota: legacy_id e isbn siguen usando ilike para búsqueda exacta de códigos
-                      const subQuery = `titulo.fts(spanish).${ftsTerm},autor.fts(spanish).${ftsTerm},descripcion.fts(spanish).${ftsTerm},legacy_id.ilike.%${term}%,isbn.ilike.%${term}%`;
-                      query = query.or(subQuery);
-                 });
+                 const filteredTerms = terms.filter(t => !SPANISH_STOPWORDS.includes(t.toLowerCase()));
+                 if (filteredTerms.length > 0) {
+                     terms = filteredTerms;
+                 }
              }
+             const finalQuery = terms.length > 0 ? terms.join(' ') : searchTerm;
+             
+             query = query.textSearch('search_vector', finalQuery, {
+                 config: 'spanish',
+                 type: 'websearch' 
+             });
         }
       }
        if (filters.category && filters.category !== 'Todos') {

@@ -201,7 +201,7 @@ export function BooksManager() {
           titulo: filters.titulo || undefined,
           autor: filters.autor || undefined,
           descripcion: filters.descripcion || undefined,
-          searchMode: filters.searchMode ? 'full' as const : 'title_legacy' as const,
+          searchMode: filters.searchMode ? 'full' as const : 'default' as const,
           sortBy: (filters.sortBy as any) || undefined,
           sortOrder: (filters.sortOrder as any) || undefined,
           forceCount: true
