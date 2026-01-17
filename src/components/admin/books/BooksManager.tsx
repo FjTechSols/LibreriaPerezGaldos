@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, LayoutList, Grid } from 'lucide-react';
+import { Plus, Search, LayoutList, Grid, X } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
 import { supabase } from '../../../lib/supabase';
 import { 
@@ -12,7 +12,8 @@ import {
   obtenerOcrearEditorial,
   obtenerCategoriaId,
   obtenerSugerencias,
-  buscarLibroParaMerge
+  buscarLibroParaMerge,
+  obtenerSugerenciaOrtografica
 } from '../../../services/libroService';
 import '../../../styles/components/BooksManager.css';
 import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
@@ -45,6 +46,8 @@ export function BooksManager() {
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [suggestions, setSuggestions] = useState<string[]>([]); // For Autocomplete
+  const [spellCheckSuggestions, setSpellCheckSuggestions] = useState<{field: string; value: string; label: string}[]>([]); // For "Did You Mean"
 
   // View Mode State
   const [viewMode, setViewMode] = useState<'grid' | 'table'>(() => {
@@ -105,7 +108,7 @@ export function BooksManager() {
 
   // Filters State
   const [localSearchTerm, setLocalSearchTerm] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  // const [suggestions, setSuggestions] = useState<string[]>([]); // Removed duplicate declaration
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filters, setFilters] = useState({
     search: '', // Synced with localSearchTerm when getting results
@@ -205,8 +208,46 @@ export function BooksManager() {
         };
 
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, queryFilters);
+
         setBooks(data);
         setFilteredCount(count);
+
+        // Spell check logic
+        if (data.length === 0 && currentPage === 1) {
+             const newSuggestions: {field: string; value: string; label: string}[] = [];
+
+             // 1. Simple Search Validation
+             if (queryFilters.search) {
+                 const simpleSuggestion = await obtenerSugerenciaOrtografica(queryFilters.search);
+                 if (simpleSuggestion) {
+                     newSuggestions.push({ field: 'search', value: simpleSuggestion, label: 'Búsqueda' });
+                 }
+             }
+
+             // 2. Advanced Fields Validation
+             // We only check fields that are actually being used
+             const advancedFields = [
+                 { key: 'titulo', label: 'Título' },
+                 { key: 'autor', label: 'Autor' },
+                 { key: 'descripcion', label: 'Descripción' },
+                 { key: 'publisher', label: 'Editorial' }
+             ];
+
+             for (const field of advancedFields) {
+                 // Access the filter value dynamically. Type casting as we know these keys exist in queryFilters (mapped from filters)
+                 const val = (queryFilters as any)[field.key];
+                 if (val && typeof val === 'string' && val.trim().length > 0) {
+                      const correction = await obtenerSugerenciaOrtografica(val);
+                      if (correction) {
+                          newSuggestions.push({ field: field.key, value: correction, label: field.label });
+                      }
+                 }
+             }
+
+             setSpellCheckSuggestions(newSuggestions);
+        } else {
+             setSpellCheckSuggestions([]);
+        }
       } catch (error) {
         console.error('Error fetching books:', error);
       } finally {
@@ -223,13 +264,20 @@ export function BooksManager() {
 
   // Handlers
   const handleSearch = () => {
-    setFilters(prev => ({ ...prev, search: localSearchTerm, searchMode: false }));
-    setCurrentPage(1); // Reset to page 1 on search
-    setLocalSearchTerm(''); // Optional: clear or keep? Usually keep. User might want to edit.
-    // Actually, usually we keep it. The original code cleared it?
-    // "setLocalSearchTerm('');" -> Yes, line 164.
-    // If we want autocomplete, clearing it might be annoying if they want to refine.
-    // But let's stick to original behavior unless asked.
+    setFilters(prev => ({ 
+      ...prev, 
+      search: localSearchTerm, 
+      searchMode: false,
+      // Clear advanced text filters to prevent collision
+      titulo: '',
+      autor: '',
+      publisher: '',
+      isbn: '',
+      descripcion: '',
+      legacy_id: ''
+    }));
+    setCurrentPage(1);
+    setLocalSearchTerm(''); 
     setShowSuggestions(false);
   };
 
@@ -518,6 +566,7 @@ export function BooksManager() {
       const pedido = await crearPedidoExpress({
         clientName: data.clientName,
         clientPhone: data.clientPhone,
+        clientEmail: data.clientEmail,
         pickupLocation: data.pickupLocation,
         bookId: parseInt(expressOrderBook.id),
         quantity: data.quantity,
@@ -899,6 +948,47 @@ export function BooksManager() {
              </div>
           )}
        </div>
+
+       {spellCheckSuggestions.length > 0 && (
+            <div className="mb-6 flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                {spellCheckSuggestions.map((sug, idx) => (
+                    <div key={idx} className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-3">
+                        <span className="text-xl">💡</span>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                            No encontramos resultados en <strong>{sug.label}</strong>. ¿Quizás quisiste decir: 
+                            <button 
+                                className="ml-1 font-bold text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 focus:outline-none"
+                                onClick={() => {
+                                    if (sug.field === 'search') {
+                                        setLocalSearchTerm(sug.value); 
+                                        setFilters(prev => ({ ...prev, search: sug.value }));
+                                    } else {
+                                        // Update specific advanced filter
+                                        setFilters(prev => ({ ...prev, [sug.field]: sug.value }));
+                                        if (!advancedMode && sug.field !== 'search') {
+                                            // Optional: setAdvancedMode(true);
+                                        }
+                                    }
+                                    setCurrentPage(1);
+                                    // Remove this suggestion from list (optimistic)
+                                    setSpellCheckSuggestions(prev => prev.filter(item => item !== sug));
+                                }}
+                            >
+                                {sug.value}
+                            </button>
+                            ?
+                        </p>
+                        <button
+                            onClick={() => setSpellCheckSuggestions(prev => prev.filter((_, i) => i !== idx))}
+                            className="ml-auto text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-300 transition-colors p-1"
+                            title="Descartar sugerencia"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                ))}
+            </div>
+       )}
 
        {/* Table */}
           {/* Conditional View Rendering */}

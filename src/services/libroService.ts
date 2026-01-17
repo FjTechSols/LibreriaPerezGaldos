@@ -397,16 +397,16 @@ export const obtenerLibros = async (
              // (Title OR Author OR ISBN) AND (Title OR Author OR ISBN)...
              
              const terms = searchTerm.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
-
+             
              if (terms.length > 0) {
                  terms.forEach(term => {
-                      // Apply Smart Vowel wildcard for text fields if needed
-                      // For now, standard ILIKE to match Header Search behavior exactly.
-                      // If the user liked the fuzzy vowel logic, we can re-enable it, but simplicity first.
-                      // The previous Header Search fix just used raw terms (no fuzzy vowel), so we stick to that for consistency.
-                      // Wait, previous file view showed I implemented standard ILIKE in Header.
+                      // Usar FTS (Full Text Search) con configuración en español para soportar acentos y derivaciones
+                      // Ejemplo: "camion" encuentra "camión", "historia" encuentra "historias"
+                      // Se añade :* para permitir coincidencia de prefijos (ej. "Gald" encuentra "Galdos")
+                      const ftsTerm = `${term}:*`;
                       
-                      const subQuery = `titulo.ilike.%${term}%,autor.ilike.%${term}%,descripcion.ilike.%${term}%,legacy_id.ilike.%${term}%,isbn.ilike.%${term}%`;
+                      // Nota: legacy_id e isbn siguen usando ilike para búsqueda exacta de códigos
+                      const subQuery = `titulo.fts(spanish).${ftsTerm},autor.fts(spanish).${ftsTerm},descripcion.fts(spanish).${ftsTerm},legacy_id.ilike.%${term}%,isbn.ilike.%${term}%`;
                       query = query.or(subQuery);
                  });
              }
@@ -475,7 +475,9 @@ export const obtenerLibros = async (
         if (filters.isbn) {
             // Remove dashes/spaces for flexible match if needed, but usually strict eq for specific field
             const clean = filters.isbn.replace(/[-\s]/g, '');
-            query = query.ilike('isbn', `%${clean}%`); // partial match for convenience
+            // Keep isbn as iLike/eq usually, but fts handles punctuation well too.
+            // For ISBN, ILIKE is safer for partial matches of numbers
+            query = query.ilike('isbn', `%${clean}%`); 
         }
 
         if (filters.legacy_id) {
@@ -483,26 +485,24 @@ export const obtenerLibros = async (
         }
 
         if (filters.titulo) {
-            // Use simple ILIKE for each term to ensure consistent "contains" behavior
+            // Use FTS for specific field search as well
             const terms = filters.titulo.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
             terms.forEach(term => {
-                query = query.ilike('titulo', `%${term}%`);
+                query = query.textSearch('titulo', term, { config: 'spanish' });
             });
         }
         
         if (filters.autor) {
             const terms = filters.autor.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
             terms.forEach(term => {
-                 // Check if term matches author column
-                 // Smart wildcard logic not needed if using ILIKE for simple case-insensitive substring
-                 query = query.ilike('autor', `%${term}%`);
+                 query = query.textSearch('autor', term, { config: 'spanish' });
             });
         }
 
         if (filters.descripcion) {
             const terms = filters.descripcion.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
              terms.forEach(term => {
-                query = query.ilike('descripcion', `%${term}%`);
+                query = query.textSearch('descripcion', term, { config: 'spanish' });
             });
         }
 

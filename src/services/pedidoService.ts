@@ -682,11 +682,12 @@ export const getPendingOrdersCount = async (): Promise<number> => {
 export interface ExpressOrderInput {
   clientName: string;
   clientPhone: string;
+  clientEmail?: string; // Added email field
   pickupLocation: string;
   bookId: number;
   quantity: number;
   adminUserId: string;
-  clientId?: string; // Optional: if client was selected from autocomplete
+  clientId?: string; 
   isDeposit?: boolean;
   depositAmount?: number;
 }
@@ -695,7 +696,7 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
   try {
     let clienteId: string;
     
-    // Sanitize phone number (remove spaces/dashes) to avoid 400 errors if DB expects numeric or clean string
+    // Sanitize phone number (remove spaces/dashes)
     const sanitizedPhone = input.clientPhone.replace(/[\s-]/g, '');
 
     // If clientId was provided (selected from autocomplete), use it directly
@@ -705,19 +706,26 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
       // Otherwise, search for existing client by phone or create new one
       const { data: existingClient } = await supabase
         .from('clientes')
-        .select('id')
+        .select('id, email') // Select email too
         .eq('telefono', sanitizedPhone)
-        .maybeSingle(); // Use maybeSingle instead of limit(1)
+        .maybeSingle(); 
       
       if (existingClient) {
         // Client exists, use it
         clienteId = existingClient.id;
+        
+        // Update email if provided and missing
+        if (input.clientEmail && !existingClient.email) {
+           await supabase
+             .from('clientes')
+             .update({ email: input.clientEmail })
+             .eq('id', clienteId);
+        }
       } else {
         // Create new client
-        // Split name into First and Last (Simple heuristic)
         const nameParts = input.clientName.trim().split(' ');
         const nombre = nameParts[0];
-        const apellidos = nameParts.slice(1).join(' ') || '.'; // Fallback to '.' if no surname to satisfy constraints
+        const apellidos = nameParts.slice(1).join(' ') || '.'; 
 
         const { data: newClient, error: clientError } = await supabase
           .from('clientes')
@@ -725,7 +733,7 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
             nombre: nombre,
             apellidos: apellidos,
             telefono: sanitizedPhone,
-            email: null,
+            email: input.clientEmail || null, // Use provided email
             direccion: null,
             tipo: 'particular',
             notas: 'Cliente creado desde Pedido Express'

@@ -40,6 +40,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
     });
 
     onSearch(filteredCriteria);
+    handleClear(); // Clear form after search
     onClose();
   };
 
@@ -59,6 +60,11 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
     });
   };
 
+  const handleClose = () => {
+    handleClear();
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -68,7 +74,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
         <div className={`flex items-center justify-between p-6 border-b ${actualTheme === 'dark' ? 'border-gray-800 bg-gray-900/50' : 'border-gray-100 bg-white'}`}>
           <h2 className="text-2xl font-bold">Búsqueda Avanzada</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <X size={24} />
@@ -182,7 +188,7 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
           </button>
           <div className="flex gap-3 ml-2 border-l border-gray-200 dark:border-gray-700 pl-5">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-6 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
             >
               Cancelar

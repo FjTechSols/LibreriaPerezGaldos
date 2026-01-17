@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Zap, User, Phone, MapPin, Package } from 'lucide-react';
+import { X, Zap, User, Phone, MapPin, Package, Mail } from 'lucide-react';
 import { Book } from '../../../types';
 import { useTheme } from '../../../context/ThemeContext';
 import { buscarClientes } from '../../../services/clienteService';
@@ -14,6 +14,7 @@ interface ExpressOrderModalProps {
 export interface ExpressOrderData {
   clientName: string;
   clientPhone: string;
+  clientEmail?: string;
   pickupLocation: 'Galeón' | 'Pérez Galdós';
   quantity: number;
   clientId?: string;
@@ -26,6 +27,7 @@ interface ClientSuggestion {
   nombre: string;
   apellidos?: string;
   telefono: string;
+  email?: string;
 }
 
 export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOrderModalProps) {
@@ -33,6 +35,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
   const [formData, setFormData] = useState<ExpressOrderData>({
     clientName: '',
     clientPhone: '',
+    clientEmail: '',
     pickupLocation: 'Pérez Galdós',
     quantity: 1,
     isDeposit: false,
@@ -69,7 +72,8 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
             id: c.id,
             nombre: c.nombre,
             apellidos: c.apellidos,
-            telefono: c.telefono || ''
+            telefono: c.telefono || '',
+            email: c.email || ''
           })));
           setShowNameSuggestions(true);
         } catch (error) {
@@ -93,7 +97,8 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
             id: c.id,
             nombre: c.nombre,
             apellidos: c.apellidos,
-            telefono: c.telefono || ''
+            telefono: c.telefono || '',
+            email: c.email || ''
           })));
           setShowPhoneSuggestions(true);
         } catch (error) {
@@ -112,7 +117,8 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
     setFormData(prev => ({
       ...prev,
       clientName: client.nombre + (client.apellidos ? ' ' + client.apellidos : ''),
-      clientPhone: client.telefono
+      clientPhone: client.telefono,
+      clientEmail: client.email || ''
     }));
     setSelectedClientId(client.id);
     setShowNameSuggestions(false);
@@ -151,6 +157,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
     setFormData({
       clientName: '',
       clientPhone: '',
+      clientEmail: '',
       pickupLocation: 'Pérez Galdós',
       quantity: 1,
       isDeposit: false,
@@ -164,8 +171,11 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
     setFormData({
       clientName: '',
       clientPhone: '',
+      clientEmail: '',
       pickupLocation: 'Pérez Galdós',
-      quantity: 1
+      quantity: 1,
+      isDeposit: false,
+      depositAmount: 0 // Reset deposit too ideally
     });
     setSelectedClientId(undefined);
     setErrors({});
@@ -293,6 +303,23 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
                 ))}
               </ul>
             )}
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+               <Mail size={16} />
+               Email (Opcional)
+            </label>
+            <input
+              type="email"
+              value={formData.clientEmail || ''}
+              onChange={(e) => {
+                setFormData(prev => ({ ...prev, clientEmail: e.target.value }));
+                // Don't reset selectedClientId just for email change
+              }}
+              placeholder="cliente@email.com"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+            />
           </div>
 
           <div>
