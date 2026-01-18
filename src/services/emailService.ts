@@ -81,6 +81,7 @@ export interface OrderEmailData {
   carrier?: string;
   trackingNumber?: string;
   storeName?: string;
+  orderType?: string; // Added to distinguish internal vs manual orders
 }
 
 /**

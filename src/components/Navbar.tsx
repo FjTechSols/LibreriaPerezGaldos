@@ -221,6 +221,7 @@ export function Navbar() {
             {wishlistItems.length > 0 && <span className="wishlist-badge">{wishlistItems.length}</span>}
           </Link>
           <LanguageSelector />
+          
           {user ? (
             <div className="account-dropdown" ref={accountMenuRef}>
               <button

@@ -52,7 +52,9 @@ import {
   ChevronRight,
   ChevronDown,
   CalendarClock,
-  Bell
+  Bell,
+  Grid,
+  LayoutList
 } from 'lucide-react';
 
 // ... imports ...
@@ -70,7 +72,7 @@ type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'reservation
 export function AdminDashboard() {
   const { user, logout, isAdmin } = useAuth();
   const { invoices } = useInvoice(); // Invoices context
-  const { theme, actualTheme, setTheme } = useTheme();
+  const { theme, actualTheme, setTheme, viewMode, setViewMode } = useTheme();
   const navigate = useNavigate();
   const { formatPrice, settings } = useSettings();
   
@@ -655,6 +657,38 @@ export function AdminDashboard() {
               activeSection}
           </h1>
           </div>
+
+          {/* Center: View Toggle for Book Manager */}
+          {activeSection === 'books' && (
+             <div className="flex-1 flex justify-center mx-4">
+               <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-medium ${
+                      viewMode === 'grid'
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                    title="Vista de Cuadrícula"
+                  >
+                    <Grid size={16} />
+                    <span className="hidden sm:inline">Cuadrícula</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('table')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-medium ${
+                      viewMode === 'table'
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                    title="Vista de Lista"
+                  >
+                    <LayoutList size={16} />
+                    <span className="hidden sm:inline">Lista</span>
+                  </button>
+               </div>
+             </div>
+          )}
           
           <div className="flex items-center gap-4">
              <div className="text-right hidden sm:block">
@@ -675,7 +709,7 @@ export function AdminDashboard() {
                   </span>
                 )}
               </button>
-             <button
+            <button
               onClick={toggleTheme}
               className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
               title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
@@ -686,8 +720,8 @@ export function AdminDashboard() {
         </header>
 
         {/* Scrollable Content Area */}
-        <main className="flex-1 overflow-auto p-6" style={{ background: 'var(--bg-tertiary)' }}>
-          <div className="w-full">
+        <main className="flex-1 overflow-auto p-6 min-w-0" style={{ background: 'var(--bg-tertiary)' }}>
+          <div className="w-full min-w-0">
              {activeSection === 'dashboard' && renderDashboard()}
              {activeSection === 'books' && <BooksManager />}
              {activeSection === 'invoices' && <InvoicesManager />}

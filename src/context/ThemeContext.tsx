@@ -6,6 +6,8 @@ interface ThemeContextType {
   theme: Theme;
   actualTheme: 'light' | 'dark';
   setTheme: (theme: Theme) => void;
+  viewMode: 'grid' | 'table';
+  setViewMode: (mode: 'grid' | 'table') => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -15,6 +17,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem('theme');
     return (saved as Theme) || 'auto';
   });
+
+  const [viewMode, setViewModeState] = useState<'grid' | 'table'>(() => {
+    return (localStorage.getItem('booksManager_viewMode') as 'grid' | 'table') || 'grid';
+  });
+
+  const setViewMode = (mode: 'grid' | 'table') => {
+    setViewModeState(mode);
+    localStorage.setItem('booksManager_viewMode', mode);
+  };
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
 
@@ -55,7 +66,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, actualTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, actualTheme, setTheme, viewMode, setViewMode }}>
       {children}
     </ThemeContext.Provider>
   );

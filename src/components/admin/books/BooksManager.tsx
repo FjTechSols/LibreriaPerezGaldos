@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, LayoutList, Grid, X } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
 import { supabase } from '../../../lib/supabase';
 import { 
@@ -49,17 +49,12 @@ export function BooksManager() {
   const [suggestions, setSuggestions] = useState<string[]>([]); // For Autocomplete
   const [spellCheckSuggestions, setSpellCheckSuggestions] = useState<{field: string; value: string; label: string}[]>([]); // For "Did You Mean"
 
-  // View Mode State
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>(() => {
-    return (localStorage.getItem('booksManager_viewMode') as 'grid' | 'table') || 'grid';
-  });
 
-  // Persist View Mode
-  useEffect(() => {
-    localStorage.setItem('booksManager_viewMode', viewMode);
-  }, [viewMode]);
+  // View Mode State from Context
+  const { viewMode } = useTheme();
 
-  // Pagination
+  // Removed local persistence logic as it is now handled in ThemeContext
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [filteredCount, setFilteredCount] = useState(0);
@@ -624,31 +619,7 @@ export function BooksManager() {
             </p>
           </div>
            
-           {/* View Toggle */}
-           <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-                title="Vista de Cuadrícula"
-              >
-                <Grid size={20} />
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'table'
-                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-                title="Vista de Lista (Legacy)"
-              >
-                <LayoutList size={20} />
-              </button>
-           </div>
+            {/* View Toggle Moved to Navbar */}
 
            <div className="admin-search books-manager-search">
              <div className="search-input-wrapper">

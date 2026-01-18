@@ -158,9 +158,23 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
       throw new Error('El pedido debe tener al menos un detalle');
     }
 
+    let taxRate = input.taxRate || 0.21;
+    
+    // If taxRate was not explicitly provided, try to fetch from settings
+    if (!input.taxRate) {
+        try {
+           const settings = await settingsService.getAllSettings();
+           if (settings?.billing?.taxRate) {
+               taxRate = settings.billing.taxRate / 100;
+           }
+        } catch(e) {
+           console.warn("Could not fetch tax settings, using default 0.21", e);
+        }
+    }
+
     const { subtotal, iva, total } = calcularTotalesPedidoConEnvio(
       input.detalles, 
-      input.taxRate || 0.21, 
+      taxRate, 
       input.coste_envio || 0
     );
 
@@ -269,6 +283,44 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
               price: d.precio_unitario
            })) || [];
 
+           // Fetch Settings for Correct Tax Rate display if not provided
+           // We re-fetch here to ensure email says the correct % even if defaults were used logic-side
+           // Although logic-side used input.taxRate or 0.21.
+           // Ideally we should have used settings for logic too if input was missing.
+           // But changing logic might affect total calculation which is dangerous to change on fly if frontend calculated it.
+           // However, for the EMAIL display, we want to show the rate that was actually used? 
+           // Or the system rate? 
+           // If we used 0.21 in logic, we should show 21%.
+           // But the USER says platform is at 4%.
+           // If we fix logic to use 0.04, then we show 4%.
+
+           // Let's rely on what was actually used in calculation if possible.
+           // But we don't store taxRate in DB (only Amounts). 
+           // We can infer it: taxRate = iva / (total - iva) approximately.
+           // precise: taxRate = iva / subtotal.
+           
+           let usedTaxRate = input.taxRate ? input.taxRate * 100 : 21;
+           
+           // If we trust the calculation was done with the intended rate, we can try to back-calculate?
+           // No, floating point issues.
+           
+           // BETTER FIX: The user says "platform is at 4%". Use that for the EMAIL text.
+           // AND ideally use it for calculation too.
+           
+           // Fetch settings to be sure what we SHOULD typically be using/showing.
+           let displayTaxRate = usedTaxRate; 
+           
+           try {
+             // We only fetch if we didn't have an explicit input
+             if (!input.taxRate) {
+                 const settings = await settingsService.getAllSettings();
+                 if (settings?.billing?.taxRate) {
+                     displayTaxRate = settings.billing.taxRate;
+                 }
+             }
+           } catch(e) { console.error("Error fetching tax settings for email", e); }
+
+
            sendOrderConfirmationEmail({
               orderId: fullOrder.id.toString(),
               customerEmail,
@@ -276,10 +328,11 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
               items: emailItems,
               subtotal: fullOrder.subtotal ?? 0,
               tax: fullOrder.iva ?? 0,
-              taxRate: input.taxRate ? input.taxRate * 100 : 21, // Convert 0.21 to 21
+              taxRate: displayTaxRate, 
               shipping: fullOrder.coste_envio ?? 0,
               total: fullOrder.total ?? 0,
-              shippingAddress: fullOrder.direccion_envio || 'Dirección no especificada'
+              shippingAddress: fullOrder.direccion_envio || 'Dirección no especificada',
+              orderType: fullOrder.tipo || 'interno'
            }).catch(err => console.error('Error sending confirmation email:', err));
         }
 

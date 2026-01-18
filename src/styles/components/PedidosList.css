@@ -1,7 +1,7 @@
 .pedidos-list-container {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  /* overflow-x: hidden; Removed to allow table scroll */
 }
 
 .pedidos-loading {
@@ -160,6 +160,8 @@
   overflow-x: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   max-width: 100%;
+  display: block; /* Explicitly block to allow width constraint */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Updated Header with compact columns */
