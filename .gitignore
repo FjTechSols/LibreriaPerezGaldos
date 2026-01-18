@@ -1,54 +1,51 @@
-# Logs
-logs
+# .gitignore for laboratorioPG branch
+# Track: root files, src/, docs/, logs/, maintenance/, scripts/ (code only), public/, supabase/
+
+# Exclude ALL directories except specified ones
+/**/
+!src/
+!docs/
+!logs/
+!maintenance/
+!scripts/
+!public/
+!supabase/
+
+# Explicitly ignore large data directories inside scripts
+scripts/files/
+scripts/gestion_libros/resultados/
+
+# But keep these specific root files
+!.gitignore
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+!vite.config.ts
+!tailwind.config.js
+!postcss.config.js
+!eslint.config.js
+!index.html
+!vercel.json
+!deno.json
+!README.md
+!.env.development
+!.env.example
+
+# Standard exclusions
+node_modules/
+.vite/
+dist/
 *.log
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-
-!.vscode/extensions.json
-.idea
+.env
+.env.local
+.env.*.local
 .DS_Store
+Thumbs.db
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-# Environment Variables
-.env
-.env.*
-!.env.example
-
-# User requested exclusions
-docs/
-scripts/
-
-
-# Temporary & Layout files
-lint_output.txt
-construccion.html
-vercel-construccion.json
-
-# Large Data Files (Ignored to prevent git push errors)
-scripts/files/*.json
-scripts/files/*.txt
-scripts/files/*.jsonl
-scripts/gestion_libros/resultados/*.json
-scripts/gestion_libros/resultados/*.txt
-
-# Development Tools (not for production)
-src/dev-tools/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-laboratorio/
-
-supabase/
-
-analysis_results.txt

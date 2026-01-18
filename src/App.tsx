@@ -6,6 +6,7 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { InvoiceProvider } from './context/InvoiceContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { OrderProvider } from './context/OrderContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { Navbar } from './components/Navbar';
@@ -131,13 +132,15 @@ function App() {
           <LanguageProvider>
             <SettingsProvider>
               <AuthProvider>
-                <CartProvider>
-                  <WishlistProvider>
-                    <InvoiceProvider>
-                      <AppRoutes />
-                    </InvoiceProvider>
-                  </WishlistProvider>
-                </CartProvider>
+                <OrderProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <InvoiceProvider>
+                        <AppRoutes />
+                      </InvoiceProvider>
+                    </WishlistProvider>
+                  </CartProvider>
+                </OrderProvider>
               </AuthProvider>
             </SettingsProvider>
           </LanguageProvider>
