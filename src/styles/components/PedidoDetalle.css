@@ -207,7 +207,7 @@
 
 .detalles-table .table-header {
   display: grid;
-  grid-template-columns: 2fr 100px 120px 120px;
+  grid-template-columns: 120px 2fr 100px 120px 120px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   background: #f8fafc;
@@ -219,7 +219,7 @@
 
 .detalles-table .table-row {
   display: grid;
-  grid-template-columns: 2fr 100px 120px 120px;
+  grid-template-columns: 120px 2fr 100px 120px 120px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #f1f5f9;

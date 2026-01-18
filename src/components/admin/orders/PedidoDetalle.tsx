@@ -1290,6 +1290,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
 
             <div className="detalles-table">
               <div className="table-header">
+                <span>Código</span>
                 <span>Título</span>
                 <span>Cantidad</span>
                 <span>Precio Unitario</span>
@@ -1299,6 +1300,9 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
 
               {(isEditing ? editedLines : pedido?.detalles || []).map((detalle, index) => (
                 <div key={detalle.id || `temp-${index}`} className="table-row">
+                  <span className="libro-codigo" data-label="Código" style={{ fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    {detalle.libro?.codigo || detalle.libro?.legacy_id || '-'}
+                  </span>
                   <span className="libro-titulo" data-label="Título" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span className="font-medium text-gray-900 dark:text-gray-100">
                         {detalle.libro?.titulo || detalle.nombre_externo || 'Sin título'}

@@ -11,6 +11,27 @@ export interface ISBNBookData {
   language: string;
 }
 
+// Utility function to clean unwanted metadata from titles
+const cleanTitle = (title: string): string => {
+  if (!title) return title;
+  
+  // Remove common format tags from library catalogs
+  return title
+    .replace(/\s*\[Texto impreso\]/gi, '')
+    .replace(/\s*\[Recurso electrónico\]/gi, '')
+    .replace(/\s*\[Libro electrónico\]/gi, '')
+    .replace(/\s*\[Material gráfico\]/gi, '')
+    .replace(/\s*\[Grabación sonora\]/gi, '')
+    .replace(/\s*\[Videograbación\]/gi, '')
+    .replace(/\s*\[Música impresa\]/gi, '')
+    .replace(/\s*\[Manuscrito\]/gi, '')
+    .replace(/\s*\[Microforma\]/gi, '')
+    .replace(/\s*\[Objeto\]/gi, '')
+    .replace(/\s*\[Cartografía\]/gi, '')
+    .replace(/\s*:\s*$/, '') // Remove trailing colon
+    .trim();
+};
+
 export const buscarLibroPorISBN = async (isbn: string): Promise<ISBNBookData | null> => {
   try {
     const cleanISBN = isbn.replace(/[-\s]/g, '');
@@ -38,7 +59,7 @@ export const buscarLibroPorISBN = async (isbn: string): Promise<ISBNBookData | n
 
     const bookData: ISBNBookData = {
       isbn: cleanISBN,
-      title: fullTitle || '',
+      title: cleanTitle(fullTitle) || '',
       authors: bookInfo.authors || [],
       publisher: bookInfo.publisher || '',
       publishedDate: bookInfo.publishedDate || '',
@@ -84,7 +105,7 @@ export const buscarLibrosOpenLibrary = async (isbn: string): Promise<ISBNBookDat
 
     const bookData: ISBNBookData = {
       isbn: cleanISBN,
-      title: fullTitle || '',
+      title: cleanTitle(fullTitle) || '',
       authors: bookInfo.authors?.map((a: any) => a.name) || [],
       publisher: bookInfo.publishers?.[0]?.name || '',
       publishedDate: bookInfo.publish_date || '',
@@ -260,7 +281,7 @@ export const buscarLibroBNE = async (isbn: string): Promise<ISBNBookData | null>
     
     const bookData: ISBNBookData = {
       isbn: cleanISBN,
-      title: title,
+      title: cleanTitle(title),
       authors: [creator],
       publisher: publisher,
       publishedDate: cleanDate,
