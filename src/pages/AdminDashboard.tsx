@@ -56,7 +56,8 @@ import {
   CalendarClock,
   Bell,
   Grid,
-  LayoutList
+  LayoutList,
+  Zap
 } from 'lucide-react';
 
 // ... imports ...

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { OrderProvider } from './context/OrderContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { InvoiceProvider } from './context/InvoiceContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -132,11 +133,13 @@ function App() {
             <SettingsProvider>
               <AuthProvider>
                 <CartProvider>
-                  <WishlistProvider>
-                    <InvoiceProvider>
-                      <AppRoutes />
-                    </InvoiceProvider>
-                  </WishlistProvider>
+                  <OrderProvider>
+                    <WishlistProvider>
+                      <InvoiceProvider>
+                        <AppRoutes />
+                      </InvoiceProvider>
+                    </WishlistProvider>
+                  </OrderProvider>
                 </CartProvider>
               </AuthProvider>
             </SettingsProvider>
