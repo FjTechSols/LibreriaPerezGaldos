@@ -16,6 +16,8 @@ import { useAuth } from '../context/AuthContext';
 import { useInvoice } from '../context/InvoiceContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
+import { useOrder } from '../context/OrderContext';
+import { FlashOrderFab } from '../components/admin/orders/FlashOrderFab';
 
 import { DiscountManager } from '../components/admin/marketing/DiscountManager';
 import { BannerManager } from '../components/admin/marketing/BannerManager';
@@ -73,6 +75,7 @@ export function AdminDashboard() {
   const { user, logout, isAdmin } = useAuth();
   const { invoices } = useInvoice(); // Invoices context
   const { theme, actualTheme, setTheme, viewMode, setViewMode } = useTheme();
+  const { orderMode, toggleOrderMode } = useOrder();
   const navigate = useNavigate();
   const { formatPrice, settings } = useSettings();
   
@@ -709,6 +712,14 @@ export function AdminDashboard() {
                   </span>
                 )}
               </button>
+            <button 
+               onClick={toggleOrderMode}
+               className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-sm font-bold border ${orderMode === 'flash' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}
+               title={orderMode === 'flash' ? "Modo Flash Activado" : "Activar Modo Flash"}
+             >
+               <Zap size={16} className={orderMode === 'flash' ? 'fill-current' : ''} />
+               <span className="hidden sm:inline">{orderMode === 'flash' ? 'FLASH ON' : 'Flash'}</span>
+             </button>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
@@ -742,6 +753,7 @@ export function AdminDashboard() {
            </div>
         </main>
       </div>
+      <FlashOrderFab />
     </div>
   );
 }

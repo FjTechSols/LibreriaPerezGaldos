@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Edit, Trash2, Plus, Minus, Zap, Info } from 'lucide-react';
 import { Book } from '../../../types';
+import { useOrder } from '../../../context/OrderContext';
 
 interface BookTableProps {
   books: Book[];
@@ -11,6 +12,7 @@ interface BookTableProps {
 }
 
 export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrder }: BookTableProps) {
+  const { orderMode } = useOrder();
   const [hoveredCode, setHoveredCode] = useState<{ code: string; top: number; left: number } | null>(null);
   const [hoveredDescription, setHoveredDescription] = useState<{ text: string; top: number; left: number } | null>(null);
   return (
@@ -110,11 +112,14 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
            </div>
             <button 
               onClick={() => onExpressOrder(book)}
-              className="express-btn"
-              title="Pedido Express"
-              aria-label="Crear pedido express"
+              className={orderMode === 'flash' 
+                ? "p-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+                : "express-btn"
+              }
+              title={orderMode === 'flash' ? "Añadir a Pedido Flash" : "Pedido Express"}
+              aria-label={orderMode === 'flash' ? "Añadir a pedido flash" : "Crear pedido express"}
             >
-              <Zap size={16} />
+              <Zap size={16} className={orderMode === 'flash' ? "text-white fill-current" : ""} />
             </button>
             <button 
               onClick={() => onEdit(book)}

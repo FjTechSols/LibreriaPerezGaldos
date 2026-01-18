@@ -22,6 +22,7 @@ import { useSettings } from '../../../context/SettingsContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { Pagination } from '../../Pagination';
+import { useOrder } from '../../../context/OrderContext';
 import { BookTable } from './BookTable';
 import { BookForm } from './BookForm';
 import { BooksTableLegacy } from './BooksTableLegacy';
@@ -547,7 +548,18 @@ export function BooksManager() {
     );
   };
 
+  const { orderMode, addFlashItem } = useOrder();
+
   const handleExpressOrder = (book: Book) => {
+    if (orderMode === 'flash') {
+      // Pass full book, casting as any if context types restrict it, or just book if compatible.
+      // Based on error "missing properties", context expects Book.
+      addFlashItem(book as any); 
+      // Optional: Show toast "Added to Flash Order"
+      showModal('Añadido', 'Libro añadido al pedido flash.', 'success');
+      return;
+    }
+
     setExpressOrderBook(book);
     setIsExpressOrderOpen(true);
   };

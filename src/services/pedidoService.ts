@@ -893,3 +893,94 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
   }
 };
 
+
+export interface CrearPedidoFlashInput {
+  detalles: Array<{
+    bookId: number;
+    quantity: number;
+    price: number;
+  }>;
+  clientName: string;
+  clientPhone: string;
+  clientEmail?: string;
+  pickupLocation: 'Galeón' | 'Pérez Galdós';
+  adminUserId: string;
+  clientId?: string;
+  isDeposit?: boolean;
+  depositAmount?: number;
+}
+
+export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pedido | null> => {
+  try {
+    // 1. Create or Update Client
+    let clienteId = input.clientId;
+    if (!clienteId) {
+      const { data: newClient, error: clientError } = await supabase
+        .from('clientes')
+        .insert([{
+          nombre: input.clientName,
+          apellidos: '', // Flat name for flash
+          telefono: input.clientPhone,
+          email: input.clientEmail,
+          tipo: 'particular',
+          activo: true,
+          notas: 'Creado vía Pedido Flash'
+        }])
+        .select()
+        .single();
+
+      if (clientError) throw clientError;
+      clienteId = newClient.id;
+    }
+
+    // 2. Create Order
+    const { data: pedido, error: pedidoError } = await supabase
+      .from('pedidos')
+      .insert([{
+        usuario_id: input.adminUserId,
+        cliente_id: clienteId,
+        tipo: 'flash',
+        estado: 'pendiente',
+        fecha_pedido: new Date().toISOString(),
+        metodo_pago: 'efectivo',
+        total: input.detalles.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        punto_recogida: input.pickupLocation,
+        es_senal: input.isDeposit,
+        importe_senal: input.depositAmount || 0,
+        observaciones: 'Pedido Flash'
+      }])
+      .select()
+      .single();
+
+    if (pedidoError) throw pedidoError;
+
+    // 3. Create Details
+    const detallesData = input.detalles.map(item => ({
+      pedido_id: pedido.id,
+      libro_id: item.bookId,
+      cantidad: item.quantity,
+      precio_unitario: item.price,
+      subtotal: item.quantity * item.price
+    }));
+
+    const { error: detallesError } = await supabase
+      .from('pedidos_detalles')
+      .insert(detallesData);
+
+    if (detallesError) throw detallesError;
+
+    // 4. Update Stock (Decrement)
+    for (const item of input.detalles) {
+      await supabase.rpc('decrement_stock', { row_id: Number(item.bookId), amount: item.quantity });
+    }
+
+    // 5. Notifications
+    await createOrderNotification(pedido.id, input.adminUserId);
+
+    return pedido;
+
+  } catch (error) {
+    console.error('Error creating Flash Order:', error);
+    throw error;
+  }
+};
