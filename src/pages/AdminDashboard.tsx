@@ -664,34 +664,63 @@ export function AdminDashboard() {
 
           {/* Center: View Toggle for Book Manager */}
           {activeSection === 'books' && (
-             <div className="flex-1 flex justify-center mx-4">
-               <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex-1 flex justify-center mx-4 gap-4">
+                {/* View Mode Toggle Group */}
+                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                   <button
+                     onClick={() => setViewMode('grid')}
+                     className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-medium ${
+                       viewMode === 'grid'
+                         ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                     }`}
+                     title="Vista de Cuadrícula"
+                   >
+                     <Grid size={16} />
+                     <span className="hidden sm:inline">Cuadrícula</span>
+                   </button>
+                   <button
+                     onClick={() => setViewMode('table')}
+                     className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-medium ${
+                       viewMode === 'table'
+                         ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                     }`}
+                     title="Vista de Lista"
+                   >
+                     <LayoutList size={16} />
+                     <span className="hidden sm:inline">Lista</span>
+                   </button>
+                </div>
+
+                {/* Order Mode Toggle Group */}
+                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
                   <button
-                    onClick={() => setViewMode('grid')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-medium ${
-                      viewMode === 'grid'
-                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    onClick={() => orderMode === 'flash' && toggleOrderMode()}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-bold ${
+                      orderMode === 'standard'
+                        ? 'bg-orange-500 text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
-                    title="Vista de Cuadrícula"
+                    title="Modo Pedido Express"
                   >
-                    <Grid size={16} />
-                    <span className="hidden sm:inline">Cuadrícula</span>
+                    <Zap size={16} className={orderMode === 'standard' ? 'fill-current' : ''} />
+                    <span className="hidden sm:inline">Express</span>
                   </button>
                   <button
-                    onClick={() => setViewMode('table')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-medium ${
-                      viewMode === 'table'
-                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    onClick={() => orderMode === 'standard' && toggleOrderMode()}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all text-sm font-bold ${
+                      orderMode === 'flash'
+                        ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
-                    title="Vista de Lista"
+                    title="Modo Pedido Flash"
                   >
-                    <LayoutList size={16} />
-                    <span className="hidden sm:inline">Lista</span>
+                    <Zap size={16} className={orderMode === 'flash' ? 'fill-current' : ''} />
+                    <span className="hidden sm:inline">Flash</span>
                   </button>
-               </div>
-             </div>
+                </div>
+              </div>
           )}
           
           <div className="flex items-center gap-4">
@@ -713,14 +742,6 @@ export function AdminDashboard() {
                   </span>
                 )}
               </button>
-            <button 
-               onClick={toggleOrderMode}
-               className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-sm font-bold border ${orderMode === 'flash' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}
-               title={orderMode === 'flash' ? "Modo Flash Activado" : "Activar Modo Flash"}
-             >
-               <Zap size={16} className={orderMode === 'flash' ? 'fill-current' : ''} />
-               <span className="hidden sm:inline">{orderMode === 'flash' ? 'FLASH ON' : 'Flash'}</span>
-             </button>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
