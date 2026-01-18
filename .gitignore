@@ -50,3 +50,5 @@ lerna-debug.log*
 laboratorio/
 
 supabase/
+
+analysis_results.txt

@@ -88,7 +88,7 @@
 }
 
 .reset-btn {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -96,11 +96,19 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
 }
 
 .reset-btn:hover {
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
   transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.dark-mode .reset-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  color: #ffffff !important;
 }
 
 @media (max-width: 1024px) {

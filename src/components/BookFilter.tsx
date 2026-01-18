@@ -154,18 +154,12 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
                         return;
                     }
                     if (val.length >= 2) {
-                        // Debounce manually or simple call
-                        // For simplicity in this quick implementation, we call directly but ideally debounce
-                        // Considering low traffic, direct call is okay-ish, but debounce is better.
-                        // We'll use a timeout ref if we want, but let's just let it be responsive for now
                          buscarEditoriales(val).then(setPublisherSuggestions);
                     }
                   }}
                   onBlur={() => {
-                      // Delayed clear to allow click on suggestion
                       setTimeout(() => {
                            if (!filters.publisher && publisherInput.length > 0) {
-                               // If user typed but didn't select, apply what they typed?
                                onFiltersChange({ publisher: publisherInput });
                            }
                            setPublisherSuggestions([]);
@@ -212,7 +206,24 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
              )}
           </div>
 
-
+          <div className="Book-Filter__group">
+            <label className="Book-Filter__label">{language === 'es' ? 'Idioma' : language === 'en' ? 'Language' : 'Langue'}</label>
+            <select
+                value={filters.language || 'Todos'}
+                onChange={(e) => onFiltersChange({ language: e.target.value === 'Todos' ? undefined : e.target.value })}
+                className="Book-Filter__input-select"
+            >
+                <option value="Todos">{language === 'es' ? 'Todos' : 'All'}</option>
+                <option value="Español">Español</option>
+                <option value="Inglés">Inglés</option>
+                <option value="Francés">Francés</option>
+                <option value="Alemán">Alemán</option>
+                <option value="Italiano">Italiano</option>
+                <option value="Catalán">Catalán</option>
+                <option value="Gallego">Gallego</option>
+                <option value="Euskera">Euskera</option>
+            </select>
+          </div>
 
           <div className="Book-Filter__group">
             <label className="Book-Filter__label">{language === 'es' ? 'Rango de Precio' : language === 'en' ? 'Price Range' : 'Fourchette de Prix'}</label>
@@ -239,6 +250,39 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
             </div>
           </div>
         </div>
+
+        <div className="Book-Filter__status-row" style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'center' }}>
+            {/* Condition: Nuevo */}
+            <label className="checkbox-label">
+                <input 
+                    type="checkbox"
+                    checked={filters.condition === 'nuevo'}
+                    onChange={() => onFiltersChange({ condition: filters.condition === 'nuevo' ? undefined : 'nuevo' })}
+                />
+                {language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Neuf'}
+            </label>
+
+            {/* Condition: Leído */}
+            <label className="checkbox-label">
+                <input 
+                    type="checkbox"
+                    checked={filters.condition === 'leido'}
+                    onChange={() => onFiltersChange({ condition: filters.condition === 'leido' ? undefined : 'leido' })}
+                />
+                {language === 'es' ? 'Leído / Usado' : language === 'en' ? 'Used' : 'Occasion'}
+            </label>
+
+            {/* Out of Print */}
+            <label className="checkbox-label">
+                <input 
+                    type="checkbox"
+                    checked={!!filters.isOutOfPrint}
+                    onChange={(e) => onFiltersChange({ isOutOfPrint: e.target.checked })}
+                />
+                {language === 'es' ? 'Descatalogados' : language === 'en' ? 'Out of Print' : 'Épuisé'}
+            </label>
+        </div>
+
         <div className="Book-Filter__actions">
           <button
             onClick={() => onFiltersChange({
@@ -246,7 +290,14 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
               availability: 'inStock',
               priceRange: [0, 1000],
               sortBy: 'default',
-              sortOrder: 'asc'
+              sortOrder: 'asc',
+              featured: false,
+              isNew: false,
+              onSale: false,
+              publisher: undefined,
+              language: undefined,
+              condition: undefined,
+              isOutOfPrint: false
             })}
             className="Book-Filter__btn-clear"
           >

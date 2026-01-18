@@ -78,7 +78,11 @@ export function Catalog() {
             sortOrder: filters.sortOrder,
             featured: filters.featured,
             isOnSale: filters.onSale, 
-            isNew: filters.isNew
+            isNew: filters.isNew,
+            language: filters.language, // Added
+            condition: filters.condition, // Added
+            isOutOfPrint: filters.isOutOfPrint, // Added
+            publisher: filters.publisher, // Added
         };
 
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, serviceFilters);
@@ -101,7 +105,7 @@ export function Catalog() {
             // ... (rest of logic for counts)
              const isDefaultView = !filters.category || filters.category === 'Todos';
             const searchTerm = searchParams.get('search');
-            const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale;
+            const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale && !filters.isOutOfPrint && !filters.language && !filters.condition && !filters.publisher;
             
             if (isTrulyDefault) {
                 if (totalDatabaseBooks > 0) {
@@ -140,7 +144,7 @@ export function Catalog() {
   useEffect(() => {
      const isDefaultView = !filters.category || filters.category === 'Todos';
      const searchTerm = searchParams.get('search');
-     const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale;
+     const isTrulyDefault = isDefaultView && !searchTerm && (!filters.priceRange || (filters.priceRange[0] === 0 && filters.priceRange[1] === 1000)) && !filters.featured && !filters.isNew && !filters.onSale && !filters.isOutOfPrint && !filters.language && !filters.condition && !filters.publisher;
 
      if (isTrulyDefault && totalDatabaseBooks > 0) {
          setTotalFilteredBooks(totalDatabaseBooks);

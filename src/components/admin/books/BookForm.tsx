@@ -84,9 +84,20 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     setShowMessageModal(true);
   };
 
+
+  const LANGUAGES = [
+      'Español', 'Inglés', 'Francés', 'Alemán', 'Italiano', 'Portugués', 
+      'Catalán', 'Euskera', 'Gallego', 'Japonés', 'Chino', 'Ruso', 
+      'Holandés', 'Polaco', 'Latín', 'Griego'
+  ];
+
   // State for Editorial Autocomplete
   const [editorialSuggestions, setEditorialSuggestions] = useState<string[]>([]);
   const [showEditorialSuggestions, setShowEditorialSuggestions] = useState(false);
+
+  // State for Language Autocomplete
+  const [languageSuggestions, setLanguageSuggestions] = useState<string[]>(LANGUAGES);
+  const [showLanguageSuggestions, setShowLanguageSuggestions] = useState(false);
 
   const handleEditorialChange = async (val: string) => {
       setFormData({...formData, publisher: val});
@@ -102,6 +113,13 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
           setEditorialSuggestions([]);
           setShowEditorialSuggestions(false);
       }
+  };
+
+  const handleLanguageChange = (val: string) => {
+      setFormData({...formData, language: val});
+      const filtered = LANGUAGES.filter(l => l.toLowerCase().includes(val.toLowerCase()));
+      setLanguageSuggestions(filtered);
+      setShowLanguageSuggestions(true);
   };
 
 
@@ -849,15 +867,40 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   </div>
 
                   {/* Idioma */}
-                  <div style={{ flex: 1, maxWidth: '200px' }}>
+                  <div style={{ flex: 1, maxWidth: '200px', position: 'relative' }}>
                      <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Idioma</label>
                      <input
                        type="text"
                        value={formData.language || 'Español'}
-                       onChange={(e) => setFormData({...formData, language: e.target.value})}
+                       onChange={(e) => handleLanguageChange(e.target.value)}
+                       onFocus={() => {
+                           // Show all if empty or current value
+                           const val = formData.language || '';
+                           const filtered = LANGUAGES.filter(l => l.toLowerCase().includes(val.toLowerCase()));
+                           setLanguageSuggestions(filtered);
+                           setShowLanguageSuggestions(true);
+                       }}
+                       onBlur={() => setTimeout(() => setShowLanguageSuggestions(false), 200)}
                        className="form-input"
                        style={{ width: '100%' }}
+                       autoComplete="off"
                      />
+                     {showLanguageSuggestions && languageSuggestions.length > 0 && (
+                        <ul className="absolute top-full left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-lg shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto" style={{ marginTop: '2px' }}>
+                            {languageSuggestions.map((lang, i) => (
+                                <li 
+                                    key={i}
+                                    onClick={() => {
+                                        setFormData({...formData, language: lang});
+                                        setShowLanguageSuggestions(false);
+                                    }}
+                                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
+                                >
+                                    {lang}
+                                </li>
+                            ))}
+                        </ul>
+                     )}
                   </div>
             </div>
 

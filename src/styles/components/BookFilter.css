@@ -465,3 +465,56 @@
   background: #64748b;
   color: white;
 }
+
+/* Row Layout for Filters */
+.Book-Filter__group-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.Book-Filter__group-row.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Checkbox Style */
+.Book-Filter__group-checkbox {
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  grid-column: 1 / -1; /* Force to new line below inputs */
+  margin-top: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.95rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+/* Dark Mode updates for new elements */
+.dark-mode .checkbox-label {
+  color: #cbd5e1;
+}
+
+/* Responsive adjustment for row */
+@media (max-width: 600px) {
+  .Book-Filter__group-row.two-columns {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

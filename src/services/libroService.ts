@@ -215,7 +215,11 @@ export interface LibroFilters {
    featured?: boolean;
    isNew?: boolean;
    isOnSale?: boolean;
+   isOutOfPrint?: boolean;
+   language?: string;
+   condition?: 'nuevo' | 'leido';
    coverStatus?: 'all' | 'with_cover' | 'without_cover';
+
    // Advanced filters
    publisher?: string;
    location?: string;
@@ -343,10 +347,14 @@ export const obtenerLibros = async (
         !filters.featured && 
         !filters.isNew && 
         !filters.isOnSale && 
+        !filters.isOutOfPrint &&
+        !filters.language &&
+        !filters.condition &&
         !filters.location && 
         !filters.isbn &&
         !filters.forceCount
     );
+    
     
     // OPTIMIZATION:
     // For Full Text Search (FTS), counting rows is extremely expensive (3s+ for 'sistema').
@@ -370,9 +378,6 @@ export const obtenerLibros = async (
         const searchTerm = filters.search.trim();
         const isNumeric = /^\d+$/.test(searchTerm);
         
-
-
-
         // 1. Numeric/Code Priority Search (Legacy compatibility)
         if (isNumeric && filters.searchMode === 'default') {
              // Exact match optimization for Barcode scanners
@@ -470,6 +475,18 @@ export const obtenerLibros = async (
        if (filters.featured) query = query.eq('destacado', true);
        if (filters.isNew) query = query.eq('novedad', true);
        if (filters.isOnSale) query = query.eq('oferta', true);
+       if (filters.isOutOfPrint) query = query.eq('descatalogado', true);
+       
+       if (filters.language && filters.language !== 'Todos') {
+           // Use broad matching to catch various formats in legacy data
+           // e.g. "Español" matches "En Español", "Texto: Español", etc.
+           query = query.ilike('idioma', `%${filters.language}%`);
+       }
+       // Removed explicit 'todos' check as type is stricter
+       if (filters.condition) { 
+           // Use ilike for case insensitivity (e.g. 'Nuevo' vs 'nuevo')
+           query = query.ilike('estado', filters.condition);
+       }
 
        // Cover status filter
        if (filters.coverStatus === 'with_cover') {
@@ -480,7 +497,7 @@ export const obtenerLibros = async (
 
        // Advanced Filters
        if (filters.location) {
-           query = query.eq('ubicacion', filters.location);
+           query = query.ilike('ubicacion', filters.location);
        }
 
         if (filters.isbn) {

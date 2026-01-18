@@ -180,7 +180,16 @@ export function Home() {
                 <BookCard key={book.id} book={book} />
               ))
             ) : (
-              <p>No hay ofertas disponibles.</p>
+              <div className="empty-state-container">
+                <div className="empty-state-icon">
+                  <Tag size={40} />
+                </div>
+                <h3>{t('noOffersTitle') || 'No hay ofertas activas por el momento'}</h3>
+                <p>{t('noOffersDesc') || 'Estamos seleccionando las mejores promociones para ti. Mientras tanto, explora nuestra colección completa.'}</p>
+                <Link to="/catalogo" className="state-btn">
+                  {t('exploreCatalog')} <ArrowRight size={16} />
+                </Link>
+              </div>
             )}
           </div>
         </div>

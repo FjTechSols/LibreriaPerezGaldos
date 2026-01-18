@@ -336,6 +336,9 @@ export interface FilterState {
   onSale?: boolean;
   isNew?: boolean;
   publisher?: string;
+  language?: string;
+  condition?: 'nuevo' | 'leido';
+  isOutOfPrint?: boolean;
 }
 
 export interface Invoice {

@@ -413,39 +413,67 @@ export function BookDetail() {
                   <div className="specs-grid">
                     <div className="spec-item">
                       <span className="spec-label">Autor:</span>
-                      <span className="spec-value">{book.author}</span>
+                      <span className="spec-value" title={book.author}>{book.author}</span>
                     </div>
                     <div className="spec-item">
                       <span className="spec-label">Editorial:</span>
-                      <span className="spec-value">{book.publisher}</span>
+                      <span className="spec-value" title={book.publisher}>{book.publisher}</span>
                     </div>
                     {book.code && (
                       <div className="spec-item">
                         <span className="spec-label">Código Ref.:</span>
-                        <span className="spec-value">{book.code}</span>
+                        <span className="spec-value" title={book.code}>{book.code}</span>
                       </div>
                     )}
                     {book.isbn && book.isbn.trim() !== '' && (
                       <div className="spec-item">
                         <span className="spec-label">ISBN:</span>
-                        <span className="spec-value">{book.isbn}</span>
+                        <span className="spec-value" title={book.isbn}>{book.isbn}</span>
                       </div>
                     )}
                     <div className="spec-item">
                       <span className="spec-label">Páginas:</span>
-                      <span className="spec-value">{book.pages}</span>
+                      <span className="spec-value" title={String(book.pages)}>{book.pages}</span>
                     </div>
                     <div className="spec-item">
                       <span className="spec-label">{language === 'es' ? 'Categoría' : language === 'en' ? 'Category' : 'Catégorie'}:</span>
-                      <span className="spec-value">{book.category}</span>
+                      <span className="spec-value" title={book.category}>{book.category}</span>
                     </div>
                     <div className="spec-item">
                       <span className="spec-label">Año de Publicación:</span>
-                      <span className="spec-value">{book.publicationYear}</span>
+                      <span className="spec-value" title={String(book.publicationYear)}>{book.publicationYear}</span>
                     </div>
+                    {book.language && (
+                      <div className="spec-item">
+                        <span className="spec-label">{language === 'es' ? 'Idioma' : language === 'en' ? 'Language' : 'Langue'}:</span>
+                        <span className="spec-value" title={book.language}>{book.language}</span>
+                      </div>
+                    )}
+                    {book.condition && (
+                      <div className="spec-item">
+                        <span className="spec-label">{language === 'es' ? 'Estado' : language === 'en' ? 'Condition' : 'État'}:</span>
+                        <span className="spec-value" title={book.condition === 'nuevo' 
+                            ? (language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Neuf') 
+                            : (language === 'es' ? 'Leído / Usado' : language === 'en' ? 'Used' : 'Occasion')}>
+                          {book.condition === 'nuevo' 
+                            ? (language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Neuf') 
+                            : (language === 'es' ? 'Leído / Usado' : language === 'en' ? 'Used' : 'Occasion')}
+                        </span>
+                      </div>
+                    )}
+                    {book.contents && book.contents.length > 0 && (
+                       <div className="spec-item full-width">
+                          <span className="spec-label">{language === 'es' ? 'Contenido' : language === 'en' ? 'Contents' : 'Contenu'}:</span>
+                          <div className="spec-value-list">
+                            {book.contents.map((vol, idx) => (
+                              <span key={idx} className="spec-value-item" title={`Vol ${idx + 1}. ${vol}`}>Vol {idx + 1}. {vol}</span>
+                            ))}
+                          </div>
+                       </div>
+                    )}
                     <div className="spec-item">
                       <span className="spec-label">Valoración:</span>
-                      <span className="spec-value">{averageRating}/5 estrellas</span>
+                      <span className="spec-value" title={`${averageRating}/5 estrellas`}>{averageRating}/5 estrellas</span>
                     </div>
                   </div>
                 </div>
