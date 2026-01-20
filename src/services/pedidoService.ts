@@ -399,36 +399,47 @@ export const actualizarEstadoPedido = async (
       
       if (statesImpliesDeduction.includes(estado)) {
           // Check if we are coming from a state that is NOT in the deducted list
-          // e.g. 'pendiente' -> 'enviado' (DEDUCT)
-          // e.g. 'procesando' -> 'enviado' (ALREADY DEDUCTED, SKIP)
           if (!statesImpliesDeduction.includes(currentOrder.estado)) {
-               console.log(`[Stock] Deducting stock for order ${id} (Transition: ${currentOrder.estado} -> ${estado})`);
-               const res = await deductStockForce(id);
-               if (!res.success) {
-                   return { success: false, error: "Error al descontar stock (insuficiente): " + res.error };
+               // EXCEPTION: Express and Flash orders deduct stock ON CREATION.
+               // So we should NOT deduct again when moving from 'pendiente' to 'procesando/enviado'.
+               const typesWithImmediateDeduction: Partial<TipoPedido>[] = ['express', 'flash'];
+               
+               if (typesWithImmediateDeduction.includes(currentOrder.tipo)) {
+                   console.log(`[Stock] Skipping deduction for ${currentOrder.tipo} order ${id} (Used immediate deduction)`);
+               } else {
+                   console.log(`[Stock] Deducting stock for order ${id} (Transition: ${currentOrder.estado} -> ${estado})`);
+                   const res = await deductStockForce(id);
+                   if (!res.success) {
+                       return { success: false, error: "Error al descontar stock (insuficiente): " + res.error };
+                   }
                }
           }
       }
 
-      // LOGIC 2: Stock Restoration for Returns ('devolucion')
-      if (estado === 'devolucion') {
-           // We assume we only restore if it was previously deducted.
-           // For Web: Always deducted.
-           // For Manual: Deducted only if state was >= 'enviado'.
-           // To be safe and simple per user request: "en caso de que el cliente lo devuelva... reintegrado".
-           // We will try to restore.
-           // Ideally we should check if it WAS deducted.
-           // Heuristic: If Manual and state < enviado (e.g. pendiente), it was NOT deducted, so NO restore.
-           
-           let shouldRestore = true;
-           if (currentOrder.tipo !== 'interno') {
-               // Manual Order
-               if (currentOrder.estado === 'pendiente' || currentOrder.estado === 'procesando') {
-                   shouldRestore = false; // Never deducted
+      // LOGIC 2: Stock Restoration for Cancellation or Returns
+      if (estado === 'devolucion' || estado === 'cancelado') {
+           let shouldRestore = false;
+
+           // Case A: Immediate Deduction Types (Express, Flash)
+           // They effectively ALWAYS have stock deducted unless they are already cancelled/returned.
+           const typesWithImmediateDeduction: Partial<TipoPedido>[] = ['express', 'flash'];
+           if (typesWithImmediateDeduction.includes(currentOrder.tipo)) {
+               // If we are NOT already in a restored state, we must restore.
+               // (Prevent double restoration if for some reason we re-cancel)
+               if (currentOrder.estado !== 'devolucion' && currentOrder.estado !== 'cancelado') {
+                   shouldRestore = true;
+               }
+           } 
+           // Case B: Standard Deduction Types (Interno, Web, etc.)
+           // Only restore if we are coming from a state that implied deduction.
+           else {
+               if (statesImpliesDeduction.includes(currentOrder.estado)) {
+                   shouldRestore = true;
                }
            }
-           
+
            if (shouldRestore) {
+               console.log(`[Stock] Restoring stock for ${currentOrder.tipo} order ${id} (Transition: ${currentOrder.estado} -> ${estado})`);
                const res = await restoreStockForce(id);
                if (!res.success) {
                     return { success: false, error: "Error al restaurar stock: " + res.error };
@@ -862,6 +873,17 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
       // Rollback: delete the order
       await supabase.from('pedidos').delete().eq('id', pedido.id);
       throw new Error('Error al añadir detalle del pedido: ' + detalleError.message);
+    }
+
+    // 5b. Update Stock Immediately (Decrement)
+    const { error: stockError } = await supabase.rpc('decrement_stock', {
+      row_id: Number(input.bookId),
+      amount: input.quantity
+    });
+
+    if (stockError) {
+       console.error('Error decrementing stock for express order:', stockError);
+       // Optional: Rollback or just warn? For now warn, as order is created.
     }
     
     // 6. Handle Deposit (Señal)
