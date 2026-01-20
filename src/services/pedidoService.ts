@@ -984,3 +984,24 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
     throw error;
   }
 };
+
+export const hardDeleteOrder = async (orderId: number): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const { data, error } = await supabase.rpc('hard_delete_order', {
+      p_order_id: orderId
+    });
+
+    if (error) throw error;
+
+    return {
+      success: data.success,
+      message: data.message
+    };
+  } catch (error: any) {
+    console.error('Error in hardDeleteOrder:', error);
+    return {
+      success: false,
+      message: error.message || 'Error desconocido al eliminar el pedido permanentemente'
+    };
+  }
+};

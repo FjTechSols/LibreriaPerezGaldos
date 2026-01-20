@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown, Info } from 'lucide-react';
+import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown, Info, Trash2 } from 'lucide-react';
 import { Pedido, EstadoPedido, TipoPedido } from '../../../types';
-import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
+import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos, hardDeleteOrder } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
+import { useAuth } from '../../../context/AuthContext';
 import { TableLoader } from '../../Loader';
 import { Pagination } from '../../Pagination';
 import '../../../styles/components/PedidosList.css';
@@ -67,6 +68,9 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
   const [hoveredOrder, setHoveredOrder] = useState<{ id: number; items: string[]; top: number; left: number } | null>(null);
+
+  const { isSuperAdmin } = useAuth();
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; orderId: number | null }>({ isOpen: false, orderId: null });
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -252,6 +256,34 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
             type: 'error'
         });
         setShowMessageModal(true);
+    }
+  };
+
+  const handleHardDelete = async () => {
+    if (!deleteConfirmation.orderId) return;
+
+    setLoading(true); // Optional: show loading state
+    const result = await hardDeleteOrder(deleteConfirmation.orderId);
+    setLoading(false);
+
+    setDeleteConfirmation({ isOpen: false, orderId: null });
+
+    if (result.success) {
+      setMessageModalConfig({
+        title: 'Pedido Eliminado',
+        message: result.message || 'El pedido se ha eliminado permanentemente.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
+      cargarPedidos();
+      cargarEstadisticas();
+    } else {
+      setMessageModalConfig({
+        title: 'Error',
+        message: result.message || 'Error al eliminar el pedido.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
     }
   };
 
@@ -617,6 +649,17 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                     ))}
                 </select>
               )}
+
+              
+              {isSuperAdmin && (
+                  <button
+                    onClick={() => setDeleteConfirmation({ isOpen: true, orderId: pedido.id })}
+                    className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors ml-1"
+                    title="Eliminar permanentemente (Super Admin)"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+              )}
             </div>
           </div>
         ))}
@@ -677,6 +720,40 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                     </li>
                 ))}
             </ul>
+        </div>
+
+      )}
+
+      {/* Hard Delete Confirmation Modal */}
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl mx-4 transform transition-all scale-100">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+              <Trash2 className="text-red-500" />
+              Eliminar Pedido #{deleteConfirmation.orderId}
+            </h3>
+            <div className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
+              <p className="mb-2 font-bold text-red-600">⚠️ ESTA ACCIÓN ES IRREVERSIBLE</p>
+              <p>Se borrará el pedido y todos sus datos relacionados (detalle, envío, facturas).</p>
+              <p className="mt-2 text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded border-l-4 border-blue-500">
+                INFO: Si este es el último pedido creado, el contador de IDs se reiniciará para reutilizar este número.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirmation({ isOpen: false, orderId: null })}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleHardDelete}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors font-medium text-sm shadow-sm"
+              >
+                Eliminar Definitivamente
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
