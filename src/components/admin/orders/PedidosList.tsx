@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown } from 'lucide-react';
+import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown, Info } from 'lucide-react';
 import { Pedido, EstadoPedido, TipoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail } from '../../../services/emailService';
@@ -49,7 +49,8 @@ const TIPO_LABELS: Record<TipoPedido, string> = {
     perez_galdos: 'Pérez Galdós',
     galeon: 'Galeón',
     express: 'Express',
-    abebooks: 'Abebooks'
+    abebooks: 'Abebooks',
+    flash: 'Flash'
 };
 
 export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosListProps) {
@@ -65,6 +66,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
+  const [hoveredOrder, setHoveredOrder] = useState<{ id: number; items: string[]; top: number; left: number } | null>(null);
 
   // State for MessageModal
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -269,7 +271,13 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
       pedido.cliente.email?.toLowerCase().includes(searchTermLower)
     ) : false;
 
-    return matchesBasic || matchesClient;
+    // Search in Book Titles (Items)
+    const matchesBooks = pedido.detalles?.some(d => {
+        const title = d.libro?.titulo || d.nombre_externo || '';
+        return title.toLowerCase().includes(searchTermLower);
+    });
+
+    return matchesBasic || matchesClient || matchesBooks;
   });
 
   // Filter by Type
@@ -408,6 +416,18 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
             <span className="pedido-numero">
               <Package size={16} />
               #{pedido.id}
+              <div className="relative inline-flex ml-2">
+                  <Info 
+                      size={16} 
+                      className="text-gray-400 hover:text-blue-500 cursor-help"
+                      onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const items = pedido.detalles?.map(d => d.libro?.titulo || d.nombre_externo || 'Producto desconocido') || [];
+                          setHoveredOrder({ id: pedido.id, items, top: rect.top, left: rect.left });
+                      }}
+                      onMouseLeave={() => setHoveredOrder(null)}
+                  />
+              </div>
             </span>
             <span className="pedido-usuario">
               <div className="usuario-info">
@@ -639,6 +659,26 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
         }}
         onConfirm={handleRechazarPedido}
       />
+
+       {/* Fixed Order Tooltip Overlay */}
+       {hoveredOrder && (
+        <div 
+            className="fixed z-[9999] bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 max-w-sm pointer-events-none animate-in fade-in zoom-in-95 duration-200"
+            style={{ 
+                top: hoveredOrder.top,
+                left: hoveredOrder.left + 24, // Shift right of icon
+            }}
+        >
+            <div className="font-semibold mb-1 border-b border-gray-700 pb-1">Contenido del Pedido</div>
+            <ul className="list-disc list-inside space-y-1">
+                {hoveredOrder.items.map((item, idx) => (
+                    <li key={idx} className="leading-relaxed text-gray-300">
+                        {item}
+                    </li>
+                ))}
+            </ul>
+        </div>
+      )}
     </div>
   );
 }

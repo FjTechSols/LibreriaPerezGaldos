@@ -975,7 +975,7 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
     }
 
     // 5. Notifications
-    await createOrderNotification(pedido.id, input.adminUserId);
+    await createOrderNotification(input.adminUserId, pedido.id);
 
     return pedido;
 
