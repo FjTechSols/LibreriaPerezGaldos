@@ -1229,7 +1229,13 @@ export const eliminarLibro = async (id: number): Promise<boolean> => {
   }
 };
 
-export const buscarLibros = async (query: string, options?: { searchFields?: 'code' | 'all' }): Promise<Book[]> => {
+export const buscarLibros = async (
+  query: string, 
+  options?: { 
+    searchFields?: 'code' | 'all';
+    includeOutOfStock?: boolean;  // New: Allow searching books without stock (for admin)
+  }
+): Promise<Book[]> => {
   try {
     const isNumeric = /^\d+$/.test(query);
  
@@ -1241,12 +1247,18 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
     // Check for Numeric (Potential Barcode)
     if (isNumeric) {
         // Priority A: Strict Legacy ID (Barcode) Match
-        const { data: exactLegacy, error: exactError } = await supabase
+        let exactLegacyQuery = supabase
               .from('libros')
               .select('*, editoriales(id, nombre), categorias(id, nombre)')
               .eq('activo', true)
-              .eq('legacy_id', query)
-              .limit(5);
+              .eq('legacy_id', query);
+        
+        // Filter by stock unless explicitly including out-of-stock
+        if (!options?.includeOutOfStock) {
+          exactLegacyQuery = exactLegacyQuery.gt('stock', 0);
+        }
+        
+        const { data: exactLegacy, error: exactError } = await exactLegacyQuery.limit(5);
 
          if (!exactError && exactLegacy && exactLegacy.length > 0) {
               return exactLegacy.map(mapLibroToBook);
@@ -1254,12 +1266,18 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
          
          // Priority B: Strict ID (Internal) Match - Optional, but kept for admin flexibility
          if (options?.searchFields === 'all') { // Only if not strictly code
-             const { data: exactId, error: idError } = await supabase
+             let exactIdQuery = supabase
                 .from('libros')
                 .select('*, editoriales(id, nombre), categorias(id, nombre)')
                 .eq('activo', true)
-                .eq('id', parseInt(query))
-                .limit(1);
+                .eq('id', parseInt(query));
+             
+             // Filter by stock unless explicitly including out-of-stock
+             if (!options?.includeOutOfStock) {
+               exactIdQuery = exactIdQuery.gt('stock', 0);
+             }
+             
+             const { data: exactId, error: idError } = await exactIdQuery.limit(1);
              
              if (!idError && exactId && exactId.length > 0) {
                  return exactId.map(mapLibroToBook);
@@ -1272,10 +1290,16 @@ export const buscarLibros = async (query: string, options?: { searchFields?: 'co
         .from('libros')
         .select('*, editoriales(id, nombre), categorias(id, nombre)')
         .eq('activo', true);
+    
+    // FIXED: Filter by stock unless explicitly including out-of-stock books
+    // Default behavior: only show books with stock > 0 (for customer-facing searches)
+    if (!options?.includeOutOfStock) {
+      queryBuilder = queryBuilder.gt('stock', 0);
+    }
 
     // Filter stopwords for cleaner query (optional with websearch but good for clarity)
     const SPANISH_STOPWORDS = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'de', 'del', 'al', 'en', 'con', 'por', 'sobre', 'entre', 'para', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'que', 'se', 'no'];
-    let terms = query.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
+    let terms = query.replace(/[(),.\\-\\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
     
     if (terms.length > 0) { // Only filter if we have terms
         const filteredTerms = terms.filter(t => !SPANISH_STOPWORDS.includes(t.toLowerCase()));
