@@ -1,41 +1,67 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useInvoice } from '../../../context/InvoiceContext';
 import { useTheme } from '../../../context/ThemeContext';
+import { obtenerPedidos } from '../../../services/pedidoService';
+import { Pedido } from '../../../types';
 
 export function RevenueChart() {
-  const { invoices } = useInvoice();
   const { actualTheme } = useTheme();
   const isDark = actualTheme === 'dark';
+  const [orders, setOrders] = useState<Pedido[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Process invoices to get monthly revenue data
+  // Fetch orders on mount
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const { data } = await obtenerPedidos();
+        setOrders(data || []);
+      } catch (error) {
+        console.error('Error fetching orders for revenue chart:', error);
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  // Process orders to get monthly revenue data
   const monthlyData = useMemo(() => {
+    // Month names in Spanish
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    
+    // Generate last 6 months (FIXED: corrected calculation)
     const last6Months = Array.from({ length: 6 }, (_, i) => {
       const date = new Date();
-      date.setMonth(date.getMonth() - (5 - i));
+      date.setMonth(date.getMonth() - i);  // ✅ FIXED: Go back from current month
       return {
-        month: date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
+        month: `${monthNames[date.getMonth()]} ${date.getFullYear()}`,  // ✅ FIXED: Better format
         monthKey: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
         revenue: 0,
         orders: 0
       };
-    });
+    }).reverse();  // ✅ FIXED: Reverse to show chronologically (oldest to newest)
 
-    invoices.forEach(invoice => {
-      if (invoice.status === 'Anulada') return;
+    // ✅ FIXED: Use orders instead of invoices, filter by status
+    orders.forEach(order => {
+      // Only count completed or shipped orders (actual revenue)
+      if (!order.estado || !['completado', 'enviado'].includes(order.estado)) return;
+      if (!order.fecha_pedido) return;  // Skip orders without date
       
-      const invoiceDate = new Date(invoice.issue_date);
-      const monthKey = `${invoiceDate.getFullYear()}-${String(invoiceDate.getMonth() + 1).padStart(2, '0')}`;
+      const orderDate = new Date(order.fecha_pedido);
+      const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
       
       const monthData = last6Months.find(m => m.monthKey === monthKey);
       if (monthData) {
-        monthData.revenue += invoice.total || 0;
+        monthData.revenue += order.total || 0;
         monthData.orders += 1;
       }
     });
 
     return last6Months;
-  }, [invoices]);
+  }, [orders]);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -93,40 +119,53 @@ export function RevenueChart() {
       }}>
         Evolución de Ingresos
       </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={monthlyData}>
-          <defs>
-            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            stroke={isDark ? '#334155' : '#e2e8f0'}
-            vertical={false}
-          />
-          <XAxis 
-            dataKey="month" 
-            stroke={isDark ? '#94a3b8' : '#64748b'}
-            style={{ fontSize: '0.875rem' }}
-          />
-          <YAxis 
-            stroke={isDark ? '#94a3b8' : '#64748b'}
-            style={{ fontSize: '0.875rem' }}
-            tickFormatter={(value) => `${value}€`}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Area 
-            type="monotone" 
-            dataKey="revenue" 
-            stroke="#10b981" 
-            strokeWidth={2}
-            fillOpacity={1} 
-            fill="url(#colorRevenue)" 
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      
+      {loading ? (
+        <div style={{
+          height: '300px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: isDark ? '#94a3b8' : '#64748b'
+        }}>
+          Cargando datos...
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={monthlyData}>
+            <defs>
+              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={isDark ? '#334155' : '#e2e8f0'}
+              vertical={false}
+            />
+            <XAxis 
+              dataKey="month" 
+              stroke={isDark ? '#94a3b8' : '#64748b'}
+              style={{ fontSize: '0.875rem' }}
+            />
+            <YAxis 
+              stroke={isDark ? '#94a3b8' : '#64748b'}
+              style={{ fontSize: '0.875rem' }}
+              tickFormatter={(value) => `${value}€`}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Area 
+              type="monotone" 
+              dataKey="revenue" 
+              stroke="#10b981" 
+              strokeWidth={2}
+              fillOpacity={1} 
+              fill="url(#colorRevenue)" 
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }
