@@ -955,7 +955,19 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
       clienteId = newClient.id;
     }
 
-    // 2. Create Order
+    // 2. Calculate Totals with Tax (FIXED: Added IVA calculation)
+    const settings = await settingsService.getAllSettings();
+    const taxPercentage = settings?.billing?.taxRate ?? 21;
+    const taxRate = taxPercentage / 100;
+
+    const totalWithTax = input.detalles.reduce((sum, item) => 
+      sum + (item.price * item.quantity), 0
+    );
+
+    const subtotalWithoutTax = totalWithTax / (1 + taxRate);
+    const iva = totalWithTax - subtotalWithoutTax;
+
+    // 3. Create Order (FIXED: Added subtotal and iva fields)
     const { data: pedido, error: pedidoError } = await supabase
       .from('pedidos')
       .insert([{
@@ -965,7 +977,9 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
         estado: 'pendiente',
         fecha_pedido: new Date().toISOString(),
         metodo_pago: 'efectivo',
-        total: input.detalles.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        subtotal: Number(subtotalWithoutTax.toFixed(2)),
+        iva: Number(iva.toFixed(2)),
+        total: Number(totalWithTax.toFixed(2)),
         punto_recogida: input.pickupLocation,
         es_senal: input.isDeposit,
         importe_senal: input.depositAmount || 0,
@@ -976,7 +990,7 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
 
     if (pedidoError) throw pedidoError;
 
-    // 3. Create Details
+    // 4. Create Details (FIXED: Corrected table name from 'pedidos_detalles' to 'pedido_detalles')
     const detallesData = input.detalles.map(item => ({
       pedido_id: pedido.id,
       libro_id: item.bookId,
@@ -986,18 +1000,64 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
     }));
 
     const { error: detallesError } = await supabase
-      .from('pedidos_detalles')
+      .from('pedido_detalles')  // ✅ FIXED: Was 'pedidos_detalles'
       .insert(detallesData);
 
-    if (detallesError) throw detallesError;
-
-    // 4. Update Stock (Decrement)
-    for (const item of input.detalles) {
-      await supabase.rpc('decrement_stock', { row_id: Number(item.bookId), amount: item.quantity });
+    if (detallesError) {
+      // FIXED: Added rollback mechanism
+      await supabase.from('pedidos').delete().eq('id', pedido.id);
+      throw new Error('Error al crear detalles del pedido flash: ' + detallesError.message);
     }
 
-    // 5. Notifications
-    await createOrderNotification(input.adminUserId, pedido.id);
+    // 5. Update Stock with Error Handling (FIXED: Added error handling)
+    for (const item of input.detalles) {
+      const { error: stockError } = await supabase.rpc('decrement_stock', { 
+        row_id: Number(item.bookId), 
+        amount: item.quantity 
+      });
+      
+      if (stockError) {
+        console.error(`Error decrementing stock for book ${item.bookId}:`, stockError);
+        // Note: We don't rollback here as the order is already confirmed
+        // Admin will need to manually adjust stock if necessary
+      }
+    }
+
+    // 6. Fetch Full Order for Notifications (FIXED: Improved notification system)
+    const fullOrder = await obtenerPedidoPorId(pedido.id);
+    
+    if (fullOrder) {
+      // Notification to Admins with detailed info
+      const clientName = fullOrder.cliente?.nombre || input.clientName;
+      const userObj = fullOrder.usuario;
+      const username = userObj?.username || 'Admin';
+      const userIdDisplay = userObj?.legacy_id ? `ID: ${userObj.legacy_id}` : `ID: ${userObj?.id?.slice(0, 8)}...`;
+      
+      const itemsSummary = fullOrder.detalles?.map(d => {
+        const title = d.libro?.titulo || 'Producto';
+        const code = d.libro?.legacy_id || 'S/C';
+        return `${title} (${code})`;
+      }).join(', ') || 'varios artículos';
+      
+      createAdminOrderNotification(
+        pedido.id,
+        clientName,
+        username,
+        'flash',
+        'pendiente',
+        userIdDisplay,
+        itemsSummary
+      ).catch(err => console.error('Error sending admin notification:', err));
+
+      // Notification to User
+      createOrderNotification(
+        input.adminUserId, 
+        pedido.id, 
+        'pendiente'
+      ).catch(err => console.error('Error sending user notification:', err));
+
+      return fullOrder;
+    }
 
     return pedido;
 
