@@ -274,7 +274,7 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
         );
         
         // Enviar notificación al usuario (Confirmación de pedido por Email)
-        const customerEmail = fullOrder.cliente?.email || fullOrder.usuario?.email;
+        const customerEmail = fullOrder.cliente?.email || 'pedidos@perezgaldos.com';
         
         if (customerEmail) {
            const emailItems = fullOrder.detalles?.map(d => ({
@@ -908,6 +908,35 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
     // 7. Create notification for admin
     await createAdminOrderNotification(pedido.id, input.adminUserId);
     
+    // 8. Send confirmation email
+    const fullOrder = await obtenerPedidoPorId(pedido.id);
+    
+    if (fullOrder) {
+      const customerEmail = fullOrder.cliente?.email || 'pedidos@perezgaldos.com';
+      
+      const emailItems = fullOrder.detalles?.map(d => ({
+        title: d.libro?.titulo || 'Producto',
+        quantity: d.cantidad,
+        price: d.precio_unitario
+      })) || [];
+      
+      const displayTaxRate = taxPercentage; // Already fetched above
+      
+      sendOrderConfirmationEmail({
+        orderId: fullOrder.id.toString(),
+        customerEmail,
+        customerName: fullOrder.cliente?.nombre || 'Cliente',
+        items: emailItems,
+        subtotal: fullOrder.subtotal ?? 0,
+        tax: fullOrder.iva ?? 0,
+        taxRate: displayTaxRate,
+        shipping: fullOrder.coste_envio ?? 0,
+        total: fullOrder.total ?? 0,
+        shippingAddress: fullOrder.punto_recogida || 'Recogida en tienda',
+        orderType: 'express'
+      }).catch(err => console.error('Error sending confirmation email:', err));
+    }
+    
     return pedido;
   } catch (error) {
     console.error('Error in crearPedidoExpress:', error);
@@ -1055,6 +1084,31 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
         pedido.id, 
         'pendiente'
       ).catch(err => console.error('Error sending user notification:', err));
+      
+      // 7. Send confirmation email
+      const customerEmail = fullOrder.cliente?.email || 'pedidos@perezgaldos.com';
+      
+      const emailItems = fullOrder.detalles?.map(d => ({
+        title: d.libro?.titulo || 'Producto',
+        quantity: d.cantidad,
+        price: d.precio_unitario
+      })) || [];
+      
+      const displayTaxRate = settings?.billing?.taxRate || 21;
+      
+      sendOrderConfirmationEmail({
+        orderId: fullOrder.id.toString(),
+        customerEmail,
+        customerName: fullOrder.cliente?.nombre || 'Cliente',
+        items: emailItems,
+        subtotal: fullOrder.subtotal ?? 0,
+        tax: fullOrder.iva ?? 0,
+        taxRate: displayTaxRate,
+        shipping: fullOrder.coste_envio ?? 0,
+        total: fullOrder.total ?? 0,
+        shippingAddress: fullOrder.punto_recogida || 'Recogida en tienda',
+        orderType: 'flash'
+      }).catch(err => console.error('Error sending confirmation email:', err));
 
       return fullOrder;
     }

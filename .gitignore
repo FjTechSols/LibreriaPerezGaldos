@@ -24,6 +24,7 @@ dist-ssr
 
 # User requested exclusions
 docs/
+!docs/auditorias/
 scripts/
 
 
