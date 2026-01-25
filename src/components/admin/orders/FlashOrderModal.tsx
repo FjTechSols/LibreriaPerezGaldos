@@ -132,6 +132,12 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
     e.preventDefault();
     if (!user) return;
 
+    // Validate items exist
+    if (flashItems.length === 0) {
+      alert('No hay libros seleccionados para el pedido');
+      return;
+    }
+
     const newErrors: Partial<Record<keyof OrderFormData, string>> = {};
     if (!formData.clientName.trim()) newErrors.clientName = 'El nombre es obligatorio';
     if (!formData.clientPhone.trim()) newErrors.clientPhone = 'El teléfono es obligatorio';
@@ -143,13 +149,25 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
     }
 
     setSubmitting(true);
+    setErrors({});
+    
     try {
+      console.log('🚀 Creating Flash Order with items:', flashItems);
+      
       // Map flash items to FlashOrderInput details
-      const detalles = flashItems.map(item => ({
-         bookId: parseInt(item.id),
-         quantity: 1, // Default 1 for now
-         price: item.price
-      }));
+      const detalles = flashItems.map(item => {
+        const bookId = parseInt(item.id);
+        if (isNaN(bookId)) {
+          throw new Error(`ID de libro inválido: ${item.id}`);
+        }
+        return {
+          bookId,
+          quantity: 1, // Default 1 for now
+          price: item.price
+        };
+      });
+
+      console.log('📦 Detalles preparados:', detalles);
 
       // Create Flash Order
       const pedido = await crearPedidoFlash({
@@ -159,19 +177,24 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
           clientEmail: formData.clientEmail,
           pickupLocation: formData.pickupLocation,
           adminUserId: user.id,
-          clientId: selectedClientId, // String, no parseInt
+          clientId: selectedClientId,
           isDeposit: formData.isDeposit,
           depositAmount: formData.depositAmount
       });
 
       if (pedido) {
+          console.log('✅ Pedido Flash creado exitosamente:', pedido.id);
           clearFlashOrder();
+          alert(`✅ Pedido Flash #${pedido.id} creado exitosamente`);
           onSuccess(pedido.id.toString());
-          onClose(); // Parent (Fab) handles notifications usually, or we can show toast here if we had access.
+          onClose();
+      } else {
+          throw new Error('No se pudo crear el pedido');
       }
-    } catch (error) {
-      console.error('Error creating flash order:', error);
-      // Show generic error or update status
+    } catch (error: any) {
+      console.error('❌ Error creating flash order:', error);
+      const errorMessage = error?.message || 'Error desconocido al crear el pedido';
+      alert(`❌ Error al crear el pedido Flash:\n\n${errorMessage}\n\nPor favor, revisa la consola para más detalles.`);
     } finally {
       setSubmitting(false);
     }

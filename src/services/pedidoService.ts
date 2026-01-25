@@ -963,9 +963,18 @@ export interface CrearPedidoFlashInput {
 
 export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pedido | null> => {
   try {
+    console.log('🚀 [Flash Order] Iniciando creación con input:', {
+      numDetalles: input.detalles.length,
+      clientName: input.clientName,
+      pickupLocation: input.pickupLocation
+    });
+    
     // 1. Create or Update Client
     let clienteId = input.clientId;
+    
     if (!clienteId) {
+      console.log('📝 [Flash Order] Creando nuevo cliente:', input.clientName);
+      
       const { data: newClient, error: clientError } = await supabase
         .from('clientes')
         .insert([{
@@ -980,8 +989,31 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
         .select()
         .single();
 
-      if (clientError) throw clientError;
+      if (clientError) {
+        console.error('❌ [Flash Order] Error al crear cliente:', clientError);
+        throw new Error('Error al crear cliente: ' + clientError.message);
+      }
+      
+      if (!newClient) {
+        throw new Error('No se pudo crear el cliente');
+      }
+      
       clienteId = newClient.id;
+      console.log('✅ [Flash Order] Cliente creado con ID:', clienteId);
+    } else {
+      console.log('📝 [Flash Order] Usando cliente existente:', clienteId);
+      
+      // Verify client exists
+      const { data: existingClient, error: verifyError } = await supabase
+        .from('clientes')
+        .select('id')
+        .eq('id', clienteId)
+        .maybeSingle();
+      
+      if (verifyError || !existingClient) {
+        console.error('❌ [Flash Order] Cliente no encontrado:', clienteId);
+        throw new Error('El cliente seleccionado no existe');
+      }
     }
 
     // 2. Calculate Totals with Tax (FIXED: Added IVA calculation)
@@ -1024,19 +1056,24 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
       pedido_id: pedido.id,
       libro_id: item.bookId,
       cantidad: item.quantity,
-      precio_unitario: item.price,
-      subtotal: item.quantity * item.price
+      precio_unitario: item.price
+      // subtotal is a GENERATED column, don't insert it manually
     }));
+
+    console.log('📦 [Flash Order] Detalles a insertar:', detallesData);
 
     const { error: detallesError } = await supabase
       .from('pedido_detalles')  // ✅ FIXED: Was 'pedidos_detalles'
       .insert(detallesData);
 
     if (detallesError) {
+      console.error('❌ [Flash Order] Error al insertar detalles:', detallesError);
       // FIXED: Added rollback mechanism
       await supabase.from('pedidos').delete().eq('id', pedido.id);
       throw new Error('Error al crear detalles del pedido flash: ' + detallesError.message);
     }
+
+    console.log('✅ [Flash Order] Detalles insertados correctamente');
 
     // 5. Update Stock with Error Handling (FIXED: Added error handling)
     for (const item of input.detalles) {
