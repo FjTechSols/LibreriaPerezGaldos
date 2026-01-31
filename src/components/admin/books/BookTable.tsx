@@ -14,7 +14,7 @@ interface BookTableProps {
 export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrder }: BookTableProps) {
   const { orderMode } = useOrder();
   const [hoveredCode, setHoveredCode] = useState<{ code: string; top: number; left: number } | null>(null);
-  const [hoveredDescription, setHoveredDescription] = useState<{ text: string; top: number; left: number } | null>(null);
+  const [hoveredDescription, setHoveredDescription] = useState<{ text: string; year?: number; isbn?: string; top: number; left: number } | null>(null);
   return (
     <div className="data-table admin-books-table">
       <div className="table-header">
@@ -62,7 +62,13 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
                         className="text-gray-400 hover:text-blue-500 cursor-help"
                         onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
-                            setHoveredDescription({ text: book.description || '', top: rect.top, left: rect.left });
+                            setHoveredDescription({ 
+                                text: book.description || '', 
+                                year: book.publicationYear,
+                                isbn: book.isbn,
+                                top: rect.top, 
+                                left: rect.left 
+                            });
                         }}
                         onMouseLeave={() => setHoveredDescription(null)}
                     />
@@ -164,9 +170,21 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
                 left: hoveredDescription.left + 24, // Shift right of icon
             }}
         >
-            <div className="font-semibold mb-1 border-b border-gray-700 pb-1">Descripción</div>
-            <p className="leading-relaxed">{hoveredDescription.text}</p>
-             {/* Arrow visual hint (optional, simpler to omit for fixed overlay or mock with pseudo) */}
+            <div className="font-semibold mb-2 border-b border-gray-700 pb-1 flex justify-between items-center gap-4">
+                <span>Información del Libro</span>
+                {hoveredDescription.year && (
+                    <span className="text-blue-400">Año: {hoveredDescription.year}</span>
+                )}
+            </div>
+            
+            {hoveredDescription.isbn && (
+                <div className="mb-2 text-gray-400">
+                    <span className="font-medium text-gray-300">ISBN:</span> {hoveredDescription.isbn}
+                </div>
+            )}
+
+            <div className="text-gray-300 font-medium mb-1">Descripción:</div>
+            <p className="leading-relaxed">{hoveredDescription.text || 'Sin descripción disponible.'}</p>
         </div>
       )}
     </div>
