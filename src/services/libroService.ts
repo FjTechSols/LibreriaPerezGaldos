@@ -450,7 +450,7 @@ export const obtenerLibros = async (
       if (filters.minPrice !== undefined && filters.minPrice > 0) {
         query = query.gte('precio', filters.minPrice);
       }
-      if (filters.maxPrice !== undefined && filters.maxPrice < 1000) {
+      if (filters.maxPrice !== undefined) {
         // Assume 1000 is the slider max, so no need to filter if it's 1000+
         query = query.lte('precio', filters.maxPrice);
       }

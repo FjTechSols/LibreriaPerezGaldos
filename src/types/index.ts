@@ -328,7 +328,7 @@ export interface WishlistState {
 
 export interface FilterState {
   category: string;
-  priceRange: [number, number];
+  priceRange: [number | '', number | ''];
   availability: 'all' | 'inStock' | 'outOfStock';
   sortBy: 'default' | 'title' | 'price' | 'rating' | 'newest';
   sortOrder: 'asc' | 'desc';

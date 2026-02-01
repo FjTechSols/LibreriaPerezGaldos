@@ -39,7 +39,7 @@ export function Catalog() {
 
   const [filters, setFilters] = useState<FilterState>({
     category: initialCategory,
-    priceRange: [0, 1000],
+    priceRange: ['', ''] as [number | '', number | ''], // Initialize empty
     availability: 'inStock', /* Default: Hide Out of Stock */
     sortBy: 'default',
     sortOrder: 'asc',
@@ -71,8 +71,8 @@ export function Catalog() {
             search: searchParams.get('search') || undefined,
             // ... (other filters)
             category: filters.category,
-            minPrice: filters.priceRange[0],
-            maxPrice: filters.priceRange[1],
+            minPrice: filters.priceRange[0] === '' ? undefined : Number(filters.priceRange[0]),
+            maxPrice: filters.priceRange[1] === '' ? undefined : Number(filters.priceRange[1]),
             availability: filters.availability,
             sortBy: filters.sortBy,
             sortOrder: filters.sortOrder,
@@ -255,7 +255,7 @@ export function Catalog() {
                       onClick={() => {
                         setFilters({
                           category: 'Todos',
-                          priceRange: [0, 1000],
+                          priceRange: ['', ''],
                           availability: 'inStock',
                           sortBy: 'default',
                           sortOrder: 'asc',

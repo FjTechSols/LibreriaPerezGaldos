@@ -230,21 +230,27 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
             <div className="Book-Filter__price-range">
               <input
                 type="number"
-                placeholder={language === 'es' ? 'Mín' : language === 'en' ? 'Min' : 'Min'}
-                value={filters.priceRange[0] || ''}
-                onChange={(e) => onFiltersChange({
-                  priceRange: [Number(e.target.value) || 0, filters.priceRange[1]]
-                })}
+                placeholder={language === 'es' ? 'Mín' : 'Min'}
+                value={filters.priceRange[0]}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  onFiltersChange({
+                    priceRange: [val === '' ? '' : Number(val), filters.priceRange[1]]
+                  });
+                }}
                 className="Book-Filter__input-price"
               />
               <span className="Book-Filter__price-separator">-</span>
               <input
                 type="number"
-                placeholder={language === 'es' ? 'Máx' : language === 'en' ? 'Max' : 'Max'}
-                value={filters.priceRange[1] || ''}
-                onChange={(e) => onFiltersChange({
-                  priceRange: [filters.priceRange[0], Number(e.target.value) || 1000]
-                })}
+                placeholder={language === 'es' ? 'Máx' : 'Max'}
+                value={filters.priceRange[1]}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  onFiltersChange({
+                    priceRange: [filters.priceRange[0], val === '' ? '' : Number(val)]
+                  });
+                }}
                 className="Book-Filter__input-price"
               />
             </div>
@@ -288,7 +294,7 @@ export function BookFilter({ filters, onFiltersChange, viewMode, onViewModeChang
             onClick={() => onFiltersChange({
               category: 'Todos',
               availability: 'inStock',
-              priceRange: [0, 1000],
+              priceRange: ['', ''],
               sortBy: 'default',
               sortOrder: 'asc',
               featured: false,
