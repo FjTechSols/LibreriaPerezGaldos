@@ -129,6 +129,10 @@
   background: var(--bg-hover);
 }
 
+[data-theme="dark"] .new-section {
+  background: var(--bg-page); /* Darker (slate-950) to make slate-800 cards pop */
+}
+
 .sale-section {
   background: var(--bg-surface);
 }

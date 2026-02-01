@@ -155,6 +155,10 @@
   background: var(--bg-hover);
 }
 
+[data-theme="dark"] .suggestion-item:hover {
+  background: var(--slate-700); /* Ensure dark hover state */
+}
+
 .suggestion-image {
   width: 44px;
   height: 56px;

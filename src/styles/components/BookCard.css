@@ -10,6 +10,13 @@
   text-decoration: none;
   color: inherit;
   display: flex;
+  border: 1px solid var(--border-subtle); /* Added for definition */
+}
+
+/* Dark Mode Specific Boost */
+[data-theme="dark"] .bookcard {
+  background: var(--slate-800); /* Lighter than default surface (slate-900) for pop */
+  border-color: var(--slate-700);
 }
 
 .bookcard:hover {
@@ -158,7 +165,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  background: var(--bg-surface);
+  background: inherit; /* Inherit from .bookcard to pick up contrast adjustments */
 }
 
 .bookcard--grid .bookcard__title {
@@ -187,8 +194,23 @@
   margin-left: 0.5rem;
 }
 
+/* Badge Styles Updates for Dark Mode contrast */
+[data-theme="dark"] .bookcard__category,
+[data-theme="dark"] .bookcard__code {
+  background: var(--slate-700); /* Lighter than card (slate-800) to create "box" effect */
+  color: var(--slate-300);
+  border-color: var(--slate-600);
+}
+
+/* Dark Mode specific separator visibility */
+[data-theme="dark"] .bookcard--grid .bookcard__pricing {
+  border-top-color: var(--slate-600); /* Stronger contrast against slate-800 background */
+}
+
 .bookcard--grid .bookcard__pricing {
   margin-top: 0.75rem;
+  padding-top: 0.75rem; /* Add spacing for separator */
+  border-top: 1px solid var(--border-subtle); /* The discreet separator requested */
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
