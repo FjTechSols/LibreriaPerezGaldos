@@ -301,6 +301,71 @@
   border-color: var(--success);
 }
 
+/* Information Tooltip Overlay */
+.info-tooltip-overlay {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  max-width: 350px;
+}
+
+.info-tooltip-header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.info-tooltip-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.info-tooltip-year {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.info-tooltip-item {
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.info-tooltip-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.info-tooltip-value {
+  color: var(--text-main);
+}
+
+.info-tooltip-description {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.info-tooltip-description-label {
+  display: block;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
 .stock-badge.is-low {
   background: var(--bg-warning-subtle);
   color: var(--warning);

@@ -188,27 +188,30 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
       {/* Fixed Description Tooltip Overlay */}
       {hoveredDescription && (
         <div 
-            className="fixed z-[9999] bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 max-w-sm pointer-events-none animate-in fade-in zoom-in-95 duration-200"
+            className="fixed z-[9999] info-tooltip-overlay text-xs pointer-events-none animate-in fade-in zoom-in-95 duration-200"
             style={{ 
                 top: hoveredDescription.top,
                 left: hoveredDescription.left + 24, // Shift right of icon
             }}
         >
-            <div className="font-semibold mb-2 border-b border-gray-700 pb-1 flex justify-between items-center gap-4">
-                <span>Información del Libro</span>
+            <div className="info-tooltip-header">
+                <span className="info-tooltip-title">Información del Libro</span>
                 {hoveredDescription.year && (
-                    <span className="text-blue-400">Año: {hoveredDescription.year}</span>
+                    <span className="info-tooltip-year">Año: {hoveredDescription.year}</span>
                 )}
             </div>
             
             {hoveredDescription.isbn && (
-                <div className="mb-2 text-gray-400">
-                    <span className="font-medium text-gray-300">ISBN:</span> {hoveredDescription.isbn}
+                <div className="info-tooltip-item">
+                    <span className="info-tooltip-label">ISBN:</span> 
+                    <span className="info-tooltip-value">{hoveredDescription.isbn}</span>
                 </div>
             )}
 
-            <div className="text-gray-300 font-medium mb-1">Descripción:</div>
-            <p className="leading-relaxed">{hoveredDescription.text || 'Sin descripción disponible.'}</p>
+            <div className="info-tooltip-description">
+                <span className="info-tooltip-description-label">Descripción:</span>
+                <p className="leading-relaxed">{hoveredDescription.text || 'Sin descripción disponible.'}</p>
+            </div>
         </div>
       )}
     </div>
