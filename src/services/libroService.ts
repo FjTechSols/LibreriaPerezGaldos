@@ -398,28 +398,24 @@ export const obtenerLibros = async (
              query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
              
         } else {
-             // 2. SMART MATCH (Título, Autor, ISBN, Código)
-             // Reemplazamos full-text search (que incluía descripción) por una búsqueda dirigida
-             // para evitar ruido (ej. buscar 'Madrid' y que salgan novelas con madrid en sinopsis).
+             // 2. SMART MATCH MULTI-TÉRMINO (Título, Autor, ISBN, Código)
+             // Lógica: Dividimos la búsqueda en palabras.
+             // Para 'Quijote Cervantes': (Titulo~Quijote O Autor~Quijote) AND (Titulo~Cervantes O Autor~Cervantes)
              
-             // Sanear término para SQL (para este caso simple con ilike, supabase escapa básico, 
-             // pero si necesitamos algo manual: const sanitized = ...). Por ahora directo.
+             const terms = searchTerm.split(/\s+/).filter(t => t.length > 0);
              
-             // En Supabase/PostgREST, el '.' es separador, así que el término no debe "romper" la url. 
-             // Pero usando la librería JS, el string se maneja bien.
-             // La sintaxis para .or es: "col.op.val,col.op.val"
-             
-             // IMPORTANTE: Para búsquedas que contienen comas u otros caracteres, supabase-js maneja el quoting?
-             // La forma más robusta es usar el método .or() con la sintaxis de filtro.
-             // "titulo.ilike.%term%,autor.ilike.%term%,isbn.ilike.%term%,legacy_id.ilike.%term%"
-             
-             const term = `%${searchTerm}%`;  
-             
-             // Construimos la query string para el OR
-             // Note: If filters.searchMode === 'full', we COULD keep vector search?
-             // But user specifically asked to fix "weird results". Let's stick to strict match effectively.
-             
-             query = query.or(`titulo.ilike.${term},autor.ilike.${term},isbn.ilike.${term},legacy_id.ilike.${term}`);
+             if (terms.length > 0) {
+                 terms.forEach(term => {
+                     // Sanear caracteres problemáticos para la URL de PostgREST si fuera necesario
+                     // Para ilike simple, solo nos aseguramos de no romper la cadena
+                     const t = `%${term}%`;
+                     query = query.or(`titulo.ilike.${t},autor.ilike.${t},isbn.ilike.${t},legacy_id.ilike.${t}`);
+                 });
+             } else {
+                 // Fallback por si acaso llega string vacío tras split
+                 const t = `%${searchTerm}%`;
+                 query = query.or(`titulo.ilike.${t},autor.ilike.${t},isbn.ilike.${t},legacy_id.ilike.${t}`);
+             }
         }
       }
        if (filters.category && filters.category !== 'Todos') {
