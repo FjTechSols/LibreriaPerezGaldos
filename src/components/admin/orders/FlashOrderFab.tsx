@@ -7,7 +7,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 export function FlashOrderFab() {
   const { orderMode, flashItems } = useOrder();
-  const { actualTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { isAdmin } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -20,7 +20,7 @@ export function FlashOrderFab() {
       <button
         onClick={() => setIsModalOpen(true)}
         className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center
-          ${actualTheme === 'dark' 
+          ${resolvedTheme === 'dark' 
             ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/50' 
             : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'}
         `}

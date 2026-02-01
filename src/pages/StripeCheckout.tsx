@@ -38,7 +38,7 @@ export default function StripeCheckout() {
   const location = useLocation();
   const { clearCart } = useCart();
   const { user, isSuperAdmin } = useAuth();
-  const { actualTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { t } = useLanguage();
   const { settings } = useSettings();
   const { createInvoice, updateInvoiceStatus } = useInvoice(); // Access invoice context
@@ -78,12 +78,12 @@ export default function StripeCheckout() {
   const stripeOptions = useMemo(() => ({
       clientSecret,
       appearance: {
-          theme: (actualTheme === 'dark' ? 'night' : 'stripe') as 'night' | 'stripe',
+          theme: (resolvedTheme === 'dark' ? 'night' : 'stripe') as 'night' | 'stripe',
           variables: {
               colorPrimary: '#2563eb',
           },
       },
-  }), [clientSecret, actualTheme]);
+  }), [clientSecret, resolvedTheme]);
 
   useEffect(() => {
     // Prevent double execution in Strict Mode
@@ -480,7 +480,7 @@ export default function StripeCheckout() {
           <Elements
             stripe={stripePromise}
             options={stripeOptions}
-            key={actualTheme}
+            key={resolvedTheme}
           >
             <StripePaymentForm
               amount={checkoutState?.orderTotal || 0}

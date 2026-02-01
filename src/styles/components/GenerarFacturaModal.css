@@ -1,6 +1,6 @@
 .modal-generar-factura {
-  background: white;
-  border-radius: 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
   padding: 0;
   max-width: 1200px;
   width: 95%;
@@ -8,42 +8,44 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xl);
 }
 
 .modal-generar-factura .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: var(--spacing-6);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .modal-generar-factura .modal-header h3 {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--spacing-3);
   margin: 0;
-  font-size: 1.25rem;
-  color: #1e293b;
+  font-size: var(--font-size-xl);
+  color: var(--text-main);
 }
 
 .modal-generar-factura .close-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-muted);
   padding: 0.5rem;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .modal-generar-factura .close-btn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .modal-generar-factura .modal-body {
-  padding: 1.5rem;
+  padding: var(--spacing-6);
   overflow-y: auto;
   flex: 1;
 }
@@ -53,14 +55,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
+  padding: var(--spacing-12) var(--spacing-6);
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .no-pedidos svg {
-  color: #cbd5e1;
-  margin-bottom: 1rem;
+  color: var(--text-dim);
+  margin-bottom: var(--spacing-4);
 }
 
 .no-pedidos p {
@@ -70,27 +72,29 @@
 
 .no-pedidos .hint {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--text-dim);
   margin-top: 0.5rem;
 }
 
 .search-box {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-6);
 }
 
 .search-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--input-text);
   font-size: 0.875rem;
   transition: all 0.2s;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .pedidos-list {
@@ -108,37 +112,38 @@
 }
 
 .pedidos-list::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 3px;
 }
 
 .pedidos-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-subtle);
   border-radius: 3px;
 }
 
 .pedidos-list::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--slate-400);
 }
 
 .pedido-item {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition-base);
 }
 
 .pedido-item:hover {
-  border-color: #cbd5e1;
-  background: #fafbfc;
+  border-color: var(--accent);
+  background: var(--bg-hover);
 }
 
 .pedido-item.selected {
-  border-color: #667eea;
-  background: #f0f4ff;
+  border-color: var(--accent);
+  background: var(--bg-hover);
 }
 
 .pedido-check {
@@ -147,16 +152,16 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  border: 2px solid #cbd5e1;
+  border: 2px solid var(--border-subtle);
   border-radius: 50%;
   flex-shrink: 0;
   transition: all 0.2s;
 }
 
 .pedido-item.selected .pedido-check {
-  background: #667eea;
-  border-color: #667eea;
-  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .pedido-info {
@@ -172,7 +177,7 @@
 
 .pedido-id {
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main);
   font-size: 0.875rem;
 }
 
@@ -185,13 +190,13 @@
 }
 
 .pedido-estado.completado {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--bg-hover);
+  color: var(--success);
 }
 
 .pedido-estado.enviado {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--bg-hover);
+  color: var(--accent);
 }
 
 .pedido-details {
@@ -200,12 +205,12 @@
   align-items: center;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .cliente-name {
   font-weight: 500;
-  color: #475569;
+  color: var(--text-main);
 }
 
 .pedido-fecha {
@@ -214,20 +219,20 @@
 
 .pedido-total {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .pedido-total strong {
-  color: #059669;
+  color: var(--success);
   font-size: 1rem;
 }
 
 .factura-preview {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  padding: var(--spacing-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .factura-preview h4 {
@@ -275,9 +280,9 @@
 .modal-generar-factura .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .btn-cancelar,
@@ -292,23 +297,23 @@
 }
 
 .btn-cancelar {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--bg-hover);
+  color: var(--text-muted);
 }
 
 .btn-cancelar:hover {
-  background: #e2e8f0;
+  background: var(--bg-surface);
 }
 
 .btn-generar {
-  background: #667eea;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .btn-generar:hover:not(:disabled) {
-  background: #5568d3;
+  background: var(--accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-generar:disabled {
@@ -323,7 +328,7 @@
 .section-title {
   text-align: center;
   font-size: 1.125rem;
-  color: #1e293b;
+  color: var(--text-main);
   margin: 0 0 2rem 0;
   font-weight: 600;
 }
@@ -331,7 +336,7 @@
 .factura-types {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: var(--spacing-6);
 }
 
 @media (max-width: 1024px) {
@@ -342,22 +347,22 @@
 
 .factura-type-card {
   position: relative;
-  padding: 2rem 1.5rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  padding: var(--spacing-8) var(--spacing-6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
+  transition: 0.3s ease;
+  background: var(--bg-surface);
 }
 
 .factura-type-card:hover {
-  border-color: #667eea;
+  border-color: var(--accent);
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .factura-type-card.electronic {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  background: var(--bg-hover);
 }
 
 .type-icon {
@@ -366,30 +371,30 @@
   justify-content: center;
   width: 80px;
   height: 80px;
-  margin: 0 auto 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  color: white;
+  margin: 0 auto var(--spacing-4);
+  background: var(--accent);
+  border-radius: var(--radius-xl);
+  color: var(--accent-contrast);
 }
 
 .type-icon.electronic {
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  background: var(--accent);
 }
 
 .type-icon.manual {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: var(--success);
 }
 
 .factura-type-card h3 {
   text-align: center;
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .factura-type-card p {
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
@@ -406,14 +411,14 @@
   padding-left: 1.5rem;
   position: relative;
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--text-muted);
 }
 
 .type-features li::before {
   content: '✓';
   position: absolute;
   left: 0;
-  color: #10b981;
+  color: var(--success);
   font-weight: bold;
 }
 
@@ -421,8 +426,8 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: #fbbf24;
-  color: #78350f;
+  background: var(--warning);
+  color: var(--warning-contrast, white);
   padding: 0.25rem 0.75rem;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -444,7 +449,7 @@
 .btn-back {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--accent);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
@@ -453,14 +458,14 @@
 }
 
 .btn-back:hover {
-  background: #f0f4ff;
+  background: var(--bg-hover);
   border-radius: 6px;
 }
 
 .form-header h4 {
   margin: 0;
   font-size: 1.125rem;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .form-sections {
@@ -470,16 +475,16 @@
 }
 
 .form-section {
-  background: #f8fafc;
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-hover);
+  padding: var(--spacing-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
 }
 
 .form-section h5 {
   margin: 0 0 1.25rem 0;
   font-size: 1rem;
-  color: #1e293b;
+  color: var(--text-main);
   font-weight: 600;
 }
 
@@ -502,27 +507,28 @@
 .form-group label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-muted);
 }
 
 .form-input,
 .form-select,
 .form-textarea {
   padding: 0.75rem 1rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   font-size: 0.875rem;
   font-family: inherit;
   transition: all 0.2s;
-  background: white;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-shadow);
 }
 
 .form-textarea {
@@ -534,28 +540,28 @@
   display: flex;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: var(--bg-hover);
+  border: 1px solid var(--accent);
   border-radius: 8px;
   margin-top: 1rem;
 }
 
 .info-banner svg {
   flex-shrink: 0;
-  color: #3b82f6;
+  color: var(--accent);
 }
 
 .info-banner strong {
   display: block;
   margin-bottom: 0.25rem;
-  color: #1e40af;
+  color: var(--accent);
   font-size: 0.875rem;
 }
 
 .info-banner p {
   margin: 0;
   font-size: 0.8125rem;
-  color: #1e40af;
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
@@ -587,210 +593,5 @@
   }
 }
 
-/* Dark Mode Styles */
-.dark-mode .modal-generar-factura {
-  background: #1e293b;
-  border: 1px solid #334155;
-}
+/* REMOVED .dark-mode blocks as variables handle it now */
 
-.dark-mode .modal-generar-factura .modal-header {
-  border-bottom-color: #334155;
-}
-
-.dark-mode .modal-generar-factura .modal-header h3,
-.dark-mode .form-header h4,
-.dark-mode .form-section h3,
-.dark-mode .form-section h4,
-.dark-mode .form-section h5,
-.dark-mode .section-title {
-  color: #ffffff !important;
-}
-
-.dark-mode .form-group label,
-.dark-mode .modal-body p,
-.dark-mode .modal-body span,
-.dark-mode .factura-info p,
-.dark-mode .factura-info strong {
-    color: #cbd5e1 !important;
-}
-
-.dark-mode .modal-generar-factura .close-btn {
-  color: #94a3b8;
-}
-
-.dark-mode .modal-generar-factura .close-btn:hover {
-  background: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .no-pedidos {
-  color: #94a3b8;
-}
-
-.dark-mode .no-pedidos svg {
-  color: #475569;
-}
-
-.dark-mode .search-input {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .search-input:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-}
-
-.dark-mode .pedidos-list::-webkit-scrollbar-track {
-  background: #0f172a;
-}
-
-.dark-mode .pedidos-list::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-
-.dark-mode .pedidos-list::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-.dark-mode .pedido-item {
-  border-color: #334155;
-  background: #1e293b;
-}
-
-.dark-mode .pedido-item:hover {
-  border-color: #475569;
-  background: #0f172a;
-}
-
-.dark-mode .pedido-item.selected {
-  border-color: #60a5fa;
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.dark-mode .pedido-check {
-  border-color: #475569;
-}
-
-.dark-mode .pedido-item.selected .pedido-check {
-  background: #60a5fa;
-  border-color: #60a5fa;
-  color: white;
-}
-
-.dark-mode .pedido-id {
-  color: #f1f5f9;
-}
-
-.dark-mode .pedido-details {
-  color: #94a3b8;
-}
-
-.dark-mode .cliente-name {
-  color: #cbd5e1;
-}
-
-.dark-mode .pedido-total {
-  color: #94a3b8;
-}
-
-.dark-mode .pedido-total strong {
-  color: #34d399;
-}
-
-.dark-mode .modal-generar-factura .modal-actions {
-  border-top-color: #334155;
-}
-
-.dark-mode .btn-cancelar {
-  background: #334155;
-  color: #cbd5e1;
-}
-
-.dark-mode .btn-cancelar:hover {
-  background: #475569;
-}
-
-.dark-mode .section-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .factura-type-card {
-  border-color: #334155;
-  background: #0f172a;
-}
-
-.dark-mode .factura-type-card:hover {
-  border-color: #60a5fa;
-  box-shadow: 0 12px 24px rgba(96, 165, 250, 0.15);
-}
-
-.dark-mode .factura-type-card.electronic {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-}
-
-.dark-mode .factura-type-card h3 {
-  color: #f1f5f9;
-}
-
-.dark-mode .factura-type-card p {
-  color: #94a3b8;
-}
-
-.dark-mode .type-features li {
-  color: #cbd5e1;
-}
-
-.dark-mode .btn-back {
-  color: #60a5fa;
-}
-
-.dark-mode .btn-back:hover {
-  background: #334155;
-}
-
-.dark-mode .form-header h4 {
-  color: #f1f5f9;
-}
-
-.dark-mode .form-section {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.dark-mode .form-section h5 {
-  color: #f1f5f9;
-}
-
-.dark-mode .form-group label {
-  color: #cbd5e1;
-}
-
-.dark-mode .form-input,
-.dark-mode .form-select,
-.dark-mode .form-textarea {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .form-input:focus,
-.dark-mode .form-select:focus,
-.dark-mode .form-textarea:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
-}
-
-.dark-mode .info-banner {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #1e3a8a;
-}
-
-.dark-mode .info-banner strong {
-  color: #93c5fd;
-}
-
-.dark-mode .info-banner p {
-  color: #bfdbfe;
-}

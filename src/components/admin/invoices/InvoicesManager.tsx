@@ -14,8 +14,8 @@ import { MessageModal } from '../../MessageModal';
 export function InvoicesManager() {
   const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
   const { formatPrice, settings } = useSettings();
-  const { actualTheme } = useTheme();
-  const isDark = actualTheme === 'dark';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   // State
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false); // Manual Invoice Form

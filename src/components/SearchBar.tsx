@@ -1,71 +1,155 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import { buscarLibros } from '../services/libroService';
+import { Book } from '../types';
 import '../styles/components/SearchBar.css';
 
 interface SearchBarProps {
   placeholder?: string;
+  mode?: 'sync' | 'navigate';
+  variant?: 'catalog' | 'header';
+  showSuggestions?: boolean;
+  onSearch?: (query: string) => void;
+  className?: string;
 }
 
-export function SearchBar({ placeholder = "Buscar libros..." }: SearchBarProps) {
+export function SearchBar({ 
+  placeholder = "Buscar libros...", 
+  mode = 'sync',
+  variant = 'catalog',
+  showSuggestions = false,
+  onSearch,
+  className = ''
+}: SearchBarProps) {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get('search') || '';
+  const navigate = useNavigate();
+  const initialQuery = mode === 'sync' ? (searchParams.get('search') || '') : '';
   const [query, setQuery] = useState(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
+  const [suggestions, setSuggestions] = useState<Book[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // Sync internal state if URL changes externally
+  // Sync internal state if URL changes externally (only for sync mode)
   useEffect(() => {
-    const urlQuery = searchParams.get('search') || '';
-    if (urlQuery !== query && urlQuery !== debouncedQuery) {
-        setQuery(urlQuery);
+    if (mode === 'sync') {
+      const urlQuery = searchParams.get('search') || '';
+      if (urlQuery !== query && urlQuery !== debouncedQuery) {
+          setQuery(urlQuery);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, mode]);
+
+  // Click outside to hide suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSuggestionsVisible(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Debounce logic
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 500); // 500ms debounce
+    }, 400); // Unified 400ms debounce
 
     return () => {
       clearTimeout(handler);
     };
   }, [query]);
 
-  // Update URL when debounced query changes
+  // Handle URL sync (Catalog mode)
   useEffect(() => {
+    if (mode !== 'sync') return;
+
     const currentSearch = searchParams.get('search') || '';
     if (debouncedQuery !== currentSearch) {
+        const nextParams = new URLSearchParams(searchParams);
         if (debouncedQuery.trim()) {
-            searchParams.set('search', debouncedQuery);
+            nextParams.set('search', debouncedQuery);
         } else {
-            searchParams.delete('search');
+            nextParams.delete('search');
         }
-        // Preserve other filters if they exist? Usually search resets strict filters, but let's keep them if compatible.
-        // But Catalog logic might reset page to 1 on search change which is good.
-        setSearchParams(searchParams);
+        setSearchParams(nextParams);
     }
-  }, [debouncedQuery, searchParams, setSearchParams]);
+  }, [debouncedQuery, mode, searchParams, setSearchParams]);
+
+  // Handle Suggestions
+  useEffect(() => {
+    if (!showSuggestions) {
+      setSuggestions([]);
+      setIsSuggestionsVisible(false);
+      return;
+    }
+
+    if (debouncedQuery.trim().length >= 2) {
+      const fetchSuggestions = async () => {
+        setLoadingSuggestions(true);
+        try {
+          const results = await buscarLibros(debouncedQuery.trim());
+          setSuggestions(results.slice(0, 8));
+          setIsSuggestionsVisible(true);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          setSuggestions([]);
+        } finally {
+          setLoadingSuggestions(false);
+        }
+      };
+      fetchSuggestions();
+    } else {
+      setSuggestions([]);
+      setIsSuggestionsVisible(false);
+    }
+  }, [debouncedQuery, showSuggestions]);
 
 
   const clearSearch = () => {
     setQuery('');
-    setDebouncedQuery(''); // Immediate clear
+    setDebouncedQuery('');
+    setIsSuggestionsVisible(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setDebouncedQuery(query); // Force update immediately on enter
+    const finalQuery = query.trim();
+    if (!finalQuery) return;
+
+    if (onSearch) {
+      onSearch(finalQuery);
+    }
+
+    if (mode === 'navigate') {
+      navigate(`/catalogo?search=${encodeURIComponent(finalQuery)}`);
+      setQuery(''); // Reset on navigate (header use case)
+    }
+    
+    setIsSuggestionsVisible(false);
+  };
+
+  const handleSuggestionClick = (book: Book) => {
+    navigate(`/libro/${book.id}`);
+    setQuery('');
+    setIsSuggestionsVisible(false);
   };
 
   return (
-    <div className="search-bar-container">
-      <form onSubmit={handleSubmit} className="search-bar">
+    <div className={`search-bar-container variant-${variant} ${className}`} ref={searchRef}>
+      <form onSubmit={handleSubmit} className="search-bar" aria-label="Explorar catálogo">
         <Search className="search-icon" size={20} />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => showSuggestions && query.trim().length >= 2 && setIsSuggestionsVisible(true)}
           placeholder={placeholder}
           className="search-input"
         />
@@ -80,6 +164,38 @@ export function SearchBar({ placeholder = "Buscar libros..." }: SearchBarProps) 
           </button>
         )}
       </form>
+
+      {showSuggestions && isSuggestionsVisible && (
+        <div className="search-suggestions">
+          {loadingSuggestions ? (
+            <div className="suggestions-loading">{t('searching')}</div>
+          ) : suggestions.length > 0 ? (
+            <>
+              {suggestions.map(book => (
+                <div
+                  key={book.id}
+                  className="suggestion-item"
+                  onClick={() => handleSuggestionClick(book)}
+                >
+                  <img src={book.coverImage} alt={book.title} className="suggestion-image" />
+                  <div className="suggestion-info">
+                    <span className="suggestion-title">{book.title}</span>
+                    <span className="suggestion-author">{book.author}</span>
+                  </div>
+                  <span className="suggestion-price">${book.price}</span>
+                </div>
+              ))}
+              <div className="suggestion-footer">
+                <button type="submit" onClick={handleSubmit} className="view-all-btn">
+                  {t('viewAllResults')} ({suggestions.length}+)
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="suggestions-empty">{t('noResults')}</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

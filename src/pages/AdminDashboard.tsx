@@ -75,13 +75,13 @@ type AdminSection = 'dashboard' | 'books' | 'invoices' | 'orders' | 'reservation
 export function AdminDashboard() {
   const { user, logout, isAdmin } = useAuth();
   const { invoices } = useInvoice(); // Invoices context
-  const { theme, actualTheme, setTheme, viewMode, setViewMode } = useTheme();
+  const { theme, resolvedTheme, setTheme, viewMode, setViewMode } = useTheme();
   const { orderMode, toggleOrderMode } = useOrder();
   const navigate = useNavigate();
   const { formatPrice, settings } = useSettings();
   
   const toggleTheme = () => {
-    setTheme(actualTheme === 'dark' ? 'light' : 'dark');
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
   
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
@@ -257,14 +257,7 @@ export function AdminDashboard() {
     return (
     <div className="stats-section">
       {loadingStats && (
-        <div style={{
-          padding: '1rem',
-          background: '#eff6ff',
-          borderRadius: '8px',
-          marginBottom: '1rem',
-          textAlign: 'center',
-          color: '#1e40af'
-        }}>
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4 text-center text-blue-800 dark:text-blue-300">
           ⏳ Cargando estadísticas...
         </div>
       )}
@@ -639,7 +632,7 @@ export function AdminDashboard() {
       {/* Main Content */}
       <div className={`dashboard-content-wrapper ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-6 shadow-sm z-10" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+        <header className="h-16 flex items-center justify-between px-6 shadow-sm z-10" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center gap-3">
              <button
                 onClick={() => setIsMobileMenuOpen(true)}
@@ -753,7 +746,7 @@ export function AdminDashboard() {
         </header>
 
         {/* Scrollable Content Area */}
-        <main className="flex-1 overflow-auto p-6 min-w-0" style={{ background: 'var(--bg-tertiary)' }}>
+        <main className="flex-1 overflow-auto p-6 min-w-0" style={{ background: 'var(--bg-page)' }}>
           <div className="w-full min-w-0">
              {activeSection === 'dashboard' && renderDashboard()}
              {activeSection === 'books' && <BooksManager />}

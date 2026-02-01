@@ -18,7 +18,7 @@
 }
 
 .header-title svg {
-  color: var(--primary-color);
+  color: var(--accent);
   min-width: 32px;
   min-height: 32px;
 }
@@ -26,12 +26,12 @@
 .header-title h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .header-title p {
   margin: 0.5rem 0 0 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -46,22 +46,22 @@
 
 .alert-error {
   background-color: rgba(239, 68, 68, 0.1);
-  color: var(--danger-color);
-  border: 1px solid var(--danger-color);
+  color: var(--danger);
+  border: 1px solid var(--danger);
 }
 
 .alert-success {
   background-color: rgba(16, 185, 129, 0.1);
-  color: var(--success-color);
-  border: 1px solid var(--success-color);
+  color: var(--success);
+  border: 1px solid var(--success);
 }
 
 .usuarios-table-container {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: 8px;
   overflow-x: auto;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .usuarios-table {
@@ -73,14 +73,14 @@
 .usuarios-table td {
   padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
 }
 
 .usuarios-table th {
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-hover);
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
   text-transform: uppercase;
 }
@@ -102,7 +102,7 @@
 
 .badge-tu {
   background-color: rgba(37, 99, 235, 0.1);
-  color: var(--primary-color);
+  color: var(--accent);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -138,31 +138,31 @@
 
 .btn-icon {
   background: none;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 0.5rem;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   transition: all 0.2s;
 }
 
 .btn-icon:hover {
   background-color: var(--bg-hover);
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .btn-icon.btn-danger {
-  color: var(--danger-color);
+  color: var(--danger);
   border-color: rgba(239, 68, 68, 0.3);
 }
 
 .btn-icon.btn-danger:hover {
   background-color: rgba(239, 68, 68, 0.1);
-  border-color: var(--danger-color);
+  border-color: var(--danger);
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
+  background-color: var(--accent);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -176,13 +176,13 @@
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--accent-hover);
 }
 
 .btn-secondary {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -209,19 +209,19 @@
 }
 
 .modal-content {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: 12px;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -230,19 +230,19 @@
 .modal-header h3 {
   margin: 0;
   font-size: 1.25rem;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .modal-close {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   padding: 0;
 }
 
 .modal-close:hover {
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .modal-form {
@@ -257,7 +257,7 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .form-group input,
@@ -265,10 +265,10 @@
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background-color: var(--bg-primary);
-  color: var(--text-primary);
+  color: var(--text-main);
   font-size: 0.95rem;
   transition: border-color 0.2s;
 }
@@ -277,7 +277,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -288,9 +288,9 @@
   max-height: 200px;
   overflow-y: auto;
   padding: 0.5rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-hover);
 }
 
 .checkbox-label {
@@ -320,12 +320,12 @@
 }
 
 .checkbox-content strong {
-  color: var(--text-primary);
+  color: var(--text-main);
   font-size: 0.9rem;
 }
 
 .checkbox-content small {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -335,7 +335,7 @@
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* Mobile Optimization - Clean Slate */
@@ -402,8 +402,8 @@
   /* User Card */
   .usuarios-table tr {
     position: relative;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 1rem;
@@ -416,7 +416,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-subtle);
     text-align: right;
     gap: 0.5rem;
   }
@@ -432,7 +432,7 @@
   .usuarios-table td:before {
     content: attr(data-label); /* Ideal usage, but we hardcode for now based on index */
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     text-align: left;
     flex-shrink: 0; /* Prevent label squeeze */
   }
@@ -497,3 +497,4 @@
 .dark-mode .header-title svg {
   color: #60a5fa;
 }
+

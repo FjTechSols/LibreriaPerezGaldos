@@ -1,0 +1,207 @@
+:root {
+  /* Primitives (Base Palette) */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+
+  --success-50: #f0fdf4;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+
+  /* Default Theme (Light) */
+  --bg-page: var(--slate-50);
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-overlay: rgba(15, 23, 42, 0.5);
+  --bg-hover: var(--slate-100);
+  --bg-search-header: var(--slate-200);
+
+  --text-main: var(--slate-900);
+  --text-muted: var(--slate-600);
+  --text-dim: var(--slate-400);
+  --text-inverse: #ffffff;
+
+  --border-subtle: var(--slate-200);
+  --border-strong: var(--slate-300);
+  --border-active: var(--blue-600);
+
+  --accent: var(--blue-600);
+  --accent-hover: var(--blue-700);
+  --accent-contrast: #ffffff;
+  --ring: rgba(37, 99, 235, 0.2);
+
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: var(--success-600);
+  --info: #3b82f6;
+
+  /* Subtle background colors for statuses/badges */
+  --bg-danger-subtle: #fef2f2;
+  --bg-warning-subtle: #fffbeb;
+  --bg-success-subtle: #f0fdf4;
+  --bg-accent-subtle: #eff6ff;
+  --bg-muted: var(--slate-100);
+
+  /* Colored borders */
+  --border-danger: #fee2e2;
+  --border-warning: #fef3c7;
+  --border-success: #dcfce7;
+  --border-accent: #dbeafe;
+  --border-muted: var(--slate-200);
+
+  /* Layout & Spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+
+  /* Radius */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Transitions */
+  --transition-base: 0.2s ease;
+
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 4px 6px -1px var(--shadow-color);
+  --shadow-lg: 0 10px 15px -3px var(--shadow-color);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  --input-bg: #ffffff;
+  --input-text: var(--slate-900);
+  --input-border: var(--slate-300);
+  --placeholder: var(--slate-400);
+
+  --table-header-bg: var(--slate-100);
+  --table-row-hover: var(--slate-50);
+
+  --skeleton-base: var(--slate-200);
+  --skeleton-shine: var(--slate-100);
+
+  /* Scrollbar */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: var(--slate-300);
+  --scrollbar-thumb-hover: var(--slate-400);
+  --scrollbar-width: 8px;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg-page: var(--slate-950);
+  --bg-surface: var(--slate-900);
+  --bg-elevated: var(--slate-800);
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --bg-hover: var(--slate-800);
+  --bg-search-header: var(--slate-700);
+
+  --text-main: var(--slate-100);
+  --text-muted: var(--slate-400);
+  --text-dim: var(--slate-500);
+  --text-inverse: var(--slate-900);
+
+  --border-subtle: var(--slate-800);
+  --border-strong: var(--slate-700);
+  --border-active: var(--blue-600);
+
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-contrast: #ffffff;
+  --ring: rgba(59, 130, 246, 0.3);
+
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --success: #4ade80;
+  --info: #60a5fa;
+
+  /* Subtle background colors for statuses/badges (Dark Mode) */
+  /* We use lower opacity or darker versions for subtle effect in dark mode */
+  --bg-danger-subtle: rgba(248, 113, 113, 0.1);
+  --bg-warning-subtle: rgba(251, 191, 36, 0.1);
+  --bg-success-subtle: rgba(52, 211, 153, 0.1);
+  --bg-accent-subtle: rgba(59, 130, 246, 0.1);
+  --bg-muted: var(--slate-800);
+
+  /* Colored borders (Dark Mode) */
+  --border-danger: rgba(248, 113, 113, 0.2);
+  --border-warning: rgba(251, 191, 36, 0.2);
+  --border-success: rgba(52, 211, 153, 0.2);
+  --border-accent: rgba(59, 130, 246, 0.2);
+  --border-muted: var(--slate-700);
+
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Charting Tokens (Dark Mode) */
+  --chart-grid: var(--slate-800);
+  --chart-text: var(--slate-400);
+  --chart-tooltip-bg: var(--slate-800);
+  --chart-tooltip-border: var(--slate-700);
+
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+
+  --input-bg: var(--slate-900);
+  --input-text: var(--slate-100);
+  --input-border: var(--slate-700);
+  --placeholder: var(--slate-500);
+
+  --table-header-bg: var(--slate-800);
+  --table-row-hover: var(--slate-800);
+
+  --skeleton-base: var(--slate-800);
+  --skeleton-shine: var(--slate-700);
+
+  /* Scrollbar (Dark) */
+  --scrollbar-thumb: var(--slate-700);
+  --scrollbar-thumb-hover: var(--slate-600);
+
+  color-scheme: dark;
+}
+
+/* Common overrides for better dark mode compatibility with third parties */
+.dark {
+  color-scheme: dark;
+}
+

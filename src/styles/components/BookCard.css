@@ -2,10 +2,10 @@
    1. Shared / Base Styles
    ========================================= */
 .bookcard {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
   text-decoration: none;
   color: inherit;
@@ -13,7 +13,7 @@
 }
 
 .bookcard:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-4px);
 }
 
@@ -31,9 +31,9 @@
   letter-spacing: 0.5px;
 }
 
-.bookcard__badge--new { background: #10b981; color: white; }
-.bookcard__badge--sale { background: #ef4444; color: white; }
-.bookcard__badge--stock { background: #6b7280; color: white; }
+.bookcard__badge--new { background: var(--success); color: white; }
+.bookcard__badge--sale { background: var(--danger); color: white; }
+.bookcard__badge--stock { background: var(--text-muted); color: white; }
 
 /* Category/Code Pill (Common) */
 .bookcard__meta-badges {
@@ -43,8 +43,8 @@
 }
 
 .bookcard__category {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--bg-hover);
+  color: var(--accent);
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
   font-weight: 600;
@@ -54,9 +54,9 @@
 }
 
 .bookcard__code {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
   font-weight: 600;
@@ -67,7 +67,7 @@
 
 /* Stock Text (Common) */
 .bookcard__stock {
-  color: #059669;
+  color: var(--success);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -84,15 +84,15 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #6b7280;
+  color: var(--text-dim);
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   z-index: 20;
 }
 
-.bookcard__wishlist-btn:hover { background: white; transform: scale(1.1); color: #ef4444; }
-.bookcard__wishlist-btn--active { background: #ef4444; color: white; }
-.bookcard__wishlist-btn--active:hover { background: #dc2626; }
+.bookcard__wishlist-btn:hover { background: var(--bg-surface); transform: scale(1.1); color: var(--danger); }
+.bookcard__wishlist-btn--active { background: var(--danger); color: white; }
+.bookcard__wishlist-btn--active:hover { background: var(--danger); opacity: 0.9; }
 
 /* Rating Stars (Common) */
 .bookcard__rating,
@@ -102,8 +102,8 @@
   align-items: center;
 }
 .bookcard__stars { gap: 0.125rem; }
-.bookcard__star { color: #d1d5db; transition: color 0.2s ease; }
-.bookcard__star--filled { color: #fbbf24; }
+.bookcard__star { color: var(--border-strong); transition: color 0.2s ease; }
+.bookcard__star--filled { color: var(--warning); }
 
 /* =========================================
    2. Grid View Styles (.bookcard--grid)
@@ -116,7 +116,7 @@
 .bookcard--grid .bookcard__image-container {
   position: relative;
   overflow: hidden;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 1rem 1rem 0 0;
   height: 280px; /* Reduced from 320 to 280 for better proportions */
   width: 100%;
@@ -140,7 +140,7 @@
   height: 100%;
   object-fit: contain;
   transition: transform 0.3s ease;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 4px 6px var(--shadow-color));
 }
 
 .bookcard--grid:hover .bookcard__image {
@@ -158,13 +158,13 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  background: white;
+  background: var(--bg-surface);
 }
 
 .bookcard--grid .bookcard__title {
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-main);
   margin: 0 0 0.25rem 0;
   line-height: 1.4;
   display: -webkit-box;
@@ -175,7 +175,7 @@
 }
 
 .bookcard--grid .bookcard__author {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
@@ -183,7 +183,7 @@
 
 .bookcard--grid .bookcard__rating-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-left: 0.5rem;
 }
 
@@ -198,14 +198,14 @@
 .bookcard--grid .bookcard__sale-price {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--accent);
 }
 
-.bookcard--grid .bookcard__sale-price { color: #ef4444; }
+.bookcard--grid .bookcard__sale-price { color: var(--danger); }
 
 .bookcard__original-price {
   text-decoration: line-through;
-  color: #9ca3af;
+  color: var(--text-dim);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -214,8 +214,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: #fee2e2;
-  color: #ef4444;
+  background: var(--bg-hover);
+  color: var(--danger);
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
@@ -230,7 +230,7 @@
 .bookcard--grid .bookcard__meta {
   margin-top: auto;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -260,8 +260,8 @@
 .bookcard--grid:hover .bookcard__overlay { opacity: 1; transform: translateY(0); }
 
 .bookcard--grid .bookcard__add-to-cart-btn {
-  background: #3b82f6;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
@@ -319,7 +319,7 @@
 
 .bookcard--list .bookcard__info {
   flex: 1;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 0 1rem 1rem 0;
   padding: 1.5rem;
   display: grid;
@@ -339,12 +339,12 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
-  color: #111827;
+  color: var(--text-main);
 }
 
 .bookcard--list .bookcard__author {
   grid-area: author;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -353,7 +353,7 @@
 }
 .bookcard--list .bookcard__rating-text {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-left: 0.5rem;
 }
 
@@ -368,13 +368,13 @@
 .bookcard--list .bookcard__sale-price {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--accent);
 }
-.bookcard--list .bookcard__sale-price { color: #ef4444; }
+.bookcard--list .bookcard__sale-price { color: var(--danger); }
 
 .bookcard--list .bookcard__description {
   grid-area: desc;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 1rem 0;
@@ -397,8 +397,8 @@
 }
 
 .bookcard--list .bookcard__add-to-cart-btn {
-  background: #3b82f6;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -408,44 +408,12 @@
   gap: 0.5rem;
   cursor: pointer;
 }
-.bookcard--list .bookcard__add-to-cart-btn:hover { background: #2563eb; }
+.bookcard--list .bookcard__add-to-cart-btn:hover { background: var(--accent-hover); }
 
 /* =========================================
    4. Dark Mode Overrides
    ========================================= */
-.dark-mode .bookcard { background: #1e293b; }
-.dark-mode .bookcard:hover { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
-
-/* Common Dark */
-.dark-mode .bookcard__info { background: #1e293b; }
-.dark-mode .bookcard__title { color: #f1f5f9; }
-.dark-mode .bookcard__author { color: #94a3b8; }
-.dark-mode .bookcard__description { color: #cbd5e1; }
-.dark-mode .bookcard__rating-text { color: #94a3b8; }
-.dark-mode .bookcard__current-price { color: #60a5fa; }
-.dark-mode .bookcard__sale-price { color: #f87171; }
-.dark-mode .bookcard__original-price { color: #64748b; }
-.dark-mode .bookcard__discount {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-}
-
-/* Grid Dark */
-.dark-mode .bookcard--grid .bookcard__image-container { background: #0f172a; }
-.dark-mode .bookcard--grid .bookcard__meta { border-top-color: #334155; }
-.dark-mode .bookcard--grid .bookcard__add-to-cart-btn { background: #3b82f6; color: white; }
-
-/* List Dark */
-.dark-mode .bookcard--list .bookcard__image-container { background: #0f172a; }
-
-/* Shared Dark Mode Styles for Meta */
-.dark-mode .bookcard__category { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.dark-mode .bookcard__code { 
-  background: rgba(30, 58, 138, 0.3); 
-  color: #93c5fd; 
-  border-color: #1e40af; 
-}
-.dark-mode .bookcard__stock { color: #34d399; }
+/* REMOVED .dark-mode overrides as variables handle it now */
 
 /* =========================================
    5. Responsive Adjustments
@@ -471,3 +439,4 @@
   .bookcard--list .bookcard__list-actions { width: 100%; }
   .bookcard--list .bookcard__add-to-cart-btn { width: 100%; justify-content: center; }
 }
+

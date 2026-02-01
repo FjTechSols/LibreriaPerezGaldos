@@ -3,9 +3,9 @@
   position: absolute;
   top: -2px;
   right: -2px;
-  background-color: #ef4444;
-  color: white;
-  border-radius: 9999px;
+  background-color: var(--danger);
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
   min-width: 18px;
   height: 18px;
   font-size: 10px;
@@ -26,7 +26,7 @@
 
 /* Admin Notification Center Page */
 .admin-notification-center {
-  padding: 1rem;
+  padding: var(--spacing-4);
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -35,55 +35,55 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-8);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--spacing-4);
 }
 
 .header-title {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--spacing-4);
 }
 
 .header-title h2 {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-main);
   margin: 0;
 }
 
 .unread-badge {
-  background: var(--surface-hover);
-  color: var(--text-secondary);
-  padding: 0.25rem 0.75rem;
-  border-radius: 99px;
-  font-size: 0.875rem;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  padding: 0.25rem var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
   font-weight: 500;
 }
 
 .header-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-4);
   align-items: center;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  color: var(--text-secondary);
+  gap: var(--spacing-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
 }
 
 .filter-select {
   border: none;
   background: transparent;
-  color: var(--text);
-  font-size: 0.875rem;
+  color: var(--text-main);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   outline: none;
   cursor: pointer;
@@ -92,21 +92,21 @@
 .mark-all-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--surface);
-  color: var(--primary);
-  border: 1px solid var(--primary);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  gap: var(--spacing-2);
+  background: var(--bg-surface);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition-base);
 }
 
 .mark-all-btn:hover {
-  background: var(--primary);
-  color: white;
+  background: var(--accent);
+  color: var(--text-inverse);
 }
 
 /* Notifications List */
@@ -116,30 +116,30 @@
 
 .notifications-list {
   display: grid;
-  gap: 1rem;
+  gap: var(--spacing-4);
 }
 
 .notification-card {
   display: flex;
-  gap: 1.25rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 1.25rem;
-  border-radius: 12px;
+  gap: var(--spacing-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: var(--spacing-5);
+  border-radius: var(--radius-lg);
   position: relative;
-  transition: all 0.2s;
+  transition: var(--transition-base);
   cursor: pointer;
 }
 
 .notification-card:hover {
-  border-color: var(--primary);
+  border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .notification-card.unread {
-  background: var(--surface-hover);
-  border-left: 4px solid var(--primary);
+  background: var(--bg-hover);
+  border-left: 4px solid var(--accent);
 }
 
 .notification-content {
@@ -149,44 +149,44 @@
 .notification-top {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
 }
 
 .notification-top h4 {
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-main);
   margin: 0;
 }
 
 .notification-time {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 
 .notification-content p {
-  color: var(--text-secondary);
-  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
   margin: 0;
   line-height: 1.5;
 }
 
 .unread-dot {
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
+  top: var(--spacing-5);
+  right: var(--spacing-5);
   width: 8px;
   height: 8px;
-  background: var(--primary);
-  border-radius: 50%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
 }
 
 .notification-icon-wrapper {
   display: flex;
   align-items: flex-start;
-  padding-top: 0.25rem;
+  padding-top: var(--spacing-1);
 }
 
 /* Empty State */
@@ -195,23 +195,23 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: var(--spacing-16) var(--spacing-8);
   text-align: center;
-  color: var(--text-secondary);
-  background: var(--surface);
-  border-radius: 16px;
-  border: 2px dashed var(--border);
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-subtle);
 }
 
 .empty-icon {
-  margin-bottom: 1rem;
-  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-4);
+  color: var(--text-dim);
 }
 
 .empty-state h3 {
-  color: var(--text);
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
+  color: var(--text-main);
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--font-size-lg);
 }
 
 /* Loading State */
@@ -220,17 +220,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem;
-  gap: 1rem;
-  color: var(--text-secondary);
+  padding: var(--spacing-16);
+  gap: var(--spacing-4);
+  color: var(--text-muted);
 }
 
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--primary);
-  border-radius: 50%;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--accent);
+  border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
 }
 
@@ -259,86 +259,4 @@
   }
 }
 
-/* --- Dark Mode Overrides --- */
-/* Targeting both .dark and [data-theme='dark'] just to be safe */
-:root[class~="dark"] .admin-notification-center,
-:root[class~="dark-mode"] .admin-notification-center {
-  --surface: #1e293b; /* Dark slate */
-  --surface-hover: #334155;
-  --text: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --border: #334155;
-  --primary: #60a5fa;
-}
 
-/* Specific overrides if variables aren't enough */
-:root[class~="dark"] .notification-card,
-:root[class~="dark-mode"] .notification-card {
-  background-color: #1e293b;
-  border-color: #334155;
-}
-
-:root[class~="dark"] .notification-card.unread,
-:root[class~="dark-mode"] .notification-card.unread {
-  background-color: #334155;
-}
-
-:root[class~="dark"] .notification-top h4,
-:root[class~="dark-mode"] .notification-top h4 {
-  color: #f8fafc;
-}
-
-:root[class~="dark"] .notification-content p,
-:root[class~="dark-mode"] .notification-content p,
-:root[class~="dark"] .notification-time,
-:root[class~="dark-mode"] .notification-time {
-  color: #cbd5e1;
-}
-
-:root[class~="dark"] .filter-group,
-:root[class~="dark-mode"] .filter-group {
-  background-color: #1e293b;
-  border-color: #334155;
-  color: #cbd5e1;
-}
-
-:root[class~="dark"] .filter-select,
-:root[class~="dark-mode"] .filter-select {
-  color: #f8fafc;
-}
-
-:root[class~="dark"] .filter-select option,
-:root[class~="dark-mode"] .filter-select option {
-  background-color: #1e293b;
-  color: #f8fafc;
-}
-
-:root[class~="dark"] .empty-state,
-:root[class~="dark-mode"] .empty-state {
-  background-color: #1e293b;
-  border-color: #334155;
-}
-
-:root[class~="dark"] .empty-state h3,
-:root[class~="dark-mode"] .empty-state h3 {
-  color: #f8fafc;
-}
-
-:root[class~="dark"] .unread-badge,
-:root[class~="dark-mode"] .unread-badge {
-    color: #e2e8f0;
-    background-color: #334155;
-}
-
-:root[class~="dark"] .mark-all-btn,
-:root[class~="dark-mode"] .mark-all-btn {
-  color: #f8fafc;
-  border-color: #60a5fa;
-  background-color: transparent;
-}
-
-:root[class~="dark"] .mark-all-btn:hover,
-:root[class~="dark-mode"] .mark-all-btn:hover {
-  background-color: #60a5fa;
-  color: #1e293b;
-}

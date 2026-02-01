@@ -18,48 +18,56 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
   return (
     <div className="data-table admin-books-table">
       <div className="table-header">
-        <span>Código</span>
-        <span>Portada</span>
-        <span>Título</span>
-        <span>Autor</span>
-        <span>Editorial</span>
-        <span>Categoría</span>
-        <span>Páginas</span>
-        <span>Precio</span>
-        <span>Stock</span>
-        <span>Acciones</span>
+        <div className="col-code">Cód</div>
+        <div className="col-cover">Port</div>
+        <div className="col-title text-left">Título</div>
+        <div className="col-category text-left">Categoría</div>
+        <div className="col-author text-left">Autor</div>
+        <div className="col-publisher text-left">Editorial</div>
+        <div className="col-pages text-center">Pág</div>
+        <div className="col-price text-right">Precio</div>
+        <div className="col-stock text-center">Stock</div>
+        <div className="col-actions text-right">Acciones</div>
       </div>
 
-      {books.map(book => (
-        <div key={book.id} className="admin-book-row">
-          <div className="relative text-center">
-              <span 
-                  className="admin-book-code cursor-help border-b border-dotted border-gray-400 dark:border-gray-500 inline-block"
-                  onMouseEnter={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setHoveredCode({ code: book.code || 'N/A', top: rect.top, left: rect.left });
-                  }}
-                  onMouseLeave={() => setHoveredCode(null)}
-              >
-                  {book.code || 'N/A'}
-              </span>
-          </div>
-          <div className="admin-book-cover">
-            <img src={book.coverImage} alt={book.title || 'Sin Título'} />
-            {(book.featured || book.isNew || book.isOnSale) && (
-              <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', fontSize: '0.7rem' }}>
-                {book.featured && <span title="Destacado">📌</span>}
-                {book.isNew && <span title="Nuevo">✨</span>}
-                {book.isOnSale && <span title="En Oferta">🏷️</span>}
+      <div className="table-body">
+        {books.map(book => {
+          const stockStatus = 
+            book.stock === 0 ? 'out' : 
+            book.stock <= 2 ? 'low' : 'ok';
+
+          return (
+            <div key={book.id} className="admin-book-row">
+              <div className="col-code text-center">
+                  <span 
+                      className="admin-book-code-badge"
+                      onMouseEnter={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setHoveredCode({ code: book.code || 'N/A', top: rect.top, left: rect.left });
+                      }}
+                      onMouseLeave={() => setHoveredCode(null)}
+                  >
+                      {book.code || '---'}
+                  </span>
               </div>
-            )}
-          </div>
-          <span className="admin-book-title flex items-center gap-2">
-            {book.description && (
-                <div className="relative flex-shrink-0">
-                    <Info 
-                        size={16} 
-                        className="text-gray-400 hover:text-blue-500 cursor-help"
+
+              <div className="col-cover">
+                <div className="admin-book-thumbnail">
+                  <img src={book.coverImage} alt={book.title || 'Sin Título'} />
+                  <div className="badge-overlay">
+                    {book.featured && <span className="badge-item featured" title="Destacado">📌</span>}
+                    {book.isNew && <span className="badge-item new" title="Novedad">✨</span>}
+                    {book.isOnSale && <span className="badge-item sale" title="Oferta">🏷️</span>}
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-title">
+                <div className="flex items-center gap-2">
+                  {book.description && (
+                    <button 
+                        type="button"
+                        className="info-trigger-btn"
                         onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             setHoveredDescription({ 
@@ -71,79 +79,95 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
                             });
                         }}
                         onMouseLeave={() => setHoveredDescription(null)}
-                    />
+                    >
+                        <Info size={14} />
+                    </button>
+                  )}
+                  <span className="book-title-main" title={book.title}>{book.title || 'Sin Título'}</span>
                 </div>
-            )}
-            <span className="leading-tight" title={book.title}>{book.title || 'N/A'}</span>
-            {(book.featured || book.isNew || book.isOnSale) && (
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.75rem' }}>
-                {book.featured && <span style={{ color: '#f59e0b' }} title="Destacado">📌</span>}
-                {book.isNew && <span style={{ color: '#10b981' }} title="Nuevo">✨</span>}
-                {book.isOnSale && <span style={{ color: '#ef4444' }} title="En Oferta">🏷️</span>}
               </div>
-            )}
-          </span>
-          <span className="admin-book-author">{book.author || 'N/A'}</span>
-          <span className="admin-book-publisher">{book.publisher || 'N/A'}</span>
-          <span className="admin-book-category">{book.category || 'N/A'}</span>
-          <span className="admin-book-pages">{book.pages || 'N/A'}</span>
-          <span className="admin-book-price">
-            ${book.price}
-            {book.isOnSale && book.originalPrice && (
-              <span style={{ display: 'block', fontSize: '0.75rem', color: '#9ca3af', textDecoration: 'line-through', marginTop: '0.25rem' }}>
-                ${book.originalPrice}
-              </span>
-            )}
-          </span>
-          <span className={`admin-book-stock ${book.stock === 0 ? 'out-of-stock' : ''}`}>
-            {book.stock}
-          </span>
-          <div className="admin-book-actions">
-           <div className="admin-stock-actions">
-              <button
-                  onClick={() => onStockUpdate(book, 1)}
-                  className="stock-btn increase"
-                  title="Aumentar Stock"
-              >
-                  <Plus size={16} />
-              </button>
-              <button
-                  onClick={() => onStockUpdate(book, -1)}
-                  className="stock-btn decrease"
-                  title="Reducir Stock"
-                  disabled={book.stock <= 0}
-              >
-                  <Minus size={16} />
-              </button>
-           </div>
-            <button 
-              onClick={() => onExpressOrder(book)}
-              className={orderMode === 'flash' 
-                ? "p-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
-                : "express-btn"
-              }
-              title={orderMode === 'flash' ? "Añadir a Pedido Flash" : "Pedido Express"}
-              aria-label={orderMode === 'flash' ? "Añadir a pedido flash" : "Crear pedido express"}
-            >
-              <Zap size={16} className={orderMode === 'flash' ? "text-white fill-current" : ""} />
-            </button>
-            <button 
-              onClick={() => onEdit(book)}
-              className="edit-btn"
-              aria-label="Editar libro"
-            >
-              <Edit size={16} />
-            </button>
-            <button 
-              onClick={() => onDelete(book.id)}
-              className="delete-btn"
-              aria-label="Eliminar libro"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-        </div>
-      ))}
+
+              <div className="col-category">
+                <span className="category-text-main" title={book.category}>{book.category || 'N/A'}</span>
+              </div>
+
+              <div className="col-author">
+                <span className="author-text-main" title={book.author}>{book.author || 'Anónimo'}</span>
+              </div>
+
+              <div className="col-publisher">
+                <span className="publisher-text-main" title={book.publisher}>{book.publisher || 'N/A'}</span>
+              </div>
+
+              <div className="col-pages text-center">
+                <span className="text-muted">{book.pages || '-'}</span>
+              </div>
+
+              <div className="col-price text-right">
+                <div className="price-container">
+                  <span className="price-value">{book.price.toFixed(2)}€</span>
+                  {book.isOnSale && book.originalPrice && (
+                    <span className="price-original">
+                      {book.originalPrice.toFixed(2)}€
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-stock text-center flex items-center justify-center gap-2">
+                <div className="stock-controls-vertical">
+                    <button
+                        onClick={() => onStockUpdate(book, 1)}
+                        className="stock-btn-mini plus"
+                        title="Aumentar Stock"
+                    >
+                        <Plus size={12} />
+                    </button>
+                    <button
+                        onClick={() => onStockUpdate(book, -1)}
+                        className="stock-btn-mini minus"
+                        title="Reducir Stock"
+                        disabled={book.stock <= 0}
+                    >
+                        <Minus size={12} />
+                    </button>
+                </div>
+                <span className={`stock-badge is-${stockStatus}`}>
+                  {book.stock}
+                </span>
+              </div>
+
+              <div className="col-actions">
+                <div className="actions-container">
+                  <div className="main-btns-group">
+                    <button 
+                      onClick={() => onExpressOrder(book)}
+                      className={`tool-btn zap ${orderMode === 'flash' ? 'flash active' : 'express'}`}
+                      title={orderMode === 'flash' ? "Añadir a Pedido Flash" : "Pedido Express"}
+                    >
+                      <Zap size={14} className="fill-current" />
+                    </button>
+                    <button 
+                      onClick={() => onEdit(book)}
+                      className="tool-btn edit"
+                      title="Editar"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button 
+                      onClick={() => onDelete(book.id)}
+                      className="tool-btn delete"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Fixed Code Projection Overlay */}
       {hoveredCode && (
@@ -190,4 +214,3 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
     </div>
   );
 }
-``

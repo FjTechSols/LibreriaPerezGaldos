@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown, Sun, Moon, Monitor, Info, MapPin, Mail } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Heart, User, Menu, X, BookOpen, Settings, LogOut, ChevronDown, Sun, Moon, Monitor, Info, MapPin, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -8,18 +8,13 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import { LanguageSelector } from './LanguageSelector';
-import { buscarLibros } from '../services/libroService';
+import { SearchBar } from './SearchBar';
 import { getUnreadCount, getAdminUnreadCount } from '../services/notificationService';
-import { Book } from '../types';
 import '../styles/components/Navbar.css';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState<Book[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { user, logout, hasRole, isAdmin } = useAuth();
   const { items: cartItems } = useCart();
@@ -27,7 +22,6 @@ export function Navbar() {
   const { t } = useLanguage();
   const { theme, setTheme } = useTheme();
   const { settings } = useSettings();
-  const navigate = useNavigate();
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLFormElement>(null);
 
@@ -37,7 +31,8 @@ export function Navbar() {
         setIsAccountMenuOpen(false);
       }
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
+        // SearchBar handles its own click-outside, so we don't strictly need to do it here for suggestions.
+        // But if we had other logic, we'd keep it.
       }
     }
 
@@ -45,45 +40,7 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Búsqueda en tiempo real con debouncing
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (searchQuery.trim().length >= 2) {
-        setLoadingSuggestions(true);
-        try {
-          const results = await buscarLibros(searchQuery.trim());
-          setSuggestions(results.slice(0, 10));
-          setShowSuggestions(true);
-        } catch (error) {
-          console.error('Error fetching suggestions:', error);
-          setSuggestions([]);
-        } finally {
-          setLoadingSuggestions(false);
-        }
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    };
-
-    const debounceTimer = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/catalogo?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSuggestionClick = (book: Book) => {
-    navigate(`/libro/${book.id}`);
-    setSearchQuery('');
-    setShowSuggestions(false);
-  };
+  // Search handled by SearchBar component
 
   const cartCount = useMemo(() =>
     cartItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -120,76 +77,13 @@ export function Navbar() {
           <span>{settings.company.name}</span>
         </Link>
 
-        <form onSubmit={handleSearch} className="navbar-search" ref={searchContainerRef}>
-          <div className="search-container">
-            <Search className="search-icon" size={20} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por título, autor, ISBN o código..."
-              className="search-input"
-              onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setShowSuggestions(false);
-                }}
-                className="clear-search-btn"
-                aria-label="Limpiar búsqueda"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-
-          {showSuggestions && (
-            <div className="search-suggestions">
-              {loadingSuggestions ? (
-                <div className="suggestions-loading">
-                  <p>{t('searching')}</p>
-                </div>
-              ) : suggestions.length > 0 ? (
-                <>
-                  {suggestions.map(book => (
-                    <div
-                      key={book.id}
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(book)}
-                    >
-                      <img
-                        src={book.coverImage}
-                        alt={book.title}
-                        className="suggestion-image"
-                      />
-                      <div className="suggestion-info">
-                        <span className="suggestion-title">{book.title}</span>
-                        <span className="suggestion-author">{book.author}</span>
-                        <div className="suggestion-metadata">
-                          {book.category && <span className="suggestion-category">{book.category}</span>}
-                          {book.code && <span className="suggestion-code">Codigo Ref. {book.code}</span>}
-                        </div>
-                      </div>
-                      <span className="suggestion-price">${book.price}</span>
-                    </div>
-                  ))}
-                  <div className="suggestion-footer">
-                    <button type="submit" className="view-all-btn">
-                      {t('viewAllResults')} ({suggestions.length}+)
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="suggestions-empty">
-                  <p>{t('noResults')}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </form>
+        <SearchBar 
+          mode="navigate" 
+          variant="header"
+          showSuggestions={true} 
+          placeholder="Buscar por título, autor, ISBN o código..."
+          className="navbar-search"
+        />
 
         <div className="navbar-links desktop-only">
           <div className="nav-dropdown-container">
@@ -312,9 +206,9 @@ export function Navbar() {
                         <Moon size={16} />
                       </button>
                       <button
-                        onClick={() => setTheme('auto')}
-                        className={`theme-btn ${theme === 'auto' ? 'active' : ''}`}
-                        title={t('autoMode')}
+                        onClick={() => setTheme('system')}
+                        className={`theme-btn ${theme === 'system' ? 'active' : ''}`}
+                        title={t('systemMode')}
                       >
                         <Monitor size={16} />
                       </button>
@@ -392,11 +286,11 @@ export function Navbar() {
                 <span>{t('dark')}</span>
               </button>
               <button
-                onClick={() => setTheme('auto')}
-                className={`mobile-theme-btn ${theme === 'auto' ? 'active' : ''}`}
+                onClick={() => setTheme('system')}
+                className={`mobile-theme-btn ${theme === 'system' ? 'active' : ''}`}
               >
                 <Monitor size={18} />
-                <span>{t('auto')}</span>
+                <span>{t('system')}</span>
               </button>
             </div>
           </div>

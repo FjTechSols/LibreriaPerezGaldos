@@ -4,18 +4,19 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  background: var(--bg-page);
 }
 
 .verification-card {
   max-width: 500px;
   width: 100%;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 1.5rem;
   padding: 3rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   text-align: center;
   animation: slideUp 0.5s ease-out;
+  border: 1px solid var(--border-subtle);
 }
 
 @keyframes slideUp {
@@ -107,21 +108,21 @@
 
 .verification-card h1 {
   font-size: 1.875rem;
-  color: #1e293b;
+  color: var(--text-main);
   margin-bottom: 1rem;
   font-weight: 700;
 }
 
 .verification-card p {
   font-size: 1.125rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 1rem;
   line-height: 1.6;
 }
 
 .redirect-message {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--text-dim);
   font-style: italic;
   margin-top: 1.5rem;
 }
@@ -129,8 +130,8 @@
 .btn-continue {
   margin-top: 1.5rem;
   padding: 0.875rem 2rem;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 0.75rem;
   font-size: 1rem;
@@ -164,52 +165,27 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background: white;
-  color: #64748b;
-  border: 2px solid #e2e8f0;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 2px solid var(--border-subtle);
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
 }
 
-.dark-mode .email-verification-container {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-}
-
-.dark-mode .verification-card {
-  background: #1e293b;
-}
-
-.dark-mode .verification-card h1 {
-  color: #f1f5f9;
-}
-
-.dark-mode .verification-card p {
-  color: #cbd5e1;
-}
-
-.dark-mode .btn-secondary {
-  background: #0f172a;
-  color: #cbd5e1;
-  border-color: #334155;
-}
-
-.dark-mode .btn-secondary:hover {
-  background: #1e293b;
-  border-color: #475569;
-}
+/* REMOVED extensive .dark-mode blocks as variables handle theme switching natively now */
 
 @media (max-width: 640px) {
   .verification-card {
@@ -239,3 +215,4 @@
     width: 100%;
   }
 }
+

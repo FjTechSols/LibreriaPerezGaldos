@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useTheme } from '../../../context/ThemeContext';
 import { obtenerEstadisticasPedidos } from '../../../services/pedidoService';
+import '../../../styles/components/OrderStatusChart.css';
 
 // Consistent colors with the rest of the app
 const STATUS_COLORS: Record<string, string> = {
@@ -14,8 +14,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function OrderStatusChart() {
-  const { actualTheme } = useTheme();
-  const isDark = actualTheme === 'dark';
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,25 +47,11 @@ export function OrderStatusChart() {
     if (active && payload && payload.length) {
       const item = payload[0].payload;
       return (
-        <div style={{
-          background: isDark ? '#1e293b' : '#ffffff',
-          border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-          borderRadius: '8px',
-          padding: '12px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}>
-          <p style={{ 
-            margin: 0, 
-            fontWeight: 600,
-            color: STATUS_COLORS[item.key]
-          }}>
+        <div className="chart-tooltip">
+          <p className="chart-tooltip-title" style={{ color: STATUS_COLORS[item.key] }}>
             {item.name}
           </p>
-          <p style={{ 
-            margin: 0,
-            marginTop: '4px',
-            color: isDark ? '#f1f5f9' : '#1e293b'
-          }}>
+          <p className="chart-tooltip-subtext">
             {item.value} pedidos ({((item.value / data.reduce((acc, curr) => acc + curr.value, 0)) * 100).toFixed(0)}%)
           </p>
         </div>
@@ -78,37 +62,15 @@ export function OrderStatusChart() {
 
   if (loading) {
     return (
-       <div style={{
-        background: isDark ? '#1e293b' : '#ffffff',
-        borderRadius: '12px',
-        padding: '1.5rem',
-        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-        boxShadow: isDark ? '0 4px 6px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.06)',
-        height: '400px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <p style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Cargando estadísticas...</p>
+       <div className="chart-loading-container">
+        <p className="chart-loading-text">Cargando estadísticas...</p>
       </div>
     );
   }
 
   return (
-    <div style={{
-      background: isDark ? '#1e293b' : '#ffffff',
-      borderRadius: '12px',
-      padding: '1.5rem',
-      border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-      boxShadow: isDark ? '0 4px 6px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.06)'
-    }}>
-      <h3 style={{
-        margin: 0,
-        marginBottom: '1rem',
-        fontSize: '1.125rem',
-        fontWeight: 600,
-        color: isDark ? '#f1f5f9' : '#1e293b'
-      }}>
+    <div className="order-status-chart-container">
+      <h3>
         Estado de Pedidos
       </h3>
       <ResponsiveContainer width="100%" height={300}>

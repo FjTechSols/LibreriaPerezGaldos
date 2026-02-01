@@ -1,6 +1,6 @@
 .catalog {
   min-height: calc(100vh - 70px);
-  background: #fafafa;
+  background: var(--bg-page);
   padding: 2rem 0;
 }
 
@@ -18,13 +18,13 @@
 .catalog-title {
   font-size: 3rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main);
   margin: 0 0 1rem 0;
 }
 
 .catalog-subtitle {
   font-size: 1.125rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .results-count {
-  color: #6b7280;
+  color: var(--text-muted);
   font-weight: 500;
   font-size: 0.875rem;
 }
@@ -77,12 +77,12 @@
 .no-results-content h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
   margin: 0 0 1rem 0;
 }
 
 .no-results-content p {
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0 0 2rem 0;
   line-height: 1.5;
 }
@@ -105,11 +105,7 @@
   filter: brightness(1.1);
 }
 
-.dark-mode .reset-btn {
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-  color: #ffffff !important;
-}
+/* REMOVED .dark-mode reset-btn overrides */
 
 @media (max-width: 1024px) {
   .books-container.grid {
@@ -167,56 +163,37 @@
   }
 }
 
-/* Dark Mode */
-.dark-mode .catalog {
-  background: #0f172a;
-}
-
-.dark-mode .catalog-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .catalog-subtitle {
-  color: #94a3b8;
-}
-
-.dark-mode .results-count {
-  color: #94a3b8;
-}
-
-.dark-mode .no-results-content h3 {
-  color: #f1f5f9;
-}
-
-.dark-mode .no-results-content p {
-  color: #94a3b8;
-}
+/* REMOVED extensive .dark-mode blocks as variables handle theme switching natively now */
 
 /* Suggestion Box */
 .suggestion-box {
   margin: 0 auto 1.5rem auto;
   padding: 1rem;
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   max-width: 800px;
-  color: var(--text-primary);
+  color: var(--text-main);
   box-shadow: var(--shadow-sm);
+}
+
+.suggestion-icon {
+  font-size: 1.2rem;
 }
 
 .suggestion-box p {
   margin: 0;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .suggestion-button {
   background: none;
   border: none;
-  color: var(--primary-color);
+  color: var(--accent);
   font-weight: bold;
   cursor: pointer;
   text-decoration: underline;
@@ -225,13 +202,5 @@
   padding: 0;
 }
 
-/* Dark Mode Overrides for Suggestion Box */
-.dark-mode .suggestion-box {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
+/* REMOVED legacy .dark-mode suggestion-box overrides */
 
-.dark-mode .suggestion-box p {
-  color: #f1f5f9;
-}

@@ -1,16 +1,17 @@
 .policy-page {
   min-height: calc(100vh - 80px);
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  background: var(--bg-page);
   padding: 3rem 1rem;
 }
 
 .policy-container {
   max-width: 900px;
   margin: 0 auto;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
+  border: 1px solid var(--border-subtle);
 }
 
 .policy-header {
@@ -57,35 +58,35 @@
 }
 
 .section-header svg {
-  color: #667eea;
+  color: var(--accent);
   flex-shrink: 0;
 }
 
 .policy-section h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main);
   margin: 0 0 1rem;
 }
 
 .policy-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-main);
   margin: 1.5rem 0 0.75rem;
 }
 
 .policy-section h4 {
   font-size: 1rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-muted);
   margin: 1rem 0 0.5rem;
 }
 
 .policy-section p {
   font-size: 1rem;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-muted);
   margin: 0 0 1rem;
 }
 
@@ -97,32 +98,32 @@
 .policy-section li {
   font-size: 1rem;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-muted);
   margin-bottom: 0.75rem;
 }
 
 .policy-section li strong {
-  color: #1e293b;
+  color: var(--text-main);
   font-weight: 600;
 }
 
 .policy-section a {
-  color: #667eea;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .policy-section a:hover {
-  color: #764ba2;
+  filter: brightness(1.2);
   text-decoration: underline;
 }
 
 .contact-info {
-  background: #f8fafc;
+  background: var(--bg-hover);
   padding: 1.5rem;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--accent);
   margin-top: 1rem;
 }
 
@@ -137,11 +138,11 @@
 }
 
 .cookie-type {
-  background: #f8fafc;
+  background: var(--bg-hover);
   padding: 1.5rem;
   border-radius: 8px;
   margin: 1.5rem 0;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--accent);
 }
 
 .cookie-type h3 {
@@ -149,54 +150,55 @@
   align-items: center;
   gap: 0.5rem;
   margin-top: 0;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .cookie-type h3 svg {
-  color: #667eea;
+  color: var(--accent);
 }
 
 .cookie-note {
-  background: white;
+  background: var(--bg-surface);
   padding: 1rem;
   border-radius: 6px;
   font-size: 0.875rem;
   font-style: italic;
-  color: #64748b;
+  color: var(--text-dim);
   margin-top: 1rem;
   margin-bottom: 0;
+  border: 1px solid var(--border-subtle);
 }
 
 .cookie-table {
   overflow-x: auto;
   margin: 1.5rem 0;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-subtle);
 }
 
 .cookie-table table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-surface);
 }
 
 .cookie-table thead {
-  background: #f8fafc;
+  background: var(--bg-hover);
 }
 
 .cookie-table th {
   padding: 1rem;
   text-align: left;
   font-weight: 600;
-  color: #1e293b;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border-strong);
   font-size: 0.875rem;
 }
 
 .cookie-table td {
   padding: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  color: #475569;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -205,19 +207,20 @@
 }
 
 .cookie-table code {
-  background: #f1f5f9;
+  background: var(--bg-hover);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
   font-size: 0.8125rem;
-  color: #667eea;
+  color: var(--accent);
 }
 
 .management-option {
-  background: #f8fafc;
+  background: var(--bg-hover);
   padding: 1.5rem;
   border-radius: 8px;
   margin: 1.5rem 0;
+  border: 1px solid var(--border-subtle);
 }
 
 .management-option h3 {
@@ -225,11 +228,11 @@
 }
 
 .browser-links {
-  background: white;
+  background: var(--bg-surface);
   padding: 1.5rem;
   border-radius: 8px;
   margin: 1.5rem 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-subtle);
 }
 
 .browser-links h4 {
@@ -247,23 +250,23 @@
 }
 
 .policy-footer {
-  background: #f8fafc;
+  background: var(--bg-hover);
   padding: 2rem;
   text-align: center;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #667eea;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 500;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  background: white;
-  border: 2px solid #667eea;
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
   transition: all 0.3s ease;
 }
 
@@ -273,85 +276,5 @@
   transform: translateX(-4px);
 }
 
-@media (max-width: 768px) {
-  .policy-page {
-    padding: 2rem 0.75rem;
-  }
+/* REMOVED dark mode overrides */
 
-  .policy-header {
-    padding: 2rem 1.5rem;
-  }
-
-  .policy-header h1 {
-    font-size: 1.75rem;
-  }
-
-  .policy-content {
-    padding: 2rem 1.5rem;
-  }
-
-  .policy-section h2 {
-    font-size: 1.5rem;
-  }
-
-  .policy-section h3 {
-    font-size: 1.125rem;
-  }
-
-  .cookie-table {
-    font-size: 0.8125rem;
-  }
-
-  .cookie-table th,
-  .cookie-table td {
-    padding: 0.75rem 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .policy-header {
-    padding: 1.5rem 1rem;
-  }
-
-  .policy-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .policy-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .policy-content {
-    padding: 1.5rem 1rem;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .policy-section h2 {
-    font-size: 1.25rem;
-  }
-
-  .cookie-table {
-    font-size: 0.75rem;
-  }
-
-  .cookie-table th,
-  .cookie-table td {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .cookie-type,
-  .management-option,
-  .contact-info {
-    padding: 1rem;
-  }
-
-  .policy-footer {
-    padding: 1.5rem 1rem;
-  }
-}

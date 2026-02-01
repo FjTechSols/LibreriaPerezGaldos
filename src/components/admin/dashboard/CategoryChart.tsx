@@ -6,8 +6,8 @@ import { supabase } from '../../../lib/supabase';
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export function CategoryChart() {
-  const { actualTheme } = useTheme();
-  const isDark = actualTheme === 'dark';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const [categoryData, setCategoryData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

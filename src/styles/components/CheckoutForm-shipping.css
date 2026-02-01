@@ -25,9 +25,9 @@
 }
 
 .shipping-option.selected {
-  border-color: var(--primary-color);
+  border-color: var(--accent);
   background-color: #eff6ff; /* Light blue background for selected state */
-  box-shadow: 0 0 0 1px var(--primary-color);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .shipping-option-details {
@@ -70,7 +70,7 @@
 
 .dark-mode .shipping-option.selected {
   background-color: rgba(59, 130, 246, 0.1); /* Transparent primary blue */
-  border-color: var(--primary-color);
+  border-color: var(--accent);
 }
 
 .dark-mode .shipping-option-title {
@@ -88,3 +88,4 @@
 .dark-mode .shipping-option-price.free {
   color: #4ade80; /* Green-400 for better visibility on dark */
 }
+

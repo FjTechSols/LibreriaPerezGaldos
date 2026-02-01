@@ -1,0 +1,40 @@
+.order-status-chart-container {
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .order-status-chart-container {
+  box-shadow: var(--shadow-lg);
+}
+
+.order-status-chart-container h3 {
+  margin: 0;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.chart-loading-container {
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .chart-loading-container {
+  box-shadow: var(--shadow-lg);
+}
+
+.chart-loading-text {
+  color: var(--text-muted);
+}
+

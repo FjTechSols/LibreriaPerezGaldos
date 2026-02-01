@@ -18,7 +18,7 @@
 }
 
 .gestion-ubicaciones .header-title svg {
-  color: var(--primary-color);
+  color: var(--accent);
   min-width: 32px;
   min-height: 32px;
 }
@@ -26,12 +26,12 @@
 .gestion-ubicaciones .header-title h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .gestion-ubicaciones .header-title p {
   margin: 0.5rem 0 0 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -88,7 +88,7 @@
 
 .gestion-ubicaciones .form-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent);
 }
 
 .gestion-ubicaciones .form-actions {
@@ -139,7 +139,7 @@
 }
 
 .gestion-ubicaciones .data-table thead {
-  background: var(--primary-color);
+  background: var(--accent);
   color: white;
 }
 
@@ -194,7 +194,7 @@
 }
 
 .gestion-ubicaciones .btn-icon.btn-primary {
-  background: var(--primary-color);
+  background: var(--accent);
   color: white;
 }
 
@@ -236,7 +236,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--primary-color);
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: 6px;
@@ -246,7 +246,7 @@
 }
 
 .gestion-ubicaciones .btn-primary:hover {
-  background: var(--primary-hover);
+  background: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -364,8 +364,8 @@
   /* Location Card */
   .gestion-ubicaciones .data-table tr {
     position: relative;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 1rem;
@@ -377,10 +377,10 @@
 
   /* If hovering on mobile, don't change bg */
   .gestion-ubicaciones .data-table tr:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-surface);
   }
   .dark-mode .gestion-ubicaciones .data-table tr:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-surface);
   }
 
   /* Card Rows (Cells) */
@@ -389,7 +389,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-subtle);
     text-align: right;
     gap: 1rem;
   }
@@ -402,8 +402,8 @@
     text-align: center;
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary-color);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--accent);
+    border-bottom: 1px solid var(--border-subtle);
     padding-bottom: 0.75rem;
     margin-bottom: 0.5rem;
   }
@@ -468,7 +468,7 @@
   .gestion-ubicaciones .data-table td:before {
     content: attr(data-label);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     text-align: left;
     flex-shrink: 0;
   }
@@ -532,3 +532,4 @@
     position: static;
   }
 }
+

@@ -1,6 +1,6 @@
 .login {
   min-height: calc(100vh - 70px);
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  background: var(--bg-page);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,11 +13,11 @@
 }
 
 .login-card {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 1.5rem;
   padding: 3rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-subtle);
 }
 
 .login-header {
@@ -28,12 +28,12 @@
 .login-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-main);
   margin: 0 0 1rem 0;
 }
 
 .login-subtitle {
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -55,26 +55,26 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
   font-size: 0.875rem;
 }
 
 .form-input {
   padding: 1rem 1.25rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--input-border);
   border-radius: 1rem;
   font-size: 1rem;
-  background: #f8fafc;
+  background: var(--input-bg);
   transition: all 0.3s ease;
-  color: #1f2937;
+  color: var(--input-text);
   width: 100%;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #2563eb;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: var(--border-active);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 4px var(--ring);
 }
 
 .password-input-container {
@@ -96,22 +96,22 @@
 }
 
 .password-toggle:hover {
-  color: #374151;
+  color: var(--text-main);
 }
 
 .error-message {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--danger);
   font-weight: 500;
   text-align: center;
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   padding: 1rem 1.5rem;
   border-radius: 1rem;
@@ -158,18 +158,19 @@
 }
 
 .signup-prompt {
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .signup-link {
-  color: #2563eb;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .signup-link:hover {
-  color: #1d4ed8;
+  color: var(--accent);
+  filter: brightness(1.2);
 }
 
 .demo-accounts {
@@ -181,7 +182,7 @@
 .demo-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
   margin: 0 0 1rem 0;
   text-align: center;
 }
@@ -193,12 +194,12 @@
 }
 
 .demo-account {
-  background: #f0f9ff;
+  background: var(--bg-hover);
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--border-subtle);
   font-size: 0.875rem;
-  color: #1e40af;
+  color: var(--accent);
   text-align: center;
 }
 
@@ -220,98 +221,7 @@
   }
 }
 
-/* Dark Mode Styles */
-.dark-mode .login {
-  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-}
-
-.dark-mode .login-card {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .login-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .login-subtitle {
-  color: #94a3b8;
-}
-
-.dark-mode .form-label {
-  color: #cbd5e1;
-}
-
-.dark-mode .form-input {
-  background: #0f172a;
-  border-color: #334155;
-  color: #e2e8f0;
-}
-
-.dark-mode .form-input::placeholder {
-  color: #64748b;
-}
-
-.dark-mode .form-input:focus {
-  background: #0f172a;
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
-}
-
-.dark-mode .password-toggle {
-  color: #94a3b8;
-}
-
-.dark-mode .password-toggle:hover {
-  color: #cbd5e1;
-}
-
-.dark-mode .error-message {
-  background: #7f1d1d;
-  color: #fca5a5;
-  border-color: #991b1b;
-}
-
-.dark-mode .login-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-}
-
-.dark-mode .login-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-}
-
-.dark-mode .signup-prompt {
-  color: #94a3b8;
-}
-
-.dark-mode .demo-accounts {
-  border-top-color: #334155;
-}
-
-.dark-mode .demo-title {
-  color: #cbd5e1;
-}
-
-.dark-mode .demo-account {
-  background: #1e3a5f;
-  border-color: #1e40af;
-  color: #93c5fd;
-}
-
-.dark-mode .forgot-link,
-.dark-mode .signup-link {
-  color: #60a5fa;
-}
-
-.dark-mode .forgot-link:hover,
-.dark-mode .signup-link:hover {
-  color: #93c5fd;
-}
-
-.dark-mode .login-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: #ffffff;
-}
+/* REMOVED extensive .dark-mode blocks as variables handle theme switching natively now */
 
 @media (max-width: 480px) {
   .login {

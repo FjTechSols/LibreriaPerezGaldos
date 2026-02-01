@@ -1,9 +1,8 @@
-/* Main Container */
 .Book-Filter {
-  background: white;
+  background: var(--bg-surface);
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1.5rem;
 }
 
@@ -39,9 +38,9 @@
 }
 
 .Book-Filter__quick-btn {
-  background: white;
-  border: 2px solid #e2e8f0;
-  color: #64748b;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
+  color: var(--text-muted);
   padding: 0.5rem 1rem;
   border-radius: 2rem; /* Pill shape */
   font-size: 0.875rem;
@@ -54,46 +53,29 @@
 }
 
 .Book-Filter__quick-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #334155;
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-main);
   transform: translateY(-1px);
 }
 
 .Book-Filter__quick-btn.active {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  color: #2563eb;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+  background: var(--bg-hover);
+  border-color: var(--border-active);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Dark Mode for Quick Btn */
-.dark-mode .Book-Filter__quick-btn {
-  background: #0f172a;
-  border-color: #334155;
-  color: #94a3b8;
-}
-
-.dark-mode .Book-Filter__quick-btn:hover {
-  background: #1e293b;
-  border-color: #475569;
-  color: #f1f5f9;
-}
-
-.dark-mode .Book-Filter__quick-btn.active {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: #60a5fa;
-  color: #60a5fa;
-}
+/* REMOVED .dark-mode blocks as variables handle it now */
 
 /* Toggle Filter Button (Original) */
 .Book-Filter__toggle-filters {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f1f5f9;
-  border: 2px solid #e2e8f0;
-  color: #374151;
+  background: var(--bg-hover);
+  border: 2px solid var(--border-subtle);
+  color: var(--text-main);
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   cursor: pointer;
@@ -102,17 +84,17 @@
 }
 
 .Book-Filter__toggle-filters:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
 }
 
 /* View Switcher */
 .Book-Filter__view-switch {
   display: flex;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 0.75rem;
   padding: 0.25rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-subtle);
 }
 
 .Book-Filter__view-btn {
@@ -122,7 +104,7 @@
   padding: 0.5rem;
   border: none;
   background: none;
-  color: #6b7280;
+  color: var(--text-dim);
   cursor: pointer;
   border-radius: 0.5rem;
   transition: all 0.2s ease;
@@ -135,13 +117,13 @@
 }
 
 .Book-Filter__view-btn.active {
-  background: white;
-  color: #2563eb; /* Blue 600 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--bg-surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .Book-Filter__view-btn:hover:not(.active) {
-  color: #374151;
+  color: var(--text-main);
 }
 
 /* Generic Selects (Sort & Filter Inputs) */
@@ -149,10 +131,10 @@
 .Book-Filter__input-select,
 .Book-Filter__input-price {
   padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 1px solid var(--input-border);
   border-radius: 0.75rem;
-  background: #f8fafc;
-  color: #374151;
+  background: var(--input-bg);
+  color: var(--input-text);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -163,16 +145,16 @@
 .Book-Filter__input-select:focus,
 .Book-Filter__input-price:focus {
   outline: none;
-  border-color: #2563eb;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--border-active);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 /* Filter Panel */
 .Book-Filter__panel {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-subtle);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
@@ -187,7 +169,7 @@
 
 .Book-Filter__label {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
   font-size: 0.875rem;
 }
 
@@ -208,7 +190,7 @@
 }
 
 .Book-Filter__price-separator {
-  color: #6b7280;
+  color: var(--text-dim);
   font-weight: 500;
 }
 
@@ -220,7 +202,7 @@
 }
 
 .Book-Filter__btn-clear {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -266,84 +248,7 @@
   box-sizing: border-box;
 }
 
-/* Dark Mode Overrides (Using Explicit Slate Palette) */
-/* Dark Mode Overrides (Using Explicit Slate Palette) */
-.dark-mode .Book-Filter {
-  background: #1e293b; /* Slate 800 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.dark-mode .Book-Filter__toggle-filters {
-  background: #0f172a; /* Slate 900 */
-  border-color: #334155; /* Slate 700 */
-  color: #f1f5f9; /* Slate 100 */
-}
-
-.dark-mode .Book-Filter__toggle-filters:hover {
-  background: #1e293b;
-  border-color: #475569; /* Slate 600 */
-}
-
-.dark-mode .Book-Filter__view-switch {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.dark-mode .Book-Filter__view-btn {
-  color: #94a3b8; /* Slate 400 */
-}
-
-.dark-mode .Book-Filter__view-btn:hover:not(.active) {
-  color: #f1f5f9;
-}
-
-.dark-mode .Book-Filter__view-btn.active {
-  background: #1e293b;
-  color: #60a5fa; /* Blue 400 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.dark-mode .Book-Filter__sort-select,
-.dark-mode .Book-Filter__input-select,
-.dark-mode .Book-Filter__input-price {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .Book-Filter__sort-select:focus,
-.dark-mode .Book-Filter__input-select:focus,
-.dark-mode .Book-Filter__input-price:focus {
-  border-color: #60a5fa;
-  background: #1e293b;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-}
-
-.dark-mode .Book-Filter__panel {
-  border-top-color: #334155;
-}
-
-.dark-mode .Book-Filter__label {
-  color: #e2e8f0; /* Slate 200 */
-}
-
-.dark-mode .Book-Filter__price-separator {
-  color: #94a3b8;
-}
-
-.dark-mode .Book-Filter__btn-clear {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  color: white !important;
-}
-
-/* Dark Mode Toggle */
-.dark-mode .Book-Filter__toggle-slider {
-  background-color: #475569;
-}
-
-.dark-mode .Book-Filter__toggle-input:checked + .Book-Filter__toggle-slider {
-  background-color: #3b82f6;
-}
+/* REMOVED .dark-mode overrides as variables handle it now */
 
 /* Autocomplete Styles */
 .Book-Filter__autocomplete {
@@ -354,10 +259,10 @@
 .Book-Filter__input-text {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 1px solid var(--input-border);
   border-radius: 0.75rem;
-  background: #f8fafc;
-  color: #374151;
+  background: var(--input-bg);
+  color: var(--input-text);
   font-weight: 500;
   font-size: 0.875rem;
   transition: all 0.2s ease;
@@ -365,9 +270,9 @@
 
 .Book-Filter__input-text:focus {
   outline: none;
-  border-color: #2563eb;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--border-active);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .Book-Filter__suggestions {
@@ -377,11 +282,10 @@
   width: 100%;
   max-height: 200px;
   overflow-y: auto;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: 0.75rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-lg);
   z-index: 50;
 }
 
@@ -389,13 +293,12 @@
   padding: 0.75rem 1rem;
   cursor: pointer;
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--text-main);
   transition: background 0.15s ease;
 }
 
 .Book-Filter__suggestion-item:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--bg-hover);
 }
 
 .Book-Filter__clear-badg {
@@ -403,7 +306,7 @@
   right: 18px; /* Inside the input */
   top: 50%;
   transform: translateY(-50%);
-  background: #cbd5e1;
+  background: var(--border-strong);
   border: none;
   border-radius: 50%;
   width: 20px;
@@ -411,7 +314,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--bg-surface);
   font-size: 0.7rem;
   cursor: pointer;
   opacity: 0.7;
@@ -420,51 +323,10 @@
 
 .Book-Filter__clear-badg:hover {
   opacity: 1;
-  background: #94a3b8;
+  background: var(--text-muted);
 }
 
-/* Dark Mode for Autocomplete */
-.dark-mode .Book-Filter__input-text {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .Book-Filter__input-text:focus {
-  border-color: #60a5fa;
-  background: #1e293b;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-}
-
-.dark-mode .Book-Filter__suggestions {
-  background: #1e293b;
-  border-color: #334155;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-}
-
-.dark-mode .Book-Filter__suggestion-item {
-  color: #cbd5e1;
-  border-bottom: 1px solid #334155; /* Optional separator */
-}
-
-.dark-mode .Book-Filter__suggestion-item:last-child {
-  border-bottom: none;
-}
-
-.dark-mode .Book-Filter__suggestion-item:hover {
-  background: #334155;
-  color: #f8fafc;
-}
-
-.dark-mode .Book-Filter__clear-badg {
-  background: #475569;
-  color: #cbd5e1;
-}
-
-.dark-mode .Book-Filter__clear-badg:hover {
-  background: #64748b;
-  color: white;
-}
+/* REMOVED .dark-mode overrides as variables handle it now */
 
 /* Row Layout for Filters */
 .Book-Filter__group-row {
@@ -493,7 +355,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-main);
   font-size: 0.95rem;
   cursor: pointer;
   user-select: none;
@@ -502,14 +364,11 @@
 .checkbox-label input[type="checkbox"] {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: #2563eb;
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
-/* Dark Mode updates for new elements */
-.dark-mode .checkbox-label {
-  color: #cbd5e1;
-}
+/* REMOVED .dark-mode overrides as variables handle it now */
 
 /* Responsive adjustment for row */
 @media (max-width: 600px) {
@@ -518,3 +377,4 @@
     gap: 1rem;
   }
 }
+

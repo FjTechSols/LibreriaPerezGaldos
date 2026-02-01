@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Zap, User, Phone, MapPin, Package, Mail, Trash2 } from 'lucide-react';
 import { useOrder } from '../../../context/OrderContext';
-import { useTheme } from '../../../context/ThemeContext';
 import { buscarClientes } from '../../../services/clienteService';
 import { crearPedidoFlash } from '../../../services/pedidoService';
 import { useAuth } from '../../../context/AuthContext';
@@ -31,7 +30,6 @@ interface ClientSuggestion {
 
 export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalProps) {
   const { flashItems, removeFlashItem, clearFlashOrder } = useOrder();
-  const { actualTheme } = useTheme();
   const { user } = useAuth();
   
   const [formData, setFormData] = useState<OrderFormData>({
@@ -203,11 +201,11 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] backdrop-blur-sm p-4">
-      <div className={`${actualTheme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} rounded-2xl shadow-2xl w-full max-w-2xl h-[90vh] flex flex-col overflow-hidden border ${actualTheme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 70 }}>
+      <div className="modal-content max-w-2xl h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
         
         {/* Header */}
-        <div className={`flex items-center justify-between p-6 border-b ${actualTheme === 'dark' ? 'border-gray-800 bg-gradient-to-r from-blue-900/40 to-cyan-900/40' : 'border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50'}`}>
+        <div className="modal-header bg-[var(--bg-accent-subtle)] border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-500 rounded-lg shadow-lg">
               <Zap size={24} className="text-white fill-current" />
@@ -219,7 +217,7 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="modal-close-btn"
           >
             <X size={24} />
           </button>
@@ -229,8 +227,8 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
             
             {/* Left: Items List */}
-            <div className={`flex-1 overflow-y-auto p-4 border-b lg:border-b-0 lg:border-r ${actualTheme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Artículos</h3>
+            <div className="flex-1 overflow-y-auto p-4 border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)]">
+                <h3 className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-wider mb-4">Artículos</h3>
                 {flashItems.length === 0 ? (
                     <div className="text-center py-10 text-gray-400">
                         <Package size={48} className="mx-auto mb-2 opacity-50" />
@@ -239,7 +237,7 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                 ) : (
                     <div className="space-y-3">
                         {flashItems.map((item, index) => (
-                            <div key={`${item.id}-${index}`} className={`flex gap-3 p-3 rounded-xl border ${actualTheme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-100 shadow-sm'}`}>
+                            <div key={`${item.id}-${index}`} className="flex gap-3 p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] shadow-sm">
                                 <div className="w-12 h-16 bg-gray-200 rounded-md flex-shrink-0 overflow-hidden">
                                      {item.coverImage ? (
                                          <img src={item.coverImage} alt="" className="w-full h-full object-cover" />
@@ -256,7 +254,7 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                                 </div>
                                 <button 
                                     onClick={() => removeFlashItem(item.id)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors self-center"
+                                    className="p-2 text-[var(--text-dim)] hover:text-[var(--danger)] hover:bg-[var(--bg-danger-subtle)] rounded-lg transition-colors self-center"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -267,12 +265,12 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
             </div>
 
             {/* Right: Client Form */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-black/20">
-                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Datos del Cliente</h3>
+            <div className="flex-1 overflow-y-auto p-6 bg-[var(--bg-page)]/50">
+                 <h3 className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-wider mb-4">Datos del Cliente</h3>
                  <form onSubmit={handleSubmit} className="space-y-4">
                       {/* Name Input */}
                       <div className="relative">
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="flex items-center gap-2 text-sm font-bold text-[var(--text-muted)] mb-2">
                            <User size={16} /> Cliente
                         </label>
                         <input
@@ -285,24 +283,24 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                             onFocus={() => nameSuggestions.length > 0 && setShowNameSuggestions(true)}
                             onBlur={() => setTimeout(() => setShowNameSuggestions(false), 200)}
                             placeholder="Nombre completo"
-                            className={`w-full px-4 py-2.5 rounded-lg border ${errors.clientName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all`}
+                            className={`form-input ${errors.clientName ? 'error' : ''}`}
                         />
-                        {errors.clientName && <p className="text-xs text-red-500 mt-1 ml-1">{errors.clientName}</p>}
-                         {showNameSuggestions && nameSuggestions.length > 0 && (
-                            <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
-                                {nameSuggestions.map(client => (
-                                    <li key={client.id} onClick={() => handleClientSelect(client)} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                                        <div className="font-medium">{client.nombre} {client.apellidos}</div>
-                                        <div className="text-xs text-gray-500">{client.telefono}</div>
-                                    </li>
-                                ))}
-                            </ul>
-                         )}
+                        {errors.clientName && <p className="error-message">{errors.clientName}</p>}
+                          {showNameSuggestions && nameSuggestions.length > 0 && (
+                             <ul className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
+                                 {nameSuggestions.map(client => (
+                                     <li key={client.id} onClick={() => handleClientSelect(client)} className="px-4 py-2 hover:bg-[var(--bg-hover)] cursor-pointer">
+                                         <div className="font-bold text-[var(--text-main)]">{client.nombre} {client.apellidos}</div>
+                                         <div className="text-xs text-[var(--text-dim)]">{client.telefono}</div>
+                                     </li>
+                                 ))}
+                             </ul>
+                          )}
                       </div>
 
                       {/* Phone Input */}
                       <div className="relative">
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="flex items-center gap-2 text-sm font-bold text-[var(--text-muted)] mb-2">
                            <Phone size={16} /> Teléfono
                         </label>
                          <input
@@ -315,15 +313,15 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                             onFocus={() => phoneSuggestions.length > 0 && setShowPhoneSuggestions(true)}
                             onBlur={() => setTimeout(() => setShowPhoneSuggestions(false), 200)}
                             placeholder="600 000 000"
-                            className={`w-full px-4 py-2.5 rounded-lg border ${errors.clientPhone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all`}
+                            className={`form-input ${errors.clientPhone ? 'error' : ''}`}
                         />
-                        {errors.clientPhone && <p className="text-xs text-red-500 mt-1 ml-1">{errors.clientPhone}</p>}
+                        {errors.clientPhone && <p className="error-message">{errors.clientPhone}</p>}
                          {showPhoneSuggestions && phoneSuggestions.length > 0 && (
-                            <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
+                            <ul className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
                                 {phoneSuggestions.map(client => (
-                                    <li key={client.id} onClick={() => handleClientSelect(client)} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                                        <div className="font-medium">{client.nombre} {client.apellidos}</div>
-                                        <div className="text-xs text-gray-500">{client.telefono}</div>
+                                    <li key={client.id} onClick={() => handleClientSelect(client)} className="px-4 py-2 hover:bg-[var(--bg-hover)] cursor-pointer">
+                                        <div className="font-bold text-[var(--text-main)]">{client.nombre} {client.apellidos}</div>
+                                        <div className="text-xs text-[var(--text-dim)]">{client.telefono}</div>
                                     </li>
                                 ))}
                             </ul>
@@ -332,7 +330,7 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
 
                       {/* Email Input */}
                       <div>
-                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="flex items-center gap-2 text-sm font-bold text-[var(--text-muted)] mb-2">
                            <Mail size={16} /> Email (Opcional)
                         </label>
                         <input
@@ -340,19 +338,19 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                             value={formData.clientEmail || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
                             placeholder="cliente@ejemplo.com"
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="form-input"
                         />
                       </div>
 
                       {/* Location Input */}
                       <div>
-                         <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                         <label className="flex items-center gap-2 text-sm font-bold text-[var(--text-muted)] mb-2">
                            <MapPin size={16} /> Recogida
                         </label>
                         <select
                             value={formData.pickupLocation}
                             onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value as any }))}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="form-select"
                         >
                             <option value="Pérez Galdós">Pérez Galdós</option>
                             <option value="Galeón">Galeón</option>
@@ -360,16 +358,16 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                       </div>
 
                       {/* Summary & Submit */}
-                      <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="mt-8 pt-4 border-t border-[var(--border-subtle)]">
                            <div className="flex justify-between items-center mb-4 text-lg font-bold">
                                <span>Total Estimado</span>
-                               <span className="text-blue-600">{totalPrice.toFixed(2)} €</span>
+                               <span className="text-[var(--accent)] font-extrabold">{totalPrice.toFixed(2)} €</span>
                            </div>
                            
                            <button
                               type="submit"
                               disabled={submitting || flashItems.length === 0}
-                              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold rounded-xl shadow-lg transform active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                              className="btn-submit w-full py-4 text-lg"
                            >
                                {submitting ? 'Procesando...' : (
                                    <>

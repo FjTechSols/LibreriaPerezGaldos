@@ -187,7 +187,7 @@ export function Catalog() {
 
         {suggestion && (
             <div className="suggestion-box">
-                <span style={{ fontSize: '1.2rem' }}>💡</span>
+                <span className="suggestion-icon">💡</span>
                 <p>
                     No encontramos "{searchParams.get('search')}". ¿Quizás quisiste decir: 
                     <button 

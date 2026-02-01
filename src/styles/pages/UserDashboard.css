@@ -1,11 +1,11 @@
 /* User Dashboard - Main Layout */
 .user-dashboard {
   /* Identify local variables with global theme */
-  --primary: var(--primary-color);
-  --background: var(--bg-secondary); /* Light gray background */
-  --surface: var(--bg-primary);     /* White cards */
-  --text: var(--text-primary);
-  --border: var(--border-color);
+  --primary: var(--accent);
+  --background: var(--bg-page);
+  --surface: var(--bg-surface);
+  --text: var(--text-main);
+  --border: var(--border-subtle);
   --hover: var(--bg-hover);
 
   display: grid;
@@ -48,14 +48,14 @@
   grid-column: 1;
   grid-row: 1 / -1;
   background: var(--surface);
-  border-right: 1px solid rgba(148, 163, 184, 0.02);
+  border-right: 1px solid var(--border);
   padding: 2rem 0;
   overflow-y: auto;
 }
 
 .user-dashboard .sidebar-header {
   padding: 0 1.5rem 1.5rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 1.5rem;
 }
 
@@ -67,7 +67,7 @@
 
 .user-dashboard .sidebar-header p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -86,7 +86,7 @@
   background: none;
   border: none;
   border-radius: 8px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 0.9375rem;
@@ -101,7 +101,7 @@
 
 .user-dashboard .nav-item.active {
   background: var(--primary);
-  color: white;
+  color: var(--accent-contrast);
 }
 
 .user-dashboard .nav-item .badge {
@@ -109,7 +109,7 @@
   margin-left: auto !important;
   flex-shrink: 0 !important;
   background: var(--primary);
-  color: white;
+  color: var(--accent-contrast);
   padding: 0.125rem 0.5rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -150,7 +150,7 @@
 
 .section-header p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.9375rem;
 }
 
@@ -170,7 +170,7 @@
 
 .overview-section .stat-card {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.02);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -216,13 +216,13 @@
 
 .overview-section .stat-content p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
 .overview-section .quick-actions {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.02);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -245,15 +245,15 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #2563eb !important; /* Explicit Blue */
-  color: #ffffff !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-contrast) !important;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9375rem;
   font-weight: 500;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .overview-section .action-btn:hover {
@@ -272,9 +272,9 @@
 .my-reservations .filter-tabs button {
   padding: 0.5rem 1rem;
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.02);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
   font-size: 0.875rem;
   transition: all 0.2s;
@@ -286,9 +286,9 @@
 }
 
 .my-reservations .filter-tabs button.active {
-  background-color: rgba(37, 99, 235, 0.1) !important;
-  border: 1px solid #2563eb !important;
-  color: #2563eb !important;
+  background-color: var(--bg-hover) !important;
+  border: 1px solid var(--accent) !important;
+  color: var(--accent) !important;
   font-weight: 600;
 }
 
@@ -300,7 +300,7 @@
 
 .my-reservations .reservation-card {
   background: var(--surface);
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s;
@@ -316,12 +316,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.02);
+  border-bottom: 1px solid var(--border);
 }
 
 .my-reservations .reservation-date {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .my-reservations .card-body {
@@ -352,7 +352,7 @@
 .my-reservations .book-id {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .my-reservations .book-meta-container {
@@ -368,7 +368,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .my-reservations .book-meta-item strong {
@@ -377,7 +377,7 @@
 }
 
 .my-reservations .book-meta-separator {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   opacity: 0.5;
 }
 
@@ -387,15 +387,15 @@
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding: 0.5rem;
-  background: rgba(251, 191, 36, 0.1);
+  background: var(--warning-subtle);
   border-radius: 6px;
   font-size: 0.875rem;
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .my-reservations .card-footer {
   padding: 1rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border);
 }
 
 .my-reservations .cancel-btn {
@@ -405,9 +405,9 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem;
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
+  border: 1px solid var(--danger);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
@@ -431,38 +431,38 @@
 }
 
 .status-badge.status-pending {
-  background: rgba(251, 191, 36, 0.1);
-  color: #f59e0b;
+  background: var(--warning-subtle);
+  color: var(--warning);
 }
 
 .status-badge.status-confirmed {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--bg-hover);
+  color: var(--accent);
 }
 
 .status-badge.status-delivered {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: var(--bg-success-subtle);
+  color: var(--success);
 }
 
 .status-badge.status-rejected {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
 }
 
 .status-badge.status-returned {
-  background: rgba(107, 114, 128, 0.1);
-  color: #6b7280;
+  background: var(--bg-hover);
+  color: var(--text-muted);
 }
 
 .status-badge.status-canceled {
-  background: rgba(75, 85, 99, 0.1);
-  color: #4b5563;
+  background: var(--bg-hover);
+  color: var(--text-dim);
 }
 
 .status-badge.status-expired {
-  background: rgba(156, 163, 175, 0.1);
-  color: #9ca3af;
+  background: var(--bg-hover);
+  color: var(--text-dim);
 }
 
 /* Notification Center */
@@ -471,8 +471,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  background: var(--primary);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -495,31 +495,31 @@
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  background-color: #ffffff !important; /* Force White Card */
-  border: 1px solid #e2e8f0 !important;
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .notification-center .notification-item:hover {
-  border-color: #2563eb !important;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-md);
 }
 
 .notification-center .notification-item.unread {
-  background-color: #eff6ff !important; /* Very Light Blue */
-  border-color: #bfdbfe !important;
+  background-color: var(--bg-hover) !important;
+  border-color: var(--accent) !important;
 }
 
 .notification-center .notification-icon {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background-color: #2563eb !important; /* Explicit Blue Icon Bg */
-  color: #ffffff !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-contrast) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -539,13 +539,13 @@
 .notification-center .notification-content p {
   margin: 0 0 0.5rem 0;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
 .notification-center .notification-date {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .notification-center .unread-indicator {
@@ -586,14 +586,14 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.02);
+  border-bottom: 1px solid var(--border);
 }
 
 .order-history .orders-table td {
   padding: 1rem;
   font-size: 0.9375rem;
   color: var(--text);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.02);
+  border-bottom: 1px solid var(--border);
 }
 
 .order-history .orders-table tbody tr:last-child td {
@@ -609,14 +609,14 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background-color: #2563eb !important; /* Explicit Blue */
-  color: #ffffff !important;
+  background-color: var(--accent) !important;
+  color: var(--accent-contrast) !important;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .order-history .view-details-btn:hover {
@@ -639,7 +639,7 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.02);
+  border-bottom: 1px solid var(--border);
 }
 
 .profile-section .card-header h3 {
@@ -650,8 +650,8 @@
 
 .profile-section .edit-btn {
   padding: 0.5rem 1rem;
-  background: var(--primary);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -685,7 +685,7 @@
 .profile-section .info-item label {
   display: block;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin-bottom: 0.25rem;
 }
 
@@ -697,7 +697,7 @@
 
 .profile-section .profile-form {
   background: var(--surface);
-  border: 1px solid rgba(148, 163, 184, 0.02);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
   max-width: 600px;
@@ -720,7 +720,7 @@
 .profile-section .form-group input {
   width: 100%;
   padding: 0.75rem;
-  background: var(--background);
+  background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text);
@@ -743,19 +743,19 @@
   display: block;
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .profile-section .form-divider {
   margin: 2rem 0 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.02);
+  border-top: 1px solid var(--border);
 }
 
 .profile-section .form-divider span {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .profile-section .message {
@@ -766,15 +766,15 @@
 }
 
 .profile-section .message.success {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: var(--bg-success-subtle);
+  color: var(--success);
+  border: 1px solid var(--success);
 }
 
 .profile-section .message.error {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
+  border: 1px solid var(--danger);
 }
 
 .profile-section .form-actions {
@@ -800,8 +800,8 @@
 
 .profile-section .save-btn {
   padding: 0.75rem 1.5rem;
-  background: var(--primary);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -822,7 +822,7 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .empty-state svg {
@@ -842,7 +842,7 @@
   justify-content: center;
   padding: 4rem 2rem;
   font-size: 1rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 /* Sidebar Overlay (Mobile) */
@@ -870,7 +870,7 @@
     transition: left 0.3s ease;
     grid-row: 1 / -1;
     box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
-    background-color: #ffffff; /* Explicit white background for light mode */
+    background-color: var(--bg-surface);
   }
 
   .dashboard-sidebar.open {
@@ -945,7 +945,7 @@
 
   .order-history .order-mobile-card-label {
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-weight: 500;
   }
 
@@ -985,152 +985,5 @@
   }
 }
 
-/* Dark Mode */
-.dark-mode .user-dashboard {
-  --background: #0f172a;
-  --surface: #1e293b;
-  --border: #334155;
-  --text: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --hover: #334155;
-  --primary: #3b82f6;
-}
+/* REMOVED extensive .dark-mode blocks as variables handle theme switching natively now */
 
-.dark-mode .overview-section .stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.dark-mode .my-reservations .reservation-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Dark Mode Mobile Sidebar Override */
-@media (max-width: 1024px) {
-  .dark-mode .user-dashboard .dashboard-sidebar {
-    background-color: #1e293b !important; /* Explicit dark background for dark mode */
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.6);
-  }
-}
-
-/* Simplified Profile Layout */
-.profile-section .profile-info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.profile-section .profile-info-grid .info-item {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.profile-section .profile-info-grid .info-item svg {
-  color: var(--primary);
-  flex-shrink: 0;
-  margin-top: 0.25rem;
-}
-
-.profile-section .profile-info-grid .info-item div {
-  flex: 1;
-}
-
-.profile-section .profile-info-grid .info-item label {
-  display: block;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.25rem;
-}
-
-.profile-section .profile-info-grid .info-item p {
-  margin: 0;
-  font-size: 0.9375rem;
-  color: var(--text);
-}
-
-.profile-section .role-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: var(--primary);
-  color: white;
-  border-radius: 12px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-.profile-section .profile-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.profile-section .settings-link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--primary);
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.profile-section .settings-link-btn:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-/* Dark Mode Overrides for Action Buttons */
-.dark-mode .overview-section .action-btn {
-  background-color: #10b981 !important; /* Green for Dark Mode */
-  color: #ffffff !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-}
-
-.dark-mode .overview-section .action-btn:hover {
-  background-color: #059669 !important;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-}
-
-/* Dark Mode Overrides for Filter Tabs */
-.dark-mode .my-reservations .filter-tabs button.active {
-  background-color: rgba(16, 185, 129, 0.1) !important; /* Light Green tint */
-  border: 1px solid #10b981 !important;
-  color: #10b981 !important;
-}
-/* Dark Mode Overrides for Notifications */
-.dark-mode .notification-center .notification-item {
-  background-color: #1e293b !important;
-  border: 1px solid #334155 !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-}
-
-.dark-mode .notification-center .notification-item:hover {
-  border-color: #10b981 !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-}
-
-.dark-mode .notification-center .notification-item.unread {
-  background-color: rgba(16, 185, 129, 0.05) !important;
-  border-color: rgba(16, 185, 129, 0.2) !important;
-}
-
-.dark-mode .notification-center .notification-icon {
-  background-color: #10b981 !important; /* Green Icon Bg */
-}
-
-/* Dark Mode Overrides for Order History Buttons */
-.dark-mode .order-history .view-details-btn {
-  background-color: #10b981 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-}
-
-.dark-mode .order-history .view-details-btn:hover {
-  background-color: #059669 !important;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-}

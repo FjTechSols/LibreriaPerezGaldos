@@ -28,7 +28,7 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
-  color: var(--primary-color);
+  color: var(--accent);
 }
 
 .checkout-section .section-header h3 {
@@ -76,7 +76,7 @@
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -104,12 +104,12 @@
 }
 
 .payment-method:hover {
-  border-color: var(--primary-color);
+  border-color: var(--accent);
   background: #f8fafc;
 }
 
 .payment-method.selected {
-  border-color: var(--primary-color);
+  border-color: var(--accent);
   background: #eff6ff;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .payment-content svg {
-  color: var(--primary-color);
+  color: var(--accent);
   flex-shrink: 0;
 }
 
@@ -303,7 +303,7 @@
 
 .dark-mode .payment-method.selected {
   background: rgba(37, 99, 235, 0.1);
-  border-color: var(--primary-color);
+  border-color: var(--accent);
 }
 
 .dark-mode .payment-title {
@@ -370,9 +370,9 @@
 }
 
 .shipping-option.selected {
-  border-color: var(--primary-color);
+  border-color: var(--accent);
   background-color: #eff6ff; /* Light blue background for selected state */
-  box-shadow: 0 0 0 1px var(--primary-color);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .shipping-option-details {
@@ -415,7 +415,7 @@
 
 .dark-mode .shipping-option.selected {
   background-color: rgba(59, 130, 246, 0.1);
-  border-color: var(--primary-color);
+  border-color: var(--accent);
 }
 
 .dark-mode .shipping-option-title {
@@ -509,4 +509,5 @@
   color: #f1f5f9;
   background-color: #0f172a;
 }
+
 

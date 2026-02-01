@@ -1,6 +1,6 @@
 .admin-dashboard {
   min-height: calc(100vh - 70px);
-  background: var(--bg-tertiary);
+  background: var(--bg-page);
   padding: var(--spacing-8) 0;
 }
 
@@ -15,17 +15,17 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-6);
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .invoices-section .section-header h2 {
   margin: 0;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .pedidos-section {
@@ -42,10 +42,10 @@
   gap: var(--spacing-3);
   flex-wrap: wrap;
   padding: var(--spacing-4);
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .filter-input,
@@ -53,19 +53,19 @@
   flex: 1;
   min-width: 200px;
   padding: var(--spacing-3);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  background: var(--input-bg);
-  color: var(--input-text);
+  background: var(--bg-surface);
+  color: var(--text-main);
   transition: all 0.2s ease;
 }
 
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .container {
@@ -77,19 +77,19 @@
 .access-denied {
   text-align: center;
   padding: var(--spacing-16) var(--spacing-8);
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .access-denied h1 {
-  color: var(--danger-color);
+  color: var(--danger);
   margin-bottom: var(--spacing-4);
 }
 
 .access-denied p {
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .dashboard-header {
@@ -100,13 +100,13 @@
 .dashboard-title {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
   margin: 0 0 var(--spacing-2) 0;
 }
 
 .dashboard-subtitle {
   font-size: var(--font-size-lg);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -117,8 +117,8 @@
   top: 0;
   height: 100vh;
   width: 280px;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
@@ -239,7 +239,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
   min-height: 80px;
   position: relative;
 }
@@ -262,15 +262,11 @@
   font-weight: 600;
   font-size: 1.125rem;
   white-space: nowrap;
-  color: var(--text-primary);
+  color: var(--text-main);
   transition: opacity 0.2s ease-in-out;
 }
 
-/* Dark mode override for title */
-.dark-mode .sidebar-title,
-:root.dark-mode .sidebar-title {
-  color: #f1f5f9;
-}
+/* REMOVED Dark mode override for title as variables handle it */
 
 .collapsed .sidebar-title {
   opacity: 0;
@@ -287,30 +283,18 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
   background: var(--bg-hover);
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
-/* Dark mode toggle button */
-.dark-mode .sidebar-toggle,
-:root.dark-mode .sidebar-toggle {
-  background: #334155;
-  border-color: #475569;
-  color: #f1f5f9;
-}
-
-.dark-mode .sidebar-toggle:hover,
-:root.dark-mode .sidebar-toggle:hover {
-  background: #475569;
-  color: #ffffff;
-}
+/* REMOVED Dark mode toggle button overrides */
 
 /* Hide toggle button on mobile */
 @media (max-width: 1024px) {
@@ -329,15 +313,11 @@
 .collapsed .sidebar-toggle {
   position: relative;
   right: auto;
-  background: var(--bg-secondary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
 }
 
-.dark-mode .collapsed .sidebar-toggle,
-:root.dark-mode .collapsed .sidebar-toggle {
-  background: #1e293b;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
+/* REMOVED Dark mode collapsed toggle overrides */
 
 /* Navigation */
 .sidebar-nav {
@@ -357,7 +337,7 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all 0.2s;
@@ -375,42 +355,20 @@
 }
 
 .nav-item:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
-/* Active state - Light Mode (Green) */
-:root:not(.dark-mode) .nav-item.active {
-  background: #f0fdf4;
-  color: #15803d;
-  border-right: 4px solid #16a34a;
+.nav-item.active {
+  background: var(--bg-hover);
+  color: var(--accent);
+  border-right: 4px solid var(--accent);
   font-weight: 600;
 }
 
-:root:not(.dark-mode) .nav-item.active:hover {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-/* Active state - Dark Mode (Blue) */
-.dark-mode .nav-item,
-:root.dark-mode .nav-item {
-  color: #f1f5f9;
-}
-
-.dark-mode .nav-item.active,
-:root.dark-mode .nav-item.active {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border-right: 4px solid #3b82f6;
-  font-weight: 600;
-  box-shadow: none;
-}
-
-.dark-mode .nav-item.active:hover,
-:root.dark-mode .nav-item.active:hover {
-  background: rgba(59, 130, 246, 0.25);
-  color: #60a5fa;
+.nav-item.active:hover {
+  background: var(--bg-hover);
+  filter: brightness(0.95);
 }
 
 .nav-item-icon {
@@ -435,9 +393,9 @@
   right: -2px;
   width: 8px;
   height: 8px;
-  background-color: #ef4444;
+  background-color: var(--danger);
   border-radius: 50%;
-  border: 2px solid var(--bg-secondary);
+  border: 2px solid var(--bg-surface);
   animation: pulse 2s infinite;
 }
 
@@ -468,7 +426,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--text-dim);
   letter-spacing: 0.05em;
   transition: all 0.2s;
 }
@@ -498,7 +456,7 @@
 }
 
 .section-header:hover {
-  color: #f8fafc;
+  color: var(--text-main);
 }
 
 .section-content {
@@ -507,33 +465,12 @@
   gap: 0.25rem;
 }
 
-.dark-mode .section-header {
-  color: #64748b;
-}
-
-.dark-mode .section-header:hover {
-  color: #e2e8f0;
-}
-
-/* Light Mode Overrides for Section Header */
-:root:not(.dark-mode) .section-header {
-  color: #64748b;
-}
-
-:root:not(.dark-mode) .section-header:hover {
-  color: #1e293b;
-}
-
-/* Dark mode section title */
-.dark-mode .sidebar-section-title,
-:root.dark-mode .sidebar-section-title {
-  color: #94a3b8;
-}
+/* REMOVED Dark mode section header/title overrides */
 
 /* Footer */
 .sidebar-footer {
   margin-top: auto;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-subtle);
   padding: 1rem 0.5rem;
   display: flex;
   flex-direction: column;
@@ -541,25 +478,15 @@
 }
 
 .logout-btn {
-  color: var(--danger-color) !important;
+  color: var(--danger) !important;
 }
 
 .logout-btn:hover {
-  background: var(--danger-100) !important;
-  color: var(--danger-hover) !important;
+  background: var(--bg-danger-subtle) !important;
+  color: var(--danger) !important;
 }
 
-/* Dark mode - white text for logout */
-.dark-mode .logout-btn,
-:root.dark-mode .logout-btn {
-  color: #f1f5f9 !important;
-}
-
-.dark-mode .logout-btn:hover,
-:root.dark-mode .logout-btn:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: #fca5a5 !important;
-}
+/* REMOVED Dark mode logout btn overrides */
 
 /* Main Content Wrapper */
 .dashboard-content-wrapper {
@@ -596,13 +523,13 @@
 
 /* Main Content */
 .dashboard-content {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-xl);
   min-width: 0;
   overflow-x: hidden;
   padding: var(--spacing-8);
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   min-height: 600px;
 }
 
@@ -612,18 +539,18 @@
   align-items: center;
   margin-bottom: var(--spacing-8);
   padding-bottom: var(--spacing-6);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .content-title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
   margin: 0;
 }
 
 .content-subtitle {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: var(--spacing-2) 0 0 0;
 }
 
@@ -639,19 +566,19 @@
   width: 100%;
   height: 42px; /* Fixed height to match buttons */
   padding: var(--spacing-2) var(--spacing-4) var(--spacing-2) var(--spacing-12);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-main);
   transition: var(--transition-base);
 }
 
 .admin-search-input:focus {
   outline: none;
-  border-color: var(--primary-color);
-  background: var(--bg-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--accent);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .admin-search-icon {
@@ -659,7 +586,7 @@
   left: var(--spacing-4);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-tertiary);
+  color: var(--text-dim);
   pointer-events: none;
 }
 
@@ -703,11 +630,11 @@
 }
 
 .stat-card {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   padding: var(--spacing-8);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: var(--spacing-6);
@@ -719,78 +646,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* Light Mode Tonal Variations for Visual Hierarchy */
-:root:not(.dark-mode) .admin-dashboard {
-  background: #f1f5f9;
-}
-
-:root:not(.dark-mode) .dashboard-sidebar {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-}
-
-:root:not(.dark-mode) .sidebar-toggle {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
-}
-
-:root:not(.dark-mode) .sidebar-toggle:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
-:root:not(.dark-mode) .collapsed .sidebar-toggle {
-  background: #e2e8f0;
-}
-
-:root:not(.dark-mode) .stat-card {
-  background: #ffffff;
-  border-color: #cbd5e1;
-}
-
-:root:not(.dark-mode) .stat-card:hover {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-:root:not(.dark-mode) .company-info {
-  background: #ffffff;
-  border-color: #cbd5e1;
-}
-
-/* Light mode for Invoices and Orders sections */
-:root:not(.dark-mode) .invoices-section .section-header {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-}
-
-:root:not(.dark-mode) .invoice-filters {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-}
-
-:root:not(.dark-mode) .data-table {
-  background: #ffffff;
-  border-color: #cbd5e1;
-}
-
-:root:not(.dark-mode) .table-header {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-}
-
-:root:not(.dark-mode) .table-row {
-  border-color: #e2e8f0;
-}
-
-:root:not(.dark-mode) .pedidos-section .section-header {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-}
+/* REMOVED Tonal Variations for Visual Hierarchy as variables handle it */
 
 .stat-icon {
   width: 60px;
@@ -805,23 +661,23 @@
 .stat-icon.books {
   background: linear-gradient(
     135deg,
-    var(--primary-color) 0%,
-    var(--primary-hover) 100%
+    var(--accent) 0%,
+    var(--accent-hover) 100%
   );
 }
 
 .stat-icon.invoices {
-  background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
 }
 
 .stat-icon.orders {
-  background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
 }
 
 .stat-icon.revenue {
   background: linear-gradient(
     135deg,
-    var(--danger-color) 0%,
+    var(--danger) 0%,
     var(--danger-hover) 100%
   );
 }
@@ -835,11 +691,11 @@
 .stat-value {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .stat-label {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-weight: var(--font-weight-medium);
 }
 
@@ -909,21 +765,21 @@
 
 /* Tables */
 .data-table {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   margin-top: var(--spacing-6);
 }
 
 .table-header {
   display: grid;
   padding: var(--spacing-4) var(--spacing-6);
-  background: var(--bg-tertiary);
+  background: var(--bg-hover);
   font-weight: var(--font-weight-semibold);
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
   font-size: var(--font-size-sm);
   align-items: center;
 }
@@ -931,7 +787,7 @@
 .table-row {
   display: grid !important;
   padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
   align-items: center;
   transition: var(--transition-base);
   min-height: 80px;
@@ -952,7 +808,7 @@
   grid-template-columns: 80px 80px 2fr 1.5fr 1.5fr 1fr 80px 1fr 1fr 200px;
   gap: var(--spacing-4);
   padding-bottom: var(--spacing-4);
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--border-strong);
   margin-bottom: var(--spacing-4);
 }
 
@@ -965,8 +821,8 @@
   /* Separation updates */
   padding: 1rem var(--spacing-6);
   margin-bottom: 0.75rem;
-  background: var(--bg-secondary); /* Give it a subtle bg */
-  border: 1px solid var(--border-color); /* Full border instead of just bottom */
+  background: var(--bg-surface); /* Give it a subtle bg */
+  border: 1px solid var(--border-subtle); /* Full border instead of just bottom */
   border-radius: 8px; /* Rounded corners */
 }
 
@@ -986,11 +842,11 @@
 }
 
 .admin-book-code {
-  color: var(--primary-600);
+  color: var(--accent);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-xs);
   font-family: var(--font-family-mono);
-  background: var(--primary-50);
+  background: var(--bg-accent-subtle);
   padding: var(--spacing-2);
   border-radius: var(--radius-sm);
   text-align: center;
@@ -998,7 +854,7 @@
 
 .admin-book-title {
   font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  color: var(--text-main);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
   min-width: 0; /* Important: Prevents grid blowout */
@@ -1008,7 +864,7 @@
 .admin-book-author,
 .admin-book-publisher,
 .admin-book-category {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-tight);
 }
@@ -1016,20 +872,20 @@
 .admin-book-pages,
 .admin-book-price {
   font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  color: var(--text-main);
   font-size: var(--font-size-sm);
   text-align: center;
 }
 
 .admin-book-stock {
   font-weight: var(--font-weight-semibold);
-  color: var(--success-color);
+  color: var(--success);
   font-size: var(--font-size-sm);
   text-align: center;
 }
 
 .admin-book-stock.out-of-stock {
-  color: var(--error-600);
+  color: var(--danger);
 }
 
 .admin-book-actions {
@@ -1054,23 +910,23 @@
 }
 
 .admin-book-actions .edit-btn {
-  background: var(--primary-100);
-  color: var(--primary-600);
+  background: var(--bg-accent-subtle);
+  color: var(--accent);
 }
 
 .admin-book-actions .edit-btn:hover {
-  background: var(--primary-600);
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .admin-book-actions .delete-btn {
-  background: var(--error-100);
-  color: var(--error-600);
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
 }
 
 .admin-book-actions .delete-btn:hover {
-  background: var(--error-600);
-  color: white;
+  background: var(--danger);
+  color: var(--danger-contrast);
 }
 
 /* Stock Actions */
@@ -1093,23 +949,23 @@
 }
 
 .admin-stock-actions .stock-btn.increase {
-  background: var(--success-100);
-  color: var(--success-700);
+  background: var(--bg-success-subtle);
+  color: var(--success);
 }
 
 .admin-stock-actions .stock-btn.increase:hover {
-  background: var(--success-600);
-  color: white;
+  background: var(--success);
+  color: var(--success-contrast);
 }
 
 .admin-stock-actions .stock-btn.decrease {
-  background: var(--error-100);
-  color: var(--error-700);
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
 }
 
 .admin-stock-actions .stock-btn.decrease:hover {
-  background: var(--error-600);
-  color: white;
+  background: var(--danger);
+  color: var(--danger-contrast);
 }
 
 .admin-stock-actions .stock-btn:disabled {
@@ -1127,8 +983,8 @@
 .invoice-number {
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-semibold);
-  color: var(--primary-600);
-  background: var(--primary-50);
+  color: var(--accent);
+  background: var(--bg-accent-subtle);
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
@@ -1143,23 +999,23 @@
 }
 
 .status-badge.paid {
-  background: var(--success-100);
-  color: var(--success-700);
+  background: var(--bg-success-subtle);
+  color: var(--success);
 }
 
 .status-badge.pending {
-  background: var(--warning-100);
-  color: var(--warning-700);
+  background: var(--warning-subtle);
+  color: var(--warning);
 }
 
 .status-badge.overdue {
-  background: var(--error-100);
-  color: var(--error-700);
+  background: var(--bg-danger-subtle);
+  color: var(--danger);
 }
 
 .status-badge.cancelled {
-  background: var(--secondary-100);
-  color: var(--secondary-700);
+  background: var(--bg-hover);
+  color: var(--text-muted);
 }
 
 /* Orders Table */
@@ -1172,26 +1028,26 @@
 .order-number {
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-semibold);
-  color: var(--warning-600);
-  background: var(--warning-50);
+  color: var(--warning);
+  background: var(--warning-subtle);
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
 }
 
 .status-badge.processing {
-  background: var(--primary-100);
-  color: var(--primary-700);
+  background: var(--bg-accent-subtle);
+  color: var(--accent);
 }
 
 .status-badge.shipped {
-  background: var(--warning-100);
-  color: var(--warning-700);
+  background: var(--warning-subtle);
+  color: var(--warning);
 }
 
 .status-badge.delivered {
-  background: var(--success-100);
-  color: var(--success-700);
+  background: var(--bg-success-subtle);
+  color: var(--success);
 }
 
 /* Modal Styles */
@@ -1211,36 +1067,23 @@
 
 /* Increased specificity to override generic styles */
 /* Default Modal Style (Light) */
+/* Default Modal Style */
 .admin-dashboard .modal {
-  background-color: #ffffff; /* Fallback for transparency issues */
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-surface);
   border-radius: var(--radius-xl);
   padding: var(--spacing-8);
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: var(--shadow-2xl);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
   position: relative;
   isolation: isolate;
 }
 
-/* Explicit Dark Mode Override for Modal */
-.dark-mode .admin-dashboard .modal,
-.dark-mode .modal {
-  background-color: #1e293b !important;
-  color: #f1f5f9;
-  border-color: #334155;
-}
-
-/* Redundant check for admin-dashboard specific dark class just in case */
-.admin-dashboard.dark .modal {
-  background-color: #1e293b !important;
-  color: #f1f5f9;
-  border-color: #334155;
-}
+/* REMOVED Explicit Dark Mode Overrides for Modal as variables handle them */
 
 /* Ensure modal overlay is always dark/dimmed */
 .admin-dashboard .modal-overlay {
@@ -1255,20 +1098,20 @@
   align-items: center;
   margin-bottom: var(--spacing-8);
   padding-bottom: var(--spacing-6);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .modal-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
   margin: 0;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
   padding: var(--spacing-2);
   border-radius: var(--radius-sm);
@@ -1276,8 +1119,8 @@
 }
 
 .close-btn:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 /* Form Styles */
@@ -1300,7 +1143,7 @@
 
 .form-group label {
   font-weight: var(--font-weight-semibold);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: var(--font-size-sm);
 }
 
@@ -1308,14 +1151,12 @@
 .form-select,
 .form-textarea {
   padding: var(--spacing-3) var(--spacing-4);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-subtle);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  background-color: #ffffff; /* Fallback */
-  background-color: var(--input-bg);
+  background-color: var(--bg-surface);
   transition: var(--transition-base);
-  color: #1f2937; /* Fallback */
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .info-value-group {
@@ -1325,37 +1166,24 @@
 
 .info-subvalue {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   font-weight: 500;
 }
 
-/* Ensure visibility in dark mode */
-.dark-mode .info-subvalue {
-  color: #bdcccf; /* Lighter grey/blue for better contrast on dark bg */
-}
-
-/* Explicit Dark Mode Override for Inputs */
-.dark-mode .form-input,
-.dark-mode .form-select,
-.dark-mode .form-textarea {
-  background-color: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
+/* REMOVED dark mode explicit subvalue/input overrides */
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: #9ca3af; /* Fallback */
-  color: var(--text-tertiary);
+  color: var(--text-dim);
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
-  background: var(--bg-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--accent);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .form-textarea {
@@ -1365,12 +1193,12 @@
 
 /* Checkboxes personalizados */
 .form-group input[type="checkbox"] {
-  accent-color: var(--primary-600);
+  accent-color: var(--accent);
   cursor: pointer;
 }
 
 .form-group input[type="checkbox"]:focus {
-  outline: 2px solid var(--primary-600);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -1379,16 +1207,12 @@
   justify-content: flex-end;
   gap: var(--spacing-4);
   padding-top: var(--spacing-6);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .save-btn {
-  background: linear-gradient(
-    135deg,
-    var(--primary-600) 0%,
-    var(--primary-700) 100%
-  );
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   padding: var(--spacing-3) var(--spacing-6);
   border-radius: var(--radius-md);
@@ -1407,10 +1231,10 @@
 
 /* Company Info Section */
 .company-info {
-  background: var(--bg-tertiary);
+  background: var(--bg-hover);
   padding: var(--spacing-6);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .company-header {
@@ -1443,12 +1267,12 @@
 .company-name {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
   margin: 0 0 var(--spacing-1) 0;
 }
 
 .company-tagline {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -1462,13 +1286,13 @@
   display: flex;
   justify-content: space-between;
   padding: var(--spacing-3);
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .info-label {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-weight: var(--font-weight-medium);
 }
 
@@ -1476,60 +1300,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Dark Mode Invoice Stats */
-.dark-mode .invoice-stats .stat-card {
-  color: #ffffff !important;
-}
-
-.dark-mode .invoice-stats .stat-card .stat-label {
-  color: #e2e8f0 !important;
-  opacity: 0.9;
-}
-
-.dark-mode .invoice-stats .stat-card .stat-value {
-  color: #ffffff !important;
-}
-
-.dark-mode .invoice-stats .stat-card.total {
-  background-color: rgba(30, 41, 59, 0.6) !important;
-  border-color: #334155 !important;
-}
-
-.dark-mode .invoice-stats .stat-card.pendiente {
-  background-color: rgba(67, 20, 7, 0.4) !important;
-  border-color: rgba(251, 146, 60, 0.2) !important;
-}
-
-.dark-mode .invoice-stats .stat-card.pendiente .stat-value {
-  color: #fb923c !important; /* Keep orange for value */
-}
-
-.dark-mode .invoice-stats .stat-card.pagada {
-  background-color: rgba(6, 78, 59, 0.4) !important;
-  border-color: rgba(52, 211, 153, 0.2) !important;
-}
-
-.dark-mode .invoice-stats .stat-card.pagada .stat-value {
-  color: #34d399 !important; /* Keep green for value */
-}
-
-.dark-mode .invoice-stats .stat-card.anulada {
-  background-color: rgba(127, 29, 29, 0.4) !important;
-  border-color: rgba(248, 113, 113, 0.2) !important;
-}
-
-.dark-mode .invoice-stats .stat-card.anulada .stat-value {
-  color: #f87171 !important; /* Keep red for value */
-}
-
-.dark-mode .invoice-stats .stat-card.total-amount {
-  background-color: rgba(20, 83, 45, 0.4) !important;
-  border-color: rgba(74, 222, 128, 0.2) !important;
-}
-
-.dark-mode .invoice-stats .stat-card.total-amount .stat-value {
-  color: #4ade80 !important; /* Keep emerald for value */
-}
+/* REMOVED Dark Mode Invoice Stats specifically as variables handle generic stat cards */
 /* Responsive Design */
 @media (max-width: 1200px) {
   .dashboard-layout {
@@ -1582,14 +1353,12 @@
 
     padding: 1.25rem;
     position: relative;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     margin-bottom: 1rem;
-    background: var(--bg-secondary);
+    background: var(--bg-surface);
     align-items: center;
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-sm);
   }
 
   /* 1. TOP ROW: Code (Full Width or standard text) */
@@ -1601,7 +1370,7 @@
     display: block !important;
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--accent);
     background: transparent;
     padding: 0;
     margin-bottom: 0.5rem;
@@ -1625,7 +1394,7 @@
     grid-row: 2;
     font-size: 1.05rem; /* Larger title */
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text-main);
     line-height: 1.3;
     padding-right: var(--spacing-2);
     align-self: end;
@@ -1636,7 +1405,7 @@
     grid-column: 1;
     grid-row: 3;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     align-self: start;
   }
 
@@ -1646,7 +1415,7 @@
     grid-row: 4;
     font-size: 1.5rem;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--text-main);
     text-align: left;
     align-self: center;
   }
@@ -1680,7 +1449,7 @@
 
     margin-top: 0.75rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-subtle);
     width: 100%;
   }
 
@@ -1839,7 +1608,7 @@
     padding: 0 1rem !important; /* Force padding */
     font-size: 1rem !important;
     line-height: normal !important; /* Reset line-height to normal to center text */
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-hover);
     border-radius: 8px !important;
   }
 
@@ -1874,12 +1643,7 @@
     margin-top: 1rem;
   }
 
-  /* Fix Dark Mode Limpiar Filtros Visibility */
-  .dark-mode .clean-filters-btn {
-    color: #f87171;
-    border-color: #f87171;
-    background: rgba(239, 68, 68, 0.1);
-  }
+  /* REMOVED Dark Mode Limpiar Filtros overrides */
 
   /* Title optimization */
   .content-title {
@@ -1944,10 +1708,10 @@
     display: flex;
     flex-direction: column;
     padding: var(--spacing-6);
-    border: 1px solid var(--secondary-200);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-4);
-    background: white;
+    background: var(--bg-surface);
   }
 
   .book-cover {
@@ -2041,278 +1805,12 @@
     justify-content: center;
   }
 }
-/* Dark Mode Overrides */
-.dark-mode .admin-dashboard {
-  background: #0f172a;
-}
-
-.dark-mode .dashboard-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .dashboard-subtitle {
-  color: #cbd5e1;
-}
-
-.dark-mode .invoice-filters {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .filter-input,
-.dark-mode .filter-select {
-  background: #0f172a;
-  color: #f1f5f9;
-  border-color: #334155;
-}
-
-.dark-mode .filter-input:focus,
-.dark-mode .filter-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.dark-mode .dashboard-sidebar {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .sidebar-nav-item {
-  color: #cbd5e1;
-}
-
-.dark-mode .sidebar-nav-item:hover {
-  background: #334155;
-  color: #60a5fa;
-}
-
-.dark-mode .sidebar-nav-item.active {
-  background: #1e3a8a;
-  color: #60a5fa;
-}
-
-.dark-mode .dashboard-content {
-  background: #0f172a;
-}
-
-.dark-mode .stats-grid {
-  background: #0f172a;
-}
-
-.dark-mode .stat-card {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .stat-card:hover {
-  background: #334155;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-.dark-mode .stat-value {
-  color: #f1f5f9;
-}
-
-.dark-mode .stat-label {
-  color: #94a3b8;
-}
-
-.dark-mode .access-denied {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .access-denied h1 {
-  color: #f87171;
-}
-
-.dark-mode .access-denied p {
-  color: #cbd5e1;
-}
-
-.dark-mode .content-header {
-  border-bottom-color: #334155;
-}
-
-.dark-mode .content-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .content-subtitle {
-  color: #94a3b8;
-}
-
-.dark-mode .data-table {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .table-header {
-  background: #0f172a;
-  color: #cbd5e1;
-  border-bottom-color: #334155;
-}
-
-.dark-mode .table-row {
-  border-bottom-color: #334155;
-}
-
-.dark-mode .table-row:hover {
-  background: #334155;
-}
-
-.dark-mode .admin-book-code {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-}
-
-.dark-mode .admin-book-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .admin-book-author,
-.dark-mode .admin-book-publisher,
-.dark-mode .admin-book-category {
-  color: #94a3b8;
-}
-
-.dark-mode .admin-book-pages,
-.dark-mode .admin-book-price {
-  color: #f1f5f9;
-}
-
-.dark-mode .admin-book-stock {
-  color: #34d399;
-}
-
-.dark-mode .invoice-number,
-.dark-mode .order-number {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-}
-
-.dark-mode .modal {
-  background: #1e293b;
-}
-
-.dark-mode .modal-header {
-  border-bottom-color: #334155;
-}
-
-.dark-mode .modal-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .close-btn {
-  color: #94a3b8;
-}
-
-.dark-mode .close-btn:hover {
-  background: #334155;
-  color: #f1f5f9;
-}
-
-.dark-mode .form-group label {
-  color: #cbd5e1;
-}
-
-.dark-mode .form-input,
-.dark-mode .form-select,
-.dark-mode .form-textarea {
-  background: #0f172a;
-  color: #f1f5f9;
-  border-color: #334155;
-}
-
-.dark-mode .form-input:focus,
-.dark-mode .form-select:focus,
-.dark-mode .form-textarea:focus {
-  border-color: #3b82f6;
-  background: #1e293b;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.dark-mode .form-actions {
-  border-top-color: #334155;
-}
-
-.dark-mode .admin-search-input {
-  background: #1e293b; /* Lighter surface for input */
-  border-color: #475569; /* Visible border */
-  color: #f1f5f9;
-}
-
-.dark-mode .admin-search-input:focus {
-  background: #0f172a; /* Darker on focus for contrast */
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
-.dark-mode .admin-search-icon {
-  color: #64748b;
-}
-
-.dark-mode .company-info {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .company-name {
-  color: #f1f5f9;
-}
-
-.dark-mode .company-tagline {
-  color: #94a3b8;
-}
-
-.dark-mode .info-item {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.dark-mode .info-label {
-  color: #94a3b8;
-}
-
-.dark-mode .info-value {
-  color: #f1f5f9;
-}
-
-.dark-mode .action-btn.secondary {
-  background: #334155;
-  color: #cbd5e1;
-  border-color: #475569;
-}
-
-.dark-mode .action-btn.secondary:hover {
-  background: #475569;
-  border-color: #64748b;
-}
-
-.dark-mode .book-actions .edit-btn {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-}
-
-.dark-mode .book-actions .edit-btn:hover {
-  background: #3b82f6;
-  color: white;
-}
-
-.dark-mode .book-actions .delete-btn {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-}
-
-.dark-mode .book-actions .delete-btn:hover {
-  background: #ef4444;
-  color: white;
-}
+/* REMOVED extensive .dark-mode segments as variables handle theme switching natively now */
 
 /* Modal Toggle Group */
 .modal-toggle-group {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -2321,9 +1819,9 @@
 
 .modal-toggle-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
-  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-muted);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -2334,34 +1832,31 @@
 }
 
 .modal-toggle-btn.active {
-  border: 2px solid var(--primary-color);
-  background-color: var(--primary-50);
-  color: var(--primary-color);
+  border: 2px solid var(--accent);
+  background-color: var(--bg-accent-subtle);
+  color: var(--accent);
   font-weight: 600;
-  border-color: var(--primary-color);
 }
 
-.dark-mode .modal-toggle-btn.active {
-  background-color: rgba(59, 130, 246, 0.1); /* transparent primary */
-}
+/* REMOVED Dark mode modal toggle btn overrides */
 
 /* ISBN Search Container */
 .isbn-search-container {
   padding: 1.5rem;
-  background-color: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-hover);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .isbn-search-container h4 {
   margin-bottom: 1rem;
-  color: var(--text-primary);
+  color: var(--text-main);
   font-size: 1rem;
   font-weight: 600;
 }
 
 .isbn-search-container p {
   margin-bottom: 1rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -2373,11 +1868,11 @@
 .search-input {
   flex: 1;
   padding: 0.75rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   font-size: 0.875rem;
-  background: var(--input-bg);
-  color: var(--input-text);
+  background: var(--bg-surface);
+  color: var(--text-main);
 }
 
 .search-input:disabled {
@@ -2387,8 +1882,8 @@
 
 .search-btn {
   padding: 0.75rem 1.5rem;
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -2407,32 +1902,10 @@
 }
 
 .search-btn:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  filter: brightness(1.1);
 }
 
-/* Specific Fix for Create Book Modal Transparency */
-.create-book-modal {
-  background-color: #ffffff !important;
-  color: #1f2937;
-}
-
-body.dark-mode .create-book-modal,
-html.dark-mode .create-book-modal,
-.dark-mode .create-book-modal {
-  background-color: #1e293b !important;
-  color: #f1f5f9 !important;
-  border-color: #334155 !important;
-}
-
-/* Ensure inputs inside this modal are correct in dark mode */
-.dark-mode .create-book-modal .form-input,
-.dark-mode .create-book-modal .form-select,
-.dark-mode .create-book-modal .form-textarea,
-.dark-mode .create-book-modal .search-input {
-  background-color: #0f172a !important;
-  color: #f1f5f9 !important;
-  border-color: #334155 !important;
-}
+/* REMOVED specific modal/input overrides for Admin Books Modal */
 
 /* Invoice Statistics Styles */
 .invoice-stats {
@@ -2444,10 +1917,10 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   padding: 1.25rem;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -2455,6 +1928,7 @@ html.dark-mode .create-book-modal,
     transform 0.2s,
     box-shadow 0.2s;
   min-width: 0;
+  border: 1px solid var(--border-subtle);
 }
 
 .invoice-stats .stat-card:hover {
@@ -2463,8 +1937,8 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card.total {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
 }
 
 .invoice-stats .stat-card.pendiente {
@@ -2473,7 +1947,7 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card.pendiente .stat-value {
-  color: #ea580c;
+  color: var(--warning);
 }
 
 .invoice-stats .stat-card.pagada {
@@ -2482,7 +1956,7 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card.pagada .stat-value {
-  color: #16a34a;
+  color: var(--success);
 }
 
 .invoice-stats .stat-card.anulada {
@@ -2491,7 +1965,7 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card.anulada .stat-value {
-  color: #dc2626;
+  color: var(--danger);
 }
 
 .invoice-stats .stat-card.total-amount {
@@ -2500,13 +1974,13 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card.total-amount .stat-value {
-  color: #0d9488;
+  color: var(--success);
 }
 
 .invoice-stats .stat-label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   order: 1;
 }
 
@@ -2521,34 +1995,10 @@ html.dark-mode .create-book-modal,
 }
 
 .invoice-stats .stat-card.total .stat-value {
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
-/* Dark Mode Overrides for Invoice Stats */
-.dark-mode .invoice-stats .stat-card.pendiente {
-  background: rgba(234, 88, 12, 0.1);
-  border-color: rgba(234, 88, 12, 0.2);
-}
-
-.dark-mode .invoice-stats .stat-card.pagada {
-  background: rgba(22, 163, 74, 0.1);
-  border-color: rgba(22, 163, 74, 0.2);
-}
-
-.dark-mode .invoice-stats .stat-card.anulada {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.2);
-}
-
-.dark-mode .invoice-stats .stat-card.total-amount {
-  background: rgba(13, 148, 136, 0.1);
-  border-color: rgba(13, 148, 136, 0.2);
-}
-
-.dark-mode .invoice-stats .stat-card.total {
-  background: rgba(148, 163, 184, 0.1);
-  border-color: rgba(148, 163, 184, 0.2);
-}
+/* REMOVED Dark Mode Overrides for Invoice Stats as variables are shared and semantic */
 
 /* Custom utility for numeric inputs without spinners */
 .form-input.no-spinner::-webkit-outer-spin-button,
@@ -2564,9 +2014,9 @@ html.dark-mode .create-book-modal,
 /* Button Styling Fixes */
 .cancel-btn {
   padding: 0.75rem 1.5rem;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-main);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
@@ -2575,14 +2025,14 @@ html.dark-mode .create-book-modal,
 }
 
 .cancel-btn:hover {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-hover);
 }
 
 .save-btn {
   padding: 0.75rem 1.5rem;
   border: none;
-  background-color: #10b981;
-  color: white;
+  background-color: var(--success);
+  color: var(--success-contrast);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
@@ -2591,7 +2041,7 @@ html.dark-mode .create-book-modal,
 }
 
 .save-btn:hover {
-  background-color: #059669;
+  filter: brightness(1.1);
 }
 
 .save-btn:disabled {
@@ -2599,36 +2049,7 @@ html.dark-mode .create-book-modal,
   cursor: not-allowed;
 }
 
-/* Dark Mode Overrides for Buttons */
-.dark-mode .cancel-btn {
-  background-color: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
-}
-
-.dark-mode .cancel-btn:hover {
-  background-color: #334155;
-  color: white;
-}
-
-/* Dark Mode Stats Overrides */
-.dark-mode .stat-value {
-  color: #f1f5f9 !important;
-}
-
-.dark-mode .stat-label {
-  color: #94a3b8;
-}
-
-.dark-mode .content-title,
-.dark-mode .dashboard-title {
-  color: #f1f5f9;
-}
-
-.dark-mode .content-subtitle,
-.dark-mode .dashboard-subtitle {
-  color: #94a3b8;
-}
+/* REMOVED remaining Dark Mode Overrides as variables handle them */
 
 .dark-mode .stat-icon {
   color: white !important;
@@ -2641,7 +2062,7 @@ html.dark-mode .create-book-modal,
   gap: 1.5rem;
   align-items: center;
   padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-subtle);
   margin-top: 0.5rem;
   flex-wrap: wrap; /* Allow wrapping */
 }
@@ -2722,7 +2143,7 @@ html.dark-mode .create-book-modal,
   display: flex;
   gap: 0.5rem; /* Increased from 0.25rem */
   margin-right: 1rem; /* Increased from 0.5rem */
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-subtle);
   padding-right: 1rem; /* Increased from 0.5rem */
 }
 
@@ -2810,28 +2231,28 @@ html.dark-mode .create-book-modal,
   flex-direction: column;
   gap: var(--spacing-2);
   padding: var(--spacing-6);
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .reservation-manager .section-header h2 {
   margin: 0;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .reservation-manager .section-header p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .reservation-manager .table-container {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-sm);
   overflow: hidden; /* Fix for rounded corners */
   padding: 0; /* Ensure no padding */
@@ -2848,16 +2269,16 @@ html.dark-mode .create-book-modal,
 .reservation-manager .data-table td {
   padding: 12px 16px; /* Reduced vertical padding */
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
   vertical-align: middle;
 }
 
 .reservation-manager .data-table th {
-  background: var(--bg-tertiary);
+  background: var(--bg-hover);
   font-weight: 600;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase; /* Optional: standardizes header look */
   letter-spacing: 0.05em;
   height: 48px; /* Fixed height to prevent oversize */
@@ -2980,71 +2401,17 @@ html.dark-mode .create-book-modal,
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-.dark-mode .reservation-manager .action-btn.danger:hover {
-  background: #ef4444;
-  color: #fef2f2;
-}
+/* REMOVED Dark Mode Reservation Manager button overrides */
 
-/* Dark Mode Overrides for Reservation Manager */
-.dark-mode .reservation-manager .section-header,
-.dark-mode .reservation-manager .table-container {
-  background: #1f2937; /* Dark gray for containers */
-  border-color: #374151;
-}
-
-.dark-mode .reservation-manager .section-header h2 {
-  color: #f9fafb; /* White text */
-}
-
-.dark-mode .reservation-manager .section-header p {
-  color: #9ca3af; /* Light gray text */
-}
-
-.dark-mode .reservation-manager .data-table th {
-  background: #111827; /* Darker gray for header */
-  color: #d1d5db; /* Light gray text */
-  border-bottom-color: #374151;
-}
-
-.dark-mode .reservation-manager .data-table td {
-  color: #e5e7eb; /* White-ish text */
-  border-bottom-color: #374151;
-}
-
-.dark-mode .reservation-manager .data-table tr:hover td {
-  background: #374151; /* Hover effect */
-}
-
-.dark-mode .reservation-manager .text-gray-500 {
-  color: #9ca3af !important;
-}
-
-.dark-mode .reservation-manager .user-info .text-sm {
-  color: #9ca3af;
-}
-
-.dark-mode .reservation-manager .book-info .text-xs {
-  color: #9ca3af;
-}
-
-.dark-mode .reservation-manager .action-btn.warning {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
-.dark-mode .reservation-manager .action-btn.warning:hover {
-  background: #f59e0b;
-  color: #fffbeb;
-}
+/* REMOVED massive Dark Mode Reservation Manager block */
 
 /* Notification Badge */
 .admin-notification-badge {
   position: absolute;
   top: -2px;
   right: -2px;
-  background-color: var(--danger-color);
-  color: white;
+  background-color: var(--danger);
+  color: var(--danger-contrast);
   border-radius: 9999px;
   font-size: 0.7rem;
   min-width: 1.25rem;
@@ -3053,7 +2420,7 @@ html.dark-mode .create-book-modal,
   align-items: center;
   justify-content: center;
   padding: 0 0.25rem;
-  border: 2px solid var(--bg-secondary);
+  border: 2px solid var(--bg-surface);
   font-weight: 700;
   z-index: 10;
 }
@@ -3062,8 +2429,8 @@ html.dark-mode .create-book-modal,
 /* Sidebar Badge Count - High Specificity */
 .dashboard-sidebar .nav-item .sidebar-badge-count,
 .sidebar-badge-count {
-  background-color: #ef4444 !important;
-  color: #ffffff !important;
+  background-color: var(--danger) !important;
+  color: var(--danger-contrast) !important;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0 6px;
@@ -3074,7 +2441,7 @@ html.dark-mode .create-book-modal,
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
   line-height: normal; /* Fix alignment */
   z-index: 10;
 }
@@ -3082,23 +2449,13 @@ html.dark-mode .create-book-modal,
 /* Passive state (Read but pending) */
 .dashboard-sidebar .nav-item .sidebar-badge-count.passive,
 .sidebar-badge-count.passive {
-  background-color: rgba(
-    100,
-    116,
-    139,
-    0.1
-  ) !important; /* Slate-500 optimized opacity */
-  color: var(--text-secondary) !important;
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-hover) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-subtle);
   box-shadow: none;
 }
 
-/* Dark mode passive adjustment */
-.dark-mode .sidebar-badge-count.passive {
-  background-color: rgba(148, 163, 184, 0.1) !important;
-  color: #94a3b8 !important;
-  border-color: #334155;
-}
+/* REMOVED Dark mode passive badge adjust */
 
 /* Mobile Reservation Manager */
 @media (max-width: 1024px) {
@@ -3116,10 +2473,10 @@ html.dark-mode .create-book-modal,
 
   .reservation-manager .data-table tr {
     margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
-    background: var(--bg-secondary);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-sm);
     padding: 1rem;
   }
 
@@ -3129,7 +2486,7 @@ html.dark-mode .create-book-modal,
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-subtle);
     text-align: right;
     min-height: 3rem;
   }
@@ -3150,7 +2507,7 @@ html.dark-mode .create-book-modal,
   .reservation-manager .data-table td:before {
     content: attr(data-label);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     text-align: left;
     margin-right: 1rem;
     font-size: 0.875rem;
@@ -3195,4 +2552,26 @@ html.dark-mode .create-book-modal,
     flex: 1;
     justify-content: center;
   }
+}
+
+/* Sidebar specific scrollbar refinement */
+.dashboard-sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb,
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border: none;
+}
+
+.dashboard-sidebar:hover::-webkit-scrollbar-thumb,
+.sidebar-nav:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+}
+
+.dashboard-sidebar:hover::-webkit-scrollbar-thumb:hover,
+.sidebar-nav:hover::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }

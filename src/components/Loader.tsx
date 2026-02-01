@@ -4,10 +4,10 @@ import { useTheme } from '../context/ThemeContext';
 import '../styles/components/Loader.css';
 
 export const Loader: React.FC = () => {
-  const { actualTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   return (
-    <div className={`loader-container ${actualTheme}`}>
+    <div className={`loader-container ${resolvedTheme}`}>
       <div className="loader-content">
         <div className="loader-logo-wrapper">
           <div className="loader-ring"></div>

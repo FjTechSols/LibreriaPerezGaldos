@@ -162,16 +162,16 @@ export function BookExistenceCheckModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--bg-overlay)] backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-[var(--bg-surface)] text-[var(--text-main)] rounded-xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] border border-[var(--border-subtle)]">
         {/* Header */}
-        <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+        <div className="p-5 border-b border-[var(--border-subtle)] flex justify-between items-center bg-[var(--bg-page)]/50">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Verificar existencia</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Busca si el libro ya existe antes de crearlo</p>
+            <h2 className="text-xl font-semibold text-[var(--text-main)]">Verificar existencia</h2>
+            <p className="text-sm text-[var(--text-muted)]">Busca si el libro ya existe antes de crearlo</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
-            <X size={24} className="text-gray-500" />
+          <button onClick={onClose} className="p-2 hover:bg-[var(--bg-hover)] rounded-full transition-colors">
+            <X size={24} className="text-[var(--text-dim)]" />
           </button>
         </div>
 
@@ -180,13 +180,13 @@ export function BookExistenceCheckModal({
            {/* Search Form */}
            {viewMode === 'table' ? (
                // Legacy Compact View
-               <div className="mb-6 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+               <div className="mb-6 bg-[var(--bg-page)] p-4 rounded-lg border border-[var(--border-subtle)]">
                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                        <div className="col-span-1 md:col-span-2">
-                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">CÓDIGO</label>
+                           <label className="block text-xs font-bold text-[var(--text-muted)] mb-1 uppercase">CÓDIGO</label>
                            <input 
                                type="text" 
-                               className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                               className="w-full px-2 py-1.5 text-sm rounded border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--accent)] outline-none"
                                placeholder="Ej. 021005"
                                value={searchParams.code}
                                onChange={e => setSearchParams({...searchParams, code: e.target.value})}
@@ -194,10 +194,10 @@ export function BookExistenceCheckModal({
                            />
                        </div>
                        <div className="col-span-1 md:col-span-3">
-                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">ISBN</label>
+                           <label className="block text-xs font-bold text-[var(--text-muted)] mb-1 uppercase">ISBN</label>
                            <input 
                                type="text" 
-                               className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                               className="w-full px-2 py-1.5 text-sm rounded border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--accent)] outline-none"
                                placeholder="Ej. 978..."
                                value={searchParams.isbn}
                                onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
@@ -205,10 +205,10 @@ export function BookExistenceCheckModal({
                            />
                        </div>
                        <div className="col-span-1 md:col-span-4">
-                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">TÍTULO</label>
+                           <label className="block text-xs font-bold text-[var(--text-muted)] mb-1 uppercase">TÍTULO</label>
                            <input 
                                type="text" 
-                               className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none font-medium"
+                               className="w-full px-2 py-1.5 text-sm rounded border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--accent)] outline-none font-medium"
                                placeholder="Título..."
                                value={searchParams.title}
                                onChange={e => setSearchParams({...searchParams, title: e.target.value})}
@@ -216,11 +216,11 @@ export function BookExistenceCheckModal({
                            />
                        </div>
                        <div className="col-span-1 md:col-span-3">
-                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">AUTOR</label>
+                           <label className="block text-xs font-bold text-[var(--text-muted)] mb-1 uppercase">AUTOR</label>
                            <div className="flex gap-2">
                                <input 
                                    type="text" 
-                                   className="w-full px-2 py-1.5 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 outline-none"
+                                   className="w-full px-2 py-1.5 text-sm rounded border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:ring-2 focus:ring-[var(--accent)] outline-none"
                                    placeholder="Autor..."
                                    value={searchParams.author}
                                    onChange={e => setSearchParams({...searchParams, author: e.target.value})}
@@ -229,7 +229,7 @@ export function BookExistenceCheckModal({
                                <button 
                                    onClick={() => handleSearch(false)}
                                    disabled={loading}
-                                   className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center min-w-[40px]"
+                                   className="px-3 py-1.5 bg-[var(--accent)] hover:opacity-90 text-white rounded text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center min-w-[40px]"
                                    title="Buscar"
                                >
                                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
@@ -244,12 +244,12 @@ export function BookExistenceCheckModal({
                     {/* Row 1: Identifiers */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Código</label>
+                            <label className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">Código</label>
                             <div className="relative group">
-                                <Hash className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                <Hash className="absolute left-4 top-3.5 text-[var(--text-dim)] group-focus-within:text-[var(--accent)] transition-colors" size={20} />
                                 <input 
                                     type="text" 
-                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] text-lg placeholder-[var(--text-dim)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all"
                                     placeholder="Ej. 021005"
                                     value={searchParams.code}
                                     onChange={e => setSearchParams({...searchParams, code: e.target.value})}
@@ -258,12 +258,12 @@ export function BookExistenceCheckModal({
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">ISBN</label>
+                            <label className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">ISBN</label>
                             <div className="relative group">
-                                <Barcode className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                <Barcode className="absolute left-4 top-3.5 text-[var(--text-dim)] group-focus-within:text-[var(--accent)] transition-colors" size={20} />
                                 <input 
                                     type="text" 
-                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] text-lg placeholder-[var(--text-dim)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all"
                                     placeholder="Ej. 978..."
                                     value={searchParams.isbn}
                                     onChange={e => setSearchParams({...searchParams, isbn: e.target.value})}
@@ -275,12 +275,12 @@ export function BookExistenceCheckModal({
 
                     {/* Row 2: Title (Full Width) */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Título</label>
+                        <label className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">Título</label>
                         <div className="relative group">
-                            <BookOpen className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <BookOpen className="absolute left-4 top-3.5 text-[var(--text-dim)] group-focus-within:text-[var(--accent)] transition-colors" size={20} />
                             <input 
                                 type="text" 
-                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium"
+                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] text-lg placeholder-[var(--text-dim)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all font-medium"
                                 placeholder="Título completo del libro..."
                                 value={searchParams.title}
                                 onChange={e => setSearchParams({...searchParams, title: e.target.value})}
@@ -291,12 +291,12 @@ export function BookExistenceCheckModal({
 
                     {/* Row 3: Author (Full Width) */}
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">Autor</label>
+                        <label className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide">Autor</label>
                         <div className="relative group">
-                            <User className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                            <User className="absolute left-4 top-3.5 text-[var(--text-dim)] group-focus-within:text-[var(--accent)] transition-colors" size={20} />
                             <input 
                                 type="text" 
-                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-lg placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full pl-12 pr-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] text-lg placeholder-[var(--text-dim)] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all"
                                 placeholder="Nombre del autor..."
                                 value={searchParams.author}
                                 onChange={e => setSearchParams({...searchParams, author: e.target.value})}
@@ -309,9 +309,9 @@ export function BookExistenceCheckModal({
                         <button 
                             onClick={() => handleSearch(false)}
                             disabled={loading}
-                            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-6 py-2 bg-[var(--accent)] hover:opacity-90 text-[var(--text-inverse)] rounded-lg font-bold transition-all disabled:opacity-50 shadow-md"
                         >
-                            {loading ? <Loader2 className="animate-spin text-white" size={18} /> : <Search size={18} />}
+                            {loading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
                             Buscar en Base de Datos
                         </button>
                    </div>
@@ -335,12 +335,12 @@ export function BookExistenceCheckModal({
                 )}
 
                 {hasSearched && results.length === 0 && !loading && (
-                    <div className="text-center py-8 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                        <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="text-center py-10 bg-[var(--bg-page)] rounded-xl border border-dashed border-[var(--border-subtle)]">
+                        <div className="w-16 h-16 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full flex items-center justify-center mx-auto mb-4">
                             <Plus size={32} />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No se encontraron coincidencias</h3>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+                        <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">No se encontraron coincidencias</h3>
+                        <p className="text-[var(--text-muted)] mb-6 max-w-sm mx-auto">
                             Parece que este libro no está en la base de datos.
                         </p>
                         <button 
@@ -349,7 +349,7 @@ export function BookExistenceCheckModal({
                                 author: searchParams.author,
                                 isbn: searchParams.isbn
                             })}
-                            className="bg-green-600 hover:bg-green-700 text-white dark:text-white px-6 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow active:scale-95"
+                            className="bg-[var(--success)] hover:opacity-90 text-[var(--text-inverse)] px-8 py-3 rounded-lg font-bold transition-all shadow-lg active:scale-95"
                         >
                             Crear Nuevo Libro
                         </button>
@@ -358,37 +358,37 @@ export function BookExistenceCheckModal({
 
                 {results.length > 0 && (
                     <div className="space-y-3">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Resultados ({results.length})</h3>
+                        <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Resultados ({results.length})</h3>
                         
                         {viewMode === 'table' ? (
                             /* Legacy Table View for Results */
-                            <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="overflow-x-auto border border-[var(--border-subtle)] rounded-lg">
                                 <table className="w-full text-left text-sm">
-                                    <thead className="bg-gray-50 dark:bg-gray-700/50">
+                                    <thead className="bg-[var(--bg-page)]">
                                         <tr>
-                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 w-1/3">Título / Autor / Descripción</th>
-                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200">ISBN / Código</th>
-                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200">Detalles</th>
-                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 text-right">Precio</th>
-                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 text-center">Stock</th>
-                                            <th className="px-3 py-2 text-gray-700 dark:text-gray-200 text-right">Acciones</th>
+                                            <th className="px-3 py-2 text-[var(--text-main)] w-1/3">Título / Autor / Descripción</th>
+                                            <th className="px-3 py-2 text-[var(--text-main)]">ISBN / Código</th>
+                                            <th className="px-3 py-2 text-[var(--text-main)]">Detalles</th>
+                                            <th className="px-3 py-2 text-[var(--text-main)] text-right">Precio</th>
+                                            <th className="px-3 py-2 text-[var(--text-main)] text-center">Stock</th>
+                                            <th className="px-3 py-2 text-[var(--text-main)] text-right">Acciones</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tbody className="divide-y divide-[var(--border-subtle)]">
                                         {results.map(book => (
-                                            <tr key={book.id} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10">
+                                            <tr key={book.id} className="hover:bg-[var(--bg-hover)]">
                                                 <td className="px-3 py-2">
-                                                    <div className="font-bold text-gray-900 dark:text-white line-clamp-2">{book.title}</div>
-                                                    <div className="text-gray-600 dark:text-gray-400 text-xs mt-0.5 font-medium">{book.author}</div>
+                                                    <div className="font-bold text-[var(--text-main)] line-clamp-2">{book.title}</div>
+                                                    <div className="text-[var(--text-muted)] text-xs mt-0.5 font-medium">{book.author}</div>
                                                     {book.description && (
-                                                        <div className="text-gray-500 dark:text-gray-500 text-[11px] mt-1 line-clamp-2 leading-tight">
+                                                        <div className="text-[var(--text-dim)] text-[11px] mt-1 line-clamp-2 leading-tight">
                                                             {book.description}
                                                         </div>
                                                     )}
                                                 </td>
                                                 <td className="px-3 py-2 align-top">
                                                     <div 
-                                                        className="text-gray-900 dark:text-gray-300 font-mono text-xs cursor-help border-b border-dotted border-gray-400 dark:border-gray-500 w-fit"
+                                                        className="text-[var(--text-main)] font-mono text-xs cursor-help border-b border-dotted border-[var(--text-dim)] w-fit"
                                                         onMouseEnter={(e) => {
                                                             const rect = e.currentTarget.getBoundingClientRect();
                                                             setHoveredCode({ code: book.code || 'S/C', top: rect.top, left: rect.left });
@@ -397,33 +397,33 @@ export function BookExistenceCheckModal({
                                                     >
                                                         {book.code || 'S/C'}
                                                     </div>
-                                                    <div className="text-gray-500 dark:text-gray-500 text-xs mt-0.5">{book.isbn}</div>
+                                                    <div className="text-[var(--text-dim)] text-xs mt-0.5">{book.isbn}</div>
                                                 </td>
-                                                <td className="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 align-top">
-                                                    <div><span className="font-semibold text-gray-700 dark:text-gray-300">Ed:</span> {book.publisher}</div>
-                                                    <div><span className="font-semibold text-gray-700 dark:text-gray-300">Año:</span> {book.publicationYear}</div>
-                                                    {book.pages > 0 && <div><span className="font-semibold text-gray-700 dark:text-gray-300">Págs:</span> {book.pages}</div>}
-                                                    {book.category && <div><span className="font-semibold text-gray-700 dark:text-gray-300">Cat:</span> {book.category}</div>}
-                                                    {book.language && <div><span className="font-semibold text-gray-700 dark:text-gray-300">Idioma:</span> {book.language}</div>}
+                                                <td className="px-3 py-2 text-xs text-[var(--text-dim)] align-top">
+                                                    <div><span className="font-semibold text-[var(--text-muted)]">Ed:</span> {book.publisher}</div>
+                                                    <div><span className="font-semibold text-[var(--text-muted)]">Año:</span> {book.publicationYear}</div>
+                                                    {book.pages > 0 && <div><span className="font-semibold text-[var(--text-muted)]">Págs:</span> {book.pages}</div>}
+                                                    {book.category && <div><span className="font-semibold text-[var(--text-muted)]">Cat:</span> {book.category}</div>}
+                                                    {book.language && <div><span className="font-semibold text-[var(--text-muted)]">Idioma:</span> {book.language}</div>}
                                                 </td>
-                                                <td className="px-3 py-2 text-right font-medium text-gray-900 dark:text-white align-top">
+                                                <td className="px-3 py-2 text-right font-medium text-[var(--text-main)] align-top">
                                                     {typeof book.price === 'number' ? book.price.toFixed(2) : book.price}€
                                                 </td>
                                                 <td className="px-3 py-2 text-center font-bold align-top">
-                                                    <span className={book.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}>{book.stock}</span>
+                                                    <span className={book.stock > 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}>{book.stock}</span>
                                                 </td>
                                                 <td className="px-3 py-2 text-right align-top">
                                                     <div className="flex justify-end gap-1">
                                                         <button 
                                                             onClick={() => onProceedToClone(book)}
-                                                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400 rounded transition-colors"
+                                                            className="p-1.5 hover:bg-[var(--bg-hover)] text-[var(--accent)] rounded transition-colors"
                                                             title="Clonar"
                                                         >
                                                             <Copy size={16} />
                                                         </button>
                                                         <button 
                                                             onClick={() => onProceedToEdit(book)}
-                                                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                                            className="p-1.5 hover:bg-[var(--bg-hover)] text-[var(--text-muted)] rounded transition-colors"
                                                             title="Editar"
                                                         >
                                                             <Pencil size={16} />
@@ -431,7 +431,7 @@ export function BookExistenceCheckModal({
                                                         <button 
                                                             onClick={() => handleStockIncrement(book)}
                                                             disabled={!!updatingStockId}
-                                                            className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                                                            className="px-2 py-0.5 bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 text-xs font-bold rounded hover:bg-[var(--accent)]/20 transition-colors"
                                                         >
                                                             {updatingStockId === book.id ? '...' : '+1'}
                                                         </button>
@@ -445,30 +445,30 @@ export function BookExistenceCheckModal({
                         ) : (
                             /* Grid/Card View (Original) */
                              results.map(book => (
-                            <div key={book.id} className="flex items-center gap-4 p-3 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 transition-colors">
+                            <div key={book.id} className="flex items-center gap-4 p-3 bg-[var(--bg-page)] rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] transition-colors">
                                 <div className="h-16 w-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
                                      <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover" />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-gray-900 dark:text-white truncate">{book.title}</h4>
-                                    <p className="text-sm text-gray-500 truncate">{book.author}</p>
-                                    <p className="text-xs text-gray-400 truncate">
+                                 <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-[var(--text-main)] truncate">{book.title}</h4>
+                                    <p className="text-sm text-[var(--text-muted)] truncate">{book.author}</p>
+                                    <p className="text-xs text-[var(--text-dim)] truncate">
                                         {book.publisher} • {book.publicationYear} • {book.pages} págs.
                                     </p>
                                     {book.description && book.description !== 'Sin descripción disponible' && (
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 my-1">
+                                        <p className="text-xs text-[var(--text-dim)] line-clamp-2 my-1">
                                             {book.description}
                                         </p>
                                     )}
-                                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                                        <span className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
+                                     <div className="flex items-center gap-3 mt-1 text-xs text-[var(--text-dim)]">
+                                        <span className="bg-[var(--bg-hover)] px-1.5 py-0.5 rounded text-[var(--text-main)]">
                                             {book.code}
                                         </span>
                                         {book.isbn && <span>ISBN: {book.isbn}</span>}
-                                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                                        <span className="font-bold text-[var(--text-main)]">
                                             {typeof book.price === 'number' ? book.price.toFixed(2) : book.price}€
                                         </span>
-                                        <span className={`font-medium ${book.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                        <span className={`font-bold ${book.stock > 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
                                             Stock: {book.stock}
                                         </span>
                                     </div>
@@ -476,30 +476,30 @@ export function BookExistenceCheckModal({
                                 <div className="flex-shrink-0 flex items-center gap-2">
                                     <button 
                                         onClick={() => onProceedToClone(book)}
-                                        className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded-lg transition-colors"
+                                        className="p-2 bg-[var(--bg-hover)] hover:opacity-80 text-[var(--accent)] rounded-lg transition-colors"
                                         title="Clonar / Crear copia"
                                     >
                                         <Copy size={18} />
                                     </button>
-                                    <button 
+                                     <button 
                                         onClick={() => onProceedToEdit(book)}
-                                        className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded-lg transition-colors"
+                                        className="p-2 bg-[var(--bg-hover)] hover:opacity-80 text-[var(--text-main)] rounded-lg transition-colors"
                                         title="Editar libro"
-                                    >
+                                     >
                                         <Pencil size={18} />
-                                    </button>
-                                    <button 
-                                        onClick={() => handleStockIncrement(book)}
-                                        disabled={!!updatingStockId}
-                                        className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                        {updatingStockId === book.id && (
-                                            <Loader2 size={16} className="animate-spin" />
-                                        )}
-                                        +1
-                                    </button>
-                                </div>
-                            </div>
+                                     </button>
+                                     <button 
+                                         onClick={() => handleStockIncrement(book)}
+                                         disabled={!!updatingStockId}
+                                         className="flex items-center gap-1.5 bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 text-[var(--accent)] px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+                                     >
+                                         {updatingStockId === book.id && (
+                                             <Loader2 size={16} className="animate-spin" />
+                                         )}
+                                         +1
+                                     </button>
+                                 </div>
+                             </div>
                         ))
                     )}
                     </div>
@@ -510,7 +510,7 @@ export function BookExistenceCheckModal({
                         <button
                             onClick={() => handleSearch(true)}
                             disabled={loading}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                            className="text-sm font-bold text-[var(--accent)] hover:opacity-80 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-[var(--accent)]/10 transition-colors disabled:opacity-50"
                         >
                             {loading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                             Cargar más resultados
@@ -533,14 +533,14 @@ export function BookExistenceCheckModal({
       {/* Fixed Code Projection Overlay */}
       {hoveredCode && (
         <div 
-            className="fixed z-[9999] bg-white dark:bg-gray-900 border-2 border-blue-600 shadow-2xl rounded-2xl p-6 pointer-events-none animate-in fade-in zoom-in-95 duration-200 pb-8 pr-12 min-w-[max-content]"
+            className="fixed z-[9999] bg-[var(--bg-surface)] border-2 border-[var(--accent)] shadow-2xl rounded-2xl p-6 pointer-events-none animate-in fade-in zoom-in-95 duration-200 pb-8 pr-12 min-w-[max-content]"
             style={{ 
                 top: hoveredCode.top - 10, // Slight offset to cover original partially or float above
                 left: hoveredCode.left,
             }}
         >
-            <span className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1.5 block">Código Legacy</span>
-            <span className="text-6xl font-black text-gray-900 dark:text-white tracking-widest font-mono leading-none block">
+            <span className="text-xs text-[var(--accent)] font-bold uppercase tracking-widest mb-1.5 block">Código Legacy</span>
+            <span className="text-6xl font-black text-[var(--text-main)] tracking-widest font-mono leading-none block">
                 {hoveredCode.code}
             </span>
         </div>

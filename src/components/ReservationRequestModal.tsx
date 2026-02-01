@@ -28,17 +28,33 @@ export function ReservationRequestModal({
     }
   }, [isOpen]);
 
+  // Scroll lock with layout shift compensation
+  useEffect(() => {
+    if (isOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.setProperty('--scrollbar-compensation', `${scrollbarWidth}px`);
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('--scrollbar-compensation');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('--scrollbar-compensation');
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="reservation-modal-overlay" onClick={onClose}>
-      <div className="reservation-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="reservation-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className="reservation-modal__header">
           <h3 className="reservation-modal__title">
-            <BookOpen className="text-blue-600" size={24} />
+            <BookOpen className="reservation-success-icon" size={24} />
             Solicitud de Reserva
           </h3>
-          <button onClick={onClose} className="reservation-modal__close-btn" disabled={isProcessing}>
+          <button onClick={onClose} className="reservation-modal__close-btn" disabled={isProcessing} aria-label="Cerrar modal">
             <X size={24} />
           </button>
         </div>
@@ -46,10 +62,10 @@ export function ReservationRequestModal({
         {isSuccess ? (
           <div className="reservation-modal__content">
             <div className="flex flex-col items-center justify-center py-6 text-center">
-              <div className="mb-4 text-green-500">
+              <div className="mb-4 reservation-success-icon">
                 <CheckCircle size={64} />
               </div>
-              <h4 className="text-xl font-bold mb-2 dark:text-gray-100" style={{ color: 'var(--text-primary)'}}>
+              <h4 className="reservation-success-title">
                 Reserva Solicitada con Éxito
               </h4>
               <p className="reservation-modal__text mb-6">
@@ -59,8 +75,7 @@ export function ReservationRequestModal({
               </p>
               <button 
                 onClick={onClose} 
-                className="reservation-modal__btn reservation-modal__btn--confirm w-full justify-center"
-                style={{ width: '100%', justifyContent: 'center' }}
+                className="reservation-modal__btn reservation-modal__btn--confirm w-full"
               >
                 Cerrar
               </button>
@@ -84,12 +99,12 @@ export function ReservationRequestModal({
                 </p>
               </div>
 
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg text-sm">
-                <div className="flex items-start gap-2 mb-2 text-blue-800 dark:text-blue-300 font-medium">
+              <div className="mb-4 p-4 bg-[var(--bg-accent-subtle)] border border-[var(--border-accent)] rounded-lg text-sm">
+                <div className="flex items-start gap-2 mb-2 text-[var(--accent)] font-bold">
                   <MapPin size={18} className="shrink-0 mt-0.5" />
                   <span>Información de Recogida</span>
                 </div>
-                <div className="text-blue-700 dark:text-blue-400 pl-6 space-y-2">
+                <div className="text-[var(--text-muted)] pl-6 space-y-2">
                   <p>
                     Recomendamos este servicio para la <strong>provincia de Madrid</strong> (recogida personal). 
                     Si no puedes desplazarte, por favor utiliza el servicio de <strong>compra directa</strong>.
@@ -104,12 +119,12 @@ export function ReservationRequestModal({
                     type="checkbox"
                     checked={acceptedTerms}
                     onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 accent-[var(--accent)] border-[var(--border-strong)] rounded focus:ring-[var(--accent)]"
                     disabled={isProcessing}
                   />
                 </div>
                 <div className="text-sm">
-                  <label htmlFor="terms-checkbox" className="font-medium text-gray-700 dark:text-gray-300 select-none cursor-pointer">
+                  <label htmlFor="terms-checkbox" className="font-bold text-[var(--text-main)] select-none cursor-pointer">
                     He leído la información sobre recogida y accesibilidad
                   </label>
                 </div>
@@ -136,7 +151,6 @@ export function ReservationRequestModal({
                 className="reservation-modal__btn reservation-modal__btn--confirm"
                 disabled={isProcessing || !acceptedTerms}
                 title={!acceptedTerms ? "Debes aceptar los términos de recogida para continuar" : ""}
-                style={!acceptedTerms ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
                 {isProcessing ? (
                   <>

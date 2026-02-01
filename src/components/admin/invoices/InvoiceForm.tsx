@@ -62,8 +62,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
       // Cargar clientes
       try{
-        const clientesData = await getClientes();
-        setClientes(clientesData.filter(c => c.activo));
+        const response = await getClientes();
+        setClientes(response.data.filter(c => c.activo));
       } catch (error) {
         console.error('Error loading clients:', error);
       }
@@ -380,21 +380,20 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       <div className="form-section">
         <h3>Datos del cliente</h3>
         
-        <div className="form-group" style={{ position: 'relative', marginBottom: '1.5rem' }}>
-             <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="form-group" style={{ position: 'relative' }}>
+             <label className="flex justify-between items-center">
                 <span>Seleccionar cliente</span>
                 <button
                     type="button"
                     onClick={handleOpenClienteModal}
-                    className="btn-link"
-                    style={{ fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: 0 }}
+                    className="btn-link text-sm flex items-center gap-1 p-0"
                 >
                     <Plus size={14} />
                     Nuevo Cliente
                 </button>
              </label>
-             <div className="search-input-wrapper">
-                 <Search className="search-icon-absolute" size={18} style={{ color: '#9ca3af', position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+             <div className="relative">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)]" size={18} />
                  <input
                     type="text"
                     placeholder="Buscar cliente por nombre, NIF o email..."
@@ -408,8 +407,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                     onFocus={() => {
                         if (filteredClientes.length > 0) setShowClienteSuggestions(true);
                     }}
-                    className="form-input"
-                    style={{ paddingLeft: '2.5rem' }}
+                    className="form-input pl-10"
                     autoComplete="off"
                  />
              </div>
@@ -422,8 +420,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                             className="suggestion-item"
                             onClick={() => handleSelectCliente(cliente)}
                         >
-                            <div style={{ fontWeight: 500 }}>{cliente.nombre} {cliente.apellidos}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            <div className="font-bold text-[var(--text-main)]">{cliente.nombre} {cliente.apellidos}</div>
+                            <div className="text-xs text-[var(--text-dim)]">
                                 {cliente.nif || 'Sin NIF'} • {cliente.email || 'Sin email'}
                             </div>
                         </div>
@@ -431,10 +429,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                 </div>
              )}
              
-             {showClienteSuggestions && clienteSearch && filteredClientes.length === 0 && (
-                 <div className="autocomplete-suggestions" style={{ padding: '0.75rem', fontSize: '0.875rem', color: '#64748b' }}>
+              {showClienteSuggestions && clienteSearch && filteredClientes.length === 0 && (
+                 <div className="autocomplete-suggestions p-3 text-sm text-[var(--text-muted)]">
                      No se encontraron clientes. 
-                     <button type="button" onClick={handleOpenClienteModal} className="btn-link" style={{ marginLeft: '0.5rem' }}>Crear nuevo</button>
+                     <button type="button" onClick={handleOpenClienteModal} className="btn-link ml-2">Crear nuevo</button>
                  </div>
              )}
         </div>
@@ -478,7 +476,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
       <div className="form-section">
         <h3>Agregar libros a la factura</h3>
-        <p className="helper-text" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
+        <p className="helper-text mb-4">
           Escriba el título, autor o ISBN del libro. Seleccione de las sugerencias, ajuste cantidad y precio, luego haga clic en "Agregar a la lista".
         </p>
         
@@ -486,9 +484,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
           <div className="form-grid">
             <div className="form-group" ref={autocompleteRef} style={{ position: 'relative', flex: '1 1 300px' }}>
               <label>Buscar libro *</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <div className="search-input-wrapper" style={{ position: 'relative', flexGrow: 1 }}>
-                    <Search className="search-icon" size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9ca3af' }} />
+              <div className="flex gap-2">
+                  <div className="relative flex-grow">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] pointer-events-none" size={18} />
                     <input
                       type="text"
                       value={searchTerm}
@@ -503,30 +501,28 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                         if (filteredBooks.length > 0) setShowSuggestions(true);
                       }}
                       placeholder={advancedSearch ? "Título, Autor, ISBN, Código..." : "Introduzca el código del libro..."}
-                      className="form-input"
-                      autoComplete="off"
-                      style={{ paddingLeft: '2.5rem' }}
+                       className="form-input pl-10"
+                       autoComplete="off"
                     />
                  </div>
-                 <button 
-                  type="button" 
-                  onClick={handleSearch}
-                  className="action-btn"
-                  style={{ background: '#3b82f6', color: 'white', padding: '0 1rem', height: '42px', marginTop: '0', borderRadius: '0.375rem', fontWeight: 500 }}
-                 >
-                   Buscar
-                 </button>
+                  <button 
+                   type="button" 
+                   onClick={handleSearch}
+                   className="btn-submit h-[42px] px-4 font-bold"
+                  >
+                    Buscar
+                  </button>
              </div>
 
-             <div style={{ marginTop: '0.5rem' }}>
-               <label className="flex items-center gap-2 cursor-pointer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <div className="mt-2">
+               <label className="flex items-center gap-2 cursor-pointer">
                    <input 
                      type="checkbox" 
+                     className="w-auto m-0"
                      checked={advancedSearch} 
                      onChange={(e) => setAdvancedSearch(e.target.checked)}
-                     style={{ width: 'auto', margin: 0 }}
                    />
-                   <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Búsqueda avanzada (Título, Autor, ISBN)</span>
+                   <span className="text-sm text-[var(--text-muted)]">Búsqueda avanzada (Título, Autor, ISBN)</span>
                </label>
              </div>
               
@@ -534,19 +530,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                 <div className="autocomplete-suggestions">
                   {filteredBooks.length > 0 ? (
                     filteredBooks.slice(0, 10).map(book => (
-                      <div
+                       <div
                         key={book.id}
                         className="suggestion-item"
                         onClick={() => handleSelectBook(book.id)}
                       >
-                        <div className="suggestion-title" style={{ fontWeight: 500 }}>{book.title}</div>
-                        <div className="suggestion-subtitle" style={{ fontSize: '0.75rem', marginTop: '0.125rem' }}>
+                        <div className="suggestion-title font-bold text-[var(--text-main)]">{book.title}</div>
+                        <div className="suggestion-subtitle text-xs mt-0.5 text-[var(--text-dim)]">
                           {book.author} • Code: {book.code} • ISBN: {book.isbn} • {formatCurrency(book.price)}
                         </div>
                       </div>
                     ))
-                  ) : (
-                    <div className="no-results-text" style={{ padding: '0.75rem', fontSize: '0.875rem' }}>
+                   ) : (
+                    <div className="no-results-text p-3 text-sm text-[var(--text-dim)]">
                       No se encontraron libros
                     </div>
                   )}
@@ -591,9 +587,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
           {errors.item && <span className="error-message">{errors.item}</span>}
         </div>
 
-        {formData.items.length > 0 && (
-          <div className="items-list" style={{ marginTop: '1.5rem' }}>
-            <div className="items-list-header" style={{ marginBottom: '0.75rem', fontWeight: 600 }}>
+         {formData.items.length > 0 && (
+          <div className="items-list mt-6">
+            <div className="items-list-header mb-3 font-bold text-[var(--text-main)]">
               Libros agregados ({formData.items.length})
             </div>
             <table className="items-table">
@@ -725,43 +721,36 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
        {/* Client Creation Modal */}
       {showClienteModal && (
-        <div className="modal-overlay" onClick={handleCloseClienteModal} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%', background: 'var(--bg-card)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div className="modal-header" style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Crear Nuevo Cliente</h2>
+        <div className="modal-overlay" onClick={handleCloseClienteModal}>
+          <div className="modal-content max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="text-xl font-bold">Crear Nuevo Cliente</h2>
               <button 
                 type="button"
                 onClick={handleCloseClienteModal} 
-                className="modal-close"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                className="modal-close-btn"
               >
                 <X size={24} />
               </button>
             </div>
 
-            <div style={{ padding: '1.5rem' }}>
+            <div className="p-6">
                 {/* Client Type Tabs */}
-                <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: '0.5rem' }}>
+                <div className="flex gap-2 mb-6 border-b border-[var(--border-subtle)]">
                   {(['particular', 'empresa', 'institucion'] as const).map((t) => (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setClienteModalData({...clienteModalData, tipo: t})}
-                      style={{
-                        padding: '0.75rem 1.5rem',
-                        border: 'none',
-                        background: clienteModalData.tipo === t ? '#eff6ff' : 'transparent',
-                        color: clienteModalData.tipo === t ? '#2563eb' : '#6b7280',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        borderRadius: '0.5rem 0.5rem 0 0',
-                        borderBottom: clienteModalData.tipo === t ? '2px solid #2563eb' : '2px solid transparent',
-                        transition: 'all 0.2s'
-                      }}
+                      className={`px-6 py-3 font-bold transition-all rounded-t-lg border-b-2 ${
+                        clienteModalData.tipo === t 
+                          ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]' 
+                          : 'bg-transparent text-[var(--text-muted)] border-transparent hover:text-[var(--text-main)]'
+                      }`}
                     >
-                      {t === 'particular' && <User size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
-                      {t === 'empresa' && <Building2 size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
-                      {t === 'institucion' && <School size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />}
+                      {t === 'particular' && <User size={16} className="inline mr-2" />}
+                      {t === 'empresa' && <Building2 size={16} className="inline mr-2" />}
+                      {t === 'institucion' && <School size={16} className="inline mr-2" />}
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                   ))}
@@ -874,11 +863,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                 </div>
             </div>
 
-            <div className="modal-footer" style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button type="button" onClick={handleCloseClienteModal} className="btn-cancelar" style={{ padding: '0.5rem 1rem', background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '0.375rem', cursor: 'pointer' }}>
+            <div className="modal-footer flex justify-end gap-3 p-6 border-t border-[var(--border-subtle)]">
+                <button type="button" onClick={handleCloseClienteModal} className="btn-cancel">
                   Cancelar
                 </button>
-                <button type="button" onClick={handleSubmitClienteModal} className="btn-guardar" style={{ padding: '0.5rem 1rem', background: '#2563eb', color: 'white', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>
+                <button type="button" onClick={handleSubmitClienteModal} className="btn-submit">
                   Crear Cliente
                 </button>
             </div>

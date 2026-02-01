@@ -1,0 +1,58 @@
+.revenue-chart-container {
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .revenue-chart-container {
+  box-shadow: var(--shadow-lg);
+}
+
+.chart-title {
+  margin: 0;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.chart-loader {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+/* Custom Tooltip */
+.chart-tooltip {
+  background-color: var(--chart-tooltip-bg);
+  border: 1px solid var(--chart-tooltip-border);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: var(--shadow-md);
+}
+
+.chart-tooltip-title {
+  margin: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.chart-tooltip-value {
+  margin: 0;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.chart-tooltip-subtext {
+  margin: 0;
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+

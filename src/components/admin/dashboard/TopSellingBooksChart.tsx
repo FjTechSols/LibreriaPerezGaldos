@@ -5,8 +5,8 @@ import { useTheme } from '../../../context/ThemeContext';
 import { obtenerLibrosMasVendidos } from '../../../services/pedidoService';
 
 export function TopSellingBooksChart() {
-  const { actualTheme } = useTheme();
-  const isDark = actualTheme === 'dark';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

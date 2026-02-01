@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Zap, User, Phone, MapPin, Package, Mail } from 'lucide-react';
 import { Book } from '../../../types';
-import { useTheme } from '../../../context/ThemeContext';
 import { buscarClientes } from '../../../services/clienteService';
 
 interface ExpressOrderModalProps {
@@ -31,7 +30,6 @@ interface ClientSuggestion {
 }
 
 export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOrderModalProps) {
-  const { actualTheme } = useTheme();
   const [formData, setFormData] = useState<ExpressOrderData>({
     clientName: '',
     clientPhone: '',
@@ -189,40 +187,40 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
   if (!isOpen || !book) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] backdrop-blur-sm">
-      <div className={`${actualTheme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border ${actualTheme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
-        <div className={`flex items-center justify-between p-6 border-b ${actualTheme === 'dark' ? 'border-gray-800 bg-gradient-to-r from-yellow-900/20 to-orange-900/20' : 'border-gray-100 bg-gradient-to-r from-yellow-50 to-orange-50'}`}>
+    <div className="fixed inset-0 bg-[var(--bg-overlay)] flex items-center justify-center z-[70] backdrop-blur-sm">
+      <div className="bg-[var(--bg-surface)] text-[var(--text-main)] rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)] bg-gradient-to-r from-[var(--bg-page)] to-[var(--bg-surface)]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-500 rounded-lg">
+            <div className="p-2 bg-[var(--warning)] rounded-lg">
               <Zap size={24} className="text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold">Pedido Express</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Creación rápida</p>
+              <p className="text-sm text-[var(--text-muted)]">Creación rápida</p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="p-2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors rounded-full hover:bg-[var(--bg-hover)]"
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className={`p-4 border-b ${actualTheme === 'dark' ? 'border-gray-800 bg-gray-800/30' : 'border-gray-100 bg-gray-50'}`}>
+        <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-page)]/50">
           <div className="flex items-start gap-3">
             <Package size={20} className="text-blue-500 mt-1 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{book.title}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{book.author}</p>
-              <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">{book.price.toFixed(2)} €</p>
+              <p className="text-xs text-[var(--text-muted)] truncate">{book.author}</p>
+              <p className="text-sm font-bold text-[var(--accent)] mt-1">{book.price.toFixed(2)} €</p>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="relative">
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-main)] mb-2">
               <User size={16} />
               Nombre del Cliente
             </label>
@@ -236,23 +234,23 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
               onFocus={() => nameSuggestions.length > 0 && setShowNameSuggestions(true)}
               onBlur={() => setTimeout(() => setShowNameSuggestions(false), 200)}
               placeholder="Ej: Juan Pérez"
-              className={`w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border ${errors.clientName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-[var(--bg-page)]/50 border ${errors.clientName ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'} rounded-lg focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]`}
             />
-            {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
+            {errors.clientName && <p className="text-[var(--danger)] text-xs mt-1">{errors.clientName}</p>}
             
             {showNameSuggestions && nameSuggestions.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+              <ul className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                 {nameSuggestions.map((client) => (
                   <li
                     key={client.id}
                     onClick={() => handleClientSelect(client)}
-                    className="px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                    className="px-4 py-2.5 hover:bg-[var(--bg-hover)] cursor-pointer border-b border-[var(--border-subtle)] last:border-0"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="text-sm font-semibold text-[var(--text-main)]">
                         {client.nombre} {client.apellidos || ''}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 flex-shrink-0">
+                      <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 flex-shrink-0">
                         <Phone size={12} />
                         {client.telefono || 'Sin teléfono'}
                       </p>
@@ -264,7 +262,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
           </div>
 
           <div className="relative">
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-main)] mb-2">
               <Phone size={16} />
               Teléfono
             </label>
@@ -278,23 +276,23 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
               onFocus={() => phoneSuggestions.length > 0 && setShowPhoneSuggestions(true)}
               onBlur={() => setTimeout(() => setShowPhoneSuggestions(false), 200)}
               placeholder="Ej: 612345678"
-              className={`w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border ${errors.clientPhone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-[var(--bg-page)]/50 border ${errors.clientPhone ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'} rounded-lg focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]`}
             />
-            {errors.clientPhone && <p className="text-red-500 text-xs mt-1">{errors.clientPhone}</p>}
+            {errors.clientPhone && <p className="text-[var(--danger)] text-xs mt-1">{errors.clientPhone}</p>}
             
             {showPhoneSuggestions && phoneSuggestions.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+              <ul className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                 {phoneSuggestions.map((client) => (
                   <li
                     key={client.id}
                     onClick={() => handleClientSelect(client)}
-                    className="px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                    className="px-4 py-2.5 hover:bg-[var(--bg-hover)] cursor-pointer border-b border-[var(--border-subtle)] last:border-0"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="text-sm font-semibold text-[var(--text-main)]">
                         {client.nombre} {client.apellidos || ''}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 flex-shrink-0">
+                      <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 flex-shrink-0">
                         <Phone size={12} />
                         {client.telefono || 'Sin teléfono'}
                       </p>
@@ -306,7 +304,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-main)] mb-2">
                <Mail size={16} />
                Email (Opcional)
             </label>
@@ -315,22 +313,21 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
               value={formData.clientEmail || ''}
               onChange={(e) => {
                 setFormData(prev => ({ ...prev, clientEmail: e.target.value }));
-                // Don't reset selectedClientId just for email change
               }}
               placeholder="cliente@email.com"
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+              className="w-full px-4 py-2.5 bg-[var(--bg-page)]/50 border border-[var(--border-subtle)] rounded-lg focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]"
             />
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-main)] mb-2">
               <MapPin size={16} />
               Punto de Recogida
             </label>
             <select
               value={formData.pickupLocation}
               onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value as 'Galeón' | 'Pérez Galdós' }))}
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+              className="w-full px-4 py-2.5 bg-[var(--bg-page)]/50 border border-[var(--border-subtle)] rounded-lg focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]"
             >
               <option value="Pérez Galdós">Pérez Galdós</option>
               <option value="Galeón">Galeón</option>
@@ -338,7 +335,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-main)] mb-2">
               <Package size={16} />
               Cantidad
             </label>
@@ -347,22 +344,22 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
               min="1"
               value={formData.quantity}
               onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
-              className={`w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border ${errors.quantity ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-[var(--bg-page)]/50 border ${errors.quantity ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'} rounded-lg focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]`}
             />
-            {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+            {errors.quantity && <p className="text-[var(--danger)] text-xs mt-1">{errors.quantity}</p>}
           </div>
 
           {/* Deposit Section */}
-          <div className="flex items-center gap-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center gap-4 pt-2 border-t border-[var(--border-subtle)]">
              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="isDeposit"
                   checked={formData.isDeposit}
                   onChange={(e) => setFormData(prev => ({ ...prev, isDeposit: e.target.checked }))}
-                  className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500 border-gray-300 dark:border-gray-600 cursor-pointer"
+                  className="w-4 h-4 text-[var(--warning)] rounded focus:ring-[var(--warning)] border-[var(--border-subtle)] cursor-pointer"
                 />
-                <label htmlFor="isDeposit" className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer user-select-none">
+                <label htmlFor="isDeposit" className="text-sm font-semibold text-[var(--text-main)] cursor-pointer user-select-none">
                    Deja Señal
                 </label>
              </div>
@@ -376,7 +373,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
                       placeholder="Importe"
                       value={formData.depositAmount || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, depositAmount: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all text-sm"
+                      className="w-full px-4 py-2 bg-[var(--bg-page)]/50 border border-[var(--border-subtle)] rounded-lg focus:ring-2 focus:ring-[var(--warning)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]"
                    />
                 </div>
              )}
@@ -386,13 +383,13 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-[var(--text-main)] bg-[var(--bg-hover)] rounded-lg hover:bg-[var(--border-subtle)] transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-bold rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all flex items-center justify-center gap-2 shadow-lg"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[var(--warning)] to-[var(--danger)] text-white text-sm font-bold rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg"
             >
               <Zap size={18} />
               Crear Pedido

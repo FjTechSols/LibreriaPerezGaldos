@@ -11,19 +11,19 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--border-subtle);
 }
 
 .isbn-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-main);
   margin: 0 0 0.5rem 0;
 }
 
 .isbn-subtitle {
   font-size: 1rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
+  background-color: var(--accent);
   color: white;
 }
 
@@ -64,9 +64,9 @@
 }
 
 .btn-secondary {
-  background-color: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -87,12 +87,12 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .loading-state .spin {
   animation: spin 1s linear infinite;
-  color: var(--primary-color);
+  color: var(--accent);
   margin-bottom: 1rem;
 }
 
@@ -113,13 +113,13 @@
 .empty-state h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-main);
   margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
   font-size: 1rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -147,7 +147,7 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .book-info {
@@ -161,7 +161,7 @@
   height: 120px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
 }
 
 .book-details {
@@ -178,7 +178,7 @@
 
 .book-author {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: 0 0 0.25rem 0;
 }
 
@@ -241,7 +241,7 @@
 .isbn-result label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .isbn-display {
@@ -264,7 +264,7 @@
 .isbn-input-group label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .isbn-input {
@@ -526,3 +526,4 @@
 .dark-mode .loading-state .spin {
   color: #60a5fa;
 }
+

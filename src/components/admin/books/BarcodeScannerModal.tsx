@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeCameraScanConfig } from 'html5-qrcode';
 import { X, Camera } from 'lucide-react';
+import '../../../styles/components/BarcodeScannerModal.css';
 
 interface BarcodeScannerModalProps {
   isOpen: boolean;
@@ -118,66 +119,65 @@ export function BarcodeScannerModal({ isOpen, onClose, onScanSuccess }: BarcodeS
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 60 }}>
-      <div className="modal" style={{ maxWidth: '500px', width: '90%' }}>
-        <div className="modal-header">
-          <h3 className="modal-title">Escanear Código de Barras</h3>
+    <div className="barcode-scanner-modal__overlay">
+      <div className="barcode-scanner-modal">
+        <div className="barcode-scanner-modal__header">
+          <h3 className="barcode-scanner-modal__title">Escanear Código de Barras</h3>
           <button onClick={handleClose} className="close-btn">
             <X size={20} />
           </button>
         </div>
         
-        <div style={{ padding: '1.5rem' }}>
+        <div className="barcode-scanner-modal__body">
             {/* Viewfinder Area */}
-            <div style={{ position: 'relative', width: '100%', minHeight: '250px', borderRadius: '8px', overflow: 'hidden', marginBottom: '1rem', background: '#000' }}>
+            <div className="barcode-scanner-modal__viewfinder">
                 {/* 1. The Container for html5-qrcode (Must be empty of React children) */}
                 <div id={regionId} style={{ width: '100%', height: '100%' }}></div>
 
                 {/* 2. React-managed Placeholder Overlay */}
                 {!isScanning && !loading && !error && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', zIndex: 10, background: '#000' }}>
+                    <div className="barcode-scanner-modal__placeholder">
                         <Camera size={48} opacity={0.5} />
                     </div>
                 )}
             </div>
 
             {error ? (
-                 <div style={{ textAlign: 'center', color: '#dc2626' }}>
+                 <div className="barcode-scanner-modal__error-wrapper">
                     {error === 'permisos' ? (
-                        <div style={{ background: '#fef2f2', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', color: '#b91c1c', textAlign: 'left' }}>
+                        <div className="barcode-scanner-modal__error-container">
                             <strong>⚠️ Permiso Denegado</strong>
-                            <p style={{ margin: '0.5rem 0' }}>Para escanear, necesitas dar acceso a la cámara:</p>
-                            <ol style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <p className="my-2">Para escanear, necesitas dar acceso a la cámara:</p>
+                            <ol className="pl-6 space-y-2 flex flex-col">
                                 <li>Toca el candado 🔒 en la barra de dirección.</li>
                                 <li>Activa "Cámara" o "Permisos".</li>
                                 <li>Vuelve aquí y recarga.</li>
                             </ol>
                             <button 
                                 onClick={() => window.location.reload()}
-                                style={{ marginTop: '1rem', width: '100%', padding: '0.5rem', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                className="barcode-scanner-modal__error-button"
                             >
                                 Recargar Página
                             </button>
                         </div>
                     ) : (
-                        <div>⚠️ {error}</div>
+                        <div className="text-center text-[var(--danger)]">⚠️ {error}</div>
                     )}
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="barcode-scanner-modal__content">
                     {loading ? (
-                        <p style={{ textAlign: 'center' }}>Buscando cámaras...</p>
+                        <p className="text-center">Buscando cámaras...</p>
                     ) : (
                         <>
                              {!isScanning && (
                                 <>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Seleccionar Cámara</label>
+                                        <label className="barcode-scanner-modal__label">Seleccionar Cámara</label>
                                         <select 
                                             value={selectedCameraId} 
                                             onChange={(e) => setSelectedCameraId(e.target.value)}
-                                            className="form-select" // Uses global styles for dark mode support
-                                            style={{ width: '100%' }}
+                                            className="form-select barcode-scanner-modal__select"
                                         >
                                             {cameras.map(cam => (
                                                 <option key={cam.id} value={cam.id}>
@@ -187,9 +187,8 @@ export function BarcodeScannerModal({ isOpen, onClose, onScanSuccess }: BarcodeS
                                         </select>
                                     </div>
                                     <button 
-                                        className="save-btn" // Reuse primary button style
+                                        className="btn-primary barcode-scanner-modal__scan-button"
                                         onClick={startScanning}
-                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.75rem' }}
                                     >
                                         <Camera size={18} />
                                         Iniciar Escáner
@@ -198,7 +197,7 @@ export function BarcodeScannerModal({ isOpen, onClose, onScanSuccess }: BarcodeS
                              )}
                              
                              {isScanning && (
-                                <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                <p className="barcode-scanner-modal__help-text">
                                     Apunta al código de barras.
                                 </p>
                              )}

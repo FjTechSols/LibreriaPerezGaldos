@@ -37,7 +37,6 @@ import { ExpressOrderModal, ExpressOrderData } from './ExpressOrderModal';
 // For now we focus on the Catalog section logic.
 
 export function BooksManager() {
-  const { actualTheme } = useTheme();
   const { settings } = useSettings();
   const { user } = useAuth();
   
@@ -127,6 +126,7 @@ export function BooksManager() {
     autor: '',
     descripcion: '',
     searchMode: false,
+    language: 'Todos',
     sortBy: 'default', // 'default' allows backend choice (legacy_id)
     sortOrder: 'desc' // Default to descending (Highest code first)
   });
@@ -198,6 +198,7 @@ export function BooksManager() {
           autor: filters.autor || undefined,
           descripcion: filters.descripcion || undefined,
           searchMode: filters.searchMode ? 'full' as const : 'default' as const,
+          language: filters.language !== 'Todos' ? filters.language : undefined,
           sortBy: (filters.sortBy as any) || undefined,
           sortOrder: (filters.sortOrder as any) || undefined,
           forceCount: true
@@ -692,11 +693,11 @@ export function BooksManager() {
        {/* Filters */}
        <div className="filters-container" style={{ 
           padding: '1.25rem', 
-          background: actualTheme === 'dark' ? '#1f2937' : 'white',
+          background: 'var(--bg-surface)',
           borderRadius: '12px',
           marginBottom: '1.5rem',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          border: '1px solid var(--border-subtle)',
+          boxShadow: 'var(--shadow-md)'
         }}>
           {/* Top Row: Key Filters */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
@@ -771,6 +772,7 @@ export function BooksManager() {
                           autor: '',
                           descripcion: '',
                           searchMode: false,
+                          language: 'Todos',
                           sortBy: 'default',
                           sortOrder: 'desc'
                         });
@@ -875,24 +877,48 @@ export function BooksManager() {
                      </div>
                   </div>
 
-                  {/* Year Range */}
-                  <div>
-                     <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Año de Publicación</label>
-                     <div className="flex gap-2 mb-4">
-                        <input 
-                          type="number" 
-                          placeholder="Desde" 
-                          value={filters.startYear}
-                          onChange={(e) => setFilters(prev => ({...prev, startYear: e.target.value}))}
-                          className="form-input w-full h-10 text-sm"
-                        />
-                        <input 
-                          type="number" 
-                          placeholder="Hasta" 
-                          value={filters.endYear}
-                          onChange={(e) => setFilters(prev => ({...prev, endYear: e.target.value}))}
-                          className="form-input w-full h-10 text-sm"
-                        />
+                  {/* Year Range & Language */}
+                  <div className="space-y-4">
+                     <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Año de Publicación</label>
+                        <div className="flex gap-2">
+                           <input 
+                             type="number" 
+                             placeholder="Desde" 
+                             value={filters.startYear}
+                             onChange={(e) => setFilters(prev => ({...prev, startYear: e.target.value}))}
+                             className="form-input w-full h-10 text-sm"
+                           />
+                           <input 
+                             type="number" 
+                             placeholder="Hasta" 
+                             value={filters.endYear}
+                             onChange={(e) => setFilters(prev => ({...prev, endYear: e.target.value}))}
+                             className="form-input w-full h-10 text-sm"
+                           />
+                        </div>
+                     </div>
+                     <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Idioma</label>
+                        <select 
+                           value={filters.language}
+                           onChange={(e) => setFilters(prev => ({...prev, language: e.target.value}))}
+                           className="form-select w-full h-auto py-2 text-sm rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="Todos">Todos los idiomas</option>
+                          <option value="Español">Español</option>
+                          <option value="Inglés">Inglés</option>
+                          <option value="Francés">Francés</option>
+                          <option value="Alemán">Alemán</option>
+                          <option value="Italiano">Italiano</option>
+                          <option value="Portugués">Portugués</option>
+                          <option value="Catalán">Catalán</option>
+                          <option value="Gallego">Gallego</option>
+                          <option value="Euskera">Euskera</option>
+                          <option value="Latín">Latín</option>
+                          <option value="Griego">Griego</option>
+                          <option value="Otros">Otros</option>
+                        </select>
                      </div>
                   </div>
 
@@ -1034,6 +1060,7 @@ export function BooksManager() {
                        autor: '',
                        descripcion: '',
                        searchMode: false,
+                       language: 'Todos',
                        sortBy: 'default',
                        sortOrder: 'desc'
                      });

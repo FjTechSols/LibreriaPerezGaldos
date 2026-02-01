@@ -92,7 +92,7 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 1100 }}>
+    <div className="modal-overlay">
       <div className="modal-content" style={{ maxWidth: '600px', width: '95%' }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <div className="header-title">
@@ -106,7 +106,7 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
 
         <form onSubmit={handleSubmit} className="modal-body">
           {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4 text-sm border border-red-200">
+            <div className="bg-[var(--danger)]/10 text-[var(--danger)] p-3 rounded-md mb-4 text-sm border border-[var(--danger)]/20">
               {error}
             </div>
           )}
@@ -115,34 +115,32 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
             {/* Personal Info */}
             <div className="form-group">
               <label>Nombre</label>
-              <div className="input-group" style={{ position: 'relative' }}>
-                <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <div className="input-group relative">
+                <User size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
                 <input
                   type="text"
                   name="nombre"
-                  className="form-input"
+                  className="form-input pl-10 w-full"
                   value={formData.nombre}
                   onChange={handleChange}
                   required
                   placeholder="Nombre"
-                  style={{ paddingLeft: '2.5rem', width: '100%' }}
                 />
               </div>
             </div>
 
             <div className="form-group">
               <label>Apellidos</label>
-              <div className="input-group" style={{ position: 'relative' }}>
-                <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <div className="input-group relative">
+                <User size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
                 <input
                   type="text"
                   name="apellidos"
-                  className="form-input"
+                  className="form-input pl-10 w-full"
                   value={formData.apellidos}
                   onChange={handleChange}
                   required
                   placeholder="Apellidos"
-                  style={{ paddingLeft: '2.5rem', width: '100%' }}
                 />
               </div>
             </div>
@@ -150,69 +148,65 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
             {/* Contact Info */}
             <div className="form-group">
               <label>Email</label>
-              <div className="input-group" style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <div className="input-group relative">
+                <Mail size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
                 <input
                   type="email"
                   name="email"
-                  className="form-input"
+                  className="form-input pl-10 w-full"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="correo@ejemplo.com"
-                  style={{ paddingLeft: '2.5rem', width: '100%' }}
                 />
               </div>
             </div>
 
             <div className="form-group">
               <label>Teléfono</label>
-              <div className="input-group" style={{ position: 'relative' }}>
-                <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <div className="input-group relative">
+                <Phone size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
                 <input
                   type="tel"
                   name="telefono"
-                  className="form-input"
+                  className="form-input pl-10 w-full"
                   value={formData.telefono}
                   onChange={handleChange}
                   placeholder="+34 600 000 000"
-                  style={{ paddingLeft: '2.5rem', width: '100%' }}
                 />
               </div>
             </div>
 
             <div className="form-group">
                <label>NIF / DNI</label>
-               <div className="input-group" style={{ position: 'relative' }}>
-                 <CreditCard size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+               <div className="input-group relative">
+                 <CreditCard size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
                  <input
                    type="text"
                    name="nif"
-                   className="form-input"
+                   className="form-input pl-10 w-full"
                    value={formData.nif}
                    onChange={handleChange}
                    placeholder="12345678X"
-                   style={{ paddingLeft: '2.5rem', width: '100%' }}
                  />
                </div>
              </div>
           </div>
 
-          <div className="divider" style={{ margin: '1.5rem 0', borderBottom: '1px solid var(--border-color)' }}></div>
-          <h4 style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Dirección</h4>
+          <div className="divider my-6 border-b border-[var(--border-subtle)]"></div>
+          <h4 className="mb-4 text-[var(--text-muted)] text-sm">Dirección</h4>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-             <div className="form-group" style={{ gridColumn: 'span 2' }}>
+             <div className="form-group col-span-2">
               <label>Dirección</label>
-              <div className="input-group" style={{ position: 'relative' }}>
-                <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <div className="input-group relative">
+                <MapPin size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
                 <input
                   type="text"
                   name="direccion"
-                  className="form-input"
+                  className="form-input pl-10 w-full"
                   value={formData.direccion}
                   onChange={handleChange}
                   placeholder="Calle, número, piso..."
-                  style={{ paddingLeft: '2.5rem', width: '100%' }}
                 />
               </div>
             </div>
@@ -254,7 +248,7 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
             </div>
           </div>
 
-          <div className="modal-footer" style={{ marginTop: '2rem' }}>
+          <div className="modal-footer mt-8">
             <button type="button" onClick={onClose} className="btn-secondary">
               Cancelar
             </button>

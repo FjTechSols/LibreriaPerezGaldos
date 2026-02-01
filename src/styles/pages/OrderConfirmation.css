@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background-color: #f8fafc;
+  background-color: var(--bg-page);
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -14,15 +14,14 @@
 }
 
 .confirmation-card {
-  background: white;
+  background: var(--bg-surface);
   padding: 3rem;
   border-radius: 24px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xl);
   max-width: 600px;
   width: 100%;
   text-align: center;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid var(--border-subtle);
 }
 
 .icon-wrapper {
@@ -32,28 +31,28 @@
 }
 
 .clock-icon {
-  color: #3b82f6;
-  background: #eff6ff;
+  color: var(--accent);
+  background: var(--bg-hover);
   padding: 1rem;
   border-radius: 50%;
   box-sizing: content-box;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .check-icon {
   position: absolute;
   bottom: -5px;
   right: -5px;
-  color: #fff;
-  background: #10b981;
+  color: white;
+  background: var(--success);
   border-radius: 50%;
   padding: 4px;
-  border: 4px solid white;
+  border: 4px solid var(--bg-surface);
 }
 
 h1 {
   font-size: 2.25rem;
-  color: #1e293b;
+  color: var(--text-main);
   margin-bottom: 0.75rem;
   font-family: "Playfair Display", serif;
   font-weight: 700;
@@ -61,23 +60,23 @@ h1 {
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 3rem;
   font-size: 1.125rem;
   line-height: 1.6;
 }
 
 .info-box {
-  background: #f8fafc;
+  background: var(--bg-hover);
   border-radius: 16px;
   padding: 2rem;
   text-align: left;
   margin-bottom: 2.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-subtle);
 }
 
 .info-box h3 {
-  color: #0f172a;
+  color: var(--text-main);
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
   font-weight: 600;
@@ -101,13 +100,13 @@ h1 {
   top: 10px;
   bottom: 0;
   width: 2px;
-  background: #e2e8f0;
+  background: var(--border-subtle);
   border-radius: 2px;
 }
 
 .info-box li {
   margin-bottom: 2rem;
-  color: #475569;
+  color: var(--text-muted);
   line-height: 1.6;
   padding-left: 3rem;
   position: relative;
@@ -125,19 +124,19 @@ h1 {
   top: 6px;
   width: 14px;
   height: 14px;
-  background: white;
-  border: 2px solid #3b82f6;
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
   border-radius: 50%;
   z-index: 1;
 }
 
 /* Make first step active/filled */
 .info-box li:first-child::before {
-  background: #3b82f6;
+  background: var(--accent);
 }
 
 .info-box strong {
-  color: #1e293b;
+  color: var(--text-main);
   display: block;
   margin-bottom: 0.25rem;
   font-size: 1rem;
@@ -151,8 +150,8 @@ h1 {
 }
 
 .primary-btn {
-  background: #0f172a; /* Slate 900 */
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   padding: 0.875rem 2rem;
   border-radius: 12px;
   text-decoration: none;
@@ -161,7 +160,7 @@ h1 {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .primary-btn:hover {
@@ -172,8 +171,8 @@ h1 {
 
 .secondary-btn {
   background: transparent;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
   padding: 0.875rem 2rem;
   border-radius: 12px;
   text-decoration: none;
@@ -182,91 +181,13 @@ h1 {
 }
 
 .secondary-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background: var(--bg-hover);
+  color: var(--text-main);
+  border-color: var(--border-strong);
 }
 
 /* Dark Mode */
-.dark-mode .order-confirmation-container {
-  background-color: #020617; /* Slate 950 */
-}
-
-.dark-mode .confirmation-card {
-  background: #1e293b; /* Slate 800 */
-  border-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 
-              0 10px 15px -3px rgba(0, 0, 0, 0.5);
-}
-
-.dark-mode h1 {
-  color: #f8fafc;
-}
-
-.dark-mode .subtitle {
-  color: #94a3b8;
-}
-
-.dark-mode .info-box {
-  background: #0f172a; /* Slate 900 */
-  border-color: #334155;
-}
-
-.dark-mode .info-box h3 {
-  color: #e2e8f0;
-}
-
-.dark-mode .info-box ul::before {
-  background: #334155;
-}
-
-.dark-mode .info-box li::before {
-  background: #0f172a;
-  border-color: #60a5fa;
-}
-
-.dark-mode .info-box li:first-child::before {
-  background: #60a5fa;
-}
-
-.dark-mode .info-box li {
-  color: #cbd5e1;
-}
-
-.dark-mode .info-box strong {
-  color: #f1f5f9;
-}
-
-.dark-mode .clock-icon {
-  background: #172554; /* Blue 950 */
-  color: #60a5fa; /* Blue 400 */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-.dark-mode .check-icon {
-  background: #10b981;
-  border-color: #1e293b; /* Matches card bg */
-}
-
-.dark-mode .primary-btn {
-    background: #f8fafc;
-    color: #0f172a;
-}
-
-.dark-mode .primary-btn:hover {
-    background: #e2e8f0;
-}
-
-.dark-mode .secondary-btn {
-  border-color: #334155;
-  color: #94a3b8;
-}
-
-.dark-mode .secondary-btn:hover {
-  background: #334155;
-  color: #f8fafc;
-  border-color: #475569;
-}
+/* REMOVED extensive .dark-mode blocks as variables handle theme switching natively now */
 
 /* Mobile Responsive */
 @media (max-width: 640px) {
@@ -292,3 +213,4 @@ h1 {
     justify-content: center;
   }
 }
+

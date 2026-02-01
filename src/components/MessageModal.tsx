@@ -1,4 +1,5 @@
-import { X, AlertCircle, Info } from 'lucide-react';
+import { useEffect } from 'react';
+import { X, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
 import '../styles/components/MessageModal.css';
 
 interface MessageModalProps {
@@ -24,13 +25,30 @@ export function MessageModal({
   showCancel = false,
   cancelText = 'Cancelar'
 }: MessageModalProps) {
+  
+  // Scroll lock with layout shift compensation
+  useEffect(() => {
+    if (isOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.setProperty('--scrollbar-compensation', `${scrollbarWidth}px`);
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('--scrollbar-compensation');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('--scrollbar-compensation');
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="message-modal-overlay" onClick={onClose}>
-      <div className="message-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="message-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className="message-modal__header">
-          <button onClick={onClose} className="message-modal__close-btn">
+          <button onClick={onClose} className="message-modal__close-btn" aria-label="Cerrar modal">
             <X size={24} />
           </button>
         </div>
@@ -39,8 +57,8 @@ export function MessageModal({
           <div className={`message-modal__icon message-modal__icon--${type}`}>
             {type === 'error' && <AlertCircle size={48} />}
             {type === 'info' && <Info size={48} />}
-            {type === 'success' && <Info size={48} className="text-green-500" />} {/* Reusing Info or check */}
-            {type === 'warning' && <AlertCircle size={48} className="text-yellow-500" />}
+            {type === 'success' && <CheckCircle2 size={48} />}
+            {type === 'warning' && <AlertCircle size={48} />}
           </div>
           
           <h3 className="message-modal__title">{title}</h3>
@@ -49,12 +67,11 @@ export function MessageModal({
             {message}
           </p>
 
-          <div className="message-modal__actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', width: '100%' }}>
+          <div className="message-modal__actions">
             {(showCancel || onConfirm) && (
               <button 
                 onClick={onClose} 
                 className="message-modal__btn message-modal__btn--cancel"
-                style={{ backgroundColor: '#64748b' }}
               >
                 {cancelText}
               </button>

@@ -1,11 +1,7 @@
-/* Message Modal Styles */
 .message-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: var(--bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,23 +10,25 @@
   animation: fadeIn 0.2s ease-out;
 }
 
+/* Scroll Lock Helper */
+body.modal-open {
+  overflow: hidden;
+  padding-right: var(--scrollbar-compensation, 0px);
+}
+
 .message-modal {
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   border-radius: 12px;
   padding: 1.5rem;
   max-width: 400px;
   width: 90%;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-xl);
   position: relative;
   animation: scaleUp 0.2s ease-out;
+  border: 1px solid var(--border-subtle);
 }
 
-/* Dark mode check via parent class or media query if applicable - ensuring basic dark compatibility */
-:global(.dark) .message-modal {
-  background-color: #1f2937; /* gray-800 */
-  color: #f3f4f6;
-  border: 1px solid #374151;
-}
+/* REMOVED :global(.dark) blocks */
 
 .message-modal__header {
   position: absolute;
@@ -49,14 +47,11 @@
 }
 
 .message-modal__close-btn:hover {
-  background-color: #f3f4f6;
-  color: #4b5563;
+  background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
-:global(.dark) .message-modal__close-btn:hover {
-  background-color: #374151;
-  color: #e5e7eb;
-}
+/* REMOVED :global(.dark) blocks */
 
 .message-modal__content {
   display: flex;
@@ -71,47 +66,60 @@
   /* Colors handled by React logic or inline utility classes usually, but defaults: */
 }
 
-.message-modal__icon--error { color: #ef4444; }
-.message-modal__icon--success { color: #22c55e; }
-.message-modal__icon--warning { color: #eab308; }
-.message-modal__icon--info { color: #3b82f6; }
+.message-modal__icon--error { color: var(--danger); }
+.message-modal__icon--success { color: var(--success); }
+.message-modal__icon--warning { color: var(--warning); }
+.message-modal__icon--info { color: var(--accent); }
 
 .message-modal__title {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #111827;
+  color: var(--text-main);
 }
 
-:global(.dark) .message-modal__title {
-  color: #f9fafb;
-}
+/* REMOVED :global(.dark) blocks */
 
 .message-modal__text {
   font-size: 0.95rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
 
-:global(.dark) .message-modal__text {
-  color: #d1d5db;
-}
+/* REMOVED :global(.dark) blocks */
 
 .message-modal__actions {
   display: flex;
   justify-content: center;
+  gap: var(--spacing-3);
   width: 100%;
 }
 
 .message-modal__btn {
-  padding: 0.5rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  color: white;
+  padding: var(--spacing-2) var(--spacing-6);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: var(--transition-base);
+  color: var(--text-inverse);
   border: none;
   cursor: pointer;
+  outline: none;
+}
+
+.message-modal__btn--cancel {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+}
+
+.message-modal__btn--cancel:hover {
+  background-color: var(--border-subtle);
+}
+
+.message-modal__btn:focus-visible,
+.message-modal__close-btn:focus-visible {
+  box-shadow: 0 0 0 4px var(--ring);
 }
 
 .message-modal__btn:hover {
@@ -119,10 +127,10 @@
   transform: translateY(-1px);
 }
 
-.message-modal__btn--info { background-color: #3b82f6; }
-.message-modal__btn--error { background-color: #ef4444; }
-.message-modal__btn--success { background-color: #22c55e; }
-.message-modal__btn--warning { background-color: #eab308; }
+.message-modal__btn--info { background-color: var(--accent); }
+.message-modal__btn--error { background-color: var(--danger); }
+.message-modal__btn--success { background-color: var(--success); }
+.message-modal__btn--warning { background-color: var(--warning); }
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -133,3 +141,4 @@
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+

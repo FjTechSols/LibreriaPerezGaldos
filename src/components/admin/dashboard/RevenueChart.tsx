@@ -1,12 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useTheme } from '../../../context/ThemeContext';
 import { obtenerPedidos } from '../../../services/pedidoService';
 import { Pedido } from '../../../types';
+import '../../../styles/components/RevenueChart.css';
 
 export function RevenueChart() {
-  const { actualTheme } = useTheme();
-  const isDark = actualTheme === 'dark';
   const [orders, setOrders] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,34 +64,14 @@ export function RevenueChart() {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div style={{
-          background: isDark ? '#1e293b' : '#ffffff',
-          border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-          borderRadius: '8px',
-          padding: '12px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}>
-          <p style={{ 
-            margin: 0, 
-            marginBottom: '8px',
-            fontWeight: 600,
-            color: isDark ? '#f1f5f9' : '#1e293b'
-          }}>
+        <div className="chart-tooltip">
+          <p className="chart-tooltip-title">
             {payload[0].payload.month}
           </p>
-          <p style={{ 
-            margin: 0,
-            color: '#10b981',
-            fontWeight: 600
-          }}>
+          <p className="chart-tooltip-value">
             Ingresos: {payload[0].value.toFixed(2)}€
           </p>
-          <p style={{ 
-            margin: 0,
-            marginTop: '4px',
-            fontSize: '0.875rem',
-            color: isDark ? '#94a3b8' : '#64748b'
-          }}>
+          <p className="chart-tooltip-subtext">
             {payload[0].payload.orders} pedidos
           </p>
         </div>
@@ -103,31 +81,13 @@ export function RevenueChart() {
   };
 
   return (
-    <div style={{
-      background: isDark ? '#1e293b' : '#ffffff',
-      borderRadius: '12px',
-      padding: '1.5rem',
-      border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
-      boxShadow: isDark ? '0 4px 6px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.06)'
-    }}>
-      <h3 style={{
-        margin: 0,
-        marginBottom: '1rem',
-        fontSize: '1.125rem',
-        fontWeight: 600,
-        color: isDark ? '#f1f5f9' : '#1e293b'
-      }}>
+    <div className="revenue-chart-container">
+      <h3 className="chart-title">
         Evolución de Ingresos
       </h3>
       
       {loading ? (
-        <div style={{
-          height: '300px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: isDark ? '#94a3b8' : '#64748b'
-        }}>
+        <div className="chart-loader">
           Cargando datos...
         </div>
       ) : (
@@ -135,22 +95,22 @@ export function RevenueChart() {
           <AreaChart data={monthlyData}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <stop offset="5%" stopColor="var(--success)" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="var(--success)" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid 
               strokeDasharray="3 3" 
-              stroke={isDark ? '#334155' : '#e2e8f0'}
+              stroke="var(--chart-grid)"
               vertical={false}
             />
             <XAxis 
               dataKey="month" 
-              stroke={isDark ? '#94a3b8' : '#64748b'}
+              stroke="var(--chart-text)"
               style={{ fontSize: '0.875rem' }}
             />
             <YAxis 
-              stroke={isDark ? '#94a3b8' : '#64748b'}
+              stroke="var(--chart-text)"
               style={{ fontSize: '0.875rem' }}
               tickFormatter={(value) => `${value}€`}
             />
@@ -158,7 +118,7 @@ export function RevenueChart() {
             <Area 
               type="monotone" 
               dataKey="revenue" 
-              stroke="#10b981" 
+              stroke="var(--success)" 
               strokeWidth={2}
               fillOpacity={1} 
               fill="url(#colorRevenue)" 

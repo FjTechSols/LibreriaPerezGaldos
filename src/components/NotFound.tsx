@@ -9,7 +9,7 @@ interface NotFoundProps {
 }
 
 export const NotFound: React.FC<NotFoundProps> = ({ type = 'page' }) => {
-  const { actualTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   const messages = {
     book: {
@@ -27,7 +27,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ type = 'page' }) => {
   const content = messages[type];
 
   return (
-    <div className={`not-found-container ${actualTheme}`}>
+    <div className={`not-found-container ${resolvedTheme}`}>
       <div className="not-found-content">
         <div className="not-found-logo-wrapper">
           <img 
