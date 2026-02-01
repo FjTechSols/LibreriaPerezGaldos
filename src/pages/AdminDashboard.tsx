@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 // Manager Components
 import { BooksManager } from '../components/admin/books/BooksManager';
 import { InvoicesManager } from '../components/admin/invoices/InvoicesManager';
@@ -84,8 +84,21 @@ export function AdminDashboard() {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
   
-  const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
+  const [searchParams] = useSearchParams();
+  const initialSection = (searchParams.get('section') as AdminSection) || 'dashboard';
+  const [activeSection, setActiveSection] = useState<AdminSection>(initialSection);
   const [badgeCounts, setBadgeCounts] = useState({ total: 0, orders: 0, reservations: 0, invoices: 0 });
+
+  // Update URL when section changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (activeSection === 'dashboard') {
+      params.delete('section');
+    } else {
+      params.set('section', activeSection);
+    }
+    navigate({ search: params.toString() }, { replace: true });
+  }, [activeSection, navigate]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;

@@ -398,34 +398,28 @@ export const obtenerLibros = async (
              query = query.gte('legacy_id', searchTerm).lt('legacy_id', nextTerm);
              
         } else {
-             // 2. SUPER INDEX (Unified Search Vector)
-             // Uses the 'search_vector' column for consistent, relevance-ranked, instant results.
-             // 'websearch' type handles complex queries (quotes, negations) and stopwords automatically.
-             // We retain our stopword filter just in case, or we can pass the simpler string.
+             // 2. SMART MATCH (Título, Autor, ISBN, Código)
+             // Reemplazamos full-text search (que incluía descripción) por una búsqueda dirigida
+             // para evitar ruido (ej. buscar 'Madrid' y que salgan novelas con madrid en sinopsis).
              
-             // Simplification: We can now trust the vector engine.
-             // But to ensure "La mujer" -> "mujer" & "sombra" logic works nicely with websearch:
-             // Websearch parses "La mujer y su sombra" quite well naturally.
+             // Sanear término para SQL (para este caso simple con ilike, supabase escapa básico, 
+             // pero si necesitamos algo manual: const sanitized = ...). Por ahora directo.
              
-             // However, for maximum "Instant" feel (Prefix search), websearch doesn't do :*.
-             // If we want prefix search (finding 'Somb' -> 'Sombra'), we need to be clever.
-             // Let's stick to websearch for robustness first. It's the standard "Google-like" query.
+             // En Supabase/PostgREST, el '.' es separador, así que el término no debe "romper" la url. 
+             // Pero usando la librería JS, el string se maneja bien.
+             // La sintaxis para .or es: "col.op.val,col.op.val"
              
-             // Using filtered terms to clean up query mostly for clarity.
-             const SPANISH_STOPWORDS = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'de', 'del', 'al', 'en', 'con', 'por', 'sobre', 'entre', 'para', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'que', 'se', 'no'];
-             let terms = searchTerm.replace(/[(),.\-\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
-             if (terms.length > 0) {
-                 const filteredTerms = terms.filter(t => !SPANISH_STOPWORDS.includes(t.toLowerCase()));
-                 if (filteredTerms.length > 0) {
-                     terms = filteredTerms;
-                 }
-             }
-             const finalQuery = terms.length > 0 ? terms.join(' ') : searchTerm;
+             // IMPORTANTE: Para búsquedas que contienen comas u otros caracteres, supabase-js maneja el quoting?
+             // La forma más robusta es usar el método .or() con la sintaxis de filtro.
+             // "titulo.ilike.%term%,autor.ilike.%term%,isbn.ilike.%term%,legacy_id.ilike.%term%"
              
-             query = query.textSearch('search_vector', finalQuery, {
-                 config: 'spanish',
-                 type: 'websearch' 
-             });
+             const term = `%${searchTerm}%`;  
+             
+             // Construimos la query string para el OR
+             // Note: If filters.searchMode === 'full', we COULD keep vector search?
+             // But user specifically asked to fix "weird results". Let's stick to strict match effectively.
+             
+             query = query.or(`titulo.ilike.${term},autor.ilike.${term},isbn.ilike.${term},legacy_id.ilike.${term}`);
         }
       }
        if (filters.category && filters.category !== 'Todos') {
