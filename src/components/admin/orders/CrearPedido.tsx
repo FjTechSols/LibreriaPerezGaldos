@@ -849,7 +849,11 @@ export default function CrearPedido({
   const parsearUniliber = async (texto: string) => {
       setLoading(true);
       try {
-          // Normalize line endings
+          console.log('--- Uniliber Raw Data ---');
+          console.log(texto);
+          console.log('-------------------------');
+
+          // Normalize line endings and cleanup
           const cleanText = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
           const extract = (regex: RegExp) => {
@@ -857,13 +861,27 @@ export default function CrearPedido({
               return match && match[1] ? match[1].trim() : '';
           };
 
-          // Basic Fields (expecting colon/dot separator)
-          const nombre = extract(/Nombre\s*[:\.]\s*([^\n]+)/i);
-          const direccion = extract(/Direcci[óo]n\s*[:\.]\s*([^\n]+)/i);
-          const poblacion = extract(/Poblaci[óo]n\s*[:\.]\s*([^\n]+)/i);
-          const referencia = extract(/Referencia\s*[:\.]\s*([^\n]+)/i);
+          // STRICTER REGEXES: Require separator (colon, dot, dash) to avoid matching headers like "Dirección de envío"
+          // We use [:\.-] as separator and ensure it's present.
+          const nombre = extract(/(?:Nombre|Cliente)\s*[:\.-]\s*([^\n]+)/i);
+          const direccion = extract(/Direcci[óo]n\s*[:\.-]\s*([^\n]+)/i);
+          const poblacion = extract(/(?:Poblaci[óo]n|Ciudad|Localidad)\s*[:\.-]\s*([^\n]+)/i);
+          const provincia = extract(/Provincia\s*[:\.-]\s*([^\n]+)/i);
+          const cpMatch = extract(/(?:C\.?\s*Postal|C\.?P\.?|Código Postal|CP)\s*[:\.-]\s*(\d{5}|\d{4})/i) || cleanText.match(/\b\d{5}\b/)?.[0] || '';
+          
+          const email = extract(/Email\s*[:\.-]\s*([^\n]+)/i);
+          const telefono = extract(/(?:Teléfono|Tlf|Tel)\s*[:\.-]\s*([^\n]+)/i);
+          const movil = extract(/(?:Móvil|Movil)\s*[:\.-]\s*([^\n]+)/i);
 
-          // Price extraction (handling "Precio total: X" or "Precio total\nX")
+          // Reference might appear as "Referencia:", "Ref:", "Nº Pedido:", "Pedido:"
+          const referencia = extract(/(?:Referencia|Ref\.?|Nº Pedido|Pedido)\s*[:\.-]\s*([^\n]+)/i);
+
+          const missingFields = [];
+          if (!nombre) missingFields.push('Nombre');
+          if (!direccion && !poblacion) missingFields.push('Dirección/Población');
+
+          // Price extraction 
+          // Uniliber example: "Precio total\n7.00 €"
           let precioTotal = 0;
           const precioMatch = cleanText.match(/Precio\s*total(?:[:\.]\s*|\s*\n\s*)([\d.,]+)/i);
           if (precioMatch && precioMatch[1]) {
@@ -871,35 +889,84 @@ export default function CrearPedido({
           }
 
           // Title/Author/Description Heuristic
-          // everything before "Precio total" and after "Referencia"
+          // Format usually:
+          // Referencia: X
+          // Title
+          // Author
+          // Description
+          // Price (€)...
+          
           let titulo = '';
           let autor = '';
           let descripcionLines: string[] = [];
 
-          const parts = cleanText.split(/Precio\s*total/i);
-          if (parts.length > 0) {
-              let contentBlock = parts[0];
-              // If Referencia exists, take content after it
-              if (referencia) {
-                  const refSplit = contentBlock.split(/Referencia\s*[:\.]\s*[^\n]+\n?/i);
-                  if (refSplit.length > 1) contentBlock = refSplit[1];
-              }
+          // Strategy: Find text between "Referencia:..." line and the first "Precio..." line
+          // Note: Referencia regex here must match the one used for extraction to locate it properly
+          const refIndex = cleanText.search(/(?:Referencia|Ref\.?|Nº Pedido|Pedido)\s*[:\.-]/i);
+          
+          // Find start of price block (could be "Precio (€)" or "Precio total")
+          const priceBlockIndex = cleanText.search(/Precio\s*(?:\(€\)|total)/i);
 
-              // Split lines and exclude keys
-              const lines = contentBlock.split('\n').map(l => l.trim()).filter(l => l);
-              const infoLines = lines.filter(l => !l.match(/^(?:Nombre|Direcci|Poblaci|Provincia|Pa[íi]s|Email|Tel|M[óo]vil|Referencia)/i));
+          if (refIndex !== -1 && priceBlockIndex !== -1 && priceBlockIndex > refIndex) {
+              // Extract block
+              const block = cleanText.substring(refIndex, priceBlockIndex);
               
-              if (infoLines.length > 0) {
-                  titulo = infoLines[0]; // Assume first line is title
-                  if (infoLines.length > 1) autor = infoLines[1]; // Second is author
-                  if (infoLines.length > 2) descripcionLines = infoLines.slice(2);
+              // Remove the reference line itself
+              const lines = block.split('\n')
+                  .map(l => l.trim())
+                  .filter(l => l.length > 0);
+              
+              // Filter out the line that starts with Reference
+              const contentLines = lines.filter(l => !l.match(/^(?:Referencia|Ref\.?|Nº Pedido|Pedido)\s*[:\.-]/i));
+
+              if (contentLines.length > 0) {
+                  titulo = contentLines[0];
+                  if (contentLines.length > 1) autor = contentLines[1];
+                  if (contentLines.length > 2) descripcionLines = contentLines.slice(2);
               }
+          } else {
+             // Fallback if structure isn't perfect
+             // Use strict filtering for fallback too
+             const lines = cleanText.split('\n').filter(l => l.trim());
+             const filtered = lines.filter(l => !l.match(/^(?:Nombre|Direcci|Poblaci|Provincia|Pa[íi]s|C\.?P|Código|Email|Tel|M[óo]vil|Referencia|Ref|Nº|Pedido|Precio|Descuento)\s*[:\.-]/i));
+             if (filtered.length > 0) titulo = filtered[0];
+          }
+
+          if (missingFields.length > 0) {
+              console.warn("Missing fields:", missingFields);
           }
 
           // Set Client Data
-          setClienteSearch(''); // Clear search input
-          setDireccionEnvio(poblacion ? `${direccion}, ${poblacion}` : direccion);
+          setClienteSearch(''); 
           
+          // Construct full address
+          let fullAddress = direccion;
+          if (cpMatch) fullAddress += `, ${cpMatch}`;
+          if (poblacion) fullAddress += `, ${poblacion}`;
+          if (provincia) fullAddress += ` (${provincia})`;
+          
+          setDireccionEnvio(fullAddress);
+          
+          // Pre-fill Modal Data if needed
+          setClienteModalData({
+              tipo: 'particular',
+              nombre: nombre,
+              apellidos: '',
+              email: email,
+              nif: '',
+              telefono: movil || telefono,
+              direccion: direccion,
+              ciudad: poblacion,
+              codigo_postal: cpMatch,
+              provincia: provincia,
+              pais: 'España',
+              persona_contacto: '',
+              cargo: '',
+              web: '',
+              notas: `Cliente importado de Uniliber\nRef Pedido: ${referencia}`,
+              activo: true
+          });
+
           // Set Description
           const descripcion = descripcionLines.join('\n').trim();
           if (descripcion) setObservaciones(descripcion);
@@ -1274,9 +1341,10 @@ export default function CrearPedido({
                             className="btn-platform"
                             style={{ 
                                 padding: '1rem 2rem', 
-                                border: '2px solid var(--border-color)', 
+                                border: '2px solid var(--border-subtle)', 
                                 borderRadius: '0.5rem', 
-                                background: 'var(--bg-secondary)',
+                                background: 'var(--bg-surface)',
+                                color: 'var(--text-main)',
                                 cursor: 'pointer',
                                 fontSize: '1.1rem',
                                 fontWeight: 500
@@ -1290,9 +1358,10 @@ export default function CrearPedido({
                             className="btn-platform"
                              style={{ 
                                 padding: '1rem 2rem', 
-                                border: '2px solid var(--border-color)', 
+                                border: '2px solid var(--border-subtle)', 
                                 borderRadius: '0.5rem', 
-                                background: 'var(--bg-secondary)',
+                                background: 'var(--bg-surface)',
+                                color: 'var(--text-main)',
                                 cursor: 'pointer',
                                 fontSize: '1.1rem',
                                 fontWeight: 500
@@ -1309,7 +1378,17 @@ export default function CrearPedido({
                                 type="button" 
                                 onClick={() => setPlataformaOrigen(null)}
                                 className="btn-secondary"
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem' }}
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.25rem', 
+                                    padding: '0.5rem 1rem',
+                                    background: 'var(--bg-surface)',
+                                    color: 'var(--text-main)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
+                                }}
                             >
                                 <ArrowLeft size={16} /> Volver
                             </button>

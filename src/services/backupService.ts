@@ -358,33 +358,125 @@ export async function exportIberlibroToCSV(onProgress?: (val: number, total: num
     );
 }
 
+// Helper to clean and validate ISBN
+const normalizeISBN = (isbn: string | null | undefined): string | null => {
+    if (!isbn) return null;
+    // Remove hyphens, spaces, and invisible characters
+    const clean = isbn.replace(/[-\s\uFEFF\u200B]+/g, '').trim();
+    // Validate length (simple check for 10 or 13 digits)
+    if (clean.length === 10 || clean.length === 13) return clean;
+    return null; // Return null if invalid length
+};
+
 export async function exportUniliberToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
-    const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
-    return handleExport(
-        fetchAll('libros', (q) => q.gt('stock', 0).order('id', { ascending: true }), headers_map, onProgress),
-        `uniliber_backup_${new Date().toISOString().split('T')[0]}.csv`,
-        (libros) => {
-             const headers = ['ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Fecha Creación'];
-             const rows = [headers.join(',')];
-             libros.forEach((libro: any) => {
-                const editorialName = libro.editoriales?.nombre || '';
-                const categoriaName = libro.categorias?.nombre || '';
-                const row = [
-                    `"${libro.isbn || ''}"`,
-                    `"${libro.titulo?.replace(/"/g, '""') || ''}"`,
-                    `"${libro.autor?.replace(/"/g, '""') || ''}"`,
-                    `"${editorialName.replace(/"/g, '""')}"`,
-                    libro.anio || '',
-                    libro.precio || 0,
-                    libro.stock || 0,
-                    `"${categoriaName.replace(/"/g, '""')}"`,
-                    libro.created_at || ''
-                ];
-                rows.push(row.join(','));
-             });
-             return rows;
+    try {
+        const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
+        
+        // Fetch source data (we still filter by stock > 0 at DB level for efficiency, but will strictly validate below)
+        const libros = await fetchAll('libros', (q) => q.gt('stock', 0).order('id', { ascending: true }), headers_map, onProgress);
+
+        if (!libros || libros.length === 0) {
+            return { success: false, error: 'No hay libros con stock para exportar.' };
         }
-    );
+
+        const headers = ['ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Fecha Creación'];
+        const validRows: string[] = [headers.join(',')];
+        
+        let stats = {
+            total: libros.length,
+            valid: 0,
+            excluded: 0,
+            reasons: { isbn: 0, price: 0, title: 0, category: 0, year: 0 }
+        };
+
+        libros.forEach((libro: any) => {
+            // 1. Validate ISBN (CRITICAL)
+            const cleanISBN = normalizeISBN(libro.isbn);
+            if (!cleanISBN) {
+                stats.excluded++;
+                stats.reasons.isbn++;
+                return; // SKIP
+            }
+
+            // 2. Validate Title
+            const titulo = libro.titulo?.trim();
+            if (!titulo) {
+                stats.excluded++;
+                stats.reasons.title++;
+                return; // SKIP
+            }
+
+            // 3. Validate Price
+            const precio = parseFloat(libro.precio);
+            if (isNaN(precio) || precio <= 0) {
+                 stats.excluded++;
+                 stats.reasons.price++;
+                 return; // SKIP
+            }
+
+            // 4. Validate Category
+            const categoriaName = libro.categorias?.nombre?.trim();
+            if (!categoriaName) {
+                stats.excluded++;
+                stats.reasons.category++;
+                return; // SKIP
+            }
+
+            // 5. Normalize Year (Integer)
+            let anio = parseInt(libro.anio);
+            if (isNaN(anio)) {
+                // If usage requires valid year, we skip. If optional, we could leave empty.
+                // User requirement: "Año entero (INT), Si alguno falla -> no se exporta"
+                // Assuming mandatory for Uniliber based on prompt tone.
+                stats.excluded++;
+                stats.reasons.year++;
+                return; // SKIP
+            }
+
+            // 6. Validate Stock
+            let stock = parseInt(libro.stock);
+            if (isNaN(stock) || stock < 0) {
+                 // Should not happen due to DB filter, but just in case
+                 stats.excluded++; 
+                 return; 
+            }
+
+            // Data is VALID. Construct Row.
+            const editorialName = libro.editoriales?.nombre || '';
+            const autor = libro.autor || '';
+
+            const row = [
+                cleanISBN, // No quotes for ISBN usually preferred by some parsers if numeric, but CSV standard allows quotes. Uniliber often prefers raw.
+                `"${titulo.replace(/"/g, '""')}"`,
+                `"${autor.replace(/"/g, '""')}"`,
+                `"${editorialName.replace(/"/g, '""')}"`,
+                anio.toString(), // Integer string
+                precio.toFixed(2), // Formatted price
+                stock.toString(), // Integer stock
+                `"${categoriaName.replace(/"/g, '""')}"`,
+                libro.created_at || ''
+            ];
+            
+            validRows.push(row.join(','));
+            stats.valid++;
+        });
+
+        console.log('--- Resumen Exportación Uniliber ---', stats);
+
+        if (stats.valid === 0) {
+             return { success: false, error: 'Generado 0 registros válidos. Todos fueron excluidos por falta de ISBN o datos inválidos.' };
+        }
+
+        const filename = `uniliber_backup_${new Date().toISOString().split('T')[0]}.csv`;
+        // Pass useBOM = false for Uniliber
+        downloadCSV(validRows.join('\n'), filename, false);
+        
+        return { success: true };
+
+    } catch (error: any) {
+        console.error('Error in Uniliber export:', error);
+        return { success: false, error: error.message || 'Error desconocido al exportar para Uniliber.' };
+    }
 }
 
 export async function exportClientesToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
@@ -416,8 +508,8 @@ export async function exportClientesToCSV(onProgress?: (val: number, total: numb
      );
 }
 
-function downloadCSV(content: string, filename: string): void {
-  const BOM = '\uFEFF';
+function downloadCSV(content: string, filename: string, useBOM: boolean = true): void {
+  const BOM = useBOM ? '\uFEFF' : '';
   const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);

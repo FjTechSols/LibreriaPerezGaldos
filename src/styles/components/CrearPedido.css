@@ -476,38 +476,38 @@
 .btn-mode {
   flex: 1;
   padding: 0.75rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-subtle);
   border-radius: 8px;
-  background: white;
+  background: var(--bg-surface);
   cursor: pointer;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-muted);
   transition: all 0.2s;
 }
 
 .btn-mode.active {
-  border-color: #3b82f6; /* var(--accent) approx */
-  background: #eff6ff;
-  color: #3b82f6;
+  border-color: var(--accent);
+  background: var(--bg-accent-subtle);
+  color: var(--accent);
 }
 
 .paste-section {
-  background: #f9fafb;
+  background: var(--bg-hover);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-subtle);
 }
 
 .paste-label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
 }
 
 .paste-help-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-bottom: 1rem;
 }
 
@@ -620,8 +620,8 @@
 /* REMOVED legacy modal header rows */
 
 .badge-platform {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--bg-accent-subtle);
+  color: var(--accent);
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -632,11 +632,7 @@
   gap: 0.5rem;
 }
 
-.dark-mode .badge-platform {
-  background: #312e81;
-  color: #c7d2fe;
-  border: 1px solid #4338ca;
-}
+
 
 .search-header {
   display: flex;
@@ -668,16 +664,13 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   padding: 1.25rem;
-  background: #f8fafc;
+  background: var(--bg-hover);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-subtle);
   margin-bottom: 1rem;
 }
 
-.dark-mode .advanced-search-grid {
-  background: #0f172a;
-  border-color: #334155;
-}
+
 
 .btn-search-trigger {
   background: #2563eb;
@@ -715,18 +708,13 @@
   width: 100%;
   padding: 0.625rem 0.875rem;
   padding-left: 2.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 0.875rem;
   outline: none;
   transition: all 0.2s;
-  background: white; /* Ensure background is explicit */
-}
-
-.dark-mode .input-search-simple {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
+  background: var(--input-bg);
+  color: var(--input-text);
 }
 
 .dark-mode .input-search-simple:focus {
@@ -753,13 +741,11 @@
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--text-dim);
   pointer-events: none;
 }
 
-.dark-mode .search-icon-absolute {
-  color: #64748b;
-}
+
 
 /* Ensure placeholder color in dark mode */
 .dark-mode .form-input::placeholder,
