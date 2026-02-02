@@ -13,7 +13,7 @@ import { BookFormLegacy } from './BookFormLegacy'; // Import Legacy Form
 interface BookFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (bookData: Partial<Book>, contents: string[]) => Promise<void>;
+  onSubmit: (bookData: Partial<Book>, contents: string[], publishToAbebooks?: boolean) => Promise<void>;
   initialData?: Book | null;
   isCreating: boolean;
   ubicaciones: Ubicacion[];
@@ -98,6 +98,18 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   // State for Language Autocomplete
   const [languageSuggestions, setLanguageSuggestions] = useState<string[]>(LANGUAGES);
   const [showLanguageSuggestions, setShowLanguageSuggestions] = useState(false);
+  
+  // AbeBooks State
+  const [publishToAbebooks, setPublishToAbebooks] = useState(false);
+
+  // Auto-toggle AbeBooks based on Price Rule (>= 12€)
+  useEffect(() => {
+     if (isCreating) {
+        const currentPrice = formData.isOnSale ? formData.originalPrice : formData.price;
+        const shouldPublish = (currentPrice || 0) >= 12;
+        setPublishToAbebooks(shouldPublish);
+     }
+  }, [formData.price, formData.originalPrice, formData.isOnSale, isCreating]);
 
   const handleEditorialChange = async (val: string) => {
       setFormData({...formData, publisher: val});
@@ -403,7 +415,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
              }
           }
 
-          await onSubmit(formData, bookContents);
+          await onSubmit(formData, bookContents, publishToAbebooks);
       } finally {
           setIsSubmitting(false);
       }
@@ -826,6 +838,18 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   />
                   Descatalogado
                 </label>
+
+                   {/* AbeBooks Checkbox (Sólo al crear) */}
+                   {isCreating && (
+                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#dc2626', fontWeight: 600 }}>
+                           <input
+                               type="checkbox"
+                               checked={publishToAbebooks}
+                               onChange={(e) => setPublishToAbebooks(e.target.checked)}
+                           />
+                           Enviar a AbeBooks
+                       </label>
+                   )}
               </div>
             </div>
 

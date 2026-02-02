@@ -320,7 +320,7 @@ export function BooksManager() {
   // ... In Render ...
 
 
-  const handleCreateSubmit = async (bookData: Partial<Book>, contents: string[]) => {
+  const handleCreateSubmit = async (bookData: Partial<Book>, contents: string[], publishToAbebooks?: boolean) => {
     // Validation: Title, Price, Location, Category are mandatory. Author is usually expected but user didn't explicitly list it as mandatory, though typically it is.
     // User said: "los pos que si son obligatorio son Titulo, Precio, Ubicacion y categoria"
     if (!bookData.title || !bookData.price || !bookData.ubicacion || !bookData.category) {
@@ -421,10 +421,39 @@ export function BooksManager() {
              reviews: []
           };
 
-          // Show Success Modal instead of Alert
-          setCreatedBook(mappedBook);
-          setRefreshTrigger(prev => prev + 1);
-          setIsModalOpen(false); // Close the modal (resets form by unmounting)
+          // AbeBooks Upload Trigger
+          if (publishToAbebooks) {
+              // We use a non-blocking toast or a secondary modal. 
+              // Since BookSuccessModal is about to be shown via setCreatedBook...
+              // Maybe we should show a specific message using showModal for now to ensure visibility of the AbeBooks result.
+              
+              showModal('AbeBooks', `Subiendo "${nuevo.titulo}" a AbeBooks...`, 'info');
+              
+              try {
+                  const { data, error } = await supabase.functions.invoke('upload-to-abebooks', {
+                      body: { bookId: nuevo.id }
+                  });
+
+                  if (error || (data && !data.success)) {
+                      console.error('AbeBooks Upload Error:', error || data);
+                      showModal('Advertencia', `Libro guardado localmente, PERO falló la subida a AbeBooks: ${error?.message || data?.message || 'Error desconocido'}`, 'warning');
+                  } else {
+                      showModal('Éxito', `Libro guardado y publicado en AbeBooks correctamente. (Ref: ${data.abeResponse || 'OK'})`, 'success');
+                  }
+              } catch (abeErr: any) {
+                  console.error('AbeBooks Exception:', abeErr);
+                   showModal('Advertencia', `Libro guardado, pero ocurrió un error de red al contactar AbeBooks.`, 'warning');
+              }
+              // Finally trigger refresh
+              setRefreshTrigger(prev => prev + 1);
+              setIsModalOpen(false);
+
+          } else {
+              // Standard Success Flow (BookSuccessModal)
+              setCreatedBook(mappedBook);
+              setRefreshTrigger(prev => prev + 1);
+              setIsModalOpen(false); // Close the modal (resets form by unmounting)
+          }
         }
     } catch (e) {
       console.error('Error creating book:', e);
