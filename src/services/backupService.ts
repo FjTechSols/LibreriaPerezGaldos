@@ -11,6 +11,9 @@ async function fetchAll(table: string, queryBuilder?: (query: any) => any, selec
   if (onProgress) {
       try {
         let countQuery = supabase.from(table).select('*', { count: 'estimated', head: true });
+        if (queryBuilder) {
+            countQuery = queryBuilder(countQuery);
+        }
         let { count, error } = await countQuery;
         
         // Fallback to exact if estimated is invalid
@@ -358,7 +361,7 @@ export async function exportIberlibroToCSV(onProgress?: (val: number, total: num
 export async function exportUniliberToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
     const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
     return handleExport(
-        fetchAll('libros', (q) => q.order('id', { ascending: true }), headers_map, onProgress),
+        fetchAll('libros', (q) => q.gt('stock', 0).order('id', { ascending: true }), headers_map, onProgress),
         `uniliber_backup_${new Date().toISOString().split('T')[0]}.csv`,
         (libros) => {
              const headers = ['ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Fecha Creación'];
