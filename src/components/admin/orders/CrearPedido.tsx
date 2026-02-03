@@ -517,7 +517,7 @@ export default function CrearPedido({
         const phoneIndex = lines.findIndex(l => l.match(/^Phone:/i));
         
         // Fallback: If no ADUANAS, try finding "Albarán" or verify start
-        const obsStartIndex = aduanasIndex !== -1 ? aduanasIndex : (paraIndex !== -1 ? paraIndex + addressLines.length + 1 : -1);
+        const obsStartIndex = aduanasIndex !== -1 ? aduanasIndex : (paraIndex !== -1 ? paraIndex + addressBlock.length + 1 : -1);
         
         if (obsStartIndex !== -1 && phoneIndex !== -1 && phoneIndex > obsStartIndex) {
             // Capture lines in between
@@ -568,7 +568,7 @@ export default function CrearPedido({
 
                      if (exactMatch) {
                          console.log('✅ Libro encontrado:', exactMatch.title);
-                         foundBook = {
+                         const libroEncontrado: Libro = {
                              id: parseInt(exactMatch.id),
                              titulo: exactMatch.title,
                              autor: exactMatch.author,
@@ -580,13 +580,15 @@ export default function CrearPedido({
                              legacy_id: exactMatch.code,
                              descripcion: exactMatch.description
                          } as any;
+                         
+                         foundBook = libroEncontrado;
 
                          items.push({
                             id: `int-iber-${Date.now()}`,
-                            libro_id: foundBook.id,
-                            libro: foundBook,
+                            libro_id: libroEncontrado.id,
+                            libro: libroEncontrado,
                             cantidad: qty,
-                            precio_unitario: foundBook.precio,
+                            precio_unitario: libroEncontrado.precio,
                             es_externo: false
                          });
                      } else {
@@ -619,7 +621,7 @@ export default function CrearPedido({
               // Try to find existing client matches (Name or Phone)
               const matchingClients = clientes.filter(c => {
                   const nameMatch = c.nombre.toLowerCase().includes(nombre.toLowerCase());
-                  const phoneMatch = telefono && (c.telefono?.includes(telefono) || c.movil?.includes(telefono));
+                  const phoneMatch = telefono && c.telefono?.includes(telefono);
                   return nameMatch || phoneMatch;
               });
 
@@ -904,7 +906,6 @@ export default function CrearPedido({
           // --- 3. BOOK STRATEGY ---
           const items: LineaPedido[] = [];
           let foundBook: Libro | null = null;
-          let bookInfoLog = '';
 
           // A: Try DB Lookup by Reference (Primary Strategy)
           if (referencia) {
@@ -980,7 +981,6 @@ export default function CrearPedido({
                    precio_unitario: foundBook.precio, 
                    es_externo: false
               });
-              bookInfoLog = `Libro ID: ${foundBook.legacy_id || foundBook.id}`;
           } else {
               items.push({
                  id: `uni-${Date.now()}`,
@@ -992,7 +992,6 @@ export default function CrearPedido({
                     : `Producto Uniliber (Ref: ${referencia})`,
                  url_externa: ''
               });
-              bookInfoLog = `Producto Externo (Ref: ${referencia})`;
           }
 
           setLineas(items);
