@@ -531,13 +531,22 @@ export function BooksManager() {
         'warning',
         async () => {
             try {
-                // Show loading state or just modify modal?
-                // Ideally we would show a loader but simple replacement works for now.
+                // Trigger AbeBooks Deletion (Fire & Forget / Silent)
+                // We don't block the local deletion if this fails, but we try it.
+                // We use the ID directly.
+                console.log(`Attempting to delete book ${id} from AbeBooks...`);
+                supabase.functions.invoke('upload-to-abebooks', {
+                   body: { bookId: parseInt(id), action: 'delete' }
+                }).then(({ data, error }) => {
+                   if (error) console.error('AbeBooks Delete Error:', error);
+                   else console.log('AbeBooks Delete Result:', data);
+                });
+
                 const deleted = await eliminarLibro(parseInt(id));
                 if (deleted) {
                     setRefreshTrigger(prev => prev + 1);
                     setTimeout(() => {
-                        showModal('Éxito', 'Libro eliminado correctamente.', 'success');
+                        showModal('Éxito', 'Libro eliminado correctamente (y orden de baja enviada a AbeBooks).', 'success');
                     }, 300);
                 } else {
                      showModal('Error', 'No se pudo eliminar el libro.', 'error');
@@ -565,8 +574,21 @@ export function BooksManager() {
              try {
                 const updated = await incrementarStockLibro(parseInt(book.id), amount);
                 if (updated) {
+                    const newStock = (book.stock || 0) + amount;
+                    // AbeBooks Rule: Zero Stock -> Delete
+                    if (newStock <= 0) {
+                        try {
+                             supabase.functions.invoke('upload-to-abebooks', {
+                               body: { bookId: parseInt(book.id), action: 'delete' }
+                            });
+                            // Fire & forget
+                        } catch (err) { console.error(err); }
+                        
+                        showModal('Éxito', `Stock agotado. Se ha enviado orden de baja a AbeBooks.`, 'success');
+                    } else {
+                         showModal('Éxito', `Stock ${action.toLowerCase()} en 1.`, 'success');
+                    }
                     setRefreshTrigger(prev => prev + 1);
-                     showModal('Éxito', `Stock ${action.toLowerCase()} en 1.`, 'success');
                 } else {
                     showModal('Error', 'Error al actualizar el stock.', 'error');
                 }

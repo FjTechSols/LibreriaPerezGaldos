@@ -434,231 +434,239 @@ export default function CrearPedido({
   const parsearIberLibro = async (texto: string) => {
     setLoading(true);
     try {
+        console.log('--- IberLibro Raw Data (v2) ---');
+        console.log(texto);
+        console.log('-------------------------------');
+
         const cleanText = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        
-        // --- 1. Extract Header Info (Client, Address, Phone, IDs) ---
+        const lines = cleanText.split('\n');
+
+        // --- 1. Client & Address (Block "Para:") ---
         let nombre = '';
-        let direccion = '';
+        let calle = '';
+        let cp = '';
+        let ciudad = '';
+        let provincia = '';
+        let pais = 'España'; // Default
         
-        let orderId = '';
-        let abeBooksId = '';
-        let fechaTramitado = '';
-        let fechaEstimada = '';
+        // Find start: "Para:"
+        const paraIndex = lines.findIndex(l => l.trim().match(/^Para:/i));
+        let addressBlock: string[] = [];
 
-        // Helper to find lines between start marker and end marker
-        const getLinesBetween = (startRegex: RegExp, endRegex: RegExp) => {
-             const startMatch = cleanText.match(startRegex);
-             if (!startMatch || typeof startMatch.index === 'undefined') return [];
-             const startIndex = startMatch.index + startMatch[0].length;
-             
-             const restText = cleanText.slice(startIndex);
-             const endMatch = restText.match(endRegex);
-             const endOffset = endMatch && typeof endMatch.index !== 'undefined' ? endMatch.index : restText.length;
-             
-             return restText.slice(0, endOffset).trim().split('\n').map(l => l.trim()).filter(Boolean);
-        };
-
-        // Parse "Para:" block for address
-        const addressBlockLines = getLinesBetween(/^Para:/m, /Albarán de Envío|Phone:|Nº de pedido:/m);
-        
-        if (addressBlockLines.length > 0) {
-            nombre = addressBlockLines[0]; // First line is name
-            const addressLines = addressBlockLines.slice(1);
-            direccion = addressLines.join(', '); // Full address string
+        if (paraIndex !== -1) {
+            // Read lines until we hit a "Stop Word"
+            for (let i = paraIndex + 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue; 
+                if (line.match(/^(?:ADUANAS|CUSTOMS|Albar[áa]n|N[°º] de pedido|Phone)/i)) break;
+                addressBlock.push(line);
+            }
         }
 
+        if (addressBlock.length > 0) {
+            nombre = addressBlock[0];
+            const remaining = addressBlock.slice(1);
 
+            // Parsing Strategy: Reverse / Pattern Matching
+            if (remaining.length > 0) {
+                // Check Last Line for Country
+                const lastLine = remaining[remaining.length - 1];
+                if (lastLine.match(/Spain|España|France|Alemania|Germany|Portugal|Italy|Italia|United Kingdom|Reino Unido/i)) {
+                    pais = remaining.pop()!;
+                }
 
-        const idMatch = cleanText.match(/Nº de pedido:\s*(\d+)/i);
-        if (idMatch) orderId = idMatch[1];
+                // Look for CP Line (Start with 4-5 digits)
+                // Example: "28043 Madrid"
+                const cpIndex = remaining.findIndex(l => l.match(/^\d{4,5}\b/));
+                
+                if (cpIndex !== -1) {
+                    // Street is everything before CP
+                    calle = remaining.slice(0, cpIndex).join(', ');
 
-        const abeIdMatch = cleanText.match(/Nº de pedido AbeBooks:\s*(\d+)/i);
-        if (abeIdMatch) abeBooksId = abeIdMatch[1];
+                    // Parse CP + City
+                    const cpLine = remaining[cpIndex];
+                    const cpMatch = cpLine.match(/^(\d{4,5})\s+(.+)$/);
+                    if (cpMatch) {
+                         cp = cpMatch[1];
+                         ciudad = cpMatch[2].trim();
+                    } else {
+                         cp = cpLine; // Only digits?
+                    }
+
+                    // Lines AFTER CP line are usually Province or repeated City
+                    // Example: "28043 Madrid" \n "Madrid"
+                    const afterCp = remaining.slice(cpIndex + 1);
+                    if (afterCp.length > 0) {
+                        provincia = afterCp.join(', ');
+                    } else {
+                        // If no province line, assume province = city for Spain capitals usually
+                        provincia = ciudad;
+                    }
+
+                } else {
+                    // Fallback: No CP found, everything is Street
+                    calle = remaining.join(', ');
+                }
+            }
+        }
+
+        // --- 2. Observations Block (ADUANAS -> Phone) ---
+        // User wants: "encapsularlo en observaciones del envio desde aduanas/custom hasta nº phone"
+        let observaciones = '';
+        const aduanasIndex = lines.findIndex(l => l.match(/^(?:ADUANAS|CUSTOMS)/i));
+        const phoneIndex = lines.findIndex(l => l.match(/^Phone:/i));
         
-        const tramitadoMatch = cleanText.match(/Tramitado:\s*([^\n]+)/i);
-        if (tramitadoMatch) fechaTramitado = tramitadoMatch[1].trim();
-
-        const estimadaMatch = cleanText.match(/Fecha estimada de entrega:\s*([^\n]+)/i);
-        if (estimadaMatch) fechaEstimada = estimadaMatch[1].trim();
-
-        // --- 2. Extract Items ---
-        const tempItems: { title: string, author: string, ref: string, quantity: number }[] = [];
+        // Fallback: If no ADUANAS, try finding "Albarán" or verify start
+        const obsStartIndex = aduanasIndex !== -1 ? aduanasIndex : (paraIndex !== -1 ? paraIndex + addressLines.length + 1 : -1);
         
-        const splitByEst = cleanText.split(/Fecha estimada de entrega:[^\n]+\n/);
-        const contentAfterHeader = splitByEst.length > 1 ? splitByEst[1] : '';
+        if (obsStartIndex !== -1 && phoneIndex !== -1 && phoneIndex > obsStartIndex) {
+            // Capture lines in between
+            const obsLines = lines.slice(obsStartIndex, phoneIndex).map(l => l.trim()).filter(Boolean);
+            observaciones = obsLines.join('\n');
+        }
 
-        const lines = contentAfterHeader.split('\n');
-        let descLines: string[] = [];
-        let capturingDesc = false;
+        // --- 3. Phone ---
+        let telefono = '';
+        if (phoneIndex !== -1) {
+            const phoneMatch = lines[phoneIndex].match(/Phone:\s*([^\n]+)/i);
+            if (phoneMatch) telefono = phoneMatch[1].trim();
+        }
 
-        for (const line of lines) {
-             const trimLine = line.trim();
-             if (!trimLine) continue;
-             if (trimLine.startsWith('________________')) continue;
-             if (trimLine.match(/^Artículo\s+Autor/)) continue; 
-             if (trimLine.startsWith('Por favor, guarde')) break; 
-
-             const itemMatch = trimLine.match(/^\d+\s+(.+)\s+(\d+)$/);
-             
-             if (itemMatch) {
-                 let author = '';
-                 let title = '';
-                 let ref = itemMatch[2];
-                 const middle = itemMatch[1];
+        // --- 4. Items (Reference Priority) ---
+        // Look for line starting with digit, then text, ending with Reference (digits)
+        // Sample: "1 BORGES... 02273892"
+        const items: LineaPedido[] = [];
+        let foundBook: Libro | null = null;
+        
+        // Find header "Artículo Autor Título" to locate start of items
+        const itemHeaderIndex = lines.findIndex(l => l.match(/Art[íi]culo\s+Autor\s+T[íi]tulo/i));
+        
+        if (itemHeaderIndex !== -1) {
+             // Process lines after header
+             for (let i = itemHeaderIndex + 1; i < lines.length; i++) {
+                 const line = lines[i].trim();
+                 if (!line) continue;
+                 if (line.startsWith('Descripción:')) break; // Stop at description
                  
-                 if (texto.includes('\t')) {
-                     const parts = trimLine.split('\t').filter(p => p.trim());
-                     if (parts.length >= 3) {
-                         author = parts[1] || '';
-                         title = parts[2] || '';
-                         ref = parts[parts.length-1] || ref;
-                     } else {
-                         title = middle;
-                     }
-                 } else {
-                     const gapSplit = middle.split(/\s{2,}/);
-                     if (gapSplit.length >= 2) {
-                         author = gapSplit[0];
-                         title = gapSplit[1];
-                     } else {
-                         title = middle;
-                     }
-                 }
+                 // Regex to capture: Qty (start), Middle content, Reference (end)
+                 // Assumption: Reference is numeric and at the end
+                 const match = line.match(/^(\d+)\s+(.+?)\s+(\d+)$/);
+                 
+                 if (match) {
+                     const qty = parseInt(match[1]);
+                     const reference = match[3]; // The "Nº de referencia"
+                     const middle = match[2]; // Author + Title mixed
+                     
+                     console.log(`🔎 Procesando Item Ref: ${reference}`);
 
-                 tempItems.push({
-                     title,
-                     author,
-                     ref, // Legacy Code
-                     quantity: 1
-                 });
-                 capturingDesc = false;
-             } else if (trimLine === 'Descripción:') {
-                 capturingDesc = true;
-             } else if (capturingDesc) {
-                 if (trimLine.match(/^Artículo\s+/)) {
-                     capturingDesc = false;
-                 } else {
-                     descLines.push(trimLine);
+                     // DB Lookup
+                     const results = await buscarLibros(reference);
+                     const exactMatch = results.find(b => 
+                         String(b.code) === String(reference) || 
+                         String(b.id) === String(reference)
+                     );
+
+                     if (exactMatch) {
+                         console.log('✅ Libro encontrado:', exactMatch.title);
+                         foundBook = {
+                             id: parseInt(exactMatch.id),
+                             titulo: exactMatch.title,
+                             autor: exactMatch.author,
+                             isbn: exactMatch.isbn || '',
+                             precio: exactMatch.price,
+                             stock: exactMatch.stock,
+                             imagen_url: exactMatch.coverImage,
+                             editorial: { id: 0, nombre: exactMatch.publisher }, 
+                             legacy_id: exactMatch.code,
+                             descripcion: exactMatch.description
+                         } as any;
+
+                         items.push({
+                            id: `int-iber-${Date.now()}`,
+                            libro_id: foundBook.id,
+                            libro: foundBook,
+                            cantidad: qty,
+                            precio_unitario: foundBook.precio,
+                            es_externo: false
+                         });
+                     } else {
+                         // External Item fallback
+                         items.push({
+                             id: `iber-${Date.now()}`,
+                             cantidad: qty,
+                             precio_unitario: 0, // Price not detected in line, defaulting 0
+                             es_externo: true,
+                             nombre_externo: `${middle} (Ref: ${reference})`,
+                             url_externa: ''
+                         });
+                     }
                  }
              }
         }
-        
-        const description = descLines.join('\n');
-        
-        // --- 3. Resolve Items against DB (Async) ---
-        const finalItems: LineaPedido[] = [];
 
-        for (const item of tempItems) {
-            let foundBook: Libro | null = null;
-            if (item.ref) {
-                // Search by legacy code
-                // Note: buscarLibros returns fuzzy matches, we must filter for exact legacy_id if possible
-                const results = await buscarLibros(item.ref);
-                const exactMatch = results.find(b => b.code === item.ref);
-                
-                if (exactMatch) {
-                     // Map to component Libro type
-                     foundBook = {
-                        id: parseInt(exactMatch.id),
-                        titulo: exactMatch.title,
-                        autor: exactMatch.author,
-                        isbn: exactMatch.isbn || '',
-                        precio: exactMatch.price,
-                        stock: exactMatch.stock,
-                        imagen_url: exactMatch.coverImage,
-                        editorial: { id: 0, nombre: exactMatch.publisher }, 
-                        categoria_id: 0, 
-                        legacy_id: exactMatch.code
-                     } as any;
-                }
-            }
-
-            if (foundBook) {
-                // Internal Item
-                finalItems.push({
-                    id: `int-${Date.now()}-${finalItems.length}`,
-                    libro_id: foundBook.id,
-                    libro: foundBook,
-                    cantidad: item.quantity,
-                    precio_unitario: foundBook.precio, // Uses DB price
-                    es_externo: false
-                });
-            } else {
-                // External Item
-                finalItems.push({
-                     id: `ab-${Date.now()}-${finalItems.length}`,
-                     cantidad: item.quantity,
-                     precio_unitario: 0, 
-                     es_externo: true,
-                     nombre_externo: `${item.title}${item.author ? ' - ' + item.author : ''} (Ref: ${item.ref})`,
-                     url_externa: ''
-                });
-            }
-        }
-
-        // --- 4. Populate Form ---
-        let finalObservaciones = '';
-        if (abeBooksId) finalObservaciones += `AbeBooks ID: ${abeBooksId}\n`;
-        if (orderId) finalObservaciones += `Pedido Nº: ${orderId}\n`;
-        if (fechaTramitado) finalObservaciones += `Fecha: ${fechaTramitado}\n`;
-        if (fechaEstimada) finalObservaciones += `Entrega Estimada: ${fechaEstimada}\n`;
-        if (description) finalObservaciones += `\nDescripción:\n${description}`;
-
+        // --- 5. Populate Form ---
         setClienteSearch('');
-        setDireccionEnvio(direccion);
-        setObservaciones(finalObservaciones);
-        setLineas(finalItems);
+        
+        // Full address string for Order Shipping Label (Combined)
+        const fullAddressLabel = [calle, cp, ciudad, provincia, pais].filter(Boolean).join(', ');
+        setDireccionEnvio(fullAddressLabel);
+        
+        setObservaciones(observaciones);
+        setLineas(items);
 
-        // --- Auto Client Search/Creation Logic ---
-        if (nombre) {
-            // Try to find existing client by name
-            const matchingClients = clientes.filter(c => 
-                c.nombre.toLowerCase().includes(nombre.toLowerCase())
-            );
+        // Client Logic (Find or Setup Modal)
+         if (nombre) {
+              // Try to find existing client matches (Name or Phone)
+              const matchingClients = clientes.filter(c => {
+                  const nameMatch = c.nombre.toLowerCase().includes(nombre.toLowerCase());
+                  const phoneMatch = telefono && (c.telefono?.includes(telefono) || c.movil?.includes(telefono));
+                  return nameMatch || phoneMatch;
+              });
 
-            if (matchingClients.length === 1) {
-                // Exact match found - auto-select
-                setClienteSeleccionado(matchingClients[0]);
-                if (matchingClients[0].direccion) {
-                    setDireccionEnvio(matchingClients[0].direccion);
-                }
-            } else if (matchingClients.length > 1) {
-                // Multiple matches - let user choose
-                setClienteSearch(nombre);
-            } else {
-                // No match - open modal with pre-filled data
-                setClienteModalData({
-                    tipo: 'particular',
-                    nombre: nombre,
-                    apellidos: '',
-                    email: '',
-                    nif: '',
-                    telefono: '',
-                    direccion: direccion,
-                    ciudad: '',
-                    codigo_postal: '',
-                    provincia: '',
-                    pais: 'España',
-                    persona_contacto: '',
-                    cargo: '',
-                    web: '',
-                    notas: `Cliente importado de IberLibro`,
-                    activo: true
-                });
-                setShowClienteModal(true);
-            }
-        }
+              if (matchingClients.length === 1) {
+                  setClienteSeleccionado(matchingClients[0]);
+                  if (matchingClients[0].direccion) setDireccionEnvio(matchingClients[0].direccion);
+              } else if (matchingClients.length > 1) {
+                  setClienteSearch(nombre);
+              } else {
+                   // New Client Setup
+                   setClienteModalData({
+                      tipo: 'particular',
+                      nombre: nombre,
+                      apellidos: '', 
+                      email: '', // IberLibro format doesn't show email in this snippet
+                      nif: '',
+                      telefono: telefono,
+                      direccion: calle, // Structured Street
+                      ciudad: ciudad,     // Structured City
+                      codigo_postal: cp,  // Structured CP
+                      provincia: provincia, // Structured Province
+                      pais: pais,         // Structured Country
+                      persona_contacto: '',
+                      cargo: '',
+                      web: '',
+                      notas: `Cliente importado de IberLibro`,
+                      activo: true
+                  });
+                  
+                  // Heuristic Split Name
+                  const nameParts = nombre.split(' ');
+                  if (nameParts.length > 1) {
+                       const fName = nameParts[0];
+                       const lName = nameParts.slice(1).join(' ');
+                       setClienteModalData(prev => ({ ...prev, nombre: fName, apellidos: lName }));
+                  }
+                  
+                  setShowClienteModal(true);
+              }
+         }
 
         setDatosPegados("");
-        setPlataformaOrigen(null);
         setModoEntrada("manual");
-
-
         
-        const internalCount = finalItems.filter(i => !i.es_externo).length;
-        const clientMsg = nombre ? `\n👤 Cliente: ${nombre}` : '';
-        showModal('Éxito', `✅ Datos de IberLibro procesados.${clientMsg}\n📦 Items: ${finalItems.length} (${internalCount} encontrados en catálogo)`);
-        
+        const status = foundBook ? `✅ Libro encontrado` : `⚠️ Libro NO encontrado o externo`;
+        showModal('Datos IberLibro Procesados', `Cliente: ${nombre}\nItems: ${items.length}\n${status}`);
+
     } catch (e: any) {
         console.error('Error parsing IberLibro:', e);
         showModal('Error', 'Error al procesar datos de IberLibro: ' + e.message, 'error');
@@ -849,153 +857,120 @@ export default function CrearPedido({
   const parsearUniliber = async (texto: string) => {
       setLoading(true);
       try {
-          console.log('--- Uniliber Raw Data ---');
+          console.log('--- Uniliber Raw Data (v2) ---');
           console.log(texto);
-          console.log('-------------------------');
+          console.log('------------------------------');
 
-          // Normalize line endings and cleanup
+          // Normalize line endings
           const cleanText = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-          const extract = (regex: RegExp) => {
+          // --- 1. Helper for Robust Extraction ---
+          // Matches "Label: Value" allowing for loose separators and trailing spaces
+          const extract = (labelPattern: string) => {
+              // Regex matches: Label + (optional separator) + Capture Group (Value until newline)
+              const regex = new RegExp(`${labelPattern}\\s*[:\\.-]\\s*([^\\n]+)`, 'i');
               const match = cleanText.match(regex);
               return match && match[1] ? match[1].trim() : '';
           };
 
-          // STRICTER REGEXES: Require separator (colon, dot, dash) to avoid matching headers like "Dirección de envío"
-          // We use [:\.-] as separator and ensure it's present.
-          const nombre = extract(/(?:Nombre|Cliente)\s*[:\.-]\s*([^\n]+)/i);
-          const direccion = extract(/Direcci[óo]n\s*[:\.-]\s*([^\n]+)/i);
-          const poblacion = extract(/(?:Poblaci[óo]n|Ciudad|Localidad)\s*[:\.-]\s*([^\n]+)/i);
-          const provincia = extract(/Provincia\s*[:\.-]\s*([^\n]+)/i);
-          const cpMatch = extract(/(?:C\.?\s*Postal|C\.?P\.?|Código Postal|CP)\s*[:\.-]\s*(\d{5}|\d{4})/i) || cleanText.match(/\b\d{5}\b/)?.[0] || '';
+          // --- 2. Extract Key Fields ---
+          // REFERENCE (Key for DB Lookup)
+          const referencia = extract('(?:Referencia|Ref\\.?|Nº Pedido|Pedido)');
+
+          // CONTACT & ADDRESS
+          const nombre = extract('(?:Nombre|Cliente)');
+          const direccion = extract('Direcci[óo]n');
+          const poblacion = extract('(?:Poblaci[óo]n|Ciudad|Localidad)');
+          const provincia = extract('Provincia');
+          const pais = extract('Pa[íi]s');
           
-          const email = extract(/Email\s*[:\.-]\s*([^\n]+)/i);
-          const telefono = extract(/(?:Teléfono|Tlf|Tel)\s*[:\.-]\s*([^\n]+)/i);
-          const movil = extract(/(?:Móvil|Movil)\s*[:\.-]\s*([^\n]+)/i);
+          // Postal Code: Explicitly handle "C. Postal", "CP", "Código Postal"
+          const cpRaw = extract('(?:C\\.?\\s*Postal|C\\.?P\\.?|Código Postal|CP)');
+          // Sanitize to just digits (handle cases like "18600 (Granada)")
+          const codigoPostal = cpRaw.match(/\d{4,5}/)?.[0] || '';
 
-          // Reference might appear as "Referencia:", "Ref:", "Nº Pedido:", "Pedido:"
-          const referencia = extract(/(?:Referencia|Ref\.?|Nº Pedido|Pedido)\s*[:\.-]\s*([^\n]+)/i);
+          const email = extract('Email');
+          const telefono = extract('(?:Teléfono|Tlf|Tel)');
+          const movil = extract('(?:Móvil|Movil)');
 
-          const missingFields = [];
-          if (!nombre) missingFields.push('Nombre');
-          if (!direccion && !poblacion) missingFields.push('Dirección/Población');
-
-          // Price extraction 
-          // Uniliber example: "Precio total\n7.00 €"
+          // PRICE extraction
+          // Handles "Precio total\n33.00 €" or "Precio total: 33.00 €"
           let precioTotal = 0;
-          const precioMatch = cleanText.match(/Precio\s*total(?:[:\.]\s*|\s*\n\s*)([\d.,]+)/i);
+          const precioMatch = cleanText.match(/Precio\s*total(?:\s*[:\.-])?(?:\s*\n\s*|\s+)([\d.,]+)/i);
           if (precioMatch && precioMatch[1]) {
              precioTotal = parseFloat(precioMatch[1].replace(',', '.'));
           }
 
-          // Title/Author/Description Heuristic
-          // Format usually:
-          // Referencia: X
-          // Title
-          // Author
-          // Description
-          // Price (€)...
-          
-          let titulo = '';
-          let autor = '';
-          let descripcionLines: string[] = [];
-
-          // Strategy: Find text between "Referencia:..." line and the first "Precio..." line
-          // Note: Referencia regex here must match the one used for extraction to locate it properly
-          const refIndex = cleanText.search(/(?:Referencia|Ref\.?|Nº Pedido|Pedido)\s*[:\.-]/i);
-          
-          // Find start of price block (could be "Precio (€)" or "Precio total")
-          const priceBlockIndex = cleanText.search(/Precio\s*(?:\(€\)|total)/i);
-
-          if (refIndex !== -1 && priceBlockIndex !== -1 && priceBlockIndex > refIndex) {
-              // Extract block
-              const block = cleanText.substring(refIndex, priceBlockIndex);
-              
-              // Remove the reference line itself
-              const lines = block.split('\n')
-                  .map(l => l.trim())
-                  .filter(l => l.length > 0);
-              
-              // Filter out the line that starts with Reference
-              const contentLines = lines.filter(l => !l.match(/^(?:Referencia|Ref\.?|Nº Pedido|Pedido)\s*[:\.-]/i));
-
-              if (contentLines.length > 0) {
-                  titulo = contentLines[0];
-                  if (contentLines.length > 1) autor = contentLines[1];
-                  if (contentLines.length > 2) descripcionLines = contentLines.slice(2);
-              }
-          } else {
-             // Fallback if structure isn't perfect
-             // Use strict filtering for fallback too
-             const lines = cleanText.split('\n').filter(l => l.trim());
-             const filtered = lines.filter(l => !l.match(/^(?:Nombre|Direcci|Poblaci|Provincia|Pa[íi]s|C\.?P|Código|Email|Tel|M[óo]vil|Referencia|Ref|Nº|Pedido|Precio|Descuento)\s*[:\.-]/i));
-             if (filtered.length > 0) titulo = filtered[0];
-          }
-
-          if (missingFields.length > 0) {
-              console.warn("Missing fields:", missingFields);
-          }
-
-          // Set Client Data
-          setClienteSearch(''); 
-          
-          // Construct full address
-          let fullAddress = direccion;
-          if (cpMatch) fullAddress += `, ${cpMatch}`;
-          if (poblacion) fullAddress += `, ${poblacion}`;
-          if (provincia) fullAddress += ` (${provincia})`;
-          
-          setDireccionEnvio(fullAddress);
-          
-          // Pre-fill Modal Data if needed
-          setClienteModalData({
-              tipo: 'particular',
-              nombre: nombre,
-              apellidos: '',
-              email: email,
-              nif: '',
-              telefono: movil || telefono,
-              direccion: direccion,
-              ciudad: poblacion,
-              codigo_postal: cpMatch,
-              provincia: provincia,
-              pais: 'España',
-              persona_contacto: '',
-              cargo: '',
-              web: '',
-              notas: `Cliente importado de Uniliber\nRef Pedido: ${referencia}`,
-              activo: true
-          });
-
-          // Set Description
-          const descripcion = descripcionLines.join('\n').trim();
-          if (descripcion) setObservaciones(descripcion);
-
-          // --- Book Lookup by Ref ---
+          // --- 3. BOOK STRATEGY ---
           const items: LineaPedido[] = [];
           let foundBook: Libro | null = null;
-          
+          let bookInfoLog = '';
+
+          // A: Try DB Lookup by Reference (Primary Strategy)
           if (referencia) {
+               console.log(`🔎 Buscando referencia: ${referencia}`);
+               // buscarLibros is fuzzy, so we filter results for exact match on 'code' (legacy_id) or 'id'
                const results = await buscarLibros(referencia);
-               const exactMatch = results.find(b => b.code === referencia);
+               
+               const exactMatch = results.find(b => 
+                   String(b.code) === String(referencia) || 
+                   String(b.id) === String(referencia)
+               );
                
                if (exactMatch) {
+                    console.log('✅ Libro encontrado en DB:', exactMatch.title);
+                    // Map service Book to component Libro
                     foundBook = {
                        id: parseInt(exactMatch.id),
                        titulo: exactMatch.title,
                        autor: exactMatch.author,
                        isbn: exactMatch.isbn || '',
-                       precio: exactMatch.price,
+                       precio: exactMatch.price, // Use DB price
                        stock: exactMatch.stock,
                        imagen_url: exactMatch.coverImage,
                        editorial: { id: 0, nombre: exactMatch.publisher }, 
                        categoria_id: 0, 
-                       legacy_id: exactMatch.code
+                       legacy_id: exactMatch.code,
+                       descripcion: exactMatch.description
                     } as any;
                }
           }
 
-          // Set Line Item
+          // B: Fallback Text Parsing (If no DB match)
+          let tituloFallback = '';
+          let autorFallback = '';
+          
+          if (!foundBook) {
+              // Heuristic: Line after Reference is usually Title
+              const lines = cleanText.split('\n').map(l => l.trim()).filter(Boolean);
+              const refLineIndex = lines.findIndex(l => l.match(/^(?:Referencia|Ref)/i));
+              
+              if (refLineIndex !== -1 && refLineIndex + 1 < lines.length) {
+                  // Assume next line is Title if it doesn't look like a header
+                  const nextLine = lines[refLineIndex+1];
+                  if (!nextLine.includes(':')) {
+                      tituloFallback = nextLine;
+                      // Assume line after Title is Author?
+                      if (refLineIndex + 2 < lines.length) {
+                          const afterTitle = lines[refLineIndex+2];
+                          if (!afterTitle.includes(':') && !afterTitle.match(/Cartoné|Tapa|Rústica/i)) {
+                              autorFallback = afterTitle;
+                          }
+                      }
+                  }
+              }
+              // Backup strategy via filtered lines if above failed
+              if (!tituloFallback) {
+                  const contentLines = lines.filter(l => 
+                      !l.includes(':') && // Not a field
+                      !l.match(/^\d+/) && // Not a number
+                      !l.includes('€') // Not a price
+                  );
+                  if (contentLines.length > 0) tituloFallback = contentLines[0];
+              }
+          }
+
+          // C: Construct Item Line
           if (foundBook) {
               items.push({
                    id: `int-uni-${Date.now()}`,
@@ -1005,55 +980,85 @@ export default function CrearPedido({
                    precio_unitario: foundBook.precio, 
                    es_externo: false
               });
-          } else if (titulo) {
-             items.push({
-                id: `uni-${Date.now()}`,
-                cantidad: 1,
-                precio_unitario: precioTotal > 0 ? precioTotal : 0, 
-                es_externo: true,
-                nombre_externo: `${titulo} ${autor ? '- ' + autor : ''}  (Ref: ${referencia})`,
-                url_externa: ''
-             });
+              bookInfoLog = `Libro ID: ${foundBook.legacy_id || foundBook.id}`;
+          } else {
+              items.push({
+                 id: `uni-${Date.now()}`,
+                 cantidad: 1,
+                 precio_unitario: precioTotal > 0 ? precioTotal : 0, 
+                 es_externo: true,
+                 nombre_externo: tituloFallback 
+                    ? `${tituloFallback} ${autorFallback ? '- ' + autorFallback : ''} (Ref: ${referencia})` 
+                    : `Producto Uniliber (Ref: ${referencia})`,
+                 url_externa: ''
+              });
+              bookInfoLog = `Producto Externo (Ref: ${referencia})`;
           }
 
           setLineas(items);
 
-          // --- Auto Client Search/Creation Logic ---
+          // --- 4. CLIENT LOGIC ---
+          setClienteSearch(''); 
+          
+          // Construct Address
+          const addressParts = [direccion, codigoPostal, poblacion, provincia, pais].filter(Boolean);
+          // Dedup if province == city
+          const uniqueAddressParts = addressParts.filter((item, index) => addressParts.indexOf(item) === index);
+          const fullAddress = uniqueAddressParts.join(', ');
+          
+          setDireccionEnvio(fullAddress);
+          
+          // Contact Phone Logic (Prefer Mobile, then Phone)
+          const contactPhone = movil || telefono || '';
+
+          // Find or Setup Client
           if (nombre) {
-              // Try to find existing client by name
-              const matchingClients = clientes.filter(c => 
-                  c.nombre.toLowerCase().includes(nombre.toLowerCase())
-              );
+              // Try to find existing client by name OR email
+              const matchingClients = clientes.filter(c => {
+                  const nameMatch = c.nombre.toLowerCase().includes(nombre.toLowerCase());
+                  const emailMatch = email && c.email && c.email.toLowerCase() === email.toLowerCase();
+                  return nameMatch || emailMatch;
+              });
 
               if (matchingClients.length === 1) {
-                  // Exact match found - auto-select
+                  // Found single match
                   setClienteSeleccionado(matchingClients[0]);
                   if (matchingClients[0].direccion) {
                       setDireccionEnvio(matchingClients[0].direccion);
                   }
+                  // Update email/phone if missing in DB? (Optional enhancement)
               } else if (matchingClients.length > 1) {
-                  // Multiple matches - let user choose
                   setClienteSearch(nombre);
               } else {
-                  // No match - open modal with pre-filled data
+                  // New Client Modal Data
                   setClienteModalData({
                       tipo: 'particular',
                       nombre: nombre,
-                      apellidos: '',
-                      email: '',
+                      apellidos: '', // Uniliber usually gives "Name Surname Surname" in one string. Logic to split?
+                      // Simple split heuristic:
+                      email: email,
                       nif: '',
-                      telefono: '',
-                      direccion: poblacion ? `${direccion}, ${poblacion}` : direccion,
+                      telefono: contactPhone,
+                      direccion: direccion,
                       ciudad: poblacion,
-                      codigo_postal: '',
-                      provincia: '',
-                      pais: 'España',
+                      codigo_postal: codigoPostal,
+                      provincia: provincia,
+                      pais: pais || 'España',
                       persona_contacto: '',
                       cargo: '',
                       web: '',
-                      notas: `Cliente importado de Uniliber`,
+                      notas: `Cliente importado de Uniliber (Ref Pedido: ${referencia})`,
                       activo: true
                   });
+                  
+                  // Auto-split name for modal convenience
+                  const nameParts = nombre.split(' ');
+                  if (nameParts.length > 1) {
+                       const fName = nameParts[0];
+                       const lName = nameParts.slice(1).join(' ');
+                       setClienteModalData(prev => ({ ...prev, nombre: fName, apellidos: lName }));
+                  }
+
                   setShowClienteModal(true);
               }
           }
@@ -1061,12 +1066,17 @@ export default function CrearPedido({
           setDatosPegados("");
           setModoEntrada("manual");
 
-          const foundMsg = foundBook ? `\n📕 Libro encontrado en catálogo: ${foundBook.titulo}` : '';
-          showModal('Éxito', `Datos de Uniliber procesados.\nCliente detectado: "${nombre}"${foundMsg}`); 
+          const statusMsg = foundBook 
+            ? `✅ Libro encontrado en catálogo (${foundBook.titulo})` 
+            : `⚠️ Libro NO encontrado en catálogo (Añadido como externo)`;
+            
+          showModal('Datos Uniliber Procesados', 
+            `Cliente: ${nombre}\nCP: ${codigoPostal}\nEmail: ${email || 'No detectado'}\n${statusMsg}`
+          ); 
 
-      } catch (err) {
+      } catch (err: any) {
           console.error(err);
-          showModal('Error', "Error al procesar datos de Uniliber.", 'error');
+          showModal('Error', "Error al procesar datos de Uniliber: " + err.message, 'error');
       } finally {
           setLoading(false);
       }

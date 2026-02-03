@@ -346,6 +346,55 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
   }
 };
 
+
+
+/**
+ * Checks stocks of books in a given order. If any book has stock <= 0,
+ * triggers the AbeBooks deletion (Silent).
+ */
+export const checkAndSyncAbeBooksStock = async (pedidoId: number) => {
+    try {
+        // 1. Get books involved in this order
+        const { data: detalles, error } = await supabase
+            .from('pedido_detalles')
+            .select('libro_id')
+            .eq('pedido_id', pedidoId);
+
+        if (error || !detalles) return;
+
+        // Filter out nulls (external products)
+        const libroIds = detalles
+            .map(d => d.libro_id)
+            .filter((id): id is number => id !== null);
+            
+        if (libroIds.length === 0) return;
+
+        // 2. Check current stock for these books
+        const { data: libros } = await supabase
+            .from('libros')
+            .select('id, stock')
+            .in('id', libroIds);
+
+        if (!libros) return;
+
+        // 3. For each book with stock <= 0, trigger AbeBooks Delete
+        for (const libro of libros) {
+            if (libro.stock <= 0) {
+                console.log(`[AbeBooks Sync] Book ${libro.id} depleted after order ${pedidoId}. Removing from AbeBooks...`);
+                // Fire & Forget
+                supabase.functions.invoke('upload-to-abebooks', {
+                    body: { bookId: libro.id, action: 'delete' }
+                }).then(({ data, error }) => {
+                    if (error) console.error(`[AbeBooks Sync] Error deleting book ${libro.id}:`, error);
+                    else console.log(`[AbeBooks Sync] Delete request sent for book ${libro.id}. Result:`, data);
+                });
+            }
+        }
+    } catch (err) {
+        console.error('[AbeBooks Sync] Unexpected error:', err);
+    }
+};
+
 // Wrapper for Force Deduction RPC
 export const deductStockForce = async (pedidoId: number): Promise<{ success: boolean; error?: string }> => {
   try {
@@ -412,6 +461,9 @@ export const actualizarEstadoPedido = async (
                    if (!res.success) {
                        return { success: false, error: "Error al descontar stock (insuficiente): " + res.error };
                    }
+                   
+                   // ABEBOOKS SYNC: Check if any book reached 0 stock and remove from AbeBooks
+                   checkAndSyncAbeBooksStock(id).catch(err => console.error('[AbeBooks Sync] Error:', err));
                }
           }
       }
@@ -508,6 +560,11 @@ export const confirmOrderAndDeductStock = async (pedidoId: number): Promise<{ su
     if (error) {
       console.error('Error RPC confirm_order_and_deduct_stock:', error);
       return { success: false, error: error.message };
+    }
+
+    if (data) {
+       // ABEBOOKS SYNC: Check if any book reached 0 stock
+       checkAndSyncAbeBooksStock(pedidoId).catch(err => console.error('[AbeBooks Sync] Error:', err));
     }
 
     return { success: data as boolean };
@@ -798,6 +855,14 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
             apellidos: apellidos,
             telefono: sanitizedPhone,
             email: input.clientEmail || null, // Use provided email
+// ... code truncated ...
+// I need to find a good place to insert the helper function. 
+// I'll append it to the end of the file, or before the last export?
+// The file is long. I'll search for the end of the file or a good insertion point.
+// Let's insert it before `actualizarEstadoPedido` or similar. 
+// Actually, I can just append it to the end if I knew where the file ends.
+// Let's insert it before `deductStockForce` since it's related.
+
             direccion: null,
             tipo: 'particular',
             notas: 'Cliente creado desde Pedido Express'
