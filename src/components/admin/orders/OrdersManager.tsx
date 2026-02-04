@@ -5,12 +5,17 @@ import { Pedido } from '../../../types';
 import PedidosList from './PedidosList';
 import PedidoDetalle from './PedidoDetalle';
 import CrearPedido from './CrearPedido';
+import { IberLibroPedidosList } from './IberLibroPedidosList';
+import '../../../styles/components/OrdersManager.css';
 
 interface OrdersManagerProps {
   onOrdersChange?: () => void;
 }
 
+type OrderTab = 'perez_galdos' | 'iberlibro';
+
 export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
+  const [activeTab, setActiveTab] = useState<OrderTab>('perez_galdos');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
   const [isPedidoDetalleOpen, setIsPedidoDetalleOpen] = useState(false);
@@ -39,23 +44,46 @@ export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
             <h2 className="content-title">Gestión de Pedidos</h2>
             <p className="content-subtitle">Control de pedidos y envíos</p>
           </div>
-          <button
+          {activeTab === 'perez_galdos' && (
+            <button
               onClick={() => setIsCrearPedidoOpen(true)}
               className="action-btn primary"
             >
               <Plus size={20} />
               Nuevo Pedido
             </button>
+          )}
       </div>
 
-      <PedidosList
-        key={refreshTrigger}
-        onVerDetalle={(pedido) => {
-          setSelectedPedido(pedido);
-          setIsPedidoDetalleOpen(true);
-        }}
-        refreshTrigger={refreshTrigger}
-      />
+      {/* Tabs */}
+      <div className="orders-tabs">
+        <button 
+          className={`tab-btn ${activeTab === 'perez_galdos' ? 'active' : ''}`}
+          onClick={() => setActiveTab('perez_galdos')}
+        >
+          Pérez Galdós
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'iberlibro' ? 'active' : ''}`}
+          onClick={() => setActiveTab('iberlibro')}
+        >
+          IberLibro
+        </button>
+      </div>
+
+      {/* Conditional Content */}
+      {activeTab === 'perez_galdos' ? (
+        <PedidosList
+          key={refreshTrigger}
+          onVerDetalle={(pedido) => {
+            setSelectedPedido(pedido);
+            setIsPedidoDetalleOpen(true);
+          }}
+          refreshTrigger={refreshTrigger}
+        />
+      ) : (
+        <IberLibroPedidosList />
+      )}
 
       {/* Modals */}
       <PedidoDetalle
