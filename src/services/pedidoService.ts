@@ -3,6 +3,7 @@ import { Pedido, EstadoPedido, Usuario, Libro, TipoPedido } from '../types';
 import { createAdminOrderNotification, createOrderNotification } from './notificationService';
 import { sendOrderConfirmationEmail } from './emailService';
 import { settingsService } from './settingsService';
+import { abeBooksService } from './abeBooksService';
 
 export interface CrearPedidoInput {
   usuario_id: string;
@@ -377,18 +378,11 @@ export const checkAndSyncAbeBooksStock = async (pedidoId: number) => {
 
         if (!libros) return;
 
-        // 3. For each book with stock <= 0, trigger AbeBooks Delete
+        // 3. Sync stock changes with AbeBooks (Use Centralized Service)
+        // The service will check 'syncInventory' setting internally.
+        // It handles both updates (if stock > 0) and deletions (if stock <= 0).
         for (const libro of libros) {
-            if (libro.stock <= 0) {
-                console.log(`[AbeBooks Sync] Book ${libro.id} depleted after order ${pedidoId}. Removing from AbeBooks...`);
-                // Fire & Forget
-                supabase.functions.invoke('upload-to-abebooks', {
-                    body: { bookId: libro.id, action: 'delete' }
-                }).then(({ data, error }) => {
-                    if (error) console.error(`[AbeBooks Sync] Error deleting book ${libro.id}:`, error);
-                    else console.log(`[AbeBooks Sync] Delete request sent for book ${libro.id}. Result:`, data);
-                });
-            }
+             await abeBooksService.syncStock(libro.id, libro.stock);
         }
     } catch (err) {
         console.error('[AbeBooks Sync] Unexpected error:', err);

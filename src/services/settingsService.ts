@@ -4,7 +4,7 @@ export interface Setting {
   id: string;
   key: string;
   value: any;
-  category: 'company' | 'billing' | 'shipping' | 'system' | 'security';
+  category: 'company' | 'billing' | 'shipping' | 'system' | 'security' | 'integrations';
   description?: string;
   updated_at: string;
   updated_by?: string;
@@ -72,12 +72,39 @@ export interface SecuritySettings {
   enable2FA: boolean;
 }
 
+export interface IntegrationsSettings {
+  abeBooks: {
+    // Global
+    enabled: boolean;
+    lastFullSync?: string | null;
+
+    // Granular Orders
+    orders: {
+        showTab: boolean;      // Show tab in UI
+        download: boolean;     // Download new orders
+        manage: boolean;       // Future: Manage details locally
+    };
+
+    // Granular Inventory
+    inventory: {
+        upload: boolean;       // Show 'Send to AbeBooks' in BookForm
+        syncStock: boolean;    // Update stock on local changes
+        syncDeletions: boolean;// Delete on AbeBooks when locally deleted
+        autoFullSync: boolean; // Allow scheduled Edge Function to run
+    };
+  };
+  uniliber: {
+    enabled: boolean;
+  };
+}
+
 export interface AllSettings {
   company: CompanySettings;
   billing: BillingSettings;
   shipping: ShippingSettings;
   system: SystemSettings;
   security: SecuritySettings;
+  integrations: IntegrationsSettings;
 }
 
 class SettingsService {
@@ -246,6 +273,31 @@ class SettingsService {
     return this.updateMultipleSettings(updates);
   }
 
+  async updateIntegrationsSettings(settings: IntegrationsSettings): Promise<boolean> {
+    // We use 'system' category because DB might not have 'integrations' enum value
+    const category = 'system'; 
+    const updates = [
+      // Global
+      { key: 'abebooks_enabled', value: settings.abeBooks.enabled, category },
+      { key: 'abebooks_last_full_sync', value: settings.abeBooks.lastFullSync, category },
+      
+      // Orders
+      { key: 'abebooks_orders_showTab', value: settings.abeBooks.orders.showTab, category },
+      { key: 'abebooks_orders_download', value: settings.abeBooks.orders.download, category },
+      { key: 'abebooks_orders_manage', value: settings.abeBooks.orders.manage, category },
+      
+      // Inventory
+      { key: 'abebooks_inventory_upload', value: settings.abeBooks.inventory.upload, category },
+      { key: 'abebooks_inventory_syncStock', value: settings.abeBooks.inventory.syncStock, category },
+      { key: 'abebooks_inventory_syncDeletions', value: settings.abeBooks.inventory.syncDeletions, category },
+
+      // Other Integrations
+      { key: 'uniliber_enabled', value: settings.uniliber.enabled, category },
+    ];
+
+    return this.updateMultipleSettings(updates);
+  }
+
   private parseSettings(data: Setting[]): AllSettings {
     const settings = this.getDefaultSettings();
 
@@ -255,26 +307,56 @@ class SettingsService {
         const rawKey = setting.key;
         const prefix = `${category}_`;
         
-        // Option 1: Strip prefix if it exists at the start
         let keyWithoutPrefix = rawKey;
         if (rawKey.startsWith(prefix)) {
           keyWithoutPrefix = rawKey.substring(prefix.length);
         }
         const camelCaseWithoutPrefix = this.toCamelCase(keyWithoutPrefix);
-
-        // Option 2: Use raw key (for cases like shipping_zones -> shippingZones)
         const camelCaseRaw = this.toCamelCase(rawKey);
         
         const categorySettings = settings[category] as any;
         
-        // Check which key actually exists in the default settings
+        // Special handling for Integrations (stored in 'system' or 'integrations')
+        // We check keys regardless of category if they look like integration keys
+        if (rawKey.startsWith('abebooks_')) {
+            const suffix = rawKey.replace('abebooks_', '');
+            
+            // Nested parsing for 'orders_' and 'inventory_'
+            if (suffix.startsWith('orders_')) {
+                const subKey = this.toCamelCase(suffix.replace('orders_', ''));
+                if (settings.integrations.abeBooks?.orders) {
+                    (settings.integrations.abeBooks.orders as any)[subKey] = setting.value;
+                    return;
+                }
+            } else if (suffix.startsWith('inventory_')) {
+                const subKey = this.toCamelCase(suffix.replace('inventory_', ''));
+                if (settings.integrations.abeBooks?.inventory) {
+                    (settings.integrations.abeBooks.inventory as any)[subKey] = setting.value;
+                    return;
+                }
+            } else {
+                // Top level properties (enabled, lastFullSync)
+                const subKey = this.toCamelCase(suffix);
+                if (settings.integrations.abeBooks) {
+                    (settings.integrations.abeBooks as any)[subKey] = setting.value;
+                    return; 
+                }
+            }
+        }
+        if (rawKey.startsWith('uniliber_')) {
+             const subKey = this.toCamelCase(rawKey.replace('uniliber_', ''));
+             if (settings.integrations.uniliber) {
+                (settings.integrations.uniliber as any)[subKey] = setting.value;
+                return;
+             }
+        }
+
+        // Generic handling for flat settings
         if (camelCaseWithoutPrefix in categorySettings) {
           categorySettings[camelCaseWithoutPrefix] = setting.value;
         } else if (camelCaseRaw in categorySettings) {
           categorySettings[camelCaseRaw] = setting.value;
         } else {
-            // Fallback: If neither exists, assume the stripped version is intended strictly 
-            // from the old logic, or just assign it to avoid data loss on generic objects
              categorySettings[camelCaseWithoutPrefix] = setting.value;
         }
       }
@@ -339,6 +421,26 @@ class SettingsService {
         passwordMinLength: 8,
         requireEmailVerification: false,
         enable2FA: false
+      },
+      integrations: {
+        abeBooks: {
+          enabled: false,
+          lastFullSync: null,
+          orders: {
+            showTab: false,
+            download: false,
+            manage: false
+          },
+          inventory: {
+            upload: false,
+            syncStock: false,
+            syncDeletions: false,
+            autoFullSync: false
+          }
+        },
+        uniliber: {
+          enabled: false
+        }
       }
     };
   }

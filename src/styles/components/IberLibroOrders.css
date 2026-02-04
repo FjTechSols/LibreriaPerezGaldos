@@ -27,11 +27,18 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  background: var(--bg-main);
+  background: var(--input-bg);
   color: var(--text-main);
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
+  color-scheme: light dark;
+}
+
+.iberlibro-orders .filter-select option,
+.iberlibro-orders .filter-date option {
+  background-color: var(--input-bg);
+  color: var(--input-text);
 }
 
 .iberlibro-orders .filter-select:hover,
@@ -77,7 +84,7 @@
 
 /* Table Container */
 .iberlibro-orders .table-container {
-  background: var(--bg-main);
+  background: var(--bg-surface);
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--border-subtle);

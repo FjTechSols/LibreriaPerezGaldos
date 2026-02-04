@@ -6,7 +6,8 @@ import {
   BillingSettings,
   ShippingSettings,
   SystemSettings,
-  SecuritySettings
+  SecuritySettings,
+  IntegrationsSettings
 } from '../services/settingsService';
 
 interface SettingsContextType {
@@ -17,6 +18,7 @@ interface SettingsContextType {
   updateShippingSettings: (settings: ShippingSettings) => Promise<boolean>;
   updateSystemSettings: (settings: SystemSettings) => Promise<boolean>;
   updateSecuritySettings: (settings: SecuritySettings) => Promise<boolean>;
+  updateIntegrationsSettings: (settings: IntegrationsSettings) => Promise<boolean>;
   refreshSettings: () => Promise<void>;
   formatPrice: (price: number) => string;
 }
@@ -102,6 +104,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return success;
   };
 
+  const updateIntegrationsSettings = async (newSettings: IntegrationsSettings): Promise<boolean> => {
+    const success = await settingsService.updateIntegrationsSettings(newSettings);
+    if (success) {
+      setSettings(prev => ({
+        ...prev,
+        integrations: newSettings
+      }));
+    }
+    return success;
+  };
+
   const refreshSettings = async () => {
     await loadSettings();
   };
@@ -133,6 +146,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         updateShippingSettings,
         updateSystemSettings,
         updateSecuritySettings,
+        updateIntegrationsSettings,
         refreshSettings,
         formatPrice
       }}

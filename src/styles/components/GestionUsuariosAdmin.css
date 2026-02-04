@@ -267,10 +267,12 @@
   padding: 0.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  background-color: var(--bg-primary);
+  border-radius: 8px;
+  background-color: var(--input-bg);
   color: var(--text-main);
   font-size: 0.95rem;
   transition: border-color 0.2s;
+  color-scheme: light dark;
 }
 
 .form-group input:focus,

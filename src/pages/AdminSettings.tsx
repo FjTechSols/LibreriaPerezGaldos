@@ -12,6 +12,7 @@ import {
 import { GestionUbicaciones } from '../components/admin/books/GestionUbicaciones';
 import { GestionUsuariosAdmin } from '../components/admin/clients/GestionUsuariosAdmin';
 import { BannerManager } from '../components/admin/marketing/BannerManager';
+import { IntegrationsManager } from '../components/admin/integrations/IntegrationsManager';
 import {
   exportLibrosToCSV,
   exportCategoriasToCSV,
@@ -37,7 +38,7 @@ export function AdminSettings() {
     updateSecuritySettings
   } = useSettings();
 
-  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'marketing' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'billing' | 'shipping' | 'system' | 'security' | 'marketing' | 'integrations' | 'backup' | 'ubicaciones' | 'usuarios'>('company');
 
   const [exportState, setExportState] = useState<{ isExporting: boolean; type: string | null; progress: number; total: number }>({
     isExporting: false,
@@ -235,6 +236,7 @@ export function AdminSettings() {
     { id: 'system', label: 'Sistema', icon: SettingsIcon },
     { id: 'security', label: 'Seguridad', icon: Shield },
     { id: 'marketing', label: 'Marketing', icon: Megaphone },
+    ...(isSuperAdmin ? [{ id: 'integrations', label: 'Integraciones', icon: Globe }] : []),
     { id: 'ubicaciones', label: 'Ubicaciones', icon: MapPin },
     // Only show Usuarios tab if Super Admin
     ...(isSuperAdmin ? [{ id: 'usuarios', label: 'Usuarios Admin', icon: Shield }] : []),
@@ -297,6 +299,10 @@ export function AdminSettings() {
               <div className="settings-section">
                 <BannerManager />
               </div>
+            )}
+
+            {activeTab === 'integrations' && (
+              <IntegrationsManager />
             )}
 
             {activeTab === 'company' && (
@@ -976,7 +982,7 @@ export function AdminSettings() {
                         { title: 'Categorías', icon: Package, desc: 'Exportar todas las categorías', fn: exportCategoriasToCSV, id: 'Categorías' },
                         { title: 'Invoices', icon: FileText, desc: 'Exportar facturas con detalles', fn: exportInvoicesToCSV, id: 'Invoices' },
                         { title: 'Pedidos', icon: Truck, desc: 'Exportar pedidos con detalles', fn: exportPedidosToCSV, id: 'Pedidos' },
-                        { title: 'Iberlibro', icon: Globe, desc: 'Exportar libros de Iberlibro', fn: exportIberlibroToCSV, id: 'Iberlibro', className: 'iberlibro' },
+                        // { title: 'Iberlibro', icon: Globe, desc: 'Exportar libros de Iberlibro', fn: exportIberlibroToCSV, id: 'Iberlibro', className: 'iberlibro' },
                         { title: 'Uniliber', icon: Globe, desc: 'Exportar libros de Uniliber', fn: exportUniliberToCSV, id: 'Uniliber', className: 'uniliber' },
                         { title: 'Clientes', icon: Building2, desc: 'Exportar base de clientes', fn: exportClientesToCSV, id: 'Clientes' }
                     ].map((item) => (

@@ -139,6 +139,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  color-scheme: light dark;
+}
+
+.Book-Filter__sort-select option,
+.Book-Filter__input-select option {
+  background-color: var(--input-bg);
+  color: var(--input-text);
 }
 
 .Book-Filter__sort-select:focus,

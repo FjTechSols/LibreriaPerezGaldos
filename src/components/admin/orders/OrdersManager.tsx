@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSettings } from '../../../context/SettingsContext';
 import { Plus } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { Pedido } from '../../../types';
@@ -15,11 +16,22 @@ interface OrdersManagerProps {
 type OrderTab = 'perez_galdos' | 'iberlibro';
 
 export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
+  const { settings } = useSettings();
   const [activeTab, setActiveTab] = useState<OrderTab>('perez_galdos');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
   const [isPedidoDetalleOpen, setIsPedidoDetalleOpen] = useState(false);
   const [isCrearPedidoOpen, setIsCrearPedidoOpen] = useState(false);
+
+  // Feature Toggle: Check if AbeBooks Order Sync is enabled
+  const showIberLibro = settings?.integrations?.abeBooks?.enabled && settings?.integrations?.abeBooks?.orders?.showTab;
+
+  // Effect: Use Effect to redirect if active tab becomes disabled
+  useEffect(() => {
+     if (activeTab === 'iberlibro' && !showIberLibro) {
+         setActiveTab('perez_galdos');
+     }
+  }, [showIberLibro, activeTab]);
 
   // Realtime Subscription
   useEffect(() => {
@@ -63,12 +75,15 @@ export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
         >
           Pérez Galdós
         </button>
-        <button 
-          className={`tab-btn ${activeTab === 'iberlibro' ? 'active' : ''}`}
-          onClick={() => setActiveTab('iberlibro')}
-        >
-          IberLibro
-        </button>
+        
+        {showIberLibro && (
+            <button 
+              className={`tab-btn ${activeTab === 'iberlibro' ? 'active' : ''}`}
+              onClick={() => setActiveTab('iberlibro')}
+            >
+              IberLibro
+            </button>
+        )}
       </div>
 
       {/* Conditional Content */}

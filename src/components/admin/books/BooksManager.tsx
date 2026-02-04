@@ -15,6 +15,7 @@ import {
   buscarLibroParaMerge,
   obtenerSugerenciaOrtografica
 } from '../../../services/libroService';
+import { abeBooksService } from '../../../services/abeBooksService';
 import '../../../styles/components/BooksManager.css';
 import { obtenerUbicacionesActivas } from '../../../services/ubicacionService';
 import { getCategorias } from '../../../services/categoriaService';
@@ -429,16 +430,16 @@ export function BooksManager() {
               
               showModal('AbeBooks', `Subiendo "${nuevo.titulo}" a AbeBooks...`, 'info');
               
+              showModal('AbeBooks', `Subiendo "${nuevo.titulo}" a AbeBooks...`, 'info');
+              
               try {
-                  const { data, error } = await supabase.functions.invoke('upload-to-abebooks', {
-                      body: { bookId: nuevo.id }
-                  });
+                  const result = await abeBooksService.syncBook(nuevo.id);
 
-                  if (error || (data && !data.success)) {
-                      console.error('AbeBooks Upload Error:', error || data);
-                      showModal('Advertencia', `Libro guardado localmente, PERO falló la subida a AbeBooks: ${error?.message || data?.message || 'Error desconocido'}`, 'warning');
+                  if (!result.success) {
+                      console.error('AbeBooks Upload Error:', result.message);
+                      showModal('Advertencia', `Libro guardado localmente, PERO falló la subida a AbeBooks: ${result.message}`, 'warning');
                   } else {
-                      showModal('Éxito', `Libro guardado y publicado en AbeBooks correctamente. (Ref: ${data.abeResponse || 'OK'})`, 'success');
+                      showModal('Éxito', `Libro guardado y publicado en AbeBooks correctamente.`, 'success');
                   }
               } catch (abeErr: any) {
                   console.error('AbeBooks Exception:', abeErr);
@@ -535,11 +536,10 @@ export function BooksManager() {
                 // We don't block the local deletion if this fails, but we try it.
                 // We use the ID directly.
                 console.log(`Attempting to delete book ${id} from AbeBooks...`);
-                supabase.functions.invoke('upload-to-abebooks', {
-                   body: { bookId: parseInt(id), action: 'delete' }
-                }).then(({ data, error }) => {
-                   if (error) console.error('AbeBooks Delete Error:', error);
-                   else console.log('AbeBooks Delete Result:', data);
+                // Centralized service handles the specific logic and settings check
+                abeBooksService.deleteBook(id).then(result => {
+                    if (!result.success) console.warn('AbeBooks Delete Warning:', result.message);
+                    else console.log('AbeBooks Delete Result: Success');
                 });
 
                 const deleted = await eliminarLibro(parseInt(id));
@@ -575,16 +575,15 @@ export function BooksManager() {
                 const updated = await incrementarStockLibro(parseInt(book.id), amount);
                 if (updated) {
                     const newStock = (book.stock || 0) + amount;
-                    // AbeBooks Rule: Zero Stock -> Delete
+                    // AbeBooks Rule: Zero Stock -> Delete / Any Change -> Sync
+                    // Centralized service decides based on 'syncInventory' setting.
+                    try {
+                         abeBooksService.syncStock(book.id, newStock);
+                         // Fire & forget
+                    } catch (err) { console.error(err); }
+                    
                     if (newStock <= 0) {
-                        try {
-                             supabase.functions.invoke('upload-to-abebooks', {
-                               body: { bookId: parseInt(book.id), action: 'delete' }
-                            });
-                            // Fire & forget
-                        } catch (err) { console.error(err); }
-                        
-                        showModal('Éxito', `Stock agotado. Se ha enviado orden de baja a AbeBooks.`, 'success');
+                        showModal('Éxito', `Stock agotado. (Sincronización con AbeBooks iniciada).`, 'success');
                     } else {
                          showModal('Éxito', `Stock ${action.toLowerCase()} en 1.`, 'success');
                     }

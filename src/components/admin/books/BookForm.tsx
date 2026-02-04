@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Search, Trash2, Plus, Save, Camera, ScanLine } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
+// import { useCategories } from '../../../context/CategoryContext';
+import { useSettings } from '../../../context/SettingsContext';
 // import { categories } from '../../../data/categories'; // Still used for fallback or type checking?
 import { buscarLibroPorISBNMultiple } from '../../../services/isbnService';
 import { supabase } from '../../../lib/supabase'; // Import supabase
@@ -99,17 +101,23 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const [languageSuggestions, setLanguageSuggestions] = useState<string[]>(LANGUAGES);
   const [showLanguageSuggestions, setShowLanguageSuggestions] = useState(false);
   
-  // AbeBooks State
+  // const { categories } = useCategories();
+  const { settings } = useSettings();
+  
+  // AbeBooks Toggle
+  const abebooksGlobalEnabled = settings?.integrations?.abeBooks?.enabled || false;
+  const abebooksUploadEnabled = settings?.integrations?.abeBooks?.inventory?.upload || false;
+  
   const [publishToAbebooks, setPublishToAbebooks] = useState(false);
 
-  // Auto-toggle AbeBooks based on Price Rule (>= 12€)
+  // Auto-toggle AbeBooks based on Price Rule (>= 12€) ONLY if enabled globally AND upload is enabled
   useEffect(() => {
-     if (isCreating) {
+     if (isCreating && abebooksGlobalEnabled && abebooksUploadEnabled) {
         const currentPrice = formData.isOnSale ? formData.originalPrice : formData.price;
         const shouldPublish = (currentPrice || 0) >= 12;
         setPublishToAbebooks(shouldPublish);
      }
-  }, [formData.price, formData.originalPrice, formData.isOnSale, isCreating]);
+  }, [formData.price, formData.originalPrice, formData.isOnSale, isCreating, abebooksGlobalEnabled, abebooksUploadEnabled]);
 
   const handleEditorialChange = async (val: string) => {
       setFormData({...formData, publisher: val});
@@ -830,7 +838,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   />
                   Oferta
                 </label>
-                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#dc2626', fontWeight: 500 }}>
+                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={formData.isOutOfPrint || false}
@@ -839,16 +847,19 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   Descatalogado
                 </label>
 
-                   {/* AbeBooks Checkbox (Sólo al crear) */}
-                   {isCreating && (
-                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#dc2626', fontWeight: 600 }}>
-                           <input
-                               type="checkbox"
-                               checked={publishToAbebooks}
-                               onChange={(e) => setPublishToAbebooks(e.target.checked)}
-                           />
-                           Enviar a AbeBooks
-                       </label>
+                   {/* AbeBooks Toggle (Only for New Books & If Enabled) */}
+                   {isCreating && abebooksGlobalEnabled && abebooksUploadEnabled && (
+                       <div style={{ flexBasis: '100%', marginTop: '0.5rem' }}>
+                           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#2563eb', fontWeight: 600 }}>
+                               <input 
+                                   type="checkbox" 
+                                   id="publishToAbebooks"
+                                   checked={publishToAbebooks}
+                                   onChange={(e) => setPublishToAbebooks(e.target.checked)}
+                               />
+                               Publicar en AbeBooks automáticamente
+                           </label>
+                       </div>
                    )}
               </div>
             </div>
