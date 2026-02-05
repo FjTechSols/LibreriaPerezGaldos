@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import { supabase } from '../lib/supabase';
 
 // Helper to fetch all rows using batching to bypass Supabase 1000 row limit
@@ -379,105 +380,193 @@ export async function exportUniliberToCSV(onProgress?: (val: number, total: numb
             return { success: false, error: 'No hay libros con stock para exportar.' };
         }
 
-        const headers = ['ISBN', 'Título', 'Autor', 'Editorial', 'Año', 'Precio', 'Stock', 'Categoría', 'Fecha Creación'];
-        const validRows: string[] = [headers.join(',')];
-        
-        let stats = {
-            total: libros.length,
-            valid: 0,
-            excluded: 0,
-            reasons: { isbn: 0, price: 0, title: 0, category: 0, year: 0 }
-        };
+        const { validRows, stats } = generateUniliberContent(libros);
 
-        libros.forEach((libro: any) => {
-            // 1. Validate ISBN (CRITICAL)
-            const cleanISBN = normalizeISBN(libro.isbn);
-            if (!cleanISBN) {
-                stats.excluded++;
-                stats.reasons.isbn++;
-                return; // SKIP
-            }
-
-            // 2. Validate Title
-            const titulo = libro.titulo?.trim();
-            if (!titulo) {
-                stats.excluded++;
-                stats.reasons.title++;
-                return; // SKIP
-            }
-
-            // 3. Validate Price
-            const precio = parseFloat(libro.precio);
-            if (isNaN(precio) || precio <= 0) {
-                 stats.excluded++;
-                 stats.reasons.price++;
-                 return; // SKIP
-            }
-
-            // 4. Validate Category
-            const categoriaName = libro.categorias?.nombre?.trim();
-            if (!categoriaName) {
-                stats.excluded++;
-                stats.reasons.category++;
-                return; // SKIP
-            }
-
-            // 5. Normalize Year (Integer)
-            let anio = parseInt(libro.anio);
-            if (isNaN(anio)) {
-                // If usage requires valid year, we skip. If optional, we could leave empty.
-                // User requirement: "Año entero (INT), Si alguno falla -> no se exporta"
-                // Assuming mandatory for Uniliber based on prompt tone.
-                stats.excluded++;
-                stats.reasons.year++;
-                return; // SKIP
-            }
-
-            // 6. Validate Stock
-            let stock = parseInt(libro.stock);
-            if (isNaN(stock) || stock < 0) {
-                 // Should not happen due to DB filter, but just in case
-                 stats.excluded++; 
-                 return; 
-            }
-
-            // Data is VALID. Construct Row.
-            const editorialName = libro.editoriales?.nombre || '';
-            const autor = libro.autor || '';
-
-            const row = [
-                cleanISBN, // No quotes for ISBN usually preferred by some parsers if numeric, but CSV standard allows quotes. Uniliber often prefers raw.
-                `"${titulo.replace(/"/g, '""')}"`,
-                `"${autor.replace(/"/g, '""')}"`,
-                `"${editorialName.replace(/"/g, '""')}"`,
-                anio.toString(), // Integer string
-                precio.toFixed(2), // Formatted price
-                stock.toString(), // Integer stock
-                `"${categoriaName.replace(/"/g, '""')}"`,
-                libro.created_at || ''
-            ];
-            
-            validRows.push(row.join(','));
-            stats.valid++;
-        });
-
-        console.log('--- Resumen Exportación Uniliber ---', stats);
+        console.log('--- Resumen Exportación Uniliber (CSV) ---', stats);
 
         if (stats.valid === 0) {
              return { success: false, error: 'Generado 0 registros válidos. Todos fueron excluidos por falta de ISBN o datos inválidos.' };
         }
 
         const filename = `uniliber_backup_${new Date().toISOString().split('T')[0]}.csv`;
-        // Pass useBOM = false for Uniliber
-        downloadCSV(validRows.join('\n'), filename, false);
+        // Use BOM = true for better Excel/Spanish compatibility with UTF-8
+        downloadCSV(validRows.join('\n'), filename, true);
         
         return { success: true };
-
-    } catch (error: any) {
-        console.error('Error in Uniliber export:', error);
-        return { success: false, error: error.message || 'Error desconocido al exportar para Uniliber.' };
+    } catch (error) {
+        console.error('Error al exportar Uniliber CSV:', error);
+        return { success: false, error: 'Error interno al generar el CSV.' };
     }
 }
+
+export async function exportUniliberToZip(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
+    try {
+        const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at, descripcion, paginas';
+        const libros = await fetchAll('libros', (q) => q.gt('stock', 0).order('id', { ascending: true }), headers_map, onProgress);
+
+        if (!libros || libros.length === 0) {
+            return { success: false, error: 'No hay libros con stock para exportar.' };
+        }
+
+        const { validRows, errorRows, stats } = generateUniliberContent(libros);
+
+        console.log('--- Resumen Exportación Uniliber (ZIP) ---', stats);
+
+        if (stats.valid === 0 && stats.excluded === 0) {
+             return { success: false, error: 'Generado 0 registros válidos y 0 excluidos. Revisar filtros.' };
+        }
+
+        // Create ZIP
+        const zip = new JSZip();
+        // User requested "uniliber.txt" inside the ZIP
+        // We use the same content (Spanish CSV format)
+        zip.file("uniliber.txt", validRows.join('\n'));
+
+        // Include Errors CSV if there are exclusions
+        if (errorRows && errorRows.length > 1) {
+            zip.file("errores_exportacion.csv", errorRows.join('\n'));
+        }
+
+        const blob = await zip.generateAsync({ type: "blob" });
+        const filename = `uniliber_backup_${new Date().toISOString().split('T')[0]}.zip`;
+        
+        // Helper to download Blob
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error al exportar Uniliber ZIP:', error);
+        return { success: false, error: 'Error al generar el ZIP: ' + (error as any).message };
+    }
+}
+
+// Helper function to generate Uniliber content (Shared between CSV and ZIP)
+function generateUniliberContent(libros: any[]) {
+    // -------------------------------------------------------------------------
+    // LEGACY FORMAT for Uniliber
+    // Based on user sample:
+    // "N0000928"	"TITLE"	"DESC"	"NO"	"Publisher"	"2003"	"Author"	"Madrid"	"España"	15.00	"897"	""	"1"
+    // Cols: 
+    // 1: ID
+    // 2: Title
+    // 3: Description
+    // 4: "NO" (Unknown, fixed)
+    // 5: Publisher
+    // 6: Year
+    // 7: Author
+    // 8: City ("Madrid")
+    // 9: Country ("España")
+    // 10: Price (Number, dot decimal?) Sample had 15.00. User previously asked for comma. 
+    //     BUT legacy sample provided by user has "15.00" (dot). We will try DOT as per sample.
+    // 11: Pages (Inferred from "897") or maybe weight? We'll use Pages if available.
+    // 12: Empty
+    // 13: Stock (User thinks "1" is sales flag/stock). We'll use Stock.
+    // -------------------------------------------------------------------------
+
+    const separator = '\t'; // Tab separated
+    // No header row in some legacy formats? The sample didn't show one, but usually safe to omit or keep?
+    // User sample started with data. Let's TRY WITHOUT implicit headers or with dummy ones if needed.
+    // Actually, usually legacy imports map by position. We won't add a header row if we want to match exact file, 
+    // BUT we need to define columns. 
+    // Safest is NO header if the system expects raw data. Or maybe the user didn't paste headers.
+    // We will OMIT headers for now to match "raw data" look, or ask? 
+    // Let's assume NO headers for file content based on "archive normal" description.
+    
+    // However, the `errorRows` DOES need headers for the user to read it.
+    
+    const validRows: string[] = []; // No headers for the legacy .txt file
+    
+    // Error CSV can keep its headers
+    const errorHeaders = ['ID', 'ISBN', 'Título', 'Error'];
+    const errorConnector = ';'; // Keep semicolon for the error report CSV for readability in Excel
+    const errorRows: string[] = [errorHeaders.join(errorConnector)];
+
+    let stats = {
+        total: libros.length,
+        valid: 0,
+        excluded: 0,
+        reasons: { isbn: 0, price: 0, title: 0, category: 0, year: 0 }
+    };
+
+    libros.forEach((libro: any) => {
+        // Validation: Relaxes.
+        // ISBN: NOT required.
+        // Title: Required.
+        // Price: Required.
+        
+        const cleanISBN = normalizeISBN(libro.isbn); // Optional now
+
+        // 1. Validate Title
+        const titulo = libro.titulo?.trim();
+        if (!titulo) {
+            stats.excluded++;
+            stats.reasons.title++;
+            errorRows.push([libro.id, cleanISBN || '', '""', 'Título faltante'].join(errorConnector));
+            return; // SKIP
+        }
+
+        // 2. Validate Price
+        const precio = parseFloat(libro.precio);
+        if (isNaN(precio) || precio <= 0) {
+            stats.excluded++;
+            stats.reasons.price++;
+            errorRows.push([libro.id, cleanISBN || '', `"${titulo.replace(/"/g, '""')}"`, `Precio inválido (${libro.precio})`].join(errorConnector));
+            return; // SKIP
+        }
+        
+        // 3. Stock > 0 (Already filtered by query, but good to be safe)
+        let stock = parseInt(libro.stock);
+        if (isNaN(stock) || stock <= 0) {
+             stats.excluded++;
+             errorRows.push([libro.id, cleanISBN || '', `"${titulo.replace(/"/g, '""')}"`, `Stock 0 o inválido`].join(errorConnector));
+             return;
+        }
+
+        // Prepare Data
+        const id = libro.id;
+        const descripcion = (libro.descripcion || libro.sinopsis || '').replace(/[\t\r\n]/g, ' '); // Remove tabs/newlines to break TSV
+        const editorialName = libro.editoriales?.nombre || '';
+        const anio = parseInt(libro.anio) || ''; // If NaN, empty
+        const autor = libro.autor || '';
+        const paginas = libro.paginas || '';
+        
+        // Construct Row (TSV)
+        // Quote strings. Numbers like Price/Year in sample:
+        // "2003" (Year quoted), 15.00 (Price NOT quoted), "897" (Pages quoted?), "1" (Stock quoted).
+        // We will quote everything except Price? Or match sample exactly.
+        // Sample: "N0000928" "Title" "Desc" "NO" "Ed" "2003" "Aut" "Mad" "Esp" 15.00 "897" "" "1"
+        
+        const q = (s: any) => `"${String(s).replace(/"/g, '""')}"`; // Quote helper
+
+        const row = [
+            q(id),                          // 1. ID
+            q(titulo),                      // 2. Title
+            q(descripcion),                 // 3. Description
+            q("NO"),                        // 4. Constant
+            q(editorialName),               // 5. Publisher
+            q(anio),                        // 6. Year
+            q(autor),                       // 7. Author
+            q("Madrid"),                    // 8. City
+            q("España"),                    // 9. Country
+            precio.toFixed(2),              // 10. Price (Dot, Unquoted)
+            q(paginas),                     // 11. Pages
+            q(""),                          // 12. Empty
+            q(stock)                        // 13. Stock (User says "1" marks sales, likely stock count or boolean)
+        ];
+
+        validRows.push(row.join(separator));
+        stats.valid++;
+    });
+
+    return { validRows, errorRows, stats };
+}
+
+
 
 export async function exportClientesToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
      return handleExport(

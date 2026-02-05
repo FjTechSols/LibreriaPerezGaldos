@@ -18,8 +18,6 @@ import {
   exportCategoriasToCSV,
   exportInvoicesToCSV,
   exportPedidosToCSV,
-  exportIberlibroToCSV,
-  exportUniliberToCSV,
   exportClientesToCSV
 } from '../services/backupService';
 import '../styles/pages/AdminSettings.css';
@@ -983,7 +981,6 @@ export function AdminSettings() {
                         { title: 'Invoices', icon: FileText, desc: 'Exportar facturas con detalles', fn: exportInvoicesToCSV, id: 'Invoices' },
                         { title: 'Pedidos', icon: Truck, desc: 'Exportar pedidos con detalles', fn: exportPedidosToCSV, id: 'Pedidos' },
                         // { title: 'Iberlibro', icon: Globe, desc: 'Exportar libros de Iberlibro', fn: exportIberlibroToCSV, id: 'Iberlibro', className: 'iberlibro' },
-                        { title: 'Uniliber', icon: Globe, desc: 'Exportar libros de Uniliber', fn: exportUniliberToCSV, id: 'Uniliber', className: 'uniliber' },
                         { title: 'Clientes', icon: Building2, desc: 'Exportar base de clientes', fn: exportClientesToCSV, id: 'Clientes' }
                     ].map((item) => (
                         <div key={item.id} className={`backup-card ${item.className || ''}`}>
