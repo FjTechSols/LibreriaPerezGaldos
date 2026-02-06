@@ -72,19 +72,9 @@ jobs:
       - name: Log Sync Success
         if: success()
         run: |
-          # Get book count from database (books with price >= 12 and stock > 0)
-          RESPONSE=$(curl -s "${{ secrets.SUPABASE_URL }}/rest/v1/libros?select=id&precio=gte.12&stock=gt.0" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            -H "Prefer: count=exact")
-
-          # Extract count from Content-Range header
-          BOOK_COUNT=$(echo "$RESPONSE" | grep -i "content-range" | grep -oP '\d+(?=/\d+)' || echo "0")
-
-          # If grep fails, try to count JSON array length
-          if [ "$BOOK_COUNT" = "0" ]; then
-            BOOK_COUNT=$(echo "$RESPONSE" | jq '. | length' 2>/dev/null || echo "0")
-          fi
+          # Count actual books from the CSV file (subtract 1 for header)
+          BOOK_COUNT=$(wc -l < src/scripts/temp_abebooks_inventory.csv)
+          BOOK_COUNT=$((BOOK_COUNT - 1))
 
           echo "Books exported: $BOOK_COUNT"
 
