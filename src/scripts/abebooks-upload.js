@@ -106,23 +106,33 @@ async function uploadToAbeBooksFTP() {
     } finally {
         console.log('🔌 Cerrando conexión FTP...');
         client.close();
-        
-        // Clean up local CSV file
-        if (fs.existsSync(CSV_PATH)) {
-            fs.unlinkSync(CSV_PATH);
-            console.log('🗑️  Archivo temporal eliminado.');
-        }
     }
 }
 
 async function run() {
     try {
         await downloadCSV();
+        
+        // Count books BEFORE uploading (so we have the count even if upload fails)
+        const lineCount = fs.readFileSync(CSV_PATH, 'utf-8').split('\n').filter(line => line.trim()).length;
+        const bookCount = lineCount - 1; // Subtract header
+        console.log(`📊 Total books in CSV: ${bookCount}`);
+        
         await uploadToAbeBooksFTP();
         console.log('🎉 ¡Sincronización completada con éxito!');
+        
+        // Output book count for GitHub Actions to capture
+        console.log(`BOOK_COUNT=${bookCount}`);
+        
     } catch (error) {
         console.error('FAILED:', error);
         process.exit(1);
+    } finally {
+        // Clean up CSV file after everything is done
+        if (fs.existsSync(CSV_PATH)) {
+            fs.unlinkSync(CSV_PATH);
+            console.log('🗑️  Archivo temporal eliminado.');
+        }
     }
 }
 

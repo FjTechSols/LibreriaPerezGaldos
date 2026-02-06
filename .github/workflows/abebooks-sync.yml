@@ -63,18 +63,26 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           START_TIME=$(date +%s)
-          node src/scripts/abebooks-upload.js
+          OUTPUT=$(node src/scripts/abebooks-upload.js)
+          echo "$OUTPUT"
           END_TIME=$(date +%s)
           DURATION=$((END_TIME - START_TIME))
           echo "DURATION=$DURATION" >> $GITHUB_OUTPUT
 
-      # Log sync success
+          # Extract book count from script output
+          BOOK_COUNT=$(echo "$OUTPUT" | grep "BOOK_COUNT=" | cut -d'=' -f2)
+          echo "BOOK_COUNT=$BOOK_COUNT" >> $GITHUB_OUTPUT
+
       - name: Log Sync Success
         if: success()
         run: |
-          # Count actual books from the CSV file (subtract 1 for header)
-          BOOK_COUNT=$(wc -l < src/scripts/temp_abebooks_inventory.csv)
-          BOOK_COUNT=$((BOOK_COUNT - 1))
+          # Get book count from upload step output
+          BOOK_COUNT="${{ steps.upload.outputs.BOOK_COUNT }}"
+
+          if [ -z "$BOOK_COUNT" ] || [ "$BOOK_COUNT" = "0" ]; then
+            echo "Warning: Could not extract book count from upload script"
+            BOOK_COUNT=0
+          fi
 
           echo "Books exported: $BOOK_COUNT"
 
