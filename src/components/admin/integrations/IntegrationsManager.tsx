@@ -61,7 +61,7 @@ export const IntegrationsManager: React.FC = () => {
                                 <h3 className="integration-name">Uniliber</h3>
                             </div>
                             <span className={`integration-status ${integrations.uniliber.enabled ? 'active' : 'inactive'}`}>
-                                {integrations.uniliber.enabled ? 'Activo' : 'Inactivo'}
+                                {integrations.uniliber.enabled ? 'Activo' : 'Manual'}
                             </span>
                         </div>
                         <div className="integration-body">
