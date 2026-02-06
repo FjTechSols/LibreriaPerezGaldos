@@ -1,0 +1,33 @@
+name: AbeBooks Auto Sync
+
+on:
+  schedule:
+    # Ejecutar cada 6 horas: 2am, 8am, 2pm, 8pm UTC
+    - cron: "0 2,8,14,20 * * *"
+  workflow_dispatch: # Permite ejecución manual desde GitHub
+
+jobs:
+  upload-inventory:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          npm install playwright axios
+          npx playwright install chromium --with-deps
+
+      - name: Run AbeBooks Upload
+        env:
+          ABEBOOKS_USERNAME: ${{ secrets.ABEBOOKS_USERNAME }}
+          ABEBOOKS_PASSWORD: ${{ secrets.ABEBOOKS_PASSWORD }}
+          SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/abebooks-upload.js
