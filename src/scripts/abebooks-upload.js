@@ -3,10 +3,15 @@
 // Script para automatizar la subida de inventario ABEBOOKS usando Playwright
 // Requiere: npm install playwright axios
 
-const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
+import { chromium } from 'playwright';
+import fs from 'fs';
+import path from 'path';
+import https from 'https';
+import { fileURLToPath } from 'url';
+
+// Replicate __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuración desde Variables de Entorno
 const ABEBOOKS_USER = process.env.ABEBOOKS_USERNAME;
@@ -120,7 +125,11 @@ async function uploadToAbeBooks() {
     } catch (error) {
         console.error('❌ Error en el proceso:', error);
         // Tomar screenshot en error
-        await page.screenshot({ path: 'error_screenshot.png' });
+        try {
+            await page.screenshot({ path: 'error_screenshot.png' });
+        } catch (e) {
+            console.error('Could not take screenshot', e);
+        }
         throw error;
     } finally {
         await browser.close();
