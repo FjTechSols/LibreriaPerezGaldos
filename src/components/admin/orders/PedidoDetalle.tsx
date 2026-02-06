@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe, Link as LinkIcon } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe, Link as LinkIcon, ChevronDown, Tag, Eye } from 'lucide-react';
 import { Pedido, EstadoPedido, Libro } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail, sendPaymentConfirmedEmail, sendShippedEmail, sendCompletedEmail, sendStoreOrderProcessingEmail, sendStoreOrderShippedEmail } from '../../../services/emailService';
@@ -37,6 +37,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   const { createInvoice } = useInvoice();
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
+  const [showLabelDropdown, setShowLabelDropdown] = useState(false);
   
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
@@ -1506,6 +1507,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                     Cerrar
                   </button>
         
+                  {/* Ver Albarán Button */}
                   <button 
                      onClick={handleGenerarAlbaran} 
                      className="btn-generar-albaran"
@@ -1524,9 +1526,112 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                        marginRight: '0.5rem'
                      }}
                   >
-                     <Printer size={16} />
-                     {generandoAlbaran ? 'Generando...' : 'Imprimir Albarán/Etiqueta'}
+                     <Eye size={16} />
+                     {generandoAlbaran ? 'Generando...' : 'Ver Albarán'}
                   </button>
+
+                  {/* Etiqueta Button with Dropdown */}
+                  <div style={{ position: 'relative', marginRight: '0.5rem' }}>
+                    <button 
+                       onClick={() => setShowLabelDropdown(!showLabelDropdown)} 
+                       className="btn-generar-albaran"
+                       style={{ 
+                         backgroundColor: '#059669', 
+                         color: 'white', 
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '0.5rem',
+                         padding: '0.75rem 1.5rem',
+                         borderRadius: '0.5rem',
+                         fontWeight: 600,
+                         border: 'none',
+                         cursor: 'pointer'
+                       }}
+                    >
+                       <Tag size={16} />
+                       Etiqueta
+                       <ChevronDown size={16} style={{ 
+                         transform: showLabelDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                         transition: 'transform 0.2s'
+                       }} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showLabelDropdown && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: 0,
+                        marginBottom: '0.5rem',
+                        backgroundColor: 'var(--bg-surface)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: '0.5rem',
+                        boxShadow: 'var(--shadow-lg)',
+                        zIndex: 1000,
+                        minWidth: '200px',
+                        overflow: 'hidden'
+                      }}
+                      >
+                        <button
+                          onClick={() => {
+                            // TODO: Implementar lógica para Tarjeta Adhesiva
+                            console.log('Generar Tarjeta Adhesiva');
+                            setShowLabelDropdown(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.75rem 1rem',
+                            textAlign: 'left',
+                            border: 'none',
+                            background: 'transparent',
+                            color: 'var(--text-main)',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-hover)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <Printer size={16} />
+                          Tarjeta Adhesiva
+                        </button>
+                        
+                        <div style={{ height: '1px', backgroundColor: 'var(--border-subtle)' }} />
+                        
+                        <button
+                          onClick={() => {
+                            // TODO: Implementar lógica para Etiqueta GLS
+                            console.log('Generar Etiqueta GLS');
+                            setShowLabelDropdown(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.75rem 1rem',
+                            textAlign: 'left',
+                            border: 'none',
+                            background: 'transparent',
+                            color: 'var(--text-main)',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-hover)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <Truck size={16} />
+                          Etiqueta GLS
+                        </button>
+                      </div>
+                    )}
+                  </div>
         
                   {tieneFactura ? (
                     <div className="factura-generada">
