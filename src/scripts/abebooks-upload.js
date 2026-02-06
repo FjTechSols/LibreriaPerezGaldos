@@ -77,14 +77,31 @@ async function uploadToAbeBooks() {
         // 1. Login
         console.log('🔑 Iniciando sesión en AbeBooks...');
         await page.goto('https://www.abebooks.com/servlet/SellerLogin', { timeout: 60000 });
+
+        // HANDLING COOKIE CONSENT (Possible blocker)
+        // AbeBooks often uses OneTrust or similar. We try to click "Accept" or "Reject" if present.
+        try {
+            const cookieBtn = page.locator('button#onetrust-accept-btn-handler, button#onetrust-reject-all-handler, button[id*="cookie"], button:has-text("Accept All"), button:has-text("Aceptar todo")');
+            if (await cookieBtn.count() > 0 && await cookieBtn.isVisible()) {
+                console.log('🍪 Aceptando/Gestionando Cookies...');
+                await cookieBtn.first().click();
+                await page.waitForTimeout(1000); // Wait for banner to disappear
+            }
+        } catch (e) {
+            console.log('⚠️ No se detectó o no se pudo cerrar banner de cookies (continuando...)');
+        }
         
+        // Wait for username field specifically
+        console.log('⏳ Esperando campo de usuario...');
+        await page.waitForSelector('input[name="username"]', { timeout: 60000 }); // Increased timeout
+
         await page.fill('input[name="username"]', ABEBOOKS_USER);
         await page.fill('input[name="password"]', ABEBOOKS_PASS);
         
         // Click login and wait for navigation
         await Promise.all([
-            page.waitForNavigation(),
-            page.click('input[id="login-button"], button[type="submit"], input[type="submit"]') // Selector genérico
+            page.waitForNavigation({ timeout: 60000 }),
+            page.click('input[id="login-button"], button[type="submit"], input[type="submit"]')
         ]);
 
         // Verificar login
@@ -96,51 +113,50 @@ async function uploadToAbeBooks() {
         // 2. Ir a la página de subida
         console.log('📂 Navegando a "Upload Inventory"...');
         
-        // URL directa a la herramienta de subida (puede cambiar, mejor navegar o usar link directo conocido)
-        // Opción segura: Navegar desde el menú o usar URL conocida:
         await page.goto('https://www.abebooks.com/servlet/FileUpload', { timeout: 60000 });
-        // O alternativamente: https://members.abebooks.com/books/Sell/upload-inventory.shtml (redirige)
-
+        
         // 3. Subir archivo
         console.log('📤 Subiendo archivo...');
         
-        // Buscar el input file. AbeBooks suele usar <input type="file" name="uploadFile" ...>
         const fileInput = page.locator('input[type="file"]');
-        await fileInput.waitFor({ state: 'attached', timeout: 10000 });
+        await fileInput.waitFor({ state: 'attached', timeout: 30000 });
         
         await fileInput.setInputFiles(CSV_PATH);
 
-        // Click en "Upload" o "Send"
-        // Buscar el botón de submit
+        // Click en "Upload"
         const submitBtn = page.locator('input[type="submit"][value*="Upload"], button:has-text("Upload")');
         await submitBtn.click();
 
         // 4. Esperar confirmación
         console.log('⏳ Esperando confirmación...');
-        // Buscar mensaje de éxito
-        // AbeBooks suele mostrar: "Your file has been received..."
-        await page.waitForTimeout(5000); // Espera inicial
+        await page.waitForTimeout(5000); 
         
-        const successMessage = page.locator('text=received|uploaded|successful|processed'); 
-        if (await successMessage.count() > 0) {
+        const successMessage = page.locator('text=received|uploaded|successful|processed|Recibido'); 
+        // Wait up to 30s for success message
+        try {
+            await successMessage.first().waitFor({ state: 'visible', timeout: 30000 });
             console.log('✅ Archivo subido exitosamente!');
-        } else {
-            console.warn('⚠️ No se detectó mensaje de éxito claro. Verifica capturas si falla.');
-            // En CI podríamos tomar screenshot
+        } catch (e) {
+             console.warn('⚠️ No se detectó mensaje de éxito claro, pero el proceso terminó sin error fatal.');
+             // Check for specific error messages on screen
+             if (await page.locator('.error, .alert-danger').count() > 0) {
+                 throw new Error('❌ Error reportado en la página de subida.');
+             }
         }
 
     } catch (error) {
         console.error('❌ Error en el proceso:', error);
         // Tomar screenshot en error
         try {
-            await page.screenshot({ path: 'error_screenshot.png' });
+            const screenshotPath = path.join(process.cwd(), 'error_screenshot.png');
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            console.log(`📸 Screenshot guardado en: ${screenshotPath}`);
         } catch (e) {
             console.error('Could not take screenshot', e);
         }
         throw error;
     } finally {
         await browser.close();
-        // Limpiar archivo temporal
         if (fs.existsSync(CSV_PATH)) fs.unlinkSync(CSV_PATH);
     }
 }

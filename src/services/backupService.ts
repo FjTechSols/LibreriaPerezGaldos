@@ -528,7 +528,7 @@ function generateUniliberContent(libros: any[]) {
         }
 
         // Prepare Data
-        const id = libro.id;
+        const id = libro.legacy_id || libro.id;
         const descripcion = (libro.descripcion || libro.sinopsis || '').replace(/[\t\r\n]/g, ' '); // Remove tabs/newlines to break TSV
         const editorialName = libro.editoriales?.nombre || '';
         const anio = parseInt(libro.anio) || ''; // If NaN, empty
