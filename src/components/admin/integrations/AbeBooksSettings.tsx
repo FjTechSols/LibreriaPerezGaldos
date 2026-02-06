@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
 import { ArrowLeft, RefreshCw, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { fetchAbeBooksOrders } from '../../../services/abeBooksOrdersService';
@@ -22,6 +22,13 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   const abeSettings = settings.integrations.abeBooks;
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  // Local state for Min Price interaction
+  const [localMinPrice, setLocalMinPrice] = useState(abeSettings.ftps?.minPrice || 12);
+
+  useEffect(() => {
+     setLocalMinPrice(abeSettings.ftps?.minPrice || 12);
+  }, [abeSettings.ftps?.minPrice]);
 
   // Handle trigger FTPS sync
   const handleTriggerSync = async () => {
@@ -159,16 +166,6 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
       {/* Tab Navigation */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
         <button
-          onClick={() => setActiveTab('api')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'api'
-              ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-          }`}
-        >
-          API
-        </button>
-        <button
           onClick={() => setActiveTab('ftps')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'ftps'
@@ -177,6 +174,16 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
           }`}
         >
           FTPS
+        </button>
+        <button
+          onClick={() => setActiveTab('api')}
+          className={`px-4 py-2 font-medium transition-colors ${
+            activeTab === 'api'
+              ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
+        >
+          API
         </button>
       </div>
 
@@ -306,7 +313,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
 
-              {/* FTPS Settings */}
+            {/* FTPS Settings */}
               <div className="mt-6">
                 <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4 border-b pb-2">
                   Configuración de Exportación
@@ -321,10 +328,11 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                     type="number"
                     min="0"
                     step="0.01"
-                    value={abeSettings.ftps?.minPrice || 12}
-                    onChange={(e) => handleFtpsUpdate('minPrice', parseFloat(e.target.value))}
+                    value={localMinPrice}
+                    onChange={(e) => setLocalMinPrice(parseFloat(e.target.value))}
+                    onBlur={() => handleFtpsUpdate('minPrice', localMinPrice)}
                     disabled={!abeSettings.enabled}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-32"
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   />
                   <p className="toggle-description mt-2">
                     Solo se subirán libros con precio igual o superior a este valor.
@@ -351,11 +359,11 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               <SyncMonitor supabaseUrl={supabaseUrl} supabaseKey={supabaseKey} />
 
-              <div className="mt-4">
+              <div className="">
                 <button
                   onClick={() => setShowSyncModal(true)}
                   disabled={!abeSettings.enabled || testingConnection}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="btn-primary flex items-center gap-2"
                 >
                   {testingConnection ? (
                     <>

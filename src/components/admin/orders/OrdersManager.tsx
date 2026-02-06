@@ -24,7 +24,7 @@ export function OrdersManager({ onOrdersChange }: OrdersManagerProps) {
   const [isCrearPedidoOpen, setIsCrearPedidoOpen] = useState(false);
 
   // Feature Toggle: Check if AbeBooks Order Sync is enabled
-  const showIberLibro = settings?.integrations?.abeBooks?.enabled && settings?.integrations?.abeBooks?.orders?.showTab;
+  const showIberLibro = settings?.integrations?.abeBooks?.enabled && settings?.integrations?.abeBooks?.api?.orders?.showTab;
 
   // Effect: Use Effect to redirect if active tab becomes disabled
   useEffect(() => {

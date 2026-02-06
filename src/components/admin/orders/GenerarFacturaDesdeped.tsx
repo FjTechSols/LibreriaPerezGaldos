@@ -73,6 +73,7 @@ export default function GenerarFacturaModal({
       .select(`
         *,
         usuario:usuarios(*),
+        cliente:clientes(*),
         detalles:pedido_detalles(
           *,
           libro:libros(*)

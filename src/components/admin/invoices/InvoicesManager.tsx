@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Database } from 'lucide-react';
 import { useInvoice } from '../../../context/InvoiceContext';
 import { useSettings } from '../../../context/SettingsContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -10,18 +10,22 @@ import InvoiceDetailModal from './InvoiceDetailModal';
 import GenerarFacturaModal from '../orders/GenerarFacturaDesdeped';
 import DownloadInvoiceModal from './DownloadInvoiceModal';
 import { MessageModal } from '../../MessageModal';
+import { invoiceRepairService } from '../../../services/invoiceRepairService'; 
 
 export function InvoicesManager() {
-  const { invoices, loading, createInvoice, updateInvoiceStatus } = useInvoice();
+  const { invoices, loading, createInvoice, updateInvoiceStatus, fetchInvoices } = useInvoice(); 
   const { formatPrice, settings } = useSettings();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
   // State
-  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false); // Manual Invoice Form
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false); 
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isGenerarFacturaModalOpen, setIsGenerarFacturaModalOpen] = useState(false); // Choice/Orders
+  const [isGenerarFacturaModalOpen, setIsGenerarFacturaModalOpen] = useState(false); 
+  
+  // Repair State
+  const [repairing, setRepairing] = useState(false);
   
   // Download Modal State
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -48,6 +52,32 @@ export function InvoicesManager() {
   };
 
   // Handlers
+  const handleRepairData = async () => {
+      if (!confirm('¿Deseas buscar y reparar facturas con datos de cliente faltantes? Esto revisará todas las facturas y cruzará datos con los pedidos originales.')) return;
+      
+      setRepairing(true);
+      try {
+          const result = await invoiceRepairService.repairAllInvoices();
+          
+          if (result.updatedCount > 0) {
+              await fetchInvoices(); // Refresh table
+              showModal('Reparación Completada', `Se han actualizado ${result.updatedCount} facturas con datos recuperados de los pedidos.`, 'success');
+          } else {
+              showModal('Información', 'No se encontraron facturas que necesitaran reparación o no se pudieron recuperar más datos.', 'info');
+          }
+          
+          if (result.errors.length > 0) {
+              console.warn("Repair errors:", result.errors);
+          }
+
+      } catch (error) {
+          console.error("Repair failed:", error);
+          showModal('Error', 'Hubo un fallo al intentar reparar los datos.', 'error');
+      } finally {
+          setRepairing(false);
+      }
+  };
+
   const handleCreateInvoice = async (formData: InvoiceFormData) => {
     const result = await createInvoice(formData);
     if (result) {
@@ -71,10 +101,6 @@ export function InvoicesManager() {
       try {
         const { jsPDF } = await import('jspdf');
         const doc = new jsPDF();
-        // Assuming settings are available via context or passed. 
-        // We need settings.company for header. 
-        // We used useSettings() hook above.
-        // Wait, I need to make sure settings is loaded.
         
         const company = settings?.company || {
             name: 'Librería', 
@@ -170,8 +196,7 @@ export function InvoicesManager() {
       setInvoiceToDownload(null);
     }
   };
-
-  // Stats
+// ...
   const stats = {
     total: invoices.length,
     pendientes: invoices.filter(i => i.status === 'Pendiente').length,
@@ -189,13 +214,25 @@ export function InvoicesManager() {
             <h2 className="content-title">Gestión de Facturas</h2>
             <p className="content-subtitle">Gestión de facturas y contabilidad</p>
           </div>
-          <button
-              onClick={() => setIsGenerarFacturaModalOpen(true)}
-              className="action-btn primary"
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+                onClick={handleRepairData}
+                disabled={repairing}
+                className="action-btn"
+                style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                title="Intentar recuperar datos de clientes perdidos"
             >
-              <Plus size={20} />
-              Nueva Factura
+              <Database size={20} className={repairing ? 'animate-spin' : ''} />
+              {repairing ? 'Reparando...' : 'Reparar Datos'}
             </button>
+            <button
+                onClick={() => setIsGenerarFacturaModalOpen(true)}
+                className="action-btn primary"
+              >
+                <Plus size={20} />
+                Nueva Factura
+            </button>
+          </div>
       </div>
 
        <div className="invoice-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>

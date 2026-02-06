@@ -303,14 +303,19 @@ class SettingsService {
       { key: 'abebooks_last_full_sync', value: settings.abeBooks.lastFullSync, category },
       
       // Orders
-      { key: 'abebooks_orders_showTab', value: settings.abeBooks.orders.showTab, category },
-      { key: 'abebooks_orders_download', value: settings.abeBooks.orders.download, category },
-      { key: 'abebooks_orders_manage', value: settings.abeBooks.orders.manage, category },
+      { key: 'abebooks_orders_showTab', value: settings.abeBooks.api.orders.showTab, category },
+      { key: 'abebooks_orders_download', value: settings.abeBooks.api.orders.download, category },
+      { key: 'abebooks_orders_manage', value: settings.abeBooks.api.orders.manage, category },
       
       // Inventory
-      { key: 'abebooks_inventory_upload', value: settings.abeBooks.inventory.upload, category },
-      { key: 'abebooks_inventory_syncStock', value: settings.abeBooks.inventory.syncStock, category },
-      { key: 'abebooks_inventory_syncDeletions', value: settings.abeBooks.inventory.syncDeletions, category },
+      { key: 'abebooks_inventory_upload', value: settings.abeBooks.api.inventory.upload, category },
+      { key: 'abebooks_inventory_syncStock', value: settings.abeBooks.api.inventory.syncStock, category },
+      { key: 'abebooks_inventory_syncDeletions', value: settings.abeBooks.api.inventory.syncDeletions, category },
+
+      // FTPS
+      { key: 'abebooks_ftps_autoSync', value: settings.abeBooks.ftps.autoSync, category },
+      { key: 'abebooks_ftps_minPrice', value: settings.abeBooks.ftps.minPrice, category },
+      { key: 'abebooks_ftps_schedule', value: settings.abeBooks.ftps.schedule, category },
 
       // Other Integrations
       { key: 'uniliber_enabled', value: settings.uniliber.enabled, category },
@@ -345,14 +350,27 @@ class SettingsService {
             // Nested parsing for 'orders_' and 'inventory_'
             if (suffix.startsWith('orders_')) {
                 const subKey = this.toCamelCase(suffix.replace('orders_', ''));
-                if (settings.integrations.abeBooks?.orders) {
-                    (settings.integrations.abeBooks.orders as any)[subKey] = setting.value;
+                if (settings.integrations.abeBooks?.api?.orders) {
+                    (settings.integrations.abeBooks.api.orders as any)[subKey] = setting.value;
+                    // Also update legacy for safety if needed, or just migrate completely
+                    if (settings.integrations.abeBooks.orders) {
+                         (settings.integrations.abeBooks.orders as any)[subKey] = setting.value;
+                    }
                     return;
                 }
             } else if (suffix.startsWith('inventory_')) {
                 const subKey = this.toCamelCase(suffix.replace('inventory_', ''));
-                if (settings.integrations.abeBooks?.inventory) {
-                    (settings.integrations.abeBooks.inventory as any)[subKey] = setting.value;
+                if (settings.integrations.abeBooks?.api?.inventory) {
+                    (settings.integrations.abeBooks.api.inventory as any)[subKey] = setting.value;
+                     if (settings.integrations.abeBooks.inventory) {
+                         (settings.integrations.abeBooks.inventory as any)[subKey] = setting.value;
+                    }
+                    return;
+                }
+            } else if (suffix.startsWith('ftps_')) {
+                const subKey = this.toCamelCase(suffix.replace('ftps_', ''));
+                if (settings.integrations.abeBooks?.ftps) {
+                    (settings.integrations.abeBooks.ftps as any)[subKey] = setting.value;
                     return;
                 }
             } else {

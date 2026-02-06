@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Package, User, MapPin, Truck, CreditCard, FileText, Calendar, CreditCard as Edit, Printer, Save, Check, XCircle, Hash, Trash, Plus, Edit2, Building2, Globe, Link as LinkIcon, ChevronDown, Tag, Eye } from 'lucide-react';
+﻿import { useState, useEffect } from 'react';
+import { X, Truck, FileText, Printer, Edit2, ChevronDown, Tag, Eye, Package, User, Hash, Calendar, Check, XCircle, CreditCard, LinkIcon, MapPin, Edit, Save, Building2, Globe, Trash, Plus } from 'lucide-react';
 import { Pedido, EstadoPedido, Libro } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido } from '../../../services/pedidoService';
 import { sendPaymentReadyEmail, sendPaymentConfirmedEmail, sendShippedEmail, sendCompletedEmail, sendStoreOrderProcessingEmail, sendStoreOrderShippedEmail } from '../../../services/emailService';
@@ -12,6 +12,7 @@ import { EditClientModal } from '../clients/EditClientModal';
 import { AddProductToOrderModal } from './AddProductToOrderModal';
 import { GLSLabelModal, GLSLabelData } from './GLSLabelModal';
 import { AdhesiveCardModal } from './AdhesiveCardModal';
+import { InvoicePreviewModal } from './InvoicePreviewModal';
 import { Cliente } from '../../../types';
 
 interface PedidoDetalleProps {
@@ -42,6 +43,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   const [showLabelDropdown, setShowLabelDropdown] = useState(false);
   const [showGLSModal, setShowGLSModal] = useState(false);
   const [showAdhesiveCardModal, setShowAdhesiveCardModal] = useState(false);
+  const [invoiceDoc, setInvoiceDoc] = useState<any>(null);
+  const [showInvoicePreviewModal, setShowInvoicePreviewModal] = useState(false);
   
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
@@ -109,8 +112,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     if (pedido.tipo === 'interno' && nuevoEstado === 'enviado') {
         if (!transportista.trim() || !tracking.trim()) {
             setMessageModalConfig({
-                title: 'Faltan datos de envío',
-                message: 'Para marcar el pedido como Enviado, debe indicar el Transportista y el Número de Seguimiento.',
+                title: 'Faltan datos de envÃ­o',
+                message: 'Para marcar el pedido como Enviado, debe indicar el Transportista y el NÃºmero de Seguimiento.',
                 type: 'error'
             });
             setShowMessageModal(true);
@@ -130,7 +133,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
             transportista: transportista as any,
             tracking: tracking
         });
-        if (!success) errorMsg = 'Error al actualizar el pedido con datos de envío.';
+        if (!success) errorMsg = 'Error al actualizar el pedido con datos de envÃ­o.';
     } else {
         const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
         success = result.success;
@@ -160,8 +163,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
               : `${pedido.cliente.nombre} ${pedido.cliente.apellidos}`;
           const total = pedido.total || 0;
           
-          let storeName = 'Librería Pérez Galdós';
-          if (pedido.tipo === 'galeon') storeName = 'Librería Galeón';
+          let storeName = 'LibrerÃ­a PÃ©rez GaldÃ³s';
+          if (pedido.tipo === 'galeon') storeName = 'LibrerÃ­a GaleÃ³n';
           // Express defaults to PG unless specified otherwise, using PG for now
           
           // Prepare items summary for email
@@ -237,8 +240,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
       onRefresh();
       setTimeout(() => {
           setMessageModalConfig({
-            title: 'Envío Actualizado',
-            message: 'La información de envío se ha actualizado correctamente.',
+            title: 'EnvÃ­o Actualizado',
+            message: 'La informaciÃ³n de envÃ­o se ha actualizado correctamente.',
             type: 'info'
           });
           setShowMessageModal(true);
@@ -246,7 +249,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     } else {
       setMessageModalConfig({
         title: 'Error',
-        message: 'Hubo un error al actualizar la información de envío.',
+        message: 'Hubo un error al actualizar la informaciÃ³n de envÃ­o.',
         type: 'error'
       });
       setShowMessageModal(true);
@@ -301,7 +304,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   };
 
   const handleDeleteLine = (index: number) => {
-    if (confirm('¿Estás seguro de eliminar este producto del pedido?')) {
+    if (confirm('Â¿EstÃ¡s seguro de eliminar este producto del pedido?')) {
         const line = editedLines[index];
         if (line.id) {
            setDeletedLinesIds([...deletedLinesIds, line.id]);
@@ -325,7 +328,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
       if (!item.isExternal && item.libro) {
          const exists = editedLines.find(l => l.libro_id === item.libro!.id);
          if (exists) {
-             alert("Este libro ya está en el pedido. Incrementa la cantidad si lo deseas.");
+             alert("Este libro ya estÃ¡ en el pedido. Incrementa la cantidad si lo deseas.");
              return;
          }
       }
@@ -499,8 +502,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     }
   };
 
-  // Lógica híbrida para totales:
-  // 1. Calculamos el total teórico sumando los precios de los ítems (que incluyen impuestos).
+  // LÃ³gica hÃ­brida para totales:
+  // 1. Calculamos el total teÃ³rico sumando los precios de los Ã­tems (que incluyen impuestos).
   const calcularTotalBruto = () => {
     if (!pedido?.detalles) return 0;
     return pedido.detalles.reduce((sum, detalle) => {
@@ -511,18 +514,18 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
 
   const totalItems = calcularTotalBruto();
   
-  // 2. Verificamos si el pedido tiene totales guardados válidos
+  // 2. Verificamos si el pedido tiene totales guardados vÃ¡lidos
   const tieneValoresGuardados = pedido?.total !== undefined && pedido.total > 0;
 
-  // 3. Comprobamos si el total guardado coincide con la suma de ítems para detectar si es pedido "nuevo" (IVA incluido)
+  // 3. Comprobamos si el total guardado coincide con la suma de Ã­tems para detectar si es pedido "nuevo" (IVA incluido)
   const totalGuardado = pedido?.total || 0;
   const diferencia = tieneValoresGuardados ? Math.abs(totalGuardado - totalItems) : 999;
-  const esPedidoConIvaIncluido = diferencia < 0.05; // 5 céntimos de margen
+  const esPedidoConIvaIncluido = diferencia < 0.05; // 5 cÃ©ntimos de margen
 
   let total, subtotal, iva, taxRateApplied;
 
   if (esPedidoConIvaIncluido && tieneValoresGuardados) {
-    // Caso: Pedido histórico válido (IVA Incluido). Respetamos los valores guardados.
+    // Caso: Pedido histÃ³rico vÃ¡lido (IVA Incluido). Respetamos los valores guardados.
     total = totalGuardado;
     // Usamos el subtotal guardado, o lo derivamos si falta
     subtotal = pedido?.subtotal !== undefined ? pedido.subtotal : (total / (1 + (settings.billing.taxRate / 100)));
@@ -532,11 +535,11 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     // Calculamos la tasa real basada en los valores guardados
     const rawRate = subtotal > 0 ? Math.round((iva / subtotal) * 100) : settings.billing.taxRate;
     
-    // FIX: Si detectamos que el pedido se guardó con el default de 21% (error común) pero la configuración actual es diferente (ej. 4%),
+    // FIX: Si detectamos que el pedido se guardÃ³ con el default de 21% (error comÃºn) pero la configuraciÃ³n actual es diferente (ej. 4%),
     // forzamos el uso de la tasa configurada para que la factura salga correcta.
     taxRateApplied = (rawRate === 21 && Number(settings.billing.taxRate) !== 21) ? Number(settings.billing.taxRate) : rawRate;
   } else {
-    // Caso: Pedido antiguo (IVA Sumado) o sin datos. Recalculamos con la configuración ACTUAL.
+    // Caso: Pedido antiguo (IVA Sumado) o sin datos. Recalculamos con la configuraciÃ³n ACTUAL.
     total = totalItems;
     const currentTaxRateDecimal = settings.billing.taxRate / 100;
     subtotal = total / (1 + currentTaxRateDecimal);
@@ -582,11 +585,11 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
           customer_name: customerName,
           customer_address: customerAddress,
           customer_nif: customerNif,
-          tax_rate: taxRateApplied, // Usamos la tasa que se aplicó al pedido (histórica o actual)
+          tax_rate: taxRateApplied, // Usamos la tasa que se aplicÃ³ al pedido (histÃ³rica o actual)
           payment_method: pedido.metodo_pago,
           order_id: pedido.id.toString(),
           items: items,
-          shipping_cost: pedido.coste_envio || 0, // Usamos el coste de envío real del pedido
+          shipping_cost: pedido.coste_envio || 0, // Usamos el coste de envÃ­o real del pedido
           language: 'es' as 'es' | 'en'
       };
 
@@ -651,9 +654,49 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
       // Parse multi-line address from single string if it contains commas or newlines
       const addressLines = direccion.split(/[\n,]/).map(l => l.trim()).filter(l => l);
 
+      // Company Info via Settings
+      const company = settings?.company || {
+          name: 'Librería Pérez Galdós',
+          address: 'Rectoranza, 5',
+          taxId: '',
+          phone: '',
+          email: '',
+          logo: ''
+      };
+
+      // Header (Logo + Info)
+      if (company.logo) {
+          try {
+              doc.addImage(company.logo, 'PNG', 20, 10, 25, 25);
+          } catch (e) {
+              console.warn("Could not add logo to Albarán", e);
+          }
+      }
+
+      // Company Details (Right of Logo)
+      doc.setFontSize(10);
+      const infoX = 55;
+      let infoY = 15;
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(company.name, infoX, infoY);
+      infoY += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(company.address, infoX, infoY);
+      infoY += 5;
+      
+      if (company.phone) {
+          doc.text(`Tel: ${company.phone}`, infoX, infoY);
+          infoY += 5;
+      }
+      if (company.email) {
+          doc.text(`Email: ${company.email}`, infoX, infoY);
+      }
+
       // Layout Constants
       const leftMargin = 20;
-      let y = 30;
+      let y = 55; // Pushed down to accommodate header
 
       doc.setFontSize(11);
       doc.text('Para:', leftMargin, y);
@@ -738,7 +781,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
           
           // Description / Details below item
           // The example shows detailed description below the item row.
-          // "Descripción:\n Infinita plus..."
+          // "DescripciÃ³n:\n Infinita plus..."
           if (detalle.libro?.descripcion || detalle.libro?.categoria || detalle.libro?.paginas) {
               y += 2;
               doc.setFontSize(9);
@@ -774,13 +817,13 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
       doc.text('con su pedido, por favor póngase en contacto con la librería.', leftMargin, y);
       
       y += 8;
-      doc.setFont('helvetica', 'bold');
-      doc.text('Atención: AbeBooks ha procesado el pago del pedido a través de la tarjeta de crédito del comprador.', leftMargin, y);
+      // Warning removed as per user request
 
-      doc.save(`Albaran-${pedido.id}.pdf`);
+      setInvoiceDoc(doc);
+      setShowInvoicePreviewModal(true);
 
     } catch (error) {
-      console.error('Error generating Albaran PDS:', error);
+      console.error('Error generating Albaran PDF:', error);
       setMessageModalConfig({
         title: 'Error',
         message: 'Error al generar el albarán PDF.',
@@ -794,7 +837,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
 
   const handleGenerateGLSLabel = async (data: GLSLabelData) => {
     try {
-      // TODO: Implementar lógica para generar etiqueta GLS
+      // TODO: Implementar lÃ³gica para generar etiqueta GLS
       console.log('Generating GLS Label with data:', data);
       
       setMessageModalConfig({
@@ -1266,7 +1309,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                           type="text"
                           value={tracking}
                           onChange={(e) => setTracking(e.target.value)}
-                          placeholder="Número de seguimiento"
+                          placeholder="NÃºmero de seguimiento"
                           style={{
                             width: '100%',
                             padding: '0.5rem',
@@ -1330,7 +1373,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                           <div style={{ padding: '0.5rem', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '6px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <Building2 size={20} style={{ color: 'var(--success-color)' }} />
                               <div>
-                                  <span style={{ fontWeight: 600, display: 'block' }}>Recogida en Librería</span>
+                              <span style={{ fontWeight: 600, display: 'block' }}>Recogida en Librería</span>
                                   <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>El cliente recogerá el pedido.</span>
                               </div>
                           </div>
@@ -1471,7 +1514,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                   <span className="libro-codigo" data-label="Código" style={{ fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                     {detalle.libro?.codigo || detalle.libro?.legacy_id || '-'}
                   </span>
-                  <span className="libro-titulo" data-label="Título" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                   <span className="libro-titulo" data-label="Título" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span className="font-medium text-gray-900 dark:text-gray-100">
                         {detalle.libro?.titulo || detalle.nombre_externo || 'Sin título'}
                     </span>
@@ -1536,7 +1579,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                       <span className="acciones" data-label="Acciones">
                           <button 
                              onClick={() => handleDeleteLine(index)}
-                             title="Eliminar línea"
+                             title="Eliminar lÃ­nea"
                              style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
                           >
                               <Trash size={18} />
@@ -1579,7 +1622,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                         }}
                     >
                         <Plus size={16} />
-                        Añadir Producto (Interno o Externo)
+                        AÃ±adir Producto (Interno o Externo)
                     </button>
                     
                     <AddProductToOrderModal 
@@ -1674,7 +1717,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                     Cerrar
                   </button>
         
-                  {/* Ver Albarán Button */}
+                  {/* Ver AlbarÃ¡n Button */}
                   <button 
                      onClick={handleGenerarAlbaran} 
                      className="btn-generar-albaran"
@@ -1856,6 +1899,14 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
           pedidoId={pedido?.id || 0}
           cliente={pedido?.cliente || null}
           onPrint={handleGenerarTarjetaAdhesiva}
+        />
+
+        {/* Invoice Preview Modal */}
+        <InvoicePreviewModal
+          isOpen={showInvoicePreviewModal}
+          onClose={() => setShowInvoicePreviewModal(false)}
+          pdfDoc={invoiceDoc}
+          filename={`Albaran-${pedido.id}.pdf`}
         />
       </div>
     </div>
