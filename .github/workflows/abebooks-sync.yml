@@ -80,8 +80,14 @@ jobs:
           BOOK_COUNT="${{ steps.upload.outputs.BOOK_COUNT }}"
 
           if [ -z "$BOOK_COUNT" ] || [ "$BOOK_COUNT" = "0" ]; then
-            echo "Warning: Could not extract book count from upload script"
-            BOOK_COUNT=0
+            # Fallback check for txt file
+            if [ -f "src/scripts/temp_abebooks_inventory.txt" ]; then
+              BOOK_COUNT=$(wc -l < src/scripts/temp_abebooks_inventory.txt)
+              BOOK_COUNT=$((BOOK_COUNT - 1))
+            else
+              echo "Warning: No book count found and TXT file missing"
+              BOOK_COUNT=0
+            fi
           fi
 
           echo "Books exported: $BOOK_COUNT"
