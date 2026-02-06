@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { fetchAbeBooksOrders } from '../../../services/abeBooksOrdersService';
 import { ConnectionStatus } from './shared/ConnectionStatus';
 import { SyncMonitor } from './shared/SyncMonitor';
@@ -16,10 +16,50 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'success' | 'error' | 'testing'>('unknown');
   const [connectionMessage, setConnectionMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'api' | 'ftps'>('ftps');
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const abeSettings = settings.integrations.abeBooks;
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  // Handle trigger FTPS sync
+  const handleTriggerSync = async () => {
+    try {
+      setTestingConnection(true);
+      setSyncResult(null);
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/trigger-ftps-sync`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSyncResult({
+          success: true,
+          message: data.status || 'Sincronización iniciada correctamente. Puedes ver el progreso en el monitor.'
+        });
+      } else {
+        setSyncResult({
+          success: false,
+          message: data.error || 'Error desconocido al iniciar la sincronización.'
+        });
+      }
+    } catch (error) {
+      console.error('Error triggering sync:', error);
+      setSyncResult({
+        success: false,
+        message: 'Error al conectar con el servidor. Verifica tu conexión e intenta de nuevo.'
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
 
   // Helper to update API settings
   const handleApiUpdate = async (section: 'orders' | 'inventory' | 'root', key: string, value: any) => {
@@ -313,39 +353,21 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               <div className="mt-4">
                 <button
-                  onClick={async () => {
-                    if (confirm('¿Quieres subir el catálogo ahora vía FTPS? Esto iniciará la sincronización inmediatamente.')) {
-                      try {
-                        setTestingConnection(true);
-                        
-                        const response = await fetch(`${supabaseUrl}/functions/v1/trigger-ftps-sync`, {
-                          method: 'POST',
-                          headers: {
-                            'Authorization': `Bearer ${supabaseKey}`,
-                            'Content-Type': 'application/json',
-                          },
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok && data.success) {
-                          alert('✅ ' + data.status);
-                        } else {
-                          alert('❌ Error al iniciar sincronización: ' + (data.error || 'Error desconocido'));
-                        }
-                      } catch (error) {
-                        console.error('Error triggering sync:', error);
-                        alert('❌ Error al conectar con el servidor. Intenta de nuevo.');
-                      } finally {
-                        setTestingConnection(false);
-                      }
-                    }
-                  }}
+                  onClick={() => setShowSyncModal(true)}
                   disabled={!abeSettings.enabled || testingConnection}
-                  className="btn-secondary px-4 py-2 text-sm flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  <RefreshCw size={16} className={testingConnection ? 'animate-spin' : ''} />
-                  {testingConnection ? 'Iniciando...' : 'Forzar Subida FTPS'}
+                  {testingConnection ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      Iniciando sincronización...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={16} />
+                      Forzar Subida FTPS
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -375,6 +397,103 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
             </div>
           </div>
         </>
+      )}
+
+      {/* Modal de Confirmación de Sincronización */}
+      {showSyncModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                  <Upload size={24} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Forzar Sincronización FTPS
+                </h3>
+              </div>
+
+              {!syncResult ? (
+                <>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    ¿Quieres subir el catálogo ahora vía FTPS? Esto iniciará la sincronización inmediatamente.
+                  </p>
+
+                  <div className="flex gap-3 justify-end">
+                    <button
+                      onClick={() => setShowSyncModal(false)}
+                      disabled={testingConnection}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md disabled:opacity-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleTriggerSync}
+                      disabled={testingConnection}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {testingConnection ? (
+                        <>
+                          <RefreshCw size={16} className="animate-spin" />
+                          Iniciando...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} />
+                          Iniciar Sincronización
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={`p-4 rounded-lg mb-6 ${
+                    syncResult.success 
+                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      {syncResult.success ? (
+                        <CheckCircle2 size={20} className="text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertCircle size={20} className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <p className={`font-medium ${
+                          syncResult.success 
+                            ? 'text-green-800 dark:text-green-300' 
+                            : 'text-red-800 dark:text-red-300'
+                        }`}>
+                          {syncResult.success ? '¡Sincronización Iniciada!' : 'Error al Iniciar'}
+                        </p>
+                        <p className={`text-sm mt-1 ${
+                          syncResult.success 
+                            ? 'text-green-700 dark:text-green-400' 
+                            : 'text-red-700 dark:text-red-400'
+                        }`}>
+                          {syncResult.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => {
+                        setShowSyncModal(false);
+                        setSyncResult(null);
+                      }}
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
