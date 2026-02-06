@@ -106,18 +106,26 @@ async function uploadToAbeBooks() {
         
         // CHECK IF REDIRECTED TO HOMEPAGE (Bot protection quirk)
         const title = await page.title();
-        if (title.includes('Shop for Books, Art & Collectibles') || title.includes('AbeBooks | Shop for Books')) {
+        console.log(`🔍 Current page title: "${title}"`);
+        
+        // Match the actual homepage title format
+        if (title.includes('Shop for Books') || title === 'AbeBooks | Shop for Books, Art & Collectibles' || page.url() === 'https://www.abebooks.com/') {
             console.warn('⚠️ Redirigido a la Homepage en lugar del Login. Intentando navegar manualmente a "Sign On"...');
             // Click "Sign On" link
-            const signOnLink = page.locator('a[href*="SignOn"], a:has-text("Sign On"), a:has-text("Iniciar sesión"), #sign-on');
+            const signOnLink = page.locator('a[href*="SignOn"], a[href*="SellerLogin"], a:has-text("Sign On"), a:has-text("Seller Login"), a:has-text("Iniciar sesión")');
             if (await signOnLink.count() > 0) {
+                 console.log(`✅ Encontrado ${await signOnLink.count()} enlaces de login. Haciendo clic...`);
                  await signOnLink.first().click();
                  await page.waitForNavigation({ timeout: 30000 });
                  console.log('✅ Navegación manual a Login completada.');
             } else {
                  console.error('❌ No se encontró enlace de "Sign On" en la Homepage.');
+                 // Try direct navigation as fallback
+                 console.log('🔄 Intentando navegación directa a /servlet/SellerLogin...');
+                 await page.goto('https://www.abebooks.com/servlet/SellerLogin', { timeout: 30000 });
             }
         }
+
 
         // Wait for username field specifically
         console.log('⏳ Esperando campo de usuario...');
