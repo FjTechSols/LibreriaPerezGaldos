@@ -114,9 +114,15 @@ async function run() {
         await downloadTXT();
         
         // Count books BEFORE uploading (so we have the count even if upload fails)
-        const lineCount = fs.readFileSync(TXT_PATH, 'utf-8').split('\n').filter(line => line.trim()).length;
+        const fileContent = fs.readFileSync(TXT_PATH, 'utf-8');
+        const lineCount = fileContent.split('\n').filter(line => line.trim()).length;
         const bookCount = lineCount - 1; // Subtract header
         console.log(`📊 Total books in TXT: ${bookCount}`);
+
+        // DEBUG: Print first 500 chars to check format
+        console.log('--- DEBUG: FILE CONTENT SNIPPET ---');
+        console.log(JSON.stringify(fileContent.slice(0, 500)));
+        console.log('--- END DEBUG ---');
         
         await uploadToAbeBooksFTP();
         console.log('🎉 ¡Sincronización completada con éxito!');
