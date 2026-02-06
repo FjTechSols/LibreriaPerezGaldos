@@ -371,7 +371,7 @@ const normalizeISBN = (isbn: string | null | undefined): string | null => {
 
 export async function exportUniliberToCSV(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
     try {
-        const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
+        const headers_map = 'id, legacy_id, isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at';
         
         // Fetch source data (we still filter by stock > 0 at DB level for efficiency, but will strictly validate below)
         const libros = await fetchAll('libros', (q) => q.gt('stock', 0).order('id', { ascending: true }), headers_map, onProgress);
@@ -401,7 +401,7 @@ export async function exportUniliberToCSV(onProgress?: (val: number, total: numb
 
 export async function exportUniliberToZip(onProgress?: (val: number, total: number) => void): Promise<{ success: boolean; error?: string }> {
     try {
-        const headers_map = 'isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at, descripcion, paginas';
+        const headers_map = 'id, legacy_id, isbn, titulo, autor, editoriales(nombre), anio, precio, stock, categorias(nombre), created_at, descripcion, paginas';
         const libros = await fetchAll('libros', (q) => q.gt('stock', 0).order('id', { ascending: true }), headers_map, onProgress);
 
         if (!libros || libros.length === 0) {

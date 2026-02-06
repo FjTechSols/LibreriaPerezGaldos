@@ -7,12 +7,14 @@ import {
   AbeBooksOrderStatus,
   ABEBOOKS_STATUS_LABELS,
   formatAbeBooksDate,
-  getStatusBadgeClass
+  getStatusBadgeClass,
+  syncAbeBooksOrders
 } from '../../../services/abeBooksOrdersService';
 import { TableLoader } from '../../Loader';
 import { MessageModal } from '../../MessageModal';
 import { IberLibroOrderDetail } from './IberLibroOrderDetail';
 import '../../../styles/components/IberLibroOrders.css';
+import { RefreshCw } from 'lucide-react'; 
 
 const STATUS_OPTIONS: Array<{ value: AbeBooksOrderStatus | ''; label: string }> = [
   { value: '', label: 'Todos los Estados' },
@@ -134,6 +136,25 @@ export function IberLibroPedidosList() {
     );
   }
 
+  const handleSync = async () => {
+    setLoading(true);
+    try {
+        // Pass current filters to sync logic
+        // If user selects a date range, we sync that range.
+        // If empty, it defaults to 30 days in backend.
+        await syncAbeBooksOrders(filters);
+        
+        await loadOrders(); // Reload from cache
+        setMessageConfig({ title: 'Sincronización Correcta', message: 'Pedidos actualizados desde AbeBooks', type: 'success' });
+        setShowMessageModal(true);
+    } catch (err: any) {
+        setMessageConfig({ title: 'Error de Sincronización', message: err.message, type: 'error' });
+        setShowMessageModal(true);
+    } finally {
+        setLoading(false);
+    }
+  };
+
   return (
     <div className="iberlibro-orders">
       {/* Filters Bar */}
@@ -149,6 +170,13 @@ export function IberLibroPedidosList() {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+        </div>
+
+        <div className="flex items-center gap-2 ml-auto">
+            <button onClick={handleSync} className="btn-secondary flex items-center gap-2">
+                <RefreshCw size={18} />
+                Sincronizar
+            </button>
         </div>
 
         <div className="filter-group">
