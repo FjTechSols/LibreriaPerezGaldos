@@ -20,14 +20,12 @@ jobs:
           node-version: "20"
 
       - name: Install Dependencies
-        run: |
-          npm install playwright axios
-          npx playwright install chromium --with-deps
+        run: npm install basic-ftp
 
       - name: Run AbeBooks Upload
         env:
           ABEBOOKS_USERNAME: ${{ secrets.ABEBOOKS_USERNAME }}
-          ABEBOOKS_PASSWORD: ${{ secrets.ABEBOOKS_PASSWORD }}
+          ABEBOOKS_API_KEY: ${{ secrets.ABEBOOKS_API_KEY }}
           SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node src/scripts/abebooks-upload.js
