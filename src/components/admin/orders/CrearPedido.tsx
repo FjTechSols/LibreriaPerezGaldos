@@ -2308,7 +2308,7 @@ export default function CrearPedido({
 
       {/* Client Creation Modal */}
       {showClienteModal && (
-        <div className="modal-overlay" onClick={handleCloseClienteModal}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
             <div className="modal-header">
               <h2 className="text-gray-900 dark:text-white">Crear Nuevo Cliente</h2>
