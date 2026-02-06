@@ -104,6 +104,21 @@ async function uploadToAbeBooks() {
             console.log('⚠️ Error intentando cerrar banner de cookies (continuando...):', e.message);
         }
         
+        // CHECK IF REDIRECTED TO HOMEPAGE (Bot protection quirk)
+        const title = await page.title();
+        if (title.includes('Shop for Books, Art & Collectibles') || title.includes('AbeBooks | Shop for Books')) {
+            console.warn('⚠️ Redirigido a la Homepage en lugar del Login. Intentando navegar manualmente a "Sign On"...');
+            // Click "Sign On" link
+            const signOnLink = page.locator('a[href*="SignOn"], a:has-text("Sign On"), a:has-text("Iniciar sesión"), #sign-on');
+            if (await signOnLink.count() > 0) {
+                 await signOnLink.first().click();
+                 await page.waitForNavigation({ timeout: 30000 });
+                 console.log('✅ Navegación manual a Login completada.');
+            } else {
+                 console.error('❌ No se encontró enlace de "Sign On" en la Homepage.');
+            }
+        }
+
         // Wait for username field specifically
         console.log('⏳ Esperando campo de usuario...');
         // Try to verify if we are indeed on the login page or blocked
@@ -112,8 +127,8 @@ async function uploadToAbeBooks() {
         } catch (e) {
             console.error('❌ Timeout esperando input[name="username"].');
             // Check page title to see if we are blocked
-            const title = await page.title();
-            console.error(`📄 Page Title actual: "${title}"`);
+            const currentTitle = await page.title();
+            console.error(`📄 Page Title actual: "${currentTitle}"`);
             throw e;
         }
 
@@ -168,6 +183,29 @@ async function uploadToAbeBooks() {
 
     } catch (error) {
         console.error('❌ Error en el proceso:', error);
+        
+        // DEBUGGING INFO
+        try {
+            const currentUrl = page.url();
+            const currentTitle = await page.title();
+            console.log(`🔍 DEBUG INFO:`);
+            console.log(`   - URL: ${currentUrl}`);
+            console.log(`   - Title: ${currentTitle}`);
+            
+            // Check for specific blocker text
+            const bodyText = await page.innerText('body');
+            if (bodyText.includes('robot') || bodyText.includes('captcha') || bodyText.includes('denied')) {
+                console.error('⚠️ POSIBLE BLOQUEO DETECTADO (Captcha/Bot)');
+            }
+
+            // Dump HTML snippet (first 500 chars)
+            const content = await page.content();
+            console.log(`   - HTML Start: ${content.substring(0, 500)}...`);
+            
+        } catch (debugError) {
+            console.error('Error getting debug info:', debugError);
+        }
+
         // Tomar screenshot en error
         try {
             const screenshotPath = path.join(process.cwd(), 'error_screenshot.png');
