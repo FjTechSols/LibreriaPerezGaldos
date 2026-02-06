@@ -30,4 +30,4 @@ jobs:
           ABEBOOKS_PASSWORD: ${{ secrets.ABEBOOKS_PASSWORD }}
           SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/abebooks-upload.js
+        run: node src/scripts/abebooks-upload.js
