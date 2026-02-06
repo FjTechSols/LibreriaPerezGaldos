@@ -19,13 +19,85 @@ jobs:
         with:
           node-version: "20"
 
+      # Check if auto-sync is enabled (only for scheduled runs)
+      - name: Check Auto-Sync Status
+        if: github.event_name == 'schedule'
+        id: check-sync
+        run: |
+          RESPONSE=$(curl -s "${{ secrets.SUPABASE_FUNCTION_URL }}/check-ftps-enabled" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+
+          ENABLED=$(echo $RESPONSE | jq -r '.enabled')
+          echo "Auto-sync enabled: $ENABLED"
+
+          if [ "$ENABLED" != "true" ]; then
+            echo "Auto-sync is disabled. Skipping sync."
+            exit 0
+          fi
+
+      # Log sync start
+      - name: Log Sync Start
+        id: log-start
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          curl -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/abebooks_sync_log" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            -d "{
+              \"sync_date\": \"$TIMESTAMP\",
+              \"status\": \"running\",
+              \"workflow_run_id\": \"${{ github.run_id }}\"
+            }"
+
       - name: Install Dependencies
         run: npm install basic-ftp
 
       - name: Run AbeBooks Upload
+        id: upload
         env:
           ABEBOOKS_USERNAME: ${{ secrets.ABEBOOKS_USERNAME }}
           ABEBOOKS_API_KEY: ${{ secrets.ABEBOOKS_API_KEY }}
           SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node src/scripts/abebooks-upload.js
+        run: |
+          START_TIME=$(date +%s)
+          node src/scripts/abebooks-upload.js
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "DURATION=$DURATION" >> $GITHUB_OUTPUT
+
+      # Log sync success
+      - name: Log Sync Success
+        if: success()
+        run: |
+          # Get book count from CSV generation response
+          BOOK_COUNT=$(curl -s "${{ secrets.SUPABASE_FUNCTION_URL }}/generate-abebooks-csv" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | wc -l)
+          BOOK_COUNT=$((BOOK_COUNT - 1)) # Subtract header row
+
+          # Update the running log entry to success
+          curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/abebooks_sync_log?workflow_run_id=eq.${{ github.run_id }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            -d "{
+              \"status\": \"success\",
+              \"books_exported\": $BOOK_COUNT,
+              \"duration_seconds\": ${{ steps.upload.outputs.DURATION }}
+            }"
+
+      # Log sync error
+      - name: Log Sync Error
+        if: failure()
+        run: |
+          ERROR_MSG="Workflow failed at step: ${{ job.status }}"
+
+          curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/abebooks_sync_log?workflow_run_id=eq.${{ github.run_id }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            -d "{
+              \"status\": \"error\",
+              \"error_message\": \"$ERROR_MSG\"
+            }"

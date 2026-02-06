@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { fetchAbeBooksOrders } from '../../../services/abeBooksOrdersService';
@@ -313,17 +313,39 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               <div className="mt-4">
                 <button
-                  onClick={() => {
-                    if (confirm('¿Quieres subir el catálogo ahora vía FTPS? Esto iniciará el workflow en GitHub.')) {
-                      window.open('https://github.com/FjTechSols/LibreriaPerezGaldos/actions/workflows/abebooks-sync.yml', '_blank');
-                      alert("Abriendo panel de GitHub Actions...\nEl proceso tardará 1-2 minutos en completarse.");
+                  onClick={async () => {
+                    if (confirm('¿Quieres subir el catálogo ahora vía FTPS? Esto iniciará la sincronización inmediatamente.')) {
+                      try {
+                        setTestingConnection(true);
+                        
+                        const response = await fetch(`${supabaseUrl}/functions/v1/trigger-ftps-sync`, {
+                          method: 'POST',
+                          headers: {
+                            'Authorization': `Bearer ${supabaseKey}`,
+                            'Content-Type': 'application/json',
+                          },
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                          alert('✅ ' + data.status);
+                        } else {
+                          alert('❌ Error al iniciar sincronización: ' + (data.error || 'Error desconocido'));
+                        }
+                      } catch (error) {
+                        console.error('Error triggering sync:', error);
+                        alert('❌ Error al conectar con el servidor. Intenta de nuevo.');
+                      } finally {
+                        setTestingConnection(false);
+                      }
                     }
                   }}
-                  disabled={!abeSettings.enabled}
+                  disabled={!abeSettings.enabled || testingConnection}
                   className="btn-secondary px-4 py-2 text-sm flex items-center gap-2"
                 >
-                  <RefreshCw size={16} />
-                  Forzar Subida FTPS
+                  <RefreshCw size={16} className={testingConnection ? 'animate-spin' : ''} />
+                  {testingConnection ? 'Iniciando...' : 'Forzar Subida FTPS'}
                 </button>
               </div>
             </div>
