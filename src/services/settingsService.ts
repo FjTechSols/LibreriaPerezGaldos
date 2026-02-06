@@ -74,23 +74,44 @@ export interface SecuritySettings {
 
 export interface IntegrationsSettings {
   abeBooks: {
-    // Global
+    // Global Master Switch
     enabled: boolean;
     lastFullSync?: string | null;
 
-    // Granular Orders
-    orders: {
+    // API-specific settings (individual operations)
+    api: {
+      enabled: boolean;
+      orders: {
         showTab: boolean;      // Show tab in UI
         download: boolean;     // Download new orders
         manage: boolean;       // Future: Manage details locally
+      };
+      inventory: {
+        upload: boolean;       // Show 'Send to AbeBooks' in BookForm (individual)
+        syncStock: boolean;    // Update stock on local changes (individual)
+        syncDeletions: boolean;// Delete on AbeBooks when locally deleted (individual)
+      };
     };
 
-    // Granular Inventory
-    inventory: {
-        upload: boolean;       // Show 'Send to AbeBooks' in BookForm
-        syncStock: boolean;    // Update stock on local changes
-        syncDeletions: boolean;// Delete on AbeBooks when locally deleted
-        autoFullSync: boolean; // Allow scheduled Edge Function to run
+    // FTPS-specific settings (bulk catalog sync)
+    ftps: {
+      enabled: boolean;
+      autoSync: boolean;       // Enable/disable automatic scheduled sync
+      minPrice: number;        // Minimum price for export (default: 12)
+      schedule: string;        // Cron schedule (default: "0 */6 * * *")
+    };
+
+    // Legacy fields (for backward compatibility, can be removed later)
+    orders?: {
+      showTab: boolean;
+      download: boolean;
+      manage: boolean;
+    };
+    inventory?: {
+      upload: boolean;
+      syncStock: boolean;
+      syncDeletions: boolean;
+      autoFullSync: boolean;
     };
   };
   uniliber: {
@@ -426,6 +447,26 @@ class SettingsService {
         abeBooks: {
           enabled: false,
           lastFullSync: null,
+          api: {
+            enabled: false,
+            orders: {
+              showTab: false,
+              download: false,
+              manage: false
+            },
+            inventory: {
+              upload: false,
+              syncStock: false,
+              syncDeletions: false
+            }
+          },
+          ftps: {
+            enabled: false,
+            autoSync: false,
+            minPrice: 12,
+            schedule: '0 */6 * * *'
+          },
+          // Legacy fields for backward compatibility
           orders: {
             showTab: false,
             download: false,
