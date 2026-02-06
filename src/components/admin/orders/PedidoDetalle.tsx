@@ -10,6 +10,8 @@ import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
 import { EditClientModal } from '../clients/EditClientModal';
 import { AddProductToOrderModal } from './AddProductToOrderModal';
+import { GLSLabelModal, GLSLabelData } from './GLSLabelModal';
+import { AdhesiveCardModal } from './AdhesiveCardModal';
 import { Cliente } from '../../../types';
 
 interface PedidoDetalleProps {
@@ -38,6 +40,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   const [generandoFactura, setGenerandoFactura] = useState(false);
   const [generandoAlbaran, setGenerandoAlbaran] = useState(false);
   const [showLabelDropdown, setShowLabelDropdown] = useState(false);
+  const [showGLSModal, setShowGLSModal] = useState(false);
+  const [showAdhesiveCardModal, setShowAdhesiveCardModal] = useState(false);
   
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
@@ -786,6 +790,169 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     } finally {
       setGenerandoAlbaran(false);
     }
+  };
+
+  const handleGenerateGLSLabel = async (data: GLSLabelData) => {
+    try {
+      // TODO: Implementar lógica para generar etiqueta GLS
+      console.log('Generating GLS Label with data:', data);
+      
+      setMessageModalConfig({
+        title: 'Éxito',
+        message: 'Etiqueta GLS generada correctamente.',
+        type: 'info'
+      });
+      setShowMessageModal(true);
+    } catch (error) {
+      console.error('Error generating GLS label:', error);
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'Error al generar la etiqueta GLS.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleGenerarTarjetaAdhesiva = () => {
+    if (!pedido || !pedido.cliente) {
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'No se puede generar la tarjeta sin información del cliente.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+      return;
+    }
+
+    const cliente = pedido.cliente;
+    const nombreCompleto = cliente.tipo === 'particular' 
+      ? `${cliente.nombre} ${cliente.apellidos || ''}`.trim()
+      : cliente.nombre;
+
+    // Create printable HTML
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      setMessageModalConfig({
+        title: 'Error',
+        message: 'No se pudo abrir la ventana de impresión. Verifica que no esté bloqueada por el navegador.',
+        type: 'error'
+      });
+      setShowMessageModal(true);
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Tarjeta Adhesiva - Pedido #${pedido.id}</title>
+          <style>
+            @page {
+              size: 10cm 15cm;
+              margin: 0;
+            }
+            
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            body {
+              width: 10cm;
+              height: 15cm;
+              padding: 0.8cm;
+              font-family: Arial, sans-serif;
+              font-size: 11pt;
+              line-height: 1.3;
+            }
+            
+            .header {
+              display: flex;
+              align-items: flex-start;
+              gap: 0.5cm;
+              margin-bottom: 0.8cm;
+              padding-bottom: 0.5cm;
+              border-bottom: 2px solid #000;
+            }
+            
+            .logo {
+              width: 2.5cm;
+              height: 2.5cm;
+              flex-shrink: 0;
+            }
+            
+            .store-info {
+              flex: 1;
+              font-size: 9pt;
+              line-height: 1.2;
+            }
+            
+            .store-name {
+              font-weight: bold;
+              font-size: 10pt;
+              margin-bottom: 0.1cm;
+            }
+            
+            .customer-info {
+              margin-top: 0.5cm;
+            }
+            
+            .customer-name {
+              font-weight: bold;
+              font-size: 13pt;
+              margin-bottom: 0.3cm;
+              text-transform: uppercase;
+            }
+            
+            .customer-details {
+              font-size: 11pt;
+              line-height: 1.4;
+            }
+            
+            @media print {
+              body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <img src="/Logo Exlibris Perez Galdos.png" alt="Logo" class="logo" />
+            <div class="store-info">
+              <div class="store-name">Librería Pérez Galdós</div>
+              <div>Rectoranza, 5</div>
+              <div>28004 Madrid</div>
+              <div>www.perezgaldos.com</div>
+            </div>
+          </div>
+          
+          <div class="customer-info">
+            <div class="customer-name">${nombreCompleto}</div>
+            <div class="customer-details">
+              ${cliente.direccion || ''}<br/>
+              ${cliente.codigo_postal || ''} ${cliente.ciudad || ''}<br/>
+              ${cliente.provincia || ''}<br/>
+              ${cliente.pais || 'Spain'}<br/>
+              ${cliente.telefono || ''}
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    
+    // Wait for logo to load before printing
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    };
   };
 
 
@@ -1574,8 +1741,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                       >
                         <button
                           onClick={() => {
-                            // TODO: Implementar lógica para Tarjeta Adhesiva
-                            console.log('Generar Tarjeta Adhesiva');
+                            setShowAdhesiveCardModal(true);
                             setShowLabelDropdown(false);
                           }}
                           style={{
@@ -1604,8 +1770,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                         
                         <button
                           onClick={() => {
-                            // TODO: Implementar lógica para Etiqueta GLS
-                            console.log('Generar Etiqueta GLS');
+                            setShowGLSModal(true);
                             setShowLabelDropdown(false);
                           }}
                           style={{
@@ -1675,6 +1840,23 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                 onClientUpdated={handleClientUpdated}
             />
         )}
+
+        {/* GLS Label Modal */}
+        <GLSLabelModal
+          isOpen={showGLSModal}
+          onClose={() => setShowGLSModal(false)}
+          pedidoId={pedido?.id || 0}
+          onGenerate={handleGenerateGLSLabel}
+        />
+
+        {/* Adhesive Card Modal */}
+        <AdhesiveCardModal
+          isOpen={showAdhesiveCardModal}
+          onClose={() => setShowAdhesiveCardModal(false)}
+          pedidoId={pedido?.id || 0}
+          cliente={pedido?.cliente || null}
+          onPrint={handleGenerarTarjetaAdhesiva}
+        />
       </div>
     </div>
   );
