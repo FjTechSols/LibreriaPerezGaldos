@@ -39,7 +39,14 @@ async function downloadCSV() {
 
         const req = https.get(url, options, (res) => {
             if (res.statusCode !== 200) {
-                reject(new Error(`Error descargando CSV: ${res.statusCode}`));
+                // Read response body to see diagnostic error
+                let responseBody = '';
+                res.on('data', (chunk) => { responseBody += chunk; });
+                res.on('end', () => {
+                    console.error(`❌ Error descargando CSV: Status ${res.statusCode}`);
+                    console.error(`❌ Detalles del servidor: ${responseBody}`);
+                    reject(new Error(`Error descargando CSV: ${res.statusCode} - ${responseBody}`));
+                });
                 return;
             }
 
