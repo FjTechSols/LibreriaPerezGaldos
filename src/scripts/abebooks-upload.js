@@ -69,8 +69,18 @@ async function downloadCSV() {
 
 async function uploadToAbeBooks() {
     console.log('🚀 Iniciando navegador...');
-    const browser = await chromium.launch({ headless: true }); // Headless: true para CI
-    const context = await browser.newContext();
+    // Add anti-bot detection args
+    const browser = await chromium.launch({ 
+        headless: true,
+        args: [
+            '--disable-blink-features=AutomationControlled',
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+        ]
+    }); 
+    const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
     const page = await context.newPage();
 
     try {
@@ -81,19 +91,31 @@ async function uploadToAbeBooks() {
         // HANDLING COOKIE CONSENT (Possible blocker)
         // AbeBooks often uses OneTrust or similar. We try to click "Accept" or "Reject" if present.
         try {
-            const cookieBtn = page.locator('button#onetrust-accept-btn-handler, button#onetrust-reject-all-handler, button[id*="cookie"], button:has-text("Accept All"), button:has-text("Aceptar todo")');
+            // Expanded selectors for cookies
+            const cookieBtn = page.locator('button#onetrust-accept-btn-handler, button#onetrust-reject-all-handler, button[id*="cookie"], button:has-text("Accept All"), button:has-text("Aceptar todo"), button:has-text("Aceptar cookies"), .cookie-banner button');
             if (await cookieBtn.count() > 0 && await cookieBtn.isVisible()) {
                 console.log('🍪 Aceptando/Gestionando Cookies...');
                 await cookieBtn.first().click();
-                await page.waitForTimeout(1000); // Wait for banner to disappear
+                await page.waitForTimeout(2000); // Wait for banner to disappear
+            } else {
+                 console.log('ℹ️ No se detectó botón de cookies visible.');
             }
         } catch (e) {
-            console.log('⚠️ No se detectó o no se pudo cerrar banner de cookies (continuando...)');
+            console.log('⚠️ Error intentando cerrar banner de cookies (continuando...):', e.message);
         }
         
         // Wait for username field specifically
         console.log('⏳ Esperando campo de usuario...');
-        await page.waitForSelector('input[name="username"]', { timeout: 60000 }); // Increased timeout
+        // Try to verify if we are indeed on the login page or blocked
+        try {
+             await page.waitForSelector('input[name="username"]', { state: 'visible', timeout: 60000 }); 
+        } catch (e) {
+            console.error('❌ Timeout esperando input[name="username"].');
+            // Check page title to see if we are blocked
+            const title = await page.title();
+            console.error(`📄 Page Title actual: "${title}"`);
+            throw e;
+        }
 
         await page.fill('input[name="username"]', ABEBOOKS_USER);
         await page.fill('input[name="password"]', ABEBOOKS_PASS);
