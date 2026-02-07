@@ -24,7 +24,14 @@ jobs:
         if: github.event_name == 'schedule'
         id: check-sync
         run: |
-          RESPONSE=$(curl -s "${{ secrets.SUPABASE_FUNCTION_URL }}/check-ftps-enabled" \
+          # Sanitize URL: Remove generate-abebooks-csv suffix if present to get base URL
+          RAW_URL="${{ secrets.SUPABASE_FUNCTION_URL }}"
+          BASE_URL=$(echo "$RAW_URL" | sed -E 's|/generate-abebooks-csv/?$||')
+          CHECK_URL="${BASE_URL}/check-ftps-enabled"
+
+          echo "Target Check URL: $CHECK_URL"
+
+          RESPONSE=$(curl -s "$CHECK_URL" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
 
           # Debug response (print to log)

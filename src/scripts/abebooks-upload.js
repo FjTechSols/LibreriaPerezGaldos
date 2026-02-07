@@ -30,7 +30,15 @@ async function downloadTXT() {
     console.log('⬇️  Descargando inventario (TXT) desde Supabase...');
     
     return new Promise((resolve, reject) => {
-        const url = new URL(SUPABASE_FUNCTION_URL);
+        // Ensure we hit the generate-abebooks-csv endpoint, whether base URL or full URL is provided
+        let fnUrl = SUPABASE_FUNCTION_URL;
+        if (!fnUrl.endsWith('generate-abebooks-csv')) {
+             // Append only if not present. simplified logic
+             fnUrl = fnUrl.replace(/\/$/, '') + '/generate-abebooks-csv';
+        }
+        console.log('🔗 URL de generación:', fnUrl);
+
+        const url = new URL(fnUrl);
         const options = {
             headers: {
                 'Authorization': `Bearer ${SUPABASE_KEY}`
