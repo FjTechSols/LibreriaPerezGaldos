@@ -27,11 +27,17 @@ jobs:
           RESPONSE=$(curl -s "${{ secrets.SUPABASE_FUNCTION_URL }}/check-ftps-enabled" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
 
-          ENABLED=$(echo $RESPONSE | jq -r '.enabled')
+          # Debug response
+          echo "Function Response: $RESPONSE"
+
+          # Handle potential double-encoded JSON or direct object
+          ENABLED=$(echo "$RESPONSE" | jq -r 'if type=="string" then (try fromjson catch {}) else . end | .enabled')
+
+          # Default to true if parsing fails but we got something? No, explicit safety.
           echo "Auto-sync enabled: $ENABLED"
 
           if [ "$ENABLED" != "true" ]; then
-            echo "Auto-sync is disabled. Skipping sync."
+            echo "Auto-sync is disabled or check failed. Skipping sync."
             exit 0
           fi
 
