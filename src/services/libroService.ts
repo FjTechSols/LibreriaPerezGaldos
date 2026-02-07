@@ -333,17 +333,13 @@ export const obtenerLibros = async (
   filters?: LibroFilters
 ): Promise<{ data: Book[]; count: number }> => {
   try {
-    // Optimization: Skip count entirely if it's the default view to prevent timeout.
-    // We rely on the cached 'totalDatabaseBooks' in the UI for the total count.
-    
-    // Check if filters are truly default
     const isDefaultView = !filters || (
         !filters.search && 
         (!filters.category || filters.category === 'Todos') && 
         !filters.publisher && 
-        (!filters.minPrice || filters.minPrice === 0) && // Allow 0 as default
-        (!filters.maxPrice || filters.maxPrice === 1000 || filters.maxPrice >= 1000000) && // Allow 1000 or high number as default
-        (!filters.availability || filters.availability === 'inStock') && // 'inStock' is our default view usually
+        (!filters.minPrice || filters.minPrice === 0) &&
+        (!filters.maxPrice || filters.maxPrice === 1000 || filters.maxPrice >= 1000000) &&
+        (!filters.availability || filters.availability === 'inStock') &&
         !filters.featured && 
         !filters.isNew && 
         !filters.isOnSale && 
@@ -355,13 +351,122 @@ export const obtenerLibros = async (
         !filters.forceCount
     );
     
-    
-    // OPTIMIZATION:
-    // For Full Text Search (FTS), counting rows is extremely expensive (3s+ for 'sistema').
-    // We skip counting for text searches to ensure "Instant" feel.
-    // We only count if it's a default view or specific filter where count is cheap.
-    // 'exact' count forces a full scan matching the filter.
-    
+    // --- NUEVA ESTRATEGIA RPC PARA BÚSQUEDA ---
+    // Si hay un término de búsqueda, usamos la RPC optimizada con unaccent
+    if (filters?.search && filters.search.trim().length > 0) {
+        // Resolvemos IDs auxiliares si es necesario (Categoría, Editorial)
+        let catId: number | null = null;
+        let edId: number | null = null;
+
+        if (filters.category && filters.category !== 'Todos') {
+             // Try to find category ID
+             const { data: catData } = await supabase
+                .from('categorias')
+                .select('id')
+                .ilike('nombre', filters.category)
+                .maybeSingle();
+             if (catData) catId = catData.id;
+        }
+
+        if (filters.publisher) {
+             const { data: edData } = await supabase
+                .from('editoriales')
+                .select('id')
+                .ilike('nombre', `%${filters.publisher.trim()}%`)
+                .limit(1)
+                .maybeSingle();
+             if (edData) edId = edData.id;
+        }
+
+        const offset = (page - 1) * itemsPerPage;
+        
+        // Mapear sort params a lo que espera la RPC
+        let sortParam = 'relevance';
+        if (filters.sortBy === 'price') {
+            sortParam = filters.sortOrder === 'desc' ? 'price_desc' : 'price_asc';
+        } else if (filters.sortBy === 'newest') {
+            sortParam = 'newest';
+        } else if (filters.sortBy === 'title') {
+            sortParam = 'title';
+        }
+
+        // Llamar a la RPC
+        const { data: rpcData, error: rpcError } = await supabase.rpc('search_books', {
+            search_term: filters.search.trim(),
+            p_limit: itemsPerPage,
+            p_offset: offset,
+            p_min_price: filters.minPrice || null,
+            p_max_price: (filters.maxPrice && filters.maxPrice < 1000000) ? filters.maxPrice : null,
+            p_category_id: catId,
+            p_editorial_id: edId,
+            p_stock_status: filters.availability === 'inStock' ? 'in_stock' : (filters.availability === 'outOfStock' ? 'out_of_stock' : 'all'),
+            p_is_visible: true,
+            p_sort_by: sortParam
+        });
+
+        if (rpcError) {
+            console.error('Error invoking search_books RPC:', rpcError);
+            // Fallback? O retornar vacío. Mejor loguear y retornar vacío para no romper UI.
+            return { data: [], count: 0 };
+        }
+
+        if (rpcData) {
+             // Tenemos que mapear el resultado de la RPC (que ya trae nombres joined) a Book
+             // La RPC devuelve estructura plana, pero mapLibroToBook espera estructura anidada de Supabase
+             // Vamos a reconstruir el objeto compatible o mapear manualmente.
+             
+             // Fetch Active Discounts for mapping
+             const activeDiscounts = await discountService.getActiveDiscounts();
+
+             const mappedBooks = rpcData.map((item: any) => {
+                 // Construir objeto pseudo-LibroSupabase para reutilizar mapLibroToBook
+                 const tempLibro: LibroSupabase = {
+                     id: item.id,
+                     legacy_id: item.legacy_id,
+                     isbn: item.isbn,
+                     titulo: item.titulo,
+                     autor: item.autor,
+                     editorial_id: item.editorial_id,
+                     categoria_id: item.categoria_id,
+                     anio: item.anio,
+                     paginas: item.paginas,
+                     descripcion: item.descripcion,
+                     precio: item.precio,
+                     precio_original: item.precio_original,
+                     stock: item.stock,
+                     ubicacion: item.ubicacion,
+                     imagen_url: item.imagen_url,
+                     activo: item.activo,
+                     destacado: item.destacado,
+                     novedad: item.novedad,
+                     oferta: item.oferta,
+                     descatalogado: item.descatalogado,
+                     estado: item.estado,
+                     idioma: item.idioma,
+                     created_at: item.created_at,
+                     updated_at: item.updated_at,
+                     editoriales: item.editorial_nombre ? { id: item.editorial_id, nombre: item.editorial_nombre } : undefined,
+                     categorias: item.categoria_nombre ? { id: item.categoria_id, nombre: item.categoria_nombre } : undefined
+                 };
+                 
+                 const baseBook = mapLibroToBook(tempLibro);
+                 return applyDiscountsToBookWithId(baseBook, activeDiscounts, item.categoria_id);
+             });
+
+             // Estimación de Count para mantener UX (Infinite Scroll o Paginación)
+             // La RPC paginada no devuelve count total.
+             // Si devolvió itemsPerPage (lleno), asumimos que hay más.
+             let estimatedCount = (page * itemsPerPage); 
+             if (rpcData.length === itemsPerPage) estimatedCount += 100; // Hay más
+             else estimatedCount = ((page - 1) * itemsPerPage) + rpcData.length; // Es la última página
+
+             return { data: mappedBooks, count: estimatedCount };
+        }
+    }
+    // --- FIN BLOQUE RPC ---
+
+
+    // FALLBACK A LÓGICA ORIGINAL (Para filtros sin texto, navegación por categorías, etc.)
     const isTextSearch = !!filters?.search && !/^\d+$/.test(filters.search.trim());
     const countStrategy = (isDefaultView || !isTextSearch) ? 'exact' : undefined;
 
@@ -375,6 +480,10 @@ export const obtenerLibros = async (
     // Apply Filters
     if (filters) {
       if (filters.search) {
+        // [LEGACY NUMERIC SEARCH KEPT HERE AS FALLBACK OR IF RPC FAILS/NOT USED]
+        // But since we handled text search above, this block might be redundant for text.
+        // However, numeric search logic (legacy_id scan) is robust here.
+        // Let's keep it if RPC logic above was skipped (e.g. empty search).
         const searchTerm = filters.search.trim();
         const isNumeric = /^\d+$/.test(searchTerm);
         
