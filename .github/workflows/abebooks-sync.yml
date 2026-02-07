@@ -27,13 +27,15 @@ jobs:
           RESPONSE=$(curl -s "${{ secrets.SUPABASE_FUNCTION_URL }}/check-ftps-enabled" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
 
-          # Debug response
+          # Debug response (print to log)
           echo "Function Response: $RESPONSE"
 
-          # Handle potential double-encoded JSON or direct object
-          ENABLED=$(echo "$RESPONSE" | jq -r 'if type=="string" then (try fromjson catch {}) else . end | .enabled')
+          # Parse JSON simply. If response is empty or invalid, this might fail, so we default to false.
+          ENABLED=$(echo "$RESPONSE" | jq -r '.enabled // false')
 
-          # Default to true if parsing fails but we got something? No, explicit safety.
+          # Handle the string "null" which jq might return if field is missing
+          if [ "$ENABLED" = "null" ]; then ENABLED="false"; fi
+
           echo "Auto-sync enabled: $ENABLED"
 
           if [ "$ENABLED" != "true" ]; then
