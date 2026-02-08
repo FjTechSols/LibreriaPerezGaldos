@@ -13,14 +13,37 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load .env manually if needed (for local manual execution)
+const envPath = path.resolve(__dirname, '../../.env');
+if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    envConfig.split('\n').forEach(line => {
+        const [key, ...values] = line.split('=');
+        if (key && values.length > 0) {
+            const val = values.join('=').trim().replace(/^["']|["']$/g, ''); // strip quotes
+            if (!process.env[key.trim()]) {
+                process.env[key.trim()] = val;
+            }
+        }
+    });
+    console.log('🌱 Loaded .env variables manually.');
+}
+
 // Configuración desde Variables de Entorno
-const ABEBOOKS_USER = process.env.ABEBOOKS_USERNAME; // UserID en MAYÚSCULAS
+// Configuración desde Variables de Entorno
+const ABEBOOKS_USER = process.env.ABEBOOKS_USERNAME || process.env.ABEBOOKS_USER_ID; // Support both names
 const ABEBOOKS_API_KEY = process.env.ABEBOOKS_API_KEY; // API Key (contraseña FTP)
-const SUPABASE_FUNCTION_URL = process.env.SUPABASE_FUNCTION_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+let SUPABASE_FUNCTION_URL = process.env.SUPABASE_FUNCTION_URL;
+
+// Fallback for Function URL if missing locally
+if (!SUPABASE_FUNCTION_URL && process.env.VITE_SUPABASE_URL) {
+    SUPABASE_FUNCTION_URL = `${process.env.VITE_SUPABASE_URL}/functions/v1`;
+}
+
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!ABEBOOKS_USER || !ABEBOOKS_API_KEY || !SUPABASE_FUNCTION_URL || !SUPABASE_KEY) {
-    console.error('❌ Falta configuración. Asegúrate de tener: ABEBOOKS_USERNAME, ABEBOOKS_API_KEY, SUPABASE_FUNCTION_URL, SUPABASE_SERVICE_ROLE_KEY');
+    console.error('❌ Falta configuración. Asegúrate de tener: ABEBOOKS_USERNAME (o USSER_ID), ABEBOOKS_API_KEY, SUPABASE_FUNCTION_URL, SUPABASE_SERVICE_ROLE_KEY');
     process.exit(1);
 }
 
@@ -68,19 +91,20 @@ async function downloadTXT() {
                     fs.writeFileSync(TXT_PATH, rawData, { encoding: 'latin1' });
                     console.log('✅ TXT descargado y convertido a Latin-1 correctamente.');
                     
-                    // DEBUG: Check for Images in the file
-                    const lines = rawData.split('\r\n'); // It's strictly CRLF from server
-                    console.log('--- IMAGEN CHECK (First 5 with Image) ---');
+                    // DEBUG: Check for Images and ISBN in the file
+                    const lines = rawData.split('\r\n'); // Strictly CRLF from server
+                    console.log('--- CONTENT CHECK (First 5 Rows) ---');
                     let count = 0;
                     for (const line of lines) {
+                        if (!line.trim()) continue;
                         const cols = line.split('\t');
-                        // Image is Col 4 (index 3)
-                        if (cols.length > 3 && cols[3] !== '"NO"' && cols[3] !== '"Imagen"' && count < 5) {
-                            console.log(`SKU: ${cols[0]} - IMG: ${cols[3]}`);
+                        // Image is Col 4 (index 3). ISBN is Col 12 (index 11).
+                        if (count < 5) {
+                            console.log(`Row ${count + 1}: SKU=${cols[0]} | IMG=${cols[3]} | ISBN=${cols[11] || 'MISSING'}`);
+                            if (cols[3] && !cols[3].startsWith('"')) console.warn('⚠️ WARNING: Image column appears unquoted!');
                             count++;
                         }
                     }
-                    if (count === 0) console.log("⚠️ No images found in the first batch scan.");
                     console.log('--- END CHECK ---');
 
                     resolve();

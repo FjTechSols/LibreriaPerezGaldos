@@ -48,6 +48,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   /* Removed loadingBooks state */
   const autocompleteRef = useRef<HTMLDivElement>(null);
+  
+  // Manual Mode State
+  const [IsManualMode, setIsManualMode] = useState(false);
+  const [manualItemDescription, setManualItemDescription] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -277,6 +281,37 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   };
 
   const handleAddItem = () => {
+    // MANUAL MODE
+    if (IsManualMode) {
+        if (!manualItemDescription.trim()) {
+            setErrors({ ...errors, item: 'Debe ingresar una descripción' });
+            return;
+        }
+        
+        const lineTotal = quantity * unitPrice;
+        const newItem: InvoiceItem = {
+            // No book_id
+            book_title: manualItemDescription, // Use title for display
+            description: manualItemDescription,
+            quantity,
+            unit_price: unitPrice,
+            line_total: lineTotal
+        };
+
+        setFormData({
+            ...formData,
+            items: [...formData.items, newItem]
+        });
+
+        // Reset fields
+        setManualItemDescription('');
+        setQuantity(1);
+        setUnitPrice(0);
+        setErrors({ ...errors, item: '' });
+        return;
+    }
+
+    // LIST MODE
     if (!selectedBookId) {
       setErrors({ ...errors, item: 'Debe seleccionar un libro de la lista' });
       return;
@@ -288,7 +323,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
     const lineTotal = quantity * unitPrice;
     const newItem: InvoiceItem = {
       book_id: selectedBookId,
-      book_title: book.title,
+      book_title: book.title, 
       quantity,
       unit_price: unitPrice,
       line_total: lineTotal
@@ -475,127 +510,201 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
       </div>
 
       <div className="form-section">
-        <h3>Agregar libros a la factura</h3>
-        <p className="helper-text mb-4">
-          Escriba el título, autor o ISBN del libro. Seleccione de las sugerencias, ajuste cantidad y precio, luego haga clic en "Agregar a la lista".
-        </p>
+        <h3>Agregar conceptos a la factura</h3>
         
-        <div className="add-item-form">
-          <div className="form-grid">
-            <div className="form-group" ref={autocompleteRef} style={{ position: 'relative', flex: '1 1 300px' }}>
-              <label>Buscar libro *</label>
-              <div className="flex gap-2">
-                  <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] pointer-events-none" size={18} />
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleSearch();
-                          }
-                      }}
-                      onFocus={() => {
-                        if (filteredBooks.length > 0) setShowSuggestions(true);
-                      }}
-                      placeholder={advancedSearch ? "Título, Autor, ISBN, Código..." : "Introduzca el código del libro..."}
-                       className="form-input pl-10"
-                       autoComplete="off"
-                    />
-                 </div>
-                  <button 
-                   type="button" 
-                   onClick={handleSearch}
-                   className="btn-submit h-[42px] px-4 font-bold"
-                  >
-                    Buscar
-                  </button>
-             </div>
-
-             <div className="mt-2">
-               <label className="flex items-center gap-2 cursor-pointer">
-                   <input 
-                     type="checkbox" 
-                     className="w-auto m-0"
-                     checked={advancedSearch} 
-                     onChange={(e) => setAdvancedSearch(e.target.checked)}
-                   />
-                   <span className="text-sm text-[var(--text-muted)]">Búsqueda avanzada (Título, Autor, ISBN)</span>
-               </label>
-             </div>
-              
-             {showSuggestions && filteredBooks.length > 0 && (
-                <div className="autocomplete-suggestions">
-                  {filteredBooks.length > 0 ? (
-                    filteredBooks.slice(0, 10).map(book => (
-                       <div
-                        key={book.id}
-                        className="suggestion-item"
-                        onClick={() => handleSelectBook(book.id)}
-                      >
-                        <div className="suggestion-title font-bold text-[var(--text-main)]">{book.title}</div>
-                        <div className="suggestion-subtitle text-xs mt-0.5 text-[var(--text-dim)]">
-                          {book.author} • Code: {book.code} • ISBN: {book.isbn} • {formatCurrency(book.price)}
-                        </div>
-                      </div>
-                    ))
-                   ) : (
-                    <div className="no-results-text p-3 text-sm text-[var(--text-dim)]">
-                      No se encontraron libros
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Cantidad *</label>
-              <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Precio unitario *</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={unitPrice}
-                onChange={(e) => setUnitPrice(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>&nbsp;</label>
-              <button
+        {/* Toggle between Search and Manual */}
+        <div className="flex gap-4 mb-4 border-b border-[var(--border-subtle)]">
+            <button
                 type="button"
-                onClick={handleAddItem}
-                className="btn-add-item"
-                disabled={!selectedBookId}
-              >
-                <Plus size={18} />
-                Agregar a la lista
-              </button>
-            </div>
-          </div>
-          {errors.item && <span className="error-message">{errors.item}</span>}
+                onClick={() => { setSelectedBookId(''); setSearchTerm(''); }} 
+                className={`px-4 py-2 font-bold border-b-2 transition-colors ${!selectedBookId && !searchTerm && IsManualMode ? 'text-[var(--text-muted)] border-transparent' : 'text-[var(--accent)] border-[var(--accent)]'}`}
+                style={{ opacity: IsManualMode ? 0.5 : 1 }}
+            >
+                <Search size={16} className="inline mr-2" />
+                Buscar Libro
+            </button>
+            <button
+                type="button"
+                onClick={() => setIsManualMode(true)}
+                className={`px-4 py-2 font-bold border-b-2 transition-colors ${IsManualMode ? 'text-[var(--accent)] border-[var(--accent)]' : 'text-[var(--text-muted)] border-transparent'}`}
+            >
+                <FileText size={16} className="inline mr-2" />
+                Concepto Manual
+            </button>
         </div>
+
+        {IsManualMode ? (
+            <div className="add-item-form manual-mode bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)]">
+                 <div className="form-grid">
+                    <div className="form-group full-width">
+                        <label>Descripción / Concepto *</label>
+                        <input
+                            type="text"
+                            value={manualItemDescription}
+                            onChange={(e) => setManualItemDescription(e.target.value)}
+                            placeholder="Ej: Servicio de encuadernación, Gastos de gestión..."
+                            className="form-input"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Cantidad *</label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                        />
+                    </div>
+                    <div className="form-group">
+                         <label>Precio Unitario *</label>
+                         <div className="relative">
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={unitPrice}
+                                onChange={(e) => setUnitPrice(parseFloat(e.target.value) || 0)}
+                                className="pl-8"
+                            />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)]">€</span>
+                         </div>
+                    </div>
+                    <div className="form-group flex items-end">
+                        <button
+                            type="button"
+                            onClick={handleAddItem}
+                            className="btn-add-item w-full"
+                            disabled={!manualItemDescription.trim()}
+                        >
+                            <Plus size={18} />
+                            Añadir Concepto
+                        </button>
+                    </div>
+                 </div>
+            </div>
+        ) : (
+            <div className="add-item-form">
+                <p className="helper-text mb-4">
+                  Busque un libro por título, autor o ISBN para añadirlo automáticamente.
+                </p>
+                <div className="form-grid">
+                    <div className="form-group" ref={autocompleteRef} style={{ position: 'relative', flex: '1 1 300px' }}>
+                    <label>Buscar libro *</label>
+                    <div className="flex gap-2">
+                        <div className="relative flex-grow">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] pointer-events-none" size={18} />
+                            <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setIsManualMode(false);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSearch();
+                                }
+                            }}
+                            onFocus={() => {
+                                if (filteredBooks.length > 0) setShowSuggestions(true);
+                            }}
+                            placeholder={advancedSearch ? "Título, Autor, ISBN, Código..." : "Introduzca el código del libro..."}
+                            className="form-input pl-10"
+                            autoComplete="off"
+                            />
+                        </div>
+                        <button 
+                            type="button" 
+                            onClick={handleSearch}
+                            className="btn-submit h-[42px] px-4 font-bold"
+                        >
+                            Buscar
+                        </button>
+                    </div>
+
+                    <div className="mt-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                className="w-auto m-0"
+                                checked={advancedSearch} 
+                                onChange={(e) => setAdvancedSearch(e.target.checked)}
+                            />
+                            <span className="text-sm text-[var(--text-muted)]">Búsqueda avanzada (Título, Autor, ISBN)</span>
+                        </label>
+                    </div>
+                    
+                    {showSuggestions && filteredBooks.length > 0 && (
+                        <div className="autocomplete-suggestions">
+                        {filteredBooks.length > 0 ? (
+                            filteredBooks.slice(0, 10).map(book => (
+                            <div
+                                key={book.id}
+                                className="suggestion-item"
+                                onClick={() => handleSelectBook(book.id)}
+                            >
+                                <div className="suggestion-title font-bold text-[var(--text-main)]">{book.title}</div>
+                                <div className="suggestion-subtitle text-xs mt-0.5 text-[var(--text-dim)]">
+                                {book.author} • Code: {book.code} • ISBN: {book.isbn} • {formatCurrency(book.price)}
+                                </div>
+                            </div>
+                            ))
+                        ) : (
+                            <div className="no-results-text p-3 text-sm text-[var(--text-dim)]">
+                            No se encontraron libros
+                            </div>
+                        )}
+                        </div>
+                    )}
+                    </div>
+
+                    <div className="form-group">
+                    <label>Cantidad *</label>
+                    <input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                    />
+                    </div>
+
+                    <div className="form-group">
+                    <label>Precio unitario *</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={unitPrice}
+                        onChange={(e) => setUnitPrice(parseFloat(e.target.value) || 0)}
+                    />
+                    </div>
+
+                    <div className="form-group">
+                    <label>&nbsp;</label>
+                    <button
+                        type="button"
+                        onClick={handleAddItem}
+                        className="btn-add-item"
+                        disabled={!selectedBookId}
+                    >
+                        <Plus size={18} />
+                        Agregar a la lista
+                    </button>
+                    </div>
+                </div>
+                {errors.item && <span className="error-message">{errors.item}</span>}
+            </div>
+        )}
 
          {formData.items.length > 0 && (
           <div className="items-list mt-6">
             <div className="items-list-header mb-3 font-bold text-[var(--text-main)]">
-              Libros agregados ({formData.items.length})
+              Conceptos añadidos ({formData.items.length})
             </div>
             <table className="items-table">
               <thead>
                 <tr>
-                  <th>Libro</th>
+                  <th>Concepto / Libro</th>
                   <th>Cantidad</th>
                   <th>Precio unitario</th>
                   <th>Total</th>
@@ -605,7 +714,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
               <tbody>
                 {formData.items.map((item, index) => (
                   <tr key={index}>
-                    <td>{item.book_title}</td>
+                    <td>
+                        {item.book_title}
+                        {item.description && <div className="text-xs text-[var(--text-dim)]">{item.description}</div>}
+                    </td>
                     <td>{item.quantity}</td>
                     <td>{formatCurrency(item.unit_price)}</td>
                     <td>{formatCurrency(item.line_total)}</td>

@@ -214,8 +214,9 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         
         return {
           invoice_id: invoice.id,
-          book_id: item.book_id,
+          book_id: item.book_id || null, // Allow null
           book_title: item.book_title,
+          description: item.description || null, // New field map
           quantity: item.quantity,
           unit_price: Number(unitPriceWithoutTax.toFixed(2)), // Unit price WITHOUT tax
           line_total: Number(lineTotalWithoutTax.toFixed(2)) // Line total WITHOUT tax

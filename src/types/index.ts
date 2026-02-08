@@ -364,8 +364,9 @@ export interface Invoice {
 export interface InvoiceItem {
   id?: string;
   invoice_id?: string;
-  book_id: string;
-  book_title: string;
+  book_id?: string; // Made optional
+  book_title: string; // Can be title or manual description
+  description?: string; // New field for manual items
   quantity: number;
   unit_price: number;
   line_total: number;
