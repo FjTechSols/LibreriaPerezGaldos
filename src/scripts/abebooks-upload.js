@@ -57,13 +57,36 @@ async function downloadTXT() {
                 return;
             }
 
-            const file = fs.createWriteStream(TXT_PATH);
-            res.pipe(file);
+            // Encoding Fix: Collect all data as UTF-8 string, then write as Latin-1
+            let rawData = '';
+            res.setEncoding('utf8');
+            res.on('data', (chunk) => { rawData += chunk; });
+            res.on('end', () => {
+                try {
+                    // Write with 'latin1' to ensure special chars (ñ, á, etc.) are single-byte mapped
+                    // This fixes the "Ã±" issue in AbeBooks
+                    fs.writeFileSync(TXT_PATH, rawData, { encoding: 'latin1' });
+                    console.log('✅ TXT descargado y convertido a Latin-1 correctamente.');
+                    
+                    // DEBUG: Check for Images in the file
+                    const lines = rawData.split('\r\n'); // It's strictly CRLF from server
+                    console.log('--- IMAGEN CHECK (First 5 with Image) ---');
+                    let count = 0;
+                    for (const line of lines) {
+                        const cols = line.split('\t');
+                        // Image is Col 4 (index 3)
+                        if (cols.length > 3 && cols[3] !== '"NO"' && cols[3] !== '"Imagen"' && count < 5) {
+                            console.log(`SKU: ${cols[0]} - IMG: ${cols[3]}`);
+                            count++;
+                        }
+                    }
+                    if (count === 0) console.log("⚠️ No images found in the first batch scan.");
+                    console.log('--- END CHECK ---');
 
-            file.on('finish', () => {
-                file.close();
-                console.log('✅ TXT descargado correctamente.');
-                resolve();
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
             });
         });
 
