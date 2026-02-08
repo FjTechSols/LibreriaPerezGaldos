@@ -1331,101 +1331,72 @@ export const eliminarLibro = async (id: number): Promise<boolean> => {
 export const buscarLibros = async (
   query: string, 
   options?: { 
-    searchFields?: 'code' | 'all';
-    includeOutOfStock?: boolean;  // New: Allow searching books without stock (for admin)
+    searchFields?: 'code' | 'all'; // Deprecated but kept for signature compatibility
+    includeOutOfStock?: boolean; 
   }
 ): Promise<Book[]> => {
   try {
-    const isNumeric = /^\d+$/.test(query);
- 
+    if (!query || query.trim().length === 0) return [];
 
-    // 1. Unified Search Vector (Super Index)
-    // Uses the 'search_vector' column for consistent, relevance-ranked, instant results.
-    // 'websearch' type handles complex queries (quotes, negations) and stopwords automatically.
-    
-    // Check for Numeric (Potential Barcode)
-    if (isNumeric) {
-        // Priority A: Strict Legacy ID (Barcode) Match
-        let exactLegacyQuery = supabase
-              .from('libros')
-              .select('*, editoriales(id, nombre), categorias(id, nombre)')
-              .eq('activo', true)
-              .eq('legacy_id', query);
-        
-        // Filter by stock unless explicitly including out-of-stock
-        if (!options?.includeOutOfStock) {
-          exactLegacyQuery = exactLegacyQuery.gt('stock', 0);
-        }
-        
-        const { data: exactLegacy, error: exactError } = await exactLegacyQuery.limit(5);
-
-         if (!exactError && exactLegacy && exactLegacy.length > 0) {
-              return exactLegacy.map(mapLibroToBook);
-         }
-         
-         // Priority B: Strict ID (Internal) Match - Optional, but kept for admin flexibility
-         if (options?.searchFields === 'all') { // Only if not strictly code
-             let exactIdQuery = supabase
-                .from('libros')
-                .select('*, editoriales(id, nombre), categorias(id, nombre)')
-                .eq('activo', true)
-                .eq('id', parseInt(query));
-             
-             // Filter by stock unless explicitly including out-of-stock
-             if (!options?.includeOutOfStock) {
-               exactIdQuery = exactIdQuery.gt('stock', 0);
-             }
-             
-             const { data: exactId, error: idError } = await exactIdQuery.limit(1);
-             
-             if (!idError && exactId && exactId.length > 0) {
-                 return exactId.map(mapLibroToBook);
-             }
-         }
-    }
-
-    // 2. Text Search (Unified Vector)
-    let queryBuilder = supabase
-        .from('libros')
-        .select('*, editoriales(id, nombre), categorias(id, nombre)')
-        .eq('activo', true);
-    
-    // FIXED: Filter by stock unless explicitly including out-of-stock books
-    // Default behavior: only show books with stock > 0 (for customer-facing searches)
-    if (!options?.includeOutOfStock) {
-      queryBuilder = queryBuilder.gt('stock', 0);
-    }
-
-    // Filter stopwords for cleaner query (optional with websearch but good for clarity)
-    const SPANISH_STOPWORDS = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'si', 'de', 'del', 'al', 'en', 'con', 'por', 'sobre', 'entre', 'para', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'que', 'se', 'no'];
-    let terms = query.replace(/[(),.\\-\\/]/g, ' ').split(/\s+/).filter(t => t.length > 0);
-    
-    if (terms.length > 0) { // Only filter if we have terms
-        const filteredTerms = terms.filter(t => !SPANISH_STOPWORDS.includes(t.toLowerCase()));
-        if (filteredTerms.length > 0) {
-            terms = filteredTerms;
-        }
-    }
-    
-    // Use Websearch against the Super Index
-    const finalQuery = terms.length > 0 ? terms.join(' ') : query;
-    queryBuilder = queryBuilder.textSearch('search_vector', finalQuery, {
-         config: 'spanish',
-         type: 'websearch' 
+    // --- NUEVA ESTRATEGIA: USAR RPC search_books (Unificada con Catálogo) ---
+    // Esto asegura consistencia 100% entre sugerencias y resultados de catálogo.
+    const { data: rpcData, error } = await supabase.rpc('search_books', {
+        search_term: query.trim(),
+        p_limit: 20, // Limit suggestions
+        p_offset: 0,
+        p_min_price: null,
+        p_max_price: null,
+        p_category_id: null,
+        p_editorial_id: null,
+        p_stock_status: options?.includeOutOfStock ? 'all' : 'in_stock',
+        p_is_visible: true,
+        p_sort_by: 'relevance'
     });
 
-    const { data, error } = await queryBuilder
-        .limit(20);
-
     if (error) {
-        console.error('Error al buscar libros (Multi-term):', error);
+        console.error('Error invoking search_books RPC:', error);
         return [];
     }
 
-    return (data || []).map(mapLibroToBook);
+    if (!rpcData) return [];
+
+    // Mapeo manual de resultado plano RPC -> Estructura LibroSupabase -> Book
+    return rpcData.map((item: any) => {
+         const tempLibro: LibroSupabase = {
+             id: item.id,
+             legacy_id: item.legacy_id,
+             isbn: item.isbn,
+             titulo: item.titulo,
+             autor: item.autor,
+             editorial_id: item.editorial_id,
+             categoria_id: item.categoria_id,
+             anio: item.anio,
+             paginas: item.paginas,
+             descripcion: item.descripcion,
+             precio: item.precio,
+             precio_original: item.precio_original,
+             stock: item.stock,
+             ubicacion: item.ubicacion,
+             imagen_url: item.imagen_url,
+             activo: item.activo,
+             destacado: item.destacado,
+             novedad: item.novedad,
+             oferta: item.oferta,
+             descatalogado: item.descatalogado,
+             estado: item.estado,
+             idioma: item.idioma,
+             created_at: item.created_at,
+             updated_at: item.updated_at,
+             // Reconstruir objetos anidados para mapLibroToBook
+             editoriales: item.editorial_nombre ? { id: item.editorial_id, nombre: item.editorial_nombre } : undefined,
+             categorias: item.categoria_nombre ? { id: item.categoria_id, nombre: item.categoria_nombre } : undefined,
+             libros_contenidos: [] // RPC no devuelve contenidos por ahora (no crítico para sugerencias)
+         };
+         return mapLibroToBook(tempLibro);
+    });
 
   } catch (error) {
-    console.error('Error inesperado al buscar libros:', error);
+    console.error('Error in buscarLibros:', error);
     return [];
   }
 };
