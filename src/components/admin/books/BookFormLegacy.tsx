@@ -150,7 +150,7 @@ export function BookFormLegacy({
                         onChange={e => setFormData(prev => ({...prev, publicationYear: parseInt(e.target.value)}))}
                         className="w-24 px-2 py-1 text-sm border border-gray-400 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
-                ))}
+                ), true)}
 
                 {/* Row 7: Ubicacion */}
                 {renderField('Ubicación', (
