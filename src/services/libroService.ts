@@ -474,7 +474,7 @@ export const obtenerLibros = async (
       .from('libros')
       // Removed Joins to prevent massive timeout on deep pagination (page 15k+)
       // We only fetch the core table now. The UI will have to rely on IDs or we fetch details separately if needed.
-      .select('id, legacy_id, isbn, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id, descripcion', { count: countStrategy as any })
+      .select('id, legacy_id, isbn, titulo, autor, editorial_id, precio, stock, activo, destacado, novedad, oferta, precio_original, imagen_url, paginas, anio, ubicacion, categoria_id, descripcion, estado, idioma', { count: countStrategy as any })
       .eq('activo', true);
 
     // Apply Filters
