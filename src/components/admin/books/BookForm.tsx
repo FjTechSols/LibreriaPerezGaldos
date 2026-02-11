@@ -10,7 +10,9 @@ import { obtenerUbicacionPorCodigo } from '../../../utils/codigoHelper';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import { buscarEditoriales } from '../../../services/libroService';
-import { BookFormLegacy } from './BookFormLegacy'; // Import Legacy Form
+import { BookConfirmationModal } from './BookConfirmationModal';
+
+import { BookFormLegacy } from './BookFormLegacy';
 
 interface BookFormProps {
   isOpen: boolean;
@@ -38,7 +40,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     originalPrice: undefined,
     stock: 1,
     ubicacion: 'Almacén',
-    category: '', // Changed to empty string initially
+    category: '', 
     description: '',
     coverImage: '',
     featured: false,
@@ -109,6 +111,20 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const abebooksUploadEnabled = settings?.integrations?.abeBooks?.inventory?.upload || false;
   
   const [publishToAbebooks, setPublishToAbebooks] = useState(false);
+
+  // Confirmation Modal State
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Final Submit Handler (called after confirmation)
+  const handleFinalSubmit = async () => {
+      setIsSubmitting(true);
+      try {
+          await onSubmit(formData, bookContents, publishToAbebooks);
+          setShowConfirmation(false);
+      } finally {
+          setIsSubmitting(false);
+      }
+  };
 
   // Auto-toggle AbeBooks based on Price Rule (>= 12€) ONLY if enabled globally AND upload is enabled
   useEffect(() => {
@@ -384,9 +400,17 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
   const handleSubmit = async () => {
       setIsSubmitting(true);
       try {
-          // Validation: Category is mandatory
-          if (!formData.category) {
-              showModal('Campo Obligatorio', 'Por favor seleccione una categoría para el libro.', 'error');
+          // Validation: Check mandatory fields
+          const missingFields = [];
+          if (!formData.title?.trim()) missingFields.push('Título');
+          if (!formData.category) missingFields.push('Categoría');
+          if (!formData.publicationYear) missingFields.push('Año');
+          
+          const currentPrice = formData.isOnSale ? formData.originalPrice : formData.price;
+          if (currentPrice === undefined || currentPrice === null || currentPrice < 0) missingFields.push('Precio');
+
+          if (missingFields.length > 0) {
+              showModal('Campos Obligatorios', `Por favor complete los siguientes campos obligatorios: ${missingFields.join(', ')}.`, 'error');
               setIsSubmitting(false);
               return;
           }
@@ -413,18 +437,20 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                     `La editorial "${cleanPub}" no existe. ¿Desea crearla automáticamente? \n\nSi es un error tipográfico, pulse Cancelar y corríjalo.`, 
                     'warning',
                     () => {
-                        // User confirmed. Proceed with submission.
-                        setIsSubmitting(true);
-                        onSubmit(formData, bookContents).finally(() => setIsSubmitting(false)); 
+                        // User confirmed. Proceed with confirmation check.
                         setShowMessageModal(false);
+                        setShowConfirmation(true); // Trigger confirmation modal
                     }
                  );
                  return; // Stop here, wait for modal callback
              }
           }
 
-          await onSubmit(formData, bookContents, publishToAbebooks);
-      } finally {
+          // Request confirmation before final submit
+          setShowConfirmation(true);
+          setIsSubmitting(false); 
+      } catch(e) {
+          console.error(e);
           setIsSubmitting(false);
       }
   };
@@ -698,7 +724,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
 
             <div className="form-row-3">
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Año</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Año *</label>
                     <input
                       type="number"
                       value={formData.publicationYear || ''}
@@ -992,6 +1018,13 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                <Save size={16} />
                {isSubmitting ? 'Guardando...' : (isCreating ? 'Crear Libro' : 'Guardar Cambios')}
            </button>
+            <BookConfirmationModal
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleFinalSubmit}
+            formData={formData}
+            isCreating={isCreating}
+          />
         </div>
       </div>
       
