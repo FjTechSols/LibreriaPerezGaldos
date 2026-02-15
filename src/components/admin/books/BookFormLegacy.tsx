@@ -145,9 +145,16 @@ export function BookFormLegacy({
                 {/* Row 6: Year */}
                 {renderField('Año', (
                     <input 
-                        type="number" 
+                        type="text" 
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={4}
+                        placeholder="Ej. 2026"
                         value={formData.publicationYear || ''}
-                        onChange={e => setFormData(prev => ({...prev, publicationYear: parseInt(e.target.value)}))}
+                        onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setFormData(prev => ({...prev, publicationYear: val ? parseInt(val) : undefined}));
+                        }}
                         className="w-24 px-2 py-1 text-sm border border-gray-400 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                 ), true)}

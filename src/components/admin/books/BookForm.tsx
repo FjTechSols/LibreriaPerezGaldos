@@ -34,7 +34,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     author: '',
     publisher: '',
     pages: 0,
-    publicationYear: new Date().getFullYear(),
+    publicationYear: undefined,
     isbn: '',
     price: 0,
     originalPrice: undefined,
@@ -191,7 +191,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                 author: bookData.authors.join(', '),
                 publisher: bookData.publisher,
                 pages: bookData.pageCount,
-                publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : new Date().getFullYear(),
+                publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : undefined,
                 isbn: bookData.isbn,
                 category: bookData.categories[0] || (dbCategories.length > 0 ? dbCategories[0] : ''),
                 description: bookData.description,
@@ -287,7 +287,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         author: initialData?.author || '',
         publisher: initialData?.publisher || '',
         pages: initialData?.pages || 0,
-        publicationYear: initialData?.publicationYear || new Date().getFullYear(),
+        publicationYear: initialData?.publicationYear || undefined,
         isbn: initialData?.isbn || '',
         price: initialData?.price || 0,
         originalPrice: initialData?.originalPrice || undefined,
@@ -365,7 +365,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
           author: bookData.authors.join(', '),
           publisher: bookData.publisher,
           pages: bookData.pageCount,
-          publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : new Date().getFullYear(),
+          publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : undefined,
           isbn: bookData.isbn, // Ensure standard format
           price: 0,
           originalPrice: undefined,
@@ -726,9 +726,16 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Año *</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      placeholder="Ej. 2026"
                       value={formData.publicationYear || ''}
-                      onChange={(e) => setFormData({...formData, publicationYear: parseInt(e.target.value)})}
+                      onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setFormData({...formData, publicationYear: val ? parseInt(val) : undefined});
+                      }}
                       className="form-input"
                       style={{ width: '100%' }}
                     />
