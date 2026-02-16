@@ -95,9 +95,8 @@ serve(async (req) => {
                     q(""), // Place
                     q("España"), // Country
                     u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    q(book.paginas || ''), // Col 11: Pages
-                    q(""), // Col 12: Empty (No Stock/Qty)
-                    q(book.isbn || "") // Col 13: ISBN
+                    q(book.paginas || ''), // Col 11: Pages (Replacing Quantity)
+                    q(book.isbn || "") // Col 12: ISBN
                 ];
                 chunk += row.join(separator) + '\r\n';
             }
