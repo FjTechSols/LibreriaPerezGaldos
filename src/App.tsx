@@ -79,7 +79,7 @@ function AppRoutes() {
           <Route
             path="/pago-completado"
             element={
-              <ProtectedRoute requireRole="usuario">
+              <ProtectedRoute>
                 <PaymentSuccess />
               </ProtectedRoute>
             }

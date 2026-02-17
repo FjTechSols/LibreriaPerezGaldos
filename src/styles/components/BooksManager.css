@@ -504,17 +504,71 @@
 
 @media (max-width: 1200px) {
   .table-header, .admin-book-row {
-    grid-template-columns: 80px 60px minmax(0, 1.5fr) minmax(0, 1fr) 50px 80px 140px;
+    /* 6 columns: Port, Título, Autor, Precio, Stock, Acción */
+    grid-template-columns: 70px minmax(200px, 4fr) minmax(130px, 1.2fr) 90px minmax(100px, 1fr) 140px;
+    padding: 1rem 1.25rem;
   }
   .col-publisher, .col-pages, .col-category, .col-code { display: none; }
 }
 
 @media (max-width: 768px) {
-  .table-header { display: none; }
+  .table-header { display: none !important; }
+
   .admin-book-row {
-    grid-template-columns: 60px 1fr 120px;
+    /* Mobile Card Layout */
+    display: grid !important;
+    /* Columns: Cover | Content */
+    grid-template-columns: 60px 1fr;
+    grid-template-rows: auto auto min-content; /* Title, Stock/Actions */
     padding: 1rem;
-    gap: 0.5rem;
+    gap: 0.75rem 1rem;
+    align-items: start;
+    position: relative;
+    border-radius: var(--radius-lg); /* Cleaner card look */
   }
-  .col-author, .col-publisher, .col-price { display: none; }
+
+  /* Cover on left, spanning rows */
+  .col-cover {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    justify-self: center;
+    align-self: start;
+    margin-top: 4px;
+  }
+
+  /* Title on top right */
+  .col-title {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .book-title-main {
+    font-size: 1rem;
+    -webkit-line-clamp: 2;
+  }
+  
+  /* Stock and Actions share the space below title */
+  .col-stock {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-start !important;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  
+  .col-actions {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: flex-end !important;
+    margin-top: 0.5rem;
+    width: 100%;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 0.75rem;
+  }
+
+  /* Hide strict columns on mobile */
+  .col-author, .col-publisher, .col-price, .col-category, .col-pages, .col-code { 
+    display: none !important; 
+  }
 }

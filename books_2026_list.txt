@@ -1,0 +1,59 @@
+Legacy ID | ID | Stock | Título
+---|---|---|---
+00003658G | 2771673 | 1 | DE CALDERON Y CIBERCIRUGIA. 
+00064886R | 852191 | 1 | DE CALDERON Y CIBERCIRUGIA.
+00064982R | 852268 | 1 | Spanish Painting 1665 1920 Pintura Española 1665 1920
+02030164 | 414475 | 1 | GRAMATICAS DEL INDIVIDUO
+02125192 | 483326 | 2 | Historia de la literatura I. El mundo antiguo: 1200 a.C. - 600 d.C.
+02149521AG | 1472134 | 1 | JOSÉ BONAPARTE, REY DE ESPAÑA, 1808-1813: HISTORIA EXTERNA DEL REINADO
+02187540 | 983726 | 2 | De Benedicto a Francisco, el conclave cambio
+02197013 | 1495915 | 1 | LAS LEONAS DE ORO DE ETIOPIA
+02200752 | 1376653 | 1 | NO CONSIGO ADELGAZAR
+02206783 | 816275 | 1 | LA CONJURACION DE CATILINA LA GUERRA DE JUGURTA
+02249812 | 828322 | 1 | Incierta gloria 2 vol
+02277657 | 1124775 | 1 | OBRAS ESCOGIDAS: Amor después de la muerte o El Tuzani de la Alpujarra/ El médico de su honra/ La vida es sueño/ A secreto agravio, secreta venganza/ El principe constante/ La devoción de la Cruz/ El 
+02281852 | 1133246 | 1 | Libro de los lugares y aldeas del Obispado de Salamanca (manuscrito1604-1629)
+02287543 | 1533901 | 1 | Que son las matematicas. Conceptos y metodos fundamentales
+02288270 | 1286963 | 1 | La dominación de los judíos en Inglaterra
+02288378 | 1287114 | 3 | Perspectiva de género en salud
+02288384 | 1287126 | 5 | Perversiones y convergencias
+02292943 | 2633745 | 1 | Urbanizmus stredovekého mesta na Slovensku
+02292948 | 2633750 | 1 | Música y lenguaje, hermanos
+02292949 | 2633751 | 1 | SOBRE EL CONCEPTO DE ARBITRARIEDAD EN ARQUITECTURA 
+02293028 | 2771783 | 1 | Obras completas. Vol. XX: Arqueología artística de la península 
+02293029 | 2771784 | 1 | Don Juan contra Franco: Los papeles perdidos del régimen
+02293033 | 2771788 | 1 | The heart of medieval cities: Sketches of European town centres
+02293051 | 2771806 | 1 | Análisis combinatorio. Problemas y ejercicios 
+02293067 | 2771822 | 1 | OBRAS ESCOGIDAS I y 2 
+02293125 | 2771901 | 1 | CUENTOS DE HADAS EN NUEVA YORK
+02293163 | 2771942 | 1 | El amigo Fritz 
+02293164 | 2771943 | 1 | LAS BELLAS ARTES EN ESPAÑA
+02293166 | 2771945 | 1 | CUENTOS DEL LUNES (2 tomos en un solo vol.) 
+02293167 | 2771946 | 1 | El abanico de  lady Windermere, comedia sobre una mujer, La importancia de llamarse Ernesto, 
+02293169 | 2771948 | 1 | LAS TINIEBLAS Y OTROS CUENTOS, EL MISTERIO Y OTROS CUENTOS
+02293187 | 2771966 | 1 | DOÑA JUANA LA LOCA (Seis novelas superhistóricas)
+02293191 | 2771970 | 1 | LAS AVENTURAS DE CONEJITO Y POLLITO 
+02293209 | 2771988 | 1 | L'utopie urbaine au XXe siècle : Ebenezer Howard, Frank Lloyd Wright, Le Corbusier Paperback – Illustrated, 
+02293237 | 2772016 | 1 | GEORGIA O KEEFFE (RÚSTICA) 
+02293275 | 2772055 | 1 | FILOSOFÍA FUNDAMENTAL (4 TOMOS) 
+02293289 | 2772072 | 1 | CRITICA 
+02293290 | 2772073 | 1 | Nicolás Nickleby
+02293292 | 2772075 | 1 | 1117 Vidas paralelas VII (Bibl. Basica Gredos) Foción, Catón Joven,  Demóstenes, Agis, Cleómenes, Tiberio,  Cayo Graco, Ciceron
+02293295 | 2772078 | 1 | Psicología social 
+02293296 | 2772079 | 1 | HISTORIA DE LA ESPAÑA CRISTIANA 
+02293324 | 2772112 | 1 |  7 LLAVES PARA CONQUISTAR TU MENTE MAS RAPIDO.
+02293325 | 2772113 | 1 | Re-Evolución Péndulo Hebreo La técnica que te acompañará en todos tus desafios
+02293327 | 2772115 | 1 | EL COMUNISMO.
+02293331 | 2772119 | 1 | Entre mandarines y bandoleros. Jose Freinademetz misionero del Verbo Divino en China durante 28 años. Prólogo de Eduardo Safer, SVD
+02293340 | 2772128 | 1 | ESTUDIOS CLASICOS. TOMO XXXII. (NUMERO 97). REVISTA.  
+02293385 | 2772175 | 1 |  Francisco Giner de los Ríos visto por Galdós, Unamuno, A. Machado, J. Ramón Jiménez, Alfonso Reyes, etc.
+02293406 | 2772198 | 1 | Las grandes encíclicas sociales Rerum Novarum, Quadragesimo Anno, Divini Redemptoris, Divini Illius Magistri, Casti Connubi
+02293422 | 2772214 | 1 | El camino del mandala  
+02293424 | 2772216 | 1 | Poetas líricos del siglo XVIII. Antología. Selección estudio y notas de. CAPOTE, Higinio 
+02293428 | 2772220 | 1 | Biochemical Problems of Lipids B.B.A. Library, vol. 1
+02293429 | 2772221 | 1 | Autos sacramentales I (El gran teatro del mundo y la devocion de la Misa) 
+02293433 | 2772225 | 1 | RECUERDOS DE FERNÁN CABALLERO
+02293441 | 2772233 | 1 | AÑORANZA (Dedicatoria y firma autógrafa de autor) PRIMERA EDICIÓN
+02293467 | 2772266 | 1 | la Boda y el Baile de Luis Alonso (como NUEVO, libreto + estudios, ilustrado), temporada 2005-2006
+02293468 | 2772267 | 1 | la Boda y el Baile de Luis Alonso (como NUEVO, libreto + estudios, ilustrado), temporada 2005-2006
+2051255AG | 1537515 | null | DIARIO DE UN PISTOLERO ANARQUISTA
