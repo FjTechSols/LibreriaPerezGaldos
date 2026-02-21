@@ -2,8 +2,8 @@ name: AbeBooks Auto Sync
 
 on:
   schedule:
-    # Ejecutar cada 6 horas: 2am, 8am, 2pm, 8pm UTC
-    - cron: "0 2,8,14,20 * * *"
+    # Ejecutar cada 2 horas
+    - cron: "0 */2 * * *"
   workflow_dispatch: # Permite ejecución manual desde GitHub
 
 jobs:
