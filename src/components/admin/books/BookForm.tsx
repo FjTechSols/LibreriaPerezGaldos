@@ -809,9 +809,18 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Stock</label>
                     <input
-                      type="number"
-                      value={formData.stock || 0}
-                      onChange={(e) => setFormData({...formData, stock: parseInt(e.target.value)})}
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.stock ?? 0}
+                      onKeyDown={(e) => {
+                        if (!/[0-9]/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9]/g, '');
+                        setFormData({...formData, stock: val === '' ? 0 : parseInt(val, 10)});
+                      }}
                       className="form-input"
                       style={{ width: '100%' }}
                     />

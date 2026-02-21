@@ -286,9 +286,18 @@ export function BookFormLegacy({
                  {/* Row 13: Stock (Disponibles) */}
                  {renderField('Disponibles', (
                      <input 
-                        type="number" 
-                        value={formData.stock || 0}
-                        onChange={e => setFormData(prev => ({...prev, stock: parseInt(e.target.value)}))}
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.stock ?? 0}
+                        onKeyDown={(e) => {
+                          if (!/[0-9]/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={e => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          setFormData(prev => ({...prev, stock: val === '' ? 0 : parseInt(val, 10)}));
+                        }}
                         className="w-24 px-2 py-1 text-sm border border-gray-400 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     />
                 ))}
