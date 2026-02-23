@@ -144,7 +144,7 @@ async function uploadToAbeBooksFTP() {
         
         // Generate filename with timestamp
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        const remoteFilename = `inventory_update_${timestamp}.txt`;
+        const remoteFilename = `purge_inventory_${timestamp}.txt`;
 
         
         console.log(`📤 Subiendo archivo como: ${remoteFilename}...`);
