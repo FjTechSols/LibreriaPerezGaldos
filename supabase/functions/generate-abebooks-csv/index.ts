@@ -51,8 +51,6 @@ serve(async (req) => {
             const { data: books, error } = await supabaseClient
               .from('libros')
               .select('id, legacy_id, titulo, autor, isbn, precio, stock, editoriales(nombre), descripcion, anio, ubicacion, imagen_url, estado, paginas')
-              .gt('stock', 0)
-              .gte('precio', minPrice)
               .order('id', { ascending: true })
               .range(from, from + BATCH_SIZE - 1);
 
@@ -80,6 +78,10 @@ serve(async (req) => {
                      imageUrl = book.imagen_url;
                 }
 
+                // Logic applied: AbeBooks needs an explicit '0' quantity to delete/unlist a book
+                // If the book does not meet our minimum price or has no stock, we enforce quantity 0
+                const exportQuantity = (book.stock > 0 && Number(book.precio) >= minPrice) ? book.stock : 0;
+
                 // Format:
                 // Col 11: Pages (Corrected)
                 // Col 12: Empty
@@ -95,7 +97,7 @@ serve(async (req) => {
                     q(""), // Place
                     q("España"), // Country
                     u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    u(book.stock || 1), // Col 11: Quantity (Unquoted)
+                    u(exportQuantity), // Col 11: Quantity (Unquoted), explicit 0 is allowed and means delete
                     q(book.isbn || "") // Col 12: ISBN
                 ];
                 chunk += row.join(separator) + '\r\n';

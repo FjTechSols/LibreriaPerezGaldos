@@ -18,6 +18,10 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   const [activeTab, setActiveTab] = useState<'api' | 'ftps'>('ftps');
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+  
+  // UI States for saving FTPS settings
+  const [isSavingFtps, setIsSavingFtps] = useState(false);
+  const [ftpsSaveSuccess, setFtpsSaveSuccess] = useState(false);
 
   const abeSettings = settings.integrations.abeBooks;
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -105,6 +109,20 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
       ...settings.integrations,
       abeBooks: newAbeBooks
     });
+  };
+
+  const saveFtpsSettings = async () => {
+    setIsSavingFtps(true);
+    setFtpsSaveSuccess(false);
+    try {
+      await handleFtpsUpdate('minPrice', localMinPrice);
+      setFtpsSaveSuccess(true);
+      setTimeout(() => setFtpsSaveSuccess(false), 3000);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSavingFtps(false);
+    }
   };
 
   // Helper to update master switch
@@ -320,22 +338,35 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                 </h4>
 
                 {/* Minimum Price */}
-                <div className="toggle-group mb-4">
+                <div className="toggle-group mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
                     Precio Mínimo de Exportación (€)
                   </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={localMinPrice}
-                    onChange={(e) => setLocalMinPrice(parseFloat(e.target.value))}
-                    onBlur={() => handleFtpsUpdate('minPrice', localMinPrice)}
-                    disabled={!abeSettings.enabled}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  />
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={localMinPrice}
+                      onChange={(e) => setLocalMinPrice(parseFloat(e.target.value))}
+                      disabled={!abeSettings.enabled || isSavingFtps}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    />
+                    <button
+                      onClick={saveFtpsSettings}
+                      disabled={!abeSettings.enabled || isSavingFtps}
+                      className="btn-primary py-2 px-4 flex items-center gap-2"
+                    >
+                      {isSavingFtps ? (
+                        <RefreshCw size={16} className="animate-spin" />
+                      ) : ftpsSaveSuccess ? (
+                        <CheckCircle2 size={16} />
+                      ) : null}
+                      {isSavingFtps ? 'Guardando...' : ftpsSaveSuccess ? 'Guardado' : 'Guardar Ajustes'}
+                    </button>
+                  </div>
                   <p className="toggle-description mt-2">
-                    Solo se subirán libros con precio igual o superior a este valor.
+                    Solo se publicarán en AbeBooks los libros con precio igual o superior a este valor. Los que no lleguen a este precio se marcarán como agotados (borrado de AbeBooks).
                   </p>
                 </div>
 
