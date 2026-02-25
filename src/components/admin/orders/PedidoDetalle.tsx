@@ -124,21 +124,29 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     let success = false;
     let errorMsg = '';
     
-    // If Internal Order becoming Shipped, save shipping info + status together
+    // FIX: Para todos los tipos de pedido, usar actualizarEstadoPedido (contiene la lógica de stock).
+    // Para pedidos 'interno' que pasan a 'enviado', primero guardamos los datos de envío
+    // sin cambiar el estado, y luego llamamos a actualizarEstadoPedido para el cambio de estado.
     if (pedido.tipo === 'interno' && nuevoEstado === 'enviado') {
-        // cast transportista to any to avoid strict union check if user typed custom value
-        success = await actualizarPedido(pedido.id, {
-            ...pedido,
-            estado: nuevoEstado,
+        // Paso 1: Guardar transportista/tracking sin tocar el estado
+        const shippingUpdated = await actualizarPedido(pedido.id, {
             transportista: transportista as any,
             tracking: tracking
         });
-        if (!success) errorMsg = 'Error al actualizar el pedido con datos de envÃ­o.';
+        if (!shippingUpdated) {
+            errorMsg = 'Error al guardar los datos de env\u00edo.';
+        } else {
+            // Paso 2: Cambiar estado CON lógica de descuento de stock
+            const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
+            success = result.success;
+            errorMsg = result.error || '';
+        }
     } else {
         const result = await actualizarEstadoPedido(pedido.id, nuevoEstado);
         success = result.success;
         errorMsg = result.error || '';
     }
+
 
     if (success) {
       // Email Logic for Internal Orders

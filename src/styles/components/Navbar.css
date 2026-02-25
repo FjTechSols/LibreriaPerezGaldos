@@ -227,10 +227,9 @@
   color: var(--danger);
   background: rgba(239, 68, 68, 0.05);
 }
-
 .login-link {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  color: white;
+  color: var(--accent-contrast) !important;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-weight: 600;

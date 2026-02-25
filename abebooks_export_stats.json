@@ -1,0 +1,12 @@
+{
+  "total": 413657,
+  "exported_to_abebooks": 132812,
+  "stock_zero": 180170,
+  "stock_negative": 12,
+  "price_zero": 263,
+  "stock_ok_price_zero": 88,
+  "stock_ok_low_price": 92859,
+  "min_price_used": 12,
+  "note_stock_filter": "Edge function uses .gt('stock', 0) - correct, excludes 0 and negatives",
+  "note_price_filter": "Edge function uses .gte('precio', 12)"
+}

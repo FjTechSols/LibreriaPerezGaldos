@@ -1,0 +1,3934 @@
+{
+  "total_zero_price_books": 263,
+  "missing_legacy_id": [],
+  "not_found_in_source": [
+    {
+      "id": 1534365,
+      "titulo": "Test Ubicacion",
+      "precio": 0,
+      "legacy_id": "TEST_LEN_1",
+      "stock": 1,
+      "note": "Legacy ID no encontrado en archivo fuente"
+    },
+    {
+      "id": 1537515,
+      "titulo": "DIARIO DE UN PISTOLERO ANARQUISTA",
+      "precio": 0,
+      "legacy_id": "2051255AG",
+      "stock": null,
+      "note": "Legacy ID no encontrado en archivo fuente"
+    },
+    {
+      "id": 1542667,
+      "titulo": "Breve historia del futuro",
+      "precio": 0,
+      "legacy_id": "2051737",
+      "stock": 0,
+      "note": "Legacy ID no encontrado en archivo fuente"
+    }
+  ],
+  "price_mismatch": [],
+  "price_match_zero": [
+    {
+      "db_data": {
+        "id": 467860,
+        "titulo": "Filomeno, a mi pesar Crínica del rey pasmado",
+        "precio": 0,
+        "legacy_id": "02108507",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Filomeno, a mi pesar Crínica del rey pasmado",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503862,
+        "titulo": "Música fúnebre para masones",
+        "precio": 0,
+        "legacy_id": "02146182",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Música fúnebre para masones",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503864,
+        "titulo": "Otra idea de Cataluña",
+        "precio": 0,
+        "legacy_id": "02146184",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Otra idea de Cataluña",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504095,
+        "titulo": "Eduard Manet",
+        "precio": 0,
+        "legacy_id": "02146417",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Eduard Manet",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504355,
+        "titulo": "Un muchacho valiente : Domingo Savio",
+        "precio": 0,
+        "legacy_id": "02146684",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Un muchacho valiente : Domingo Savio",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504364,
+        "titulo": "Impuesto sobre el valor añadido. Doctrina Dirección General Tributo",
+        "precio": 0,
+        "legacy_id": "02146693",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Impuesto sobre el valor añadido. Doctrina Dirección General Tributo",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504365,
+        "titulo": "Impuesto sobre el valor añadido : recopilación normativa, 1989",
+        "precio": 0,
+        "legacy_id": "02146694",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Impuesto sobre el valor añadido : recopilación normativa, 1989",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504374,
+        "titulo": "Observar las aves",
+        "precio": 0,
+        "legacy_id": "02146703",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Observar las aves",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504377,
+        "titulo": "Revista \"Documentación social\". nº 40. Propiedad y conflicto en España",
+        "precio": 0,
+        "legacy_id": "R2146706",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Revista \"Documentación social\". nº 40. Propiedad y conflicto en España",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504526,
+        "titulo": "Sabiduría : agenda 2011",
+        "precio": 0,
+        "legacy_id": "02146856",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Sabiduría : agenda 2011",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1466489,
+        "titulo": "YO MATÉ A KENNEDY",
+        "precio": 0,
+        "legacy_id": "H2062869",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "YO MATÉ A KENNEDY",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 411451,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02027145",
+        "stock": 2
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 472098,
+        "titulo": "Vingt ans apres I",
+        "precio": 0,
+        "legacy_id": "02113218",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Vingt ans apres I",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504534,
+        "titulo": "Agosto, octubre",
+        "precio": 0,
+        "legacy_id": "02146864",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Agosto, octubre",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503869,
+        "titulo": "Liquidación",
+        "precio": 0,
+        "legacy_id": "02146189",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Liquidación",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1492645,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02182502",
+        "stock": -1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503861,
+        "titulo": "El llanto de los buitres",
+        "precio": 0,
+        "legacy_id": "02146181",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El llanto de los buitres",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503898,
+        "titulo": "ENCUENTROS EN BONAVAL",
+        "precio": 0,
+        "legacy_id": "02146218",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "ENCUENTROS EN BONAVAL",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503926,
+        "titulo": "La condición humana",
+        "precio": 0,
+        "legacy_id": "02146246",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La condición humana",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503927,
+        "titulo": "Don Juan",
+        "precio": 0,
+        "legacy_id": "02146247",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Don Juan",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504389,
+        "titulo": "Los reflejos cerebrales",
+        "precio": 0,
+        "legacy_id": "02146718",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Los reflejos cerebrales",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504470,
+        "titulo": "Anuario estadístico 1951 Zona de protectorado y de los territorios de soberania de España en el norte de africa",
+        "precio": 0,
+        "legacy_id": "02146799",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Anuario estadístico 1951 Zona de protectorado y de los territorios de soberania de España en el norte de africa",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 434599,
+        "titulo": "E",
+        "precio": 0,
+        "legacy_id": "02058001",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "E",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408916,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024649",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504750,
+        "titulo": "Marruecos",
+        "precio": 0,
+        "legacy_id": "02147088",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Marruecos",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 476157,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117505",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408964,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024696",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408956,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024688",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408959,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024691",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 443247,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02077465",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 443619,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02078093",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 443622,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02078096",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 443621,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02078095",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408970,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024702",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1476734,
+        "titulo": "GALDOS: DIALOGOS BIOGRAFICOS",
+        "precio": 0,
+        "legacy_id": "02268917",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "GALDOS: DIALOGOS BIOGRAFICOS",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1455467,
+        "titulo": "MUERTE CON ESCOLTA",
+        "precio": 0,
+        "legacy_id": "1040729",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "MUERTE CON ESCOLTA",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464934,
+        "titulo": "Obras Selectas",
+        "precio": 0,
+        "legacy_id": "N0050055T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Obras Selectas",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464937,
+        "titulo": "Obras Selectas",
+        "precio": 0,
+        "legacy_id": "N0050058T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Obras Selectas",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464938,
+        "titulo": "Obras Selectas",
+        "precio": 0,
+        "legacy_id": "N0050059T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Obras Selectas",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 436182,
+        "titulo": "47 LECCIONES DE FÍSICA EXPERIMENTAL. Contestaciones a las preguntas del programa de ingreso de la Academia Oficial de Aduanas",
+        "precio": 0,
+        "legacy_id": "02061853",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "47 LECCIONES DE FÍSICA EXPERIMENTAL. Contestaciones a las preguntas del programa de ingreso de la Academia Oficial de Aduanas",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 476019,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117356",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "USA"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 476232,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117580",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 476267,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117618",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 477011,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02118381",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "UK"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 478105,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02119527",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Alemania"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1459309,
+        "titulo": "historia reinas de españa",
+        "precio": 0,
+        "legacy_id": "0830179",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "historia reinas de españa",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 478125,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02119548",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Alemania"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489336,
+        "titulo": "Paulho Coelho",
+        "precio": 0,
+        "legacy_id": "02131344",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Paulho Coelho",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 490348,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02132377",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Argentina"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 491035,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02133074",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 491045,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02133084",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 491867,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02133929",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "EEUU"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 492155,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02134219",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Gran Bretaña"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 492626,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02134694",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 492992,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02135071",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 494483,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02136588",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 494966,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02137085",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 495509,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02137636",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "U.S.A."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 497589,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02139747",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 498426,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02140598",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1486302,
+        "titulo": "La imaginación descontrolada de Olivia Joules",
+        "precio": 0,
+        "legacy_id": "02256096",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La imaginación descontrolada de Olivia Joules",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 514250,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02157478",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400247,
+        "titulo": "Biblia contada a los mayores, la",
+        "precio": 0,
+        "legacy_id": "02016051",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Biblia contada a los mayores, la",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 505458,
+        "titulo": "Basic  english usage",
+        "precio": 0,
+        "legacy_id": "02147809",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Basic  english usage",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1537502,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "H2051205",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": ""
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1539530,
+        "titulo": "o",
+        "precio": 0,
+        "legacy_id": "00053183A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "o",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478199,
+        "titulo": "LA GRAN MENTIRA",
+        "precio": 0,
+        "legacy_id": "02162239",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "LA GRAN MENTIRA",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478200,
+        "titulo": "CARAVANA HACIA EL SUR",
+        "precio": 0,
+        "legacy_id": "02162240",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "CARAVANA HACIA EL SUR",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478201,
+        "titulo": "La GESTAPO",
+        "precio": 0,
+        "legacy_id": "02162241",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La GESTAPO",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478202,
+        "titulo": "VEN, GATITA",
+        "precio": 0,
+        "legacy_id": "02162243",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "VEN, GATITA",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478203,
+        "titulo": "Cours pratique d electricite industrielle. T III",
+        "precio": 0,
+        "legacy_id": "02162244",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Cours pratique d electricite industrielle. T III",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478412,
+        "titulo": "LA BIBLIA DIDACTICA",
+        "precio": 0,
+        "legacy_id": "02162984",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "LA BIBLIA DIDACTICA",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478413,
+        "titulo": "Carrera de Doris Hart, la. VOL 1",
+        "precio": 0,
+        "legacy_id": "02162985",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Carrera de Doris Hart, la. VOL 1",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478414,
+        "titulo": "Nacimiento de un niño, el",
+        "precio": 0,
+        "legacy_id": "02162987",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Nacimiento de un niño, el",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 388881,
+        "titulo": "diario",
+        "precio": 0,
+        "legacy_id": "A2004756",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "diario",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 740992,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "H2061745",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": ""
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464263,
+        "titulo": "NO",
+        "precio": 0,
+        "legacy_id": "Profusam",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "NO",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464935,
+        "titulo": "Obras Completas IV",
+        "precio": 0,
+        "legacy_id": "00050056T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Obras Completas IV",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464936,
+        "titulo": "Obras Completas IV",
+        "precio": 0,
+        "legacy_id": "N0050057T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Obras Completas IV",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 381911,
+        "titulo": "Prosas encontradas 1924-1942",
+        "precio": 0,
+        "legacy_id": "1008062",
+        "stock": 1
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Prosas encontradas 1924-1942",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408998,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024730",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 428910,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2044673",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 457991,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02098455",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 788689,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02163179",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 792481,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02166800",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 381319,
+        "titulo": "Hijos del Corazón. Guía útil de padres adoptivos",
+        "precio": 0,
+        "legacy_id": "0418038",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Hijos del Corazón. Guía útil de padres adoptivos",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 410024,
+        "titulo": "Mito y epopeya II",
+        "precio": 0,
+        "legacy_id": "R2025738",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Mito y epopeya II",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 383149,
+        "titulo": "Tratado elemental de Química",
+        "precio": 0,
+        "legacy_id": "A000434",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Tratado elemental de Química",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 479925,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02121399",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489305,
+        "titulo": "Las Siete Palabras del Señor en la Cruz",
+        "precio": 0,
+        "legacy_id": "02131312",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Las Siete Palabras del Señor en la Cruz",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489306,
+        "titulo": "Sacerdote, ministro de la reconciliacion",
+        "precio": 0,
+        "legacy_id": "02131313",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Sacerdote, ministro de la reconciliacion",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489307,
+        "titulo": "Comunidades de base y Nueva Iglesia",
+        "precio": 0,
+        "legacy_id": "02131314",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Comunidades de base y Nueva Iglesia",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489542,
+        "titulo": "Dios para que. Interrogantes del ateismo de cara a la nueva evangelizacion",
+        "precio": 0,
+        "legacy_id": "02131554",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Dios para que. Interrogantes del ateismo de cara a la nueva evangelizacion",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 428510,
+        "titulo": "a",
+        "precio": 0,
+        "legacy_id": "A2044276",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "a",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 381107,
+        "titulo": "Manuscritos incunables",
+        "precio": 0,
+        "legacy_id": "0128014",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Manuscritos incunables",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1533219,
+        "titulo": "EXISTENCIA Y NEUROSIS",
+        "precio": 0,
+        "legacy_id": "02281439",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "EXISTENCIA Y NEUROSIS",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 484265,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02126158",
+        "stock": -1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478410,
+        "titulo": "Ajedrez hipermoderno. Vol. II",
+        "precio": 0,
+        "legacy_id": "02162979",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Ajedrez hipermoderno. Vol. II",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 486672,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02128642",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Francia"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 737939,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "H2055920",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": ""
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 984437,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02165542",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489731,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02131747",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400443,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02016246",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": ""
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400610,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02016413",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 490774,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02132811",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 494140,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02136239",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Argentina"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 495428,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02137554",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 362013,
+        "titulo": "Auge y caída de las grandes potencias",
+        "precio": 0,
+        "legacy_id": "0022282",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Auge y caída de las grandes potencias",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 495590,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02137717",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 495562,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02137689",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "EEUU"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 496603,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02138743",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 497083,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02139232",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 499726,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02141930",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 501169,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02143413",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503839,
+        "titulo": "Lecciones de procesos civiles especiales",
+        "precio": 0,
+        "legacy_id": "02146152",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Lecciones de procesos civiles especiales",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503901,
+        "titulo": "Un vago, dos vagos, tres vagos",
+        "precio": 0,
+        "legacy_id": "02146221",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Un vago, dos vagos, tres vagos",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504474,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02146803",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 504218,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02146545",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 505142,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02147486",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 505578,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02147933",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 509778,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02152217",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 514392,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02157621",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 514533,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02157765",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 974322,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02159710",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480632,
+        "titulo": "El camino de la vida",
+        "precio": 0,
+        "legacy_id": "02166307",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El camino de la vida",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480633,
+        "titulo": "La epístola a los Hebreos",
+        "precio": 0,
+        "legacy_id": "02166308",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La epístola a los Hebreos",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480634,
+        "titulo": "Qué es creer?",
+        "precio": 0,
+        "legacy_id": "02166309",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Qué es creer?",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480635,
+        "titulo": "El codesarrollo en España : protagonistas, discursos y experiencias",
+        "precio": 0,
+        "legacy_id": "02166310",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El codesarrollo en España : protagonistas, discursos y experiencias",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480639,
+        "titulo": "Perro endemoniado, el",
+        "precio": 0,
+        "legacy_id": "02166316",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Perro endemoniado, el",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480640,
+        "titulo": "La cabaña del tío Tom",
+        "precio": 0,
+        "legacy_id": "02166317",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La cabaña del tío Tom",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480641,
+        "titulo": "El mal de la muerte",
+        "precio": 0,
+        "legacy_id": "02166324",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El mal de la muerte",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1480642,
+        "titulo": "El hombre sentado en el pasillo",
+        "precio": 0,
+        "legacy_id": "02166325",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El hombre sentado en el pasillo",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 977528,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02160557",
+        "stock": 2
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 978533,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02161364",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "México"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 788155,
+        "titulo": "--Y los 40 ladrones",
+        "precio": 0,
+        "legacy_id": "02162383",
+        "stock": 1
+      },
+      "source_data": {
+        "price": 0,
+        "title": "--Y los 40 ladrones",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 788734,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02163250",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 789551,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02164511",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 789558,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02164525",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Francia"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 460989,
+        "titulo": "Joan Brotat",
+        "precio": 0,
+        "legacy_id": "02101485",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Joan Brotat",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 984318,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02165647",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 791545,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02164766",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 461683,
+        "titulo": "Memorias",
+        "precio": 0,
+        "legacy_id": "02102183",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Memorias",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 474575,
+        "titulo": "La isla secreta. Un recorrido por Islandia",
+        "precio": 0,
+        "legacy_id": "02115880",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La isla secreta. Un recorrido por Islandia",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1539299,
+        "titulo": "j",
+        "precio": 0,
+        "legacy_id": "00053166A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "j",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1539300,
+        "titulo": "ñ",
+        "precio": 0,
+        "legacy_id": "00053167A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "ñ",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1539987,
+        "titulo": "l",
+        "precio": 0,
+        "legacy_id": "00053207A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "l",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1465874,
+        "titulo": "documentos graficos",
+        "precio": 0,
+        "legacy_id": "H2060494",
+        "stock": null
+      },
+      "source_data": {
+        "price": 0,
+        "title": "documentos graficos",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 434811,
+        "titulo": "E",
+        "precio": 0,
+        "legacy_id": "02058463",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "E",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 975826,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02158651",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1466216,
+        "titulo": "El Bandolerismo. Estudio Social y Memorias Historicas . tomo X",
+        "precio": 0,
+        "legacy_id": "H2061849",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El Bandolerismo. Estudio Social y Memorias Historicas . tomo X",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 467718,
+        "titulo": "Los mitos de la historia de España",
+        "precio": 0,
+        "legacy_id": "02108363",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Los mitos de la historia de España",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 502252,
+        "titulo": "Gramatica francesa y trozos de traduccion",
+        "precio": 0,
+        "legacy_id": "02144527",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Gramatica francesa y trozos de traduccion",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 792234,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02166401",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 792233,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02166400",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 503844,
+        "titulo": "Cent un poemes per a l'eternitat",
+        "precio": 0,
+        "legacy_id": "02146157",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Cent un poemes per a l'eternitat",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 505464,
+        "titulo": "Internet para todos",
+        "precio": 0,
+        "legacy_id": "02147816",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Internet para todos",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 468183,
+        "titulo": "Respuestas filosóficas a la ética, a la ciencia y a la religión",
+        "precio": 0,
+        "legacy_id": "02108831",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Respuestas filosóficas a la ética, a la ciencia y a la religión",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 407041,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02022785",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 356734,
+        "titulo": "¡Qué sabrá usted de fútbol!: cómo entender a jugadores, entrenadores, árbitros?",
+        "precio": 0,
+        "legacy_id": "0017009",
+        "stock": 1
+      },
+      "source_data": {
+        "price": 0,
+        "title": "¡Qué sabrá usted de fútbol!: cómo entender a jugadores, entrenadores, árbitros?",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 494164,
+        "titulo": "VIAJES DE ENRIQUE WANTON A LAS TIERRAS AUSTRALES Y  AL PAIS DE LAS MONAS  TOMO I",
+        "precio": 0,
+        "legacy_id": "02136263",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "VIAJES DE ENRIQUE WANTON A LAS TIERRAS AUSTRALES Y  AL PAIS DE LAS MONAS  TOMO I",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408386,
+        "titulo": "b",
+        "precio": 0,
+        "legacy_id": "02024120",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "b",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1500682,
+        "titulo": "Arrendamiento local para spot de Cortefiel",
+        "precio": 0,
+        "legacy_id": "02239073",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Arrendamiento local para spot de Cortefiel",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 505446,
+        "titulo": "Ramón y Cajal",
+        "precio": 0,
+        "legacy_id": "02147797",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Ramón y Cajal",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 438262,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02067637",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400053,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02015857",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Francia."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 351476,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "0011749",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 409745,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02025464",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 418103,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02033762",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408952,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024684",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 423048,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02038730",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 435588,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02060679",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 439320,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02069631",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 409002,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024734",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 408989,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2024721",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 434607,
+        "titulo": "C",
+        "precio": 0,
+        "legacy_id": "02058009",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "C",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 467404,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02108046",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 469778,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02110628",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 409813,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02025531",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464958,
+        "titulo": "las fieras de tarzan",
+        "precio": 0,
+        "legacy_id": "N0050089T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "las fieras de tarzan",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464959,
+        "titulo": "las fieras de tarzan",
+        "precio": 0,
+        "legacy_id": "N0050090T",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "las fieras de tarzan",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 475070,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02116383",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 475648,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02116972",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 475784,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117116",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 475808,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117140",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1459387,
+        "titulo": "LA CASA DE CERVANTES EN VALLADOLID",
+        "precio": 0,
+        "legacy_id": "0830092",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "LA CASA DE CERVANTES EN VALLADOLID",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 478507,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02119937",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 411981,
+        "titulo": "p",
+        "precio": 0,
+        "legacy_id": "02056065",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "p",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 482369,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02124208",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 482908,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02124761",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 485884,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02127839",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 493216,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02135299",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Francia"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 493593,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02135676",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 493652,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02135739",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 493999,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02136096",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 496520,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02138659",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "México"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 496780,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02138922",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Argentina"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 498167,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02140335",
+        "stock": 2
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 500565,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02142793",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 502509,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02144790",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 506134,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02148511",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "México"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 509235,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02152379",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 514064,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02157287",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 487920,
+        "titulo": "Los sueños  LAS RESPUESTAS DE ESTA NOCHE A LAS PREGUNTAS DE MAÑANA",
+        "precio": 0,
+        "legacy_id": "02129908",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Los sueños  LAS RESPUESTAS DE ESTA NOCHE A LAS PREGUNTAS DE MAÑANA",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1478243,
+        "titulo": "El árbol de la diana",
+        "precio": 0,
+        "legacy_id": "02162384",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El árbol de la diana",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489544,
+        "titulo": "La Republica de Sudafrica. Impresiones de un viaje",
+        "precio": 0,
+        "legacy_id": "02131556",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "La Republica de Sudafrica. Impresiones de un viaje",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 469114,
+        "titulo": "El doble etérico. Fenómenos relacionados con el mismo",
+        "precio": 0,
+        "legacy_id": "02109887",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El doble etérico. Fenómenos relacionados con el mismo",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 473863,
+        "titulo": "Teatro",
+        "precio": 0,
+        "legacy_id": "02115149",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Teatro",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 368336,
+        "titulo": "Masaje zonal en vídeo. Um método para prevenir los problemas más comunes",
+        "precio": 0,
+        "legacy_id": "0028606",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Masaje zonal en vídeo. Um método para prevenir los problemas más comunes",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1476174,
+        "titulo": "Real Madrid . Boletin informativo",
+        "precio": 0,
+        "legacy_id": "00071391A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Real Madrid . Boletin informativo",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 369764,
+        "titulo": "El proceso",
+        "precio": 0,
+        "legacy_id": "0030029",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El proceso",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 461997,
+        "titulo": "Pom-- Pom-- ¡Pompibol!",
+        "precio": 0,
+        "legacy_id": "02102502",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Pom-- Pom-- ¡Pompibol!",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 430097,
+        "titulo": "Breviarium romanum ex decreto Sacrosancti Concilii Tridentini restitutum Sancti PII V. Pontificis maximi jussu editum Clementis VIII et Urbani VIII",
+        "precio": 0,
+        "legacy_id": "R2045864",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Breviarium romanum ex decreto Sacrosancti Concilii Tridentini restitutum Sancti PII V. Pontificis maximi jussu editum Clementis VIII et Urbani VIII",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 462606,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02103113",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 433840,
+        "titulo": "d",
+        "precio": 0,
+        "legacy_id": "02056004",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "d",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1535269,
+        "titulo": "b",
+        "precio": 0,
+        "legacy_id": "00053089A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "b",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 414095,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "R2029781",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1497210,
+        "titulo": "PLANS, ELEVATIONS, SECTIONS AND DETAILS OF THE ALHAMBRA: From Drawings Taken On The Spot In 1834",
+        "precio": 0,
+        "legacy_id": "02202652",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "PLANS, ELEVATIONS, SECTIONS AND DETAILS OF THE ALHAMBRA: From Drawings Taken On The Spot In 1834",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 436028,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02061546",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 391902,
+        "titulo": "Los placeres y los días. Parodias y miscelánea",
+        "precio": 0,
+        "legacy_id": "02007761",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Los placeres y los días. Parodias y miscelánea",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 801568,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "02177183",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 473721,
+        "titulo": "En Pinotxo",
+        "precio": 0,
+        "legacy_id": "02115005",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "En Pinotxo",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 475279,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02116597",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 476145,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117489",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "Mexico"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 476286,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02117637",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 478826,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02120264",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 480374,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02121864",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1474510,
+        "titulo": "LAS DOS ESPAÑAS Y EL REY",
+        "precio": 0,
+        "legacy_id": "G0062855R",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "LAS DOS ESPAÑAS Y EL REY",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464515,
+        "titulo": "NO",
+        "precio": 0,
+        "legacy_id": "Trad. Ru",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "NO",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 488218,
+        "titulo": "El silencio",
+        "precio": 0,
+        "legacy_id": "02130212",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El silencio",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 452185,
+        "titulo": "Academia Zaratustra",
+        "precio": 0,
+        "legacy_id": "02091336",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Academia Zaratustra",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 507844,
+        "titulo": "Barter the right way",
+        "precio": 0,
+        "legacy_id": "02150271",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Barter the right way",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1540636,
+        "titulo": "El arte árabe",
+        "precio": 0,
+        "legacy_id": "H2110285",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El arte árabe",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 381281,
+        "titulo": "Dibujos de la Sierra de Urbión, de apuntes tomados del natural",
+        "precio": 0,
+        "legacy_id": "0411116",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Dibujos de la Sierra de Urbión, de apuntes tomados del natural",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1471492,
+        "titulo": "EL",
+        "precio": 0,
+        "legacy_id": "00053930A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "EL",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1451142,
+        "titulo": "MARXISMO CONTRA STALINISMO: MARX EN LA PRIMERA MITAD DEL SIGLO XX",
+        "precio": 0,
+        "legacy_id": "F0002423",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "MARXISMO CONTRA STALINISMO: MARX EN LA PRIMERA MITAD DEL SIGLO XX",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1451270,
+        "titulo": "NO",
+        "precio": 0,
+        "legacy_id": "enéndez",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "NO",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1444567,
+        "titulo": "HUMANAE SALUTIS MONUMENTA / MONUMENTOS DE LA SALUD DEL HOMBRE",
+        "precio": 0,
+        "legacy_id": "1100495",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "HUMANAE SALUTIS MONUMENTA / MONUMENTOS DE LA SALUD DEL HOMBRE",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1512371,
+        "titulo": "Una vecina perfecta",
+        "precio": 0,
+        "legacy_id": "02253861",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Una vecina perfecta",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1540848,
+        "titulo": ".",
+        "precio": 0,
+        "legacy_id": "00054264A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": ".",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 374047,
+        "titulo": "CATALOGOS PROMOCIONALES. MATERIAL GRÁFICO",
+        "precio": 0,
+        "legacy_id": "0034303",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "CATALOGOS PROMOCIONALES. MATERIAL GRÁFICO",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1463897,
+        "titulo": "L",
+        "precio": 0,
+        "legacy_id": "N0003106",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "L",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1464514,
+        "titulo": "1983",
+        "precio": 0,
+        "legacy_id": "Teorema",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "1983",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 381222,
+        "titulo": "Las palomas domésticas, su cría y utilidades",
+        "precio": 0,
+        "legacy_id": "0308011",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Las palomas domésticas, su cría y utilidades",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 383764,
+        "titulo": "Figuras de la pasión del Señor. Nuestro padre San Daniel",
+        "precio": 0,
+        "legacy_id": "A001046",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Figuras de la pasión del Señor. Nuestro padre San Daniel",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 471771,
+        "titulo": "El gran libro de las civilizaciones antiguas",
+        "precio": 0,
+        "legacy_id": "02112841",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "El gran libro de las civilizaciones antiguas",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1473789,
+        "titulo": "F",
+        "precio": 0,
+        "legacy_id": "N0060148A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "F",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1454879,
+        "titulo": "Sin título",
+        "precio": 0,
+        "legacy_id": "1041660",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 429603,
+        "titulo": "b",
+        "precio": 0,
+        "legacy_id": "02045369",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "b",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 370932,
+        "titulo": "Mecánica para ingenieros",
+        "precio": 0,
+        "legacy_id": "0031194",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "Mecánica para ingenieros",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 489984,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02132004",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400050,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02015854",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400593,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02016396",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 400617,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02016420",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 495600,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02137727",
+        "stock": 0
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 498270,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02140440",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 498455,
+        "titulo": "N/A",
+        "precio": 0,
+        "legacy_id": "02140629",
+        "stock": 1
+      },
+      "source_data": {
+        "price": null,
+        "title": "",
+        "originalPriceStr": "España."
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1455002,
+        "titulo": "EL ENCUENTRO DE LA VALQUIRIA",
+        "precio": 0,
+        "legacy_id": "1041405",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "EL ENCUENTRO DE LA VALQUIRIA",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1539323,
+        "titulo": "0",
+        "precio": 0,
+        "legacy_id": "00053175A",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "0",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1459422,
+        "titulo": "LAS MUJERES DE LOS NAZIS",
+        "precio": 0,
+        "legacy_id": "0820442",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "LAS MUJERES DE LOS NAZIS",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    },
+    {
+      "db_data": {
+        "id": 1459516,
+        "titulo": "DOCUMENTOS",
+        "precio": 0,
+        "legacy_id": "0820300",
+        "stock": 0
+      },
+      "source_data": {
+        "price": 0,
+        "title": "DOCUMENTOS",
+        "originalPriceStr": "0.00"
+      },
+      "note": "Precio es 0 en ambos origenes"
+    }
+  ],
+  "other_errors": []
+}

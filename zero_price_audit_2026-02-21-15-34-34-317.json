@@ -1,0 +1,2824 @@
+{
+  "generated_at": "2026-02-21T15:34:34.309Z",
+  "summary": {
+    "total_zero_price": 263,
+    "with_stock_available": 88,
+    "stock_zero": 171,
+    "stock_negative": 2,
+    "with_generic_title": 128,
+    "with_legacy_id": 263,
+    "without_legacy_id": 0
+  },
+  "urgent": [
+    {
+      "id": 411451,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 2,
+      "legacy_id": "02027145"
+    },
+    {
+      "id": 498167,
+      "titulo": "N/A",
+      "autor": "1951",
+      "precio": 0,
+      "stock": 2,
+      "legacy_id": "02140335"
+    },
+    {
+      "id": 977528,
+      "titulo": "Sin título",
+      "autor": "1942",
+      "precio": 0,
+      "stock": 2,
+      "legacy_id": "02160557"
+    },
+    {
+      "id": 975826,
+      "titulo": "Sin título",
+      "autor": "1969",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02158651"
+    },
+    {
+      "id": 514064,
+      "titulo": "N/A",
+      "autor": "2011",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02157287"
+    },
+    {
+      "id": 974322,
+      "titulo": "Sin título",
+      "autor": "2009",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02159710"
+    },
+    {
+      "id": 469778,
+      "titulo": "N/A",
+      "autor": "2003",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02110628"
+    },
+    {
+      "id": 978533,
+      "titulo": "Sin título",
+      "autor": "1995",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02161364"
+    },
+    {
+      "id": 792234,
+      "titulo": "Sin título",
+      "autor": "1915",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02166401"
+    },
+    {
+      "id": 792233,
+      "titulo": "Sin título",
+      "autor": "1927",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02166400"
+    },
+    {
+      "id": 514392,
+      "titulo": "N/A",
+      "autor": "1909",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02157621"
+    },
+    {
+      "id": 476019,
+      "titulo": "N/A",
+      "autor": "1961",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117356"
+    },
+    {
+      "id": 984318,
+      "titulo": "Sin título",
+      "autor": "1970",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02165647"
+    },
+    {
+      "id": 740992,
+      "titulo": "Sin título",
+      "autor": "",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "H2061745"
+    },
+    {
+      "id": 476267,
+      "titulo": "N/A",
+      "autor": "1955",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117618"
+    },
+    {
+      "id": 409745,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02025464"
+    },
+    {
+      "id": 381911,
+      "titulo": "Prosas encontradas 1924-1942",
+      "autor": "ALBERTI, RAFAEL",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "1008062"
+    },
+    {
+      "id": 478105,
+      "titulo": "N/A",
+      "autor": "1965",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02119527"
+    },
+    {
+      "id": 418103,
+      "titulo": "N/A",
+      "autor": "2000",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02033762"
+    },
+    {
+      "id": 478125,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02119548"
+    },
+    {
+      "id": 428910,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "R2044673"
+    },
+    {
+      "id": 457991,
+      "titulo": "N/A",
+      "autor": "2009",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02098455"
+    },
+    {
+      "id": 788689,
+      "titulo": "Sin título",
+      "autor": "1995",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02163179"
+    },
+    {
+      "id": 482369,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02124208"
+    },
+    {
+      "id": 792481,
+      "titulo": "Sin título",
+      "autor": "1989",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02166800"
+    },
+    {
+      "id": 482908,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02124761"
+    },
+    {
+      "id": 489984,
+      "titulo": "N/A",
+      "autor": "1963",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02132004"
+    },
+    {
+      "id": 491867,
+      "titulo": "N/A",
+      "autor": "1997",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02133929"
+    },
+    {
+      "id": 476286,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117637"
+    },
+    {
+      "id": 492155,
+      "titulo": "N/A",
+      "autor": "1962",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02134219"
+    },
+    {
+      "id": 492626,
+      "titulo": "N/A",
+      "autor": "1956",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02134694"
+    },
+    {
+      "id": 492992,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02135071"
+    },
+    {
+      "id": 423048,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02038730"
+    },
+    {
+      "id": 495509,
+      "titulo": "N/A",
+      "autor": "1982",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137636"
+    },
+    {
+      "id": 496520,
+      "titulo": "N/A",
+      "autor": "1982",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02138659"
+    },
+    {
+      "id": 496780,
+      "titulo": "N/A",
+      "autor": "1986",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02138922"
+    },
+    {
+      "id": 435588,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02060679"
+    },
+    {
+      "id": 498426,
+      "titulo": "N/A",
+      "autor": "1956",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02140598"
+    },
+    {
+      "id": 506134,
+      "titulo": "N/A",
+      "autor": "1985",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02148511"
+    },
+    {
+      "id": 500565,
+      "titulo": "N/A",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02142793"
+    },
+    {
+      "id": 400443,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02016246"
+    },
+    {
+      "id": 400610,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02016413"
+    },
+    {
+      "id": 486672,
+      "titulo": "N/A",
+      "autor": "1987",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02128642"
+    },
+    {
+      "id": 504218,
+      "titulo": "N/A",
+      "autor": "1930",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02146545"
+    },
+    {
+      "id": 505578,
+      "titulo": "N/A",
+      "autor": "1885",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02147933"
+    },
+    {
+      "id": 475648,
+      "titulo": "N/A",
+      "autor": "1947",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02116972"
+    },
+    {
+      "id": 475784,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117116"
+    },
+    {
+      "id": 475808,
+      "titulo": "N/A",
+      "autor": "1962",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117140"
+    },
+    {
+      "id": 509778,
+      "titulo": "N/A",
+      "autor": "1986",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02152217"
+    },
+    {
+      "id": 478507,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02119937"
+    },
+    {
+      "id": 490774,
+      "titulo": "N/A",
+      "autor": "1950",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02132811"
+    },
+    {
+      "id": 485884,
+      "titulo": "N/A",
+      "autor": "1958",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02127839"
+    },
+    {
+      "id": 490348,
+      "titulo": "N/A",
+      "autor": "1949",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02132377"
+    },
+    {
+      "id": 491035,
+      "titulo": "N/A",
+      "autor": "1971",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02133074"
+    },
+    {
+      "id": 491045,
+      "titulo": "N/A",
+      "autor": "1987",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02133084"
+    },
+    {
+      "id": 493216,
+      "titulo": "N/A",
+      "autor": "1933",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02135299"
+    },
+    {
+      "id": 493652,
+      "titulo": "N/A",
+      "autor": "1966",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02135739"
+    },
+    {
+      "id": 493999,
+      "titulo": "N/A",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02136096"
+    },
+    {
+      "id": 494966,
+      "titulo": "N/A",
+      "autor": "1983",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137085"
+    },
+    {
+      "id": 502509,
+      "titulo": "N/A",
+      "autor": "1996",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02144790"
+    },
+    {
+      "id": 494140,
+      "titulo": "N/A",
+      "autor": "1935",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02136239"
+    },
+    {
+      "id": 356734,
+      "titulo": "¡Qué sabrá usted de fútbol!: cómo entender a jugadores, entrenadores, árbitros?",
+      "autor": "BAÑERES, Enric",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "0017009"
+    },
+    {
+      "id": 737939,
+      "titulo": "Sin título",
+      "autor": "",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "H2055920"
+    },
+    {
+      "id": 984437,
+      "titulo": "Sin título",
+      "autor": "1964",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02165542"
+    },
+    {
+      "id": 478826,
+      "titulo": "N/A",
+      "autor": "1961",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02120264"
+    },
+    {
+      "id": 495590,
+      "titulo": "N/A",
+      "autor": "1949",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137717"
+    },
+    {
+      "id": 495562,
+      "titulo": "N/A",
+      "autor": "1978",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137689"
+    },
+    {
+      "id": 479925,
+      "titulo": "N/A",
+      "autor": "Años 20",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02121399"
+    },
+    {
+      "id": 496603,
+      "titulo": "N/A",
+      "autor": "1944",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02138743"
+    },
+    {
+      "id": 788155,
+      "titulo": "--Y los 40 ladrones",
+      "autor": "Vizcaíno Casas, Fernando",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02162383"
+    },
+    {
+      "id": 788734,
+      "titulo": "Sin título",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02163250"
+    },
+    {
+      "id": 789551,
+      "titulo": "Sin título",
+      "autor": "1979",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02164511"
+    },
+    {
+      "id": 789558,
+      "titulo": "Sin título",
+      "autor": "1981.",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02164525"
+    },
+    {
+      "id": 791545,
+      "titulo": "Sin título",
+      "autor": "1920",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02164766"
+    },
+    {
+      "id": 438262,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02067637"
+    },
+    {
+      "id": 476157,
+      "titulo": "N/A",
+      "autor": "1976",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117505"
+    },
+    {
+      "id": 462606,
+      "titulo": "N/A",
+      "autor": "2008",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02103113"
+    },
+    {
+      "id": 489731,
+      "titulo": "N/A",
+      "autor": "1999",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02131747"
+    },
+    {
+      "id": 498270,
+      "titulo": "N/A",
+      "autor": "1971",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02140440"
+    },
+    {
+      "id": 443247,
+      "titulo": "N/A",
+      "autor": "1974",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02077465"
+    },
+    {
+      "id": 801568,
+      "titulo": "Sin título",
+      "autor": "2006",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02177183"
+    },
+    {
+      "id": 443619,
+      "titulo": "N/A",
+      "autor": "1988",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02078093"
+    },
+    {
+      "id": 443622,
+      "titulo": "N/A",
+      "autor": "1991",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02078096"
+    },
+    {
+      "id": 498455,
+      "titulo": "N/A",
+      "autor": "1932",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02140629"
+    },
+    {
+      "id": 443621,
+      "titulo": "N/A",
+      "autor": "1991",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02078095"
+    },
+    {
+      "id": 499726,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02141930"
+    },
+    {
+      "id": 1534365,
+      "titulo": "Test Ubicacion",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "TEST_LEN_1"
+    },
+    {
+      "id": 501169,
+      "titulo": "N/A",
+      "autor": "1880",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02143413"
+    }
+  ],
+  "all_books": [
+    {
+      "id": 1537515,
+      "titulo": "DIARIO DE UN PISTOLERO ANARQUISTA",
+      "autor": "Miquel Mir",
+      "precio": 0,
+      "stock": null,
+      "legacy_id": "2051255AG"
+    },
+    {
+      "id": 1465874,
+      "titulo": "documentos graficos",
+      "autor": "Stewart, George R.",
+      "precio": 0,
+      "stock": null,
+      "legacy_id": "H2060494"
+    },
+    {
+      "id": 411451,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 2,
+      "legacy_id": "02027145"
+    },
+    {
+      "id": 498167,
+      "titulo": "N/A",
+      "autor": "1951",
+      "precio": 0,
+      "stock": 2,
+      "legacy_id": "02140335"
+    },
+    {
+      "id": 977528,
+      "titulo": "Sin título",
+      "autor": "1942",
+      "precio": 0,
+      "stock": 2,
+      "legacy_id": "02160557"
+    },
+    {
+      "id": 975826,
+      "titulo": "Sin título",
+      "autor": "1969",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02158651"
+    },
+    {
+      "id": 514064,
+      "titulo": "N/A",
+      "autor": "2011",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02157287"
+    },
+    {
+      "id": 974322,
+      "titulo": "Sin título",
+      "autor": "2009",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02159710"
+    },
+    {
+      "id": 469778,
+      "titulo": "N/A",
+      "autor": "2003",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02110628"
+    },
+    {
+      "id": 978533,
+      "titulo": "Sin título",
+      "autor": "1995",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02161364"
+    },
+    {
+      "id": 792234,
+      "titulo": "Sin título",
+      "autor": "1915",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02166401"
+    },
+    {
+      "id": 792233,
+      "titulo": "Sin título",
+      "autor": "1927",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02166400"
+    },
+    {
+      "id": 514392,
+      "titulo": "N/A",
+      "autor": "1909",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02157621"
+    },
+    {
+      "id": 476019,
+      "titulo": "N/A",
+      "autor": "1961",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117356"
+    },
+    {
+      "id": 984318,
+      "titulo": "Sin título",
+      "autor": "1970",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02165647"
+    },
+    {
+      "id": 740992,
+      "titulo": "Sin título",
+      "autor": "",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "H2061745"
+    },
+    {
+      "id": 476267,
+      "titulo": "N/A",
+      "autor": "1955",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117618"
+    },
+    {
+      "id": 409745,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02025464"
+    },
+    {
+      "id": 381911,
+      "titulo": "Prosas encontradas 1924-1942",
+      "autor": "ALBERTI, RAFAEL",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "1008062"
+    },
+    {
+      "id": 478105,
+      "titulo": "N/A",
+      "autor": "1965",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02119527"
+    },
+    {
+      "id": 418103,
+      "titulo": "N/A",
+      "autor": "2000",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02033762"
+    },
+    {
+      "id": 478125,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02119548"
+    },
+    {
+      "id": 428910,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "R2044673"
+    },
+    {
+      "id": 457991,
+      "titulo": "N/A",
+      "autor": "2009",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02098455"
+    },
+    {
+      "id": 788689,
+      "titulo": "Sin título",
+      "autor": "1995",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02163179"
+    },
+    {
+      "id": 482369,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02124208"
+    },
+    {
+      "id": 792481,
+      "titulo": "Sin título",
+      "autor": "1989",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02166800"
+    },
+    {
+      "id": 482908,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02124761"
+    },
+    {
+      "id": 489984,
+      "titulo": "N/A",
+      "autor": "1963",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02132004"
+    },
+    {
+      "id": 491867,
+      "titulo": "N/A",
+      "autor": "1997",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02133929"
+    },
+    {
+      "id": 476286,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117637"
+    },
+    {
+      "id": 492155,
+      "titulo": "N/A",
+      "autor": "1962",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02134219"
+    },
+    {
+      "id": 492626,
+      "titulo": "N/A",
+      "autor": "1956",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02134694"
+    },
+    {
+      "id": 492992,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02135071"
+    },
+    {
+      "id": 423048,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02038730"
+    },
+    {
+      "id": 495509,
+      "titulo": "N/A",
+      "autor": "1982",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137636"
+    },
+    {
+      "id": 496520,
+      "titulo": "N/A",
+      "autor": "1982",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02138659"
+    },
+    {
+      "id": 496780,
+      "titulo": "N/A",
+      "autor": "1986",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02138922"
+    },
+    {
+      "id": 435588,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02060679"
+    },
+    {
+      "id": 498426,
+      "titulo": "N/A",
+      "autor": "1956",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02140598"
+    },
+    {
+      "id": 506134,
+      "titulo": "N/A",
+      "autor": "1985",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02148511"
+    },
+    {
+      "id": 500565,
+      "titulo": "N/A",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02142793"
+    },
+    {
+      "id": 400443,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02016246"
+    },
+    {
+      "id": 400610,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02016413"
+    },
+    {
+      "id": 486672,
+      "titulo": "N/A",
+      "autor": "1987",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02128642"
+    },
+    {
+      "id": 504218,
+      "titulo": "N/A",
+      "autor": "1930",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02146545"
+    },
+    {
+      "id": 505578,
+      "titulo": "N/A",
+      "autor": "1885",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02147933"
+    },
+    {
+      "id": 475648,
+      "titulo": "N/A",
+      "autor": "1947",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02116972"
+    },
+    {
+      "id": 475784,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117116"
+    },
+    {
+      "id": 475808,
+      "titulo": "N/A",
+      "autor": "1962",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117140"
+    },
+    {
+      "id": 509778,
+      "titulo": "N/A",
+      "autor": "1986",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02152217"
+    },
+    {
+      "id": 478507,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02119937"
+    },
+    {
+      "id": 490774,
+      "titulo": "N/A",
+      "autor": "1950",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02132811"
+    },
+    {
+      "id": 485884,
+      "titulo": "N/A",
+      "autor": "1958",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02127839"
+    },
+    {
+      "id": 490348,
+      "titulo": "N/A",
+      "autor": "1949",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02132377"
+    },
+    {
+      "id": 491035,
+      "titulo": "N/A",
+      "autor": "1971",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02133074"
+    },
+    {
+      "id": 491045,
+      "titulo": "N/A",
+      "autor": "1987",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02133084"
+    },
+    {
+      "id": 493216,
+      "titulo": "N/A",
+      "autor": "1933",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02135299"
+    },
+    {
+      "id": 493652,
+      "titulo": "N/A",
+      "autor": "1966",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02135739"
+    },
+    {
+      "id": 493999,
+      "titulo": "N/A",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02136096"
+    },
+    {
+      "id": 494966,
+      "titulo": "N/A",
+      "autor": "1983",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137085"
+    },
+    {
+      "id": 502509,
+      "titulo": "N/A",
+      "autor": "1996",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02144790"
+    },
+    {
+      "id": 494140,
+      "titulo": "N/A",
+      "autor": "1935",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02136239"
+    },
+    {
+      "id": 356734,
+      "titulo": "¡Qué sabrá usted de fútbol!: cómo entender a jugadores, entrenadores, árbitros?",
+      "autor": "BAÑERES, Enric",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "0017009"
+    },
+    {
+      "id": 737939,
+      "titulo": "Sin título",
+      "autor": "",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "H2055920"
+    },
+    {
+      "id": 984437,
+      "titulo": "Sin título",
+      "autor": "1964",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02165542"
+    },
+    {
+      "id": 478826,
+      "titulo": "N/A",
+      "autor": "1961",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02120264"
+    },
+    {
+      "id": 495590,
+      "titulo": "N/A",
+      "autor": "1949",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137717"
+    },
+    {
+      "id": 495562,
+      "titulo": "N/A",
+      "autor": "1978",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02137689"
+    },
+    {
+      "id": 479925,
+      "titulo": "N/A",
+      "autor": "Años 20",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02121399"
+    },
+    {
+      "id": 496603,
+      "titulo": "N/A",
+      "autor": "1944",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02138743"
+    },
+    {
+      "id": 788155,
+      "titulo": "--Y los 40 ladrones",
+      "autor": "Vizcaíno Casas, Fernando",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02162383"
+    },
+    {
+      "id": 788734,
+      "titulo": "Sin título",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02163250"
+    },
+    {
+      "id": 789551,
+      "titulo": "Sin título",
+      "autor": "1979",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02164511"
+    },
+    {
+      "id": 789558,
+      "titulo": "Sin título",
+      "autor": "1981.",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02164525"
+    },
+    {
+      "id": 791545,
+      "titulo": "Sin título",
+      "autor": "1920",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02164766"
+    },
+    {
+      "id": 438262,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02067637"
+    },
+    {
+      "id": 476157,
+      "titulo": "N/A",
+      "autor": "1976",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02117505"
+    },
+    {
+      "id": 462606,
+      "titulo": "N/A",
+      "autor": "2008",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02103113"
+    },
+    {
+      "id": 489731,
+      "titulo": "N/A",
+      "autor": "1999",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02131747"
+    },
+    {
+      "id": 498270,
+      "titulo": "N/A",
+      "autor": "1971",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02140440"
+    },
+    {
+      "id": 443247,
+      "titulo": "N/A",
+      "autor": "1974",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02077465"
+    },
+    {
+      "id": 801568,
+      "titulo": "Sin título",
+      "autor": "2006",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02177183"
+    },
+    {
+      "id": 443619,
+      "titulo": "N/A",
+      "autor": "1988",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02078093"
+    },
+    {
+      "id": 443622,
+      "titulo": "N/A",
+      "autor": "1991",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02078096"
+    },
+    {
+      "id": 498455,
+      "titulo": "N/A",
+      "autor": "1932",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02140629"
+    },
+    {
+      "id": 443621,
+      "titulo": "N/A",
+      "autor": "1991",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02078095"
+    },
+    {
+      "id": 499726,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02141930"
+    },
+    {
+      "id": 1534365,
+      "titulo": "Test Ubicacion",
+      "autor": null,
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "TEST_LEN_1"
+    },
+    {
+      "id": 501169,
+      "titulo": "N/A",
+      "autor": "1880",
+      "precio": 0,
+      "stock": 1,
+      "legacy_id": "02143413"
+    },
+    {
+      "id": 408959,
+      "titulo": "N/A",
+      "autor": "1998",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024691"
+    },
+    {
+      "id": 409002,
+      "titulo": "N/A",
+      "autor": "1982",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024734"
+    },
+    {
+      "id": 1476734,
+      "titulo": "GALDOS: DIALOGOS BIOGRAFICOS",
+      "autor": "ROSA AMOR DEL OLMO",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02268917"
+    },
+    {
+      "id": 1455467,
+      "titulo": "MUERTE CON ESCOLTA",
+      "autor": "Manloe Cassy",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "1040729"
+    },
+    {
+      "id": 434607,
+      "titulo": "C",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02058009"
+    },
+    {
+      "id": 467404,
+      "titulo": "N/A",
+      "autor": "2004",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02108046"
+    },
+    {
+      "id": 1464934,
+      "titulo": "Obras Selectas",
+      "autor": "Ricardo Baroja",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0050055T"
+    },
+    {
+      "id": 1464937,
+      "titulo": "Obras Selectas",
+      "autor": "Azorin",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0050058T"
+    },
+    {
+      "id": 1464938,
+      "titulo": "Obras Selectas",
+      "autor": "Azorin",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0050059T"
+    },
+    {
+      "id": 475070,
+      "titulo": "N/A",
+      "autor": "2003",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02116383"
+    },
+    {
+      "id": 1459387,
+      "titulo": "LA CASA DE CERVANTES EN VALLADOLID",
+      "autor": "N. Sanz y Ruiz de la Peña",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0830092"
+    },
+    {
+      "id": 411981,
+      "titulo": "p",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02056065"
+    },
+    {
+      "id": 493593,
+      "titulo": "N/A",
+      "autor": "1970",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02135676"
+    },
+    {
+      "id": 1486302,
+      "titulo": "La imaginación descontrolada de Olivia Joules",
+      "autor": "Fielding, Helen, Cavándoli, Margarita tr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02256096"
+    },
+    {
+      "id": 400247,
+      "titulo": "Biblia contada a los mayores, la",
+      "autor": "Diaz-Plaja, Fernando",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02016051"
+    },
+    {
+      "id": 487920,
+      "titulo": "Los sueños  LAS RESPUESTAS DE ESTA NOCHE A LAS PREGUNTAS DE MAÑANA",
+      "autor": "Thurston, Mark A., Jiménez Ribera, Anatr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02129908"
+    },
+    {
+      "id": 505458,
+      "titulo": "Basic  english usage",
+      "autor": "Michael Swan",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02147809"
+    },
+    {
+      "id": 1537502,
+      "titulo": "Sin título",
+      "autor": "Desconocido",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "H2051205"
+    },
+    {
+      "id": 1478199,
+      "titulo": "LA GRAN MENTIRA",
+      "autor": "MACINNES, Helen",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162239"
+    },
+    {
+      "id": 1478200,
+      "titulo": "CARAVANA HACIA EL SUR",
+      "autor": "GELGA MORAY",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162240"
+    },
+    {
+      "id": 1478201,
+      "titulo": "La GESTAPO",
+      "autor": "JACQUES DELARUE",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162241"
+    },
+    {
+      "id": 1478202,
+      "titulo": "VEN, GATITA",
+      "autor": "FREED, ARTELLE",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162243"
+    },
+    {
+      "id": 1478203,
+      "titulo": "Cours pratique d electricite industrielle. T III",
+      "autor": "CHEVALLIER, HENRY",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162244"
+    },
+    {
+      "id": 1478243,
+      "titulo": "El árbol de la diana",
+      "autor": "Guerrero González, Mercedes",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162384"
+    },
+    {
+      "id": 368336,
+      "titulo": "Masaje zonal en vídeo. Um método para prevenir los problemas más comunes",
+      "autor": "BUZZACCHI, Erasmo",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0028606"
+    },
+    {
+      "id": 1464935,
+      "titulo": "Obras Completas IV",
+      "autor": "Pio Baroja",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00050056T"
+    },
+    {
+      "id": 1464936,
+      "titulo": "Obras Completas IV",
+      "autor": "Pio Baroja",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0050057T"
+    },
+    {
+      "id": 369764,
+      "titulo": "El proceso",
+      "autor": "KAFKA, Franz",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0030029"
+    },
+    {
+      "id": 461997,
+      "titulo": "Pom-- Pom-- ¡Pompibol!",
+      "autor": "Sáez Castán, Javier, Sáez Castán, Javier, il.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02102502"
+    },
+    {
+      "id": 1535269,
+      "titulo": "b",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053089A"
+    },
+    {
+      "id": 408998,
+      "titulo": "N/A",
+      "autor": "1980",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024730"
+    },
+    {
+      "id": 414095,
+      "titulo": "N/A",
+      "autor": "2005",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2029781"
+    },
+    {
+      "id": 436028,
+      "titulo": "N/A",
+      "autor": "1989",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02061546"
+    },
+    {
+      "id": 473721,
+      "titulo": "En Pinotxo",
+      "autor": "Collodi, Carlo, Sotillos Torrent, Eugenio, adapt.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02115005"
+    },
+    {
+      "id": 475279,
+      "titulo": "N/A",
+      "autor": "2003",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02116597"
+    },
+    {
+      "id": 476145,
+      "titulo": "N/A",
+      "autor": "1966",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02117489"
+    },
+    {
+      "id": 1540848,
+      "titulo": ".",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00054264A"
+    },
+    {
+      "id": 1463897,
+      "titulo": "L",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0003106"
+    },
+    {
+      "id": 1464514,
+      "titulo": "1983",
+      "autor": "309",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "Teorema"
+    },
+    {
+      "id": 383764,
+      "titulo": "Figuras de la pasión del Señor. Nuestro padre San Daniel",
+      "autor": "MIRÓ, Gabriel",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "A001046"
+    },
+    {
+      "id": 471771,
+      "titulo": "El gran libro de las civilizaciones antiguas",
+      "autor": "Rivière, Patrick, Equipo Editorial DVE tr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02112841"
+    },
+    {
+      "id": 1478410,
+      "titulo": "Ajedrez hipermoderno. Vol. II",
+      "autor": "(Dirigido por Alekhine)",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162979"
+    },
+    {
+      "id": 370932,
+      "titulo": "Mecánica para ingenieros",
+      "autor": "MORLEY, Arthur",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0031194"
+    },
+    {
+      "id": 400593,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02016396"
+    },
+    {
+      "id": 400617,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02016420"
+    },
+    {
+      "id": 495428,
+      "titulo": "N/A",
+      "autor": "1971",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02137554"
+    },
+    {
+      "id": 362013,
+      "titulo": "Auge y caída de las grandes potencias",
+      "autor": "KENNEDY, Paul",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0022282"
+    },
+    {
+      "id": 495600,
+      "titulo": "N/A",
+      "autor": "1971",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02137727"
+    },
+    {
+      "id": 497083,
+      "titulo": "N/A",
+      "autor": "1992",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02139232"
+    },
+    {
+      "id": 503839,
+      "titulo": "Lecciones de procesos civiles especiales",
+      "autor": "J. Tome Paule",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146152"
+    },
+    {
+      "id": 503901,
+      "titulo": "Un vago, dos vagos, tres vagos",
+      "autor": "El Gran Wyoming",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146221"
+    },
+    {
+      "id": 504474,
+      "titulo": "N/A",
+      "autor": "1907",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146803"
+    },
+    {
+      "id": 505142,
+      "titulo": "N/A",
+      "autor": "1964",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02147486"
+    },
+    {
+      "id": 1480632,
+      "titulo": "El camino de la vida",
+      "autor": "Davis, J. E.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166307"
+    },
+    {
+      "id": 1480633,
+      "titulo": "La epístola a los Hebreos",
+      "autor": "Rudd, A. B.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166308"
+    },
+    {
+      "id": 1480634,
+      "titulo": "Qué es creer?",
+      "autor": "Jagger, J. G., Sanz Pascual, Juantr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166309"
+    },
+    {
+      "id": 1480635,
+      "titulo": "El codesarrollo en España : protagonistas, discursos y experiencias",
+      "autor": "Giménez Romero, Carlos, ... [et al.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166310"
+    },
+    {
+      "id": 1480639,
+      "titulo": "Perro endemoniado, el",
+      "autor": "Marryat, Frederick, González Casquel, Migueltr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166316"
+    },
+    {
+      "id": 1480640,
+      "titulo": "La cabaña del tío Tom",
+      "autor": "Stowe, Harriet Beecher, Guardiola, Antoniotr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166317"
+    },
+    {
+      "id": 1480641,
+      "titulo": "El mal de la muerte",
+      "autor": "Duras, Marguerite, Holguera, José Maríatr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166324"
+    },
+    {
+      "id": 1480642,
+      "titulo": "El hombre sentado en el pasillo",
+      "autor": "Duras, Marguerite, Moura Gurgel, Beatriz detr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02166325"
+    },
+    {
+      "id": 1455002,
+      "titulo": "EL ENCUENTRO DE LA VALQUIRIA",
+      "autor": "Stephen Marlowe",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "1041405"
+    },
+    {
+      "id": 1459516,
+      "titulo": "DOCUMENTOS",
+      "autor": "José Mira; Dolores Arias; Lourdes Esteban",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0820300"
+    },
+    {
+      "id": 434811,
+      "titulo": "E",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02058463"
+    },
+    {
+      "id": 467860,
+      "titulo": "Filomeno, a mi pesar Crínica del rey pasmado",
+      "autor": "Torrente Ballester, Gonzalo",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02108507"
+    },
+    {
+      "id": 503862,
+      "titulo": "Música fúnebre para masones",
+      "autor": "Gustafsson, Lars, Giralt Gorina, Pilartr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146182"
+    },
+    {
+      "id": 503864,
+      "titulo": "Otra idea de Cataluña",
+      "autor": "Riera, Ignasi",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146184"
+    },
+    {
+      "id": 504095,
+      "titulo": "Eduard Manet",
+      "autor": "Faerna García-Bermejo, José María",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146417"
+    },
+    {
+      "id": 504355,
+      "titulo": "Un muchacho valiente : Domingo Savio",
+      "autor": "Bosco, Teresio",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146684"
+    },
+    {
+      "id": 504364,
+      "titulo": "Impuesto sobre el valor añadido. Doctrina Dirección General Tributo",
+      "autor": "España. Dirección General de Tributos",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146693"
+    },
+    {
+      "id": 504365,
+      "titulo": "Impuesto sobre el valor añadido : recopilación normativa, 1989",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146694"
+    },
+    {
+      "id": 504374,
+      "titulo": "Observar las aves",
+      "autor": "Pierre Darmangeat",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146703"
+    },
+    {
+      "id": 504377,
+      "titulo": "Revista \"Documentación social\". nº 40. Propiedad y conflicto en España",
+      "autor": "Caritas",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2146706"
+    },
+    {
+      "id": 505464,
+      "titulo": "Internet para todos",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02147816"
+    },
+    {
+      "id": 472098,
+      "titulo": "Vingt ans apres I",
+      "autor": "Alexander Dumas",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02113218"
+    },
+    {
+      "id": 503869,
+      "titulo": "Liquidación",
+      "autor": "Kertész, Imre, Kovacsics Meszaros, Adántr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146189"
+    },
+    {
+      "id": 408386,
+      "titulo": "b",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02024120"
+    },
+    {
+      "id": 503861,
+      "titulo": "El llanto de los buitres",
+      "autor": "Muñiz Romero, Carlos",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146181"
+    },
+    {
+      "id": 503898,
+      "titulo": "ENCUENTROS EN BONAVAL",
+      "autor": "ONEGA , SONSOLES",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146218"
+    },
+    {
+      "id": 503926,
+      "titulo": "La condición humana",
+      "autor": "Malraux, André",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146246"
+    },
+    {
+      "id": 503927,
+      "titulo": "Don Juan",
+      "autor": "Lor Byron",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146247"
+    },
+    {
+      "id": 504389,
+      "titulo": "Los reflejos cerebrales",
+      "autor": "Sechenov, Ivan M., Colodrón, Antonio;ed. lit.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146718"
+    },
+    {
+      "id": 504470,
+      "titulo": "Anuario estadístico 1951 Zona de protectorado y de los territorios de soberania de España en el norte de africa",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146799"
+    },
+    {
+      "id": 434599,
+      "titulo": "E",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02058001"
+    },
+    {
+      "id": 408916,
+      "titulo": "N/A",
+      "autor": "2002",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024649"
+    },
+    {
+      "id": 504750,
+      "titulo": "Marruecos",
+      "autor": "López Gil, María del Martr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02147088"
+    },
+    {
+      "id": 408964,
+      "titulo": "N/A",
+      "autor": "1997",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024696"
+    },
+    {
+      "id": 408956,
+      "titulo": "N/A",
+      "autor": "2000",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024688"
+    },
+    {
+      "id": 1512371,
+      "titulo": "Una vecina perfecta",
+      "autor": "Jensen, Caroline L., Sánchez Giménez, Pontustr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02253861"
+    },
+    {
+      "id": 374047,
+      "titulo": "CATALOGOS PROMOCIONALES. MATERIAL GRÁFICO",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0034303"
+    },
+    {
+      "id": 452185,
+      "titulo": "Academia Zaratustra",
+      "autor": "Bonilla, Juan",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02091336"
+    },
+    {
+      "id": 1540636,
+      "titulo": "El arte árabe",
+      "autor": "Grau, Juan",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "H2110285"
+    },
+    {
+      "id": 381281,
+      "titulo": "Dibujos de la Sierra de Urbión, de apuntes tomados del natural",
+      "autor": "RODRÍGUEZ JIMENO, Julián",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0411116"
+    },
+    {
+      "id": 1451142,
+      "titulo": "MARXISMO CONTRA STALINISMO: MARX EN LA PRIMERA MITAD DEL SIGLO XX",
+      "autor": "Petrovic, Gajo",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "F0002423"
+    },
+    {
+      "id": 1451270,
+      "titulo": "NO",
+      "autor": "España",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "enéndez"
+    },
+    {
+      "id": 489305,
+      "titulo": "Las Siete Palabras del Señor en la Cruz",
+      "autor": "Jose Guerra",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02131312"
+    },
+    {
+      "id": 489306,
+      "titulo": "Sacerdote, ministro de la reconciliacion",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02131313"
+    },
+    {
+      "id": 489307,
+      "titulo": "Comunidades de base y Nueva Iglesia",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02131314"
+    },
+    {
+      "id": 476232,
+      "titulo": "N/A",
+      "autor": "1996",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02117580"
+    },
+    {
+      "id": 477011,
+      "titulo": "N/A",
+      "autor": "1965",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02118381"
+    },
+    {
+      "id": 1459309,
+      "titulo": "historia reinas de españa",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0830179"
+    },
+    {
+      "id": 489336,
+      "titulo": "Paulho Coelho",
+      "autor": "L'Alchimista",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02131344"
+    },
+    {
+      "id": 494483,
+      "titulo": "N/A",
+      "autor": "1995",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02136588"
+    },
+    {
+      "id": 497589,
+      "titulo": "N/A",
+      "autor": "1939",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02139747"
+    },
+    {
+      "id": 509235,
+      "titulo": "N/A",
+      "autor": "2010",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02152379"
+    },
+    {
+      "id": 514250,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02157478"
+    },
+    {
+      "id": 1539530,
+      "titulo": "o",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053183A"
+    },
+    {
+      "id": 489544,
+      "titulo": "La Republica de Sudafrica. Impresiones de un viaje",
+      "autor": "Julio Cola",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02131556"
+    },
+    {
+      "id": 469114,
+      "titulo": "El doble etérico. Fenómenos relacionados con el mismo",
+      "autor": "Powell, Arturo E.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02109887"
+    },
+    {
+      "id": 1478412,
+      "titulo": "LA BIBLIA DIDACTICA",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162984"
+    },
+    {
+      "id": 1478413,
+      "titulo": "Carrera de Doris Hart, la. VOL 1",
+      "autor": "Baum, Vicki, Romero de Tejada, Josétr., Baum, Vicki, Romero de Tejada, Josétr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162985"
+    },
+    {
+      "id": 1478414,
+      "titulo": "Nacimiento de un niño, el",
+      "autor": "Dexeus, Santiago",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02162987"
+    },
+    {
+      "id": 473863,
+      "titulo": "Teatro",
+      "autor": "Moreto",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02115149"
+    },
+    {
+      "id": 388881,
+      "titulo": "diario",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "A2004756"
+    },
+    {
+      "id": 1464263,
+      "titulo": "NO",
+      "autor": "España",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "Profusam"
+    },
+    {
+      "id": 1476174,
+      "titulo": "Real Madrid . Boletin informativo",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00071391A"
+    },
+    {
+      "id": 430097,
+      "titulo": "Breviarium romanum ex decreto Sacrosancti Concilii Tridentini restitutum Sancti PII V. Pontificis maximi jussu editum Clementis VIII et Urbani VIII",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2045864"
+    },
+    {
+      "id": 433840,
+      "titulo": "d",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02056004"
+    },
+    {
+      "id": 1497210,
+      "titulo": "PLANS, ELEVATIONS, SECTIONS AND DETAILS OF THE ALHAMBRA: From Drawings Taken On The Spot In 1834",
+      "autor": "Owen Jones.  M. Jules Goury.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02202652"
+    },
+    {
+      "id": 391902,
+      "titulo": "Los placeres y los días. Parodias y miscelánea",
+      "autor": "PROUST, Marcel",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02007761"
+    },
+    {
+      "id": 381319,
+      "titulo": "Hijos del Corazón. Guía útil de padres adoptivos",
+      "autor": "Javier Angulo y José A. Reguilón",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0418038"
+    },
+    {
+      "id": 410024,
+      "titulo": "Mito y epopeya II",
+      "autor": "Dumézil, Georges",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2025738"
+    },
+    {
+      "id": 383149,
+      "titulo": "Tratado elemental de Química",
+      "autor": "LAURENT DE LAVOISIER, Antoine",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "A000434"
+    },
+    {
+      "id": 480374,
+      "titulo": "N/A",
+      "autor": "1950",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02121864"
+    },
+    {
+      "id": 1474510,
+      "titulo": "LAS DOS ESPAÑAS Y EL REY",
+      "autor": "Víctor Salmador",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "G0062855R"
+    },
+    {
+      "id": 1542667,
+      "titulo": "Breve historia del futuro",
+      "autor": "Pedro Tosaus. Contenido: Jacques Attali cuenta en estas páginas la increíble historia de los próximos cincuenta años tal como se puede imaginar a partir de cuanto se sabe de la historia y de la c",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "2051737"
+    },
+    {
+      "id": 1464515,
+      "titulo": "NO",
+      "autor": "España",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "Trad. Ru"
+    },
+    {
+      "id": 488218,
+      "titulo": "El silencio",
+      "autor": "Yuri Bondarev",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02130212"
+    },
+    {
+      "id": 507844,
+      "titulo": "Barter the right way",
+      "autor": "GOMBRICH, E. H",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02150271"
+    },
+    {
+      "id": 1471492,
+      "titulo": "EL",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053930A"
+    },
+    {
+      "id": 489542,
+      "titulo": "Dios para que. Interrogantes del ateismo de cara a la nueva evangelizacion",
+      "autor": "Emiliano Jimenez",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02131554"
+    },
+    {
+      "id": 1444567,
+      "titulo": "HUMANAE SALUTIS MONUMENTA / MONUMENTOS DE LA SALUD DEL HOMBRE",
+      "autor": "Benito Arias Montano",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "1100495"
+    },
+    {
+      "id": 381107,
+      "titulo": "Manuscritos incunables",
+      "autor": "Rigoberto Domenech Valls",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0128014"
+    },
+    {
+      "id": 428510,
+      "titulo": "a",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "A2044276"
+    },
+    {
+      "id": 381222,
+      "titulo": "Las palomas domésticas, su cría y utilidades",
+      "autor": "Salvador Castelló",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0308011"
+    },
+    {
+      "id": 1533219,
+      "titulo": "EXISTENCIA Y NEUROSIS",
+      "autor": "Cesar A. Figuerido",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02281439"
+    },
+    {
+      "id": 1473789,
+      "titulo": "F",
+      "autor": "F",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0060148A"
+    },
+    {
+      "id": 1454879,
+      "titulo": "Sin título",
+      "autor": "Desconocido",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "1041660"
+    },
+    {
+      "id": 429603,
+      "titulo": "b",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02045369"
+    },
+    {
+      "id": 400050,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02015854"
+    },
+    {
+      "id": 514533,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02157765"
+    },
+    {
+      "id": 460989,
+      "titulo": "Joan Brotat",
+      "autor": "Rodríguez-Aguilera Conde, Cesáreo",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02101485"
+    },
+    {
+      "id": 461683,
+      "titulo": "Memorias",
+      "autor": "Monnet, Jean, Martínez García, José M.tr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02102183"
+    },
+    {
+      "id": 474575,
+      "titulo": "La isla secreta. Un recorrido por Islandia",
+      "autor": "MORET, Xavier",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02115880"
+    },
+    {
+      "id": 1539299,
+      "titulo": "j",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053166A"
+    },
+    {
+      "id": 1539300,
+      "titulo": "ñ",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053167A"
+    },
+    {
+      "id": 1539323,
+      "titulo": "0",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053175A"
+    },
+    {
+      "id": 1539987,
+      "titulo": "l",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "00053207A"
+    },
+    {
+      "id": 1459422,
+      "titulo": "LAS MUJERES DE LOS NAZIS",
+      "autor": "Anna Maria Sigmund",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0820442"
+    },
+    {
+      "id": 1466216,
+      "titulo": "El Bandolerismo. Estudio Social y Memorias Historicas . tomo X",
+      "autor": "ZUGASTI, Julián de",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "H2061849"
+    },
+    {
+      "id": 467718,
+      "titulo": "Los mitos de la historia de España",
+      "autor": "García de Cortázar, Fernando",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02108363"
+    },
+    {
+      "id": 502252,
+      "titulo": "Gramatica francesa y trozos de traduccion",
+      "autor": "Juan Ostenero y Velasco",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02144527"
+    },
+    {
+      "id": 503844,
+      "titulo": "Cent un poemes per a l'eternitat",
+      "autor": "Mundet Gifre, Josep Maria",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146157"
+    },
+    {
+      "id": 504526,
+      "titulo": "Sabiduría : agenda 2011",
+      "autor": "Coelho, Paulo, Costas, Ana Beléntr.",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146856"
+    },
+    {
+      "id": 468183,
+      "titulo": "Respuestas filosóficas a la ética, a la ciencia y a la religión",
+      "autor": "Schopenhauer, Arthur",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02108831"
+    },
+    {
+      "id": 407041,
+      "titulo": "N/A",
+      "autor": "2007",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02022785"
+    },
+    {
+      "id": 1466489,
+      "titulo": "YO MATÉ A KENNEDY",
+      "autor": "VÁZQUEZ MONTALBÁN, Manuel",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "H2062869"
+    },
+    {
+      "id": 504534,
+      "titulo": "Agosto, octubre",
+      "autor": "Barba, Andrés",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02146864"
+    },
+    {
+      "id": 494164,
+      "titulo": "VIAJES DE ENRIQUE WANTON A LAS TIERRAS AUSTRALES Y  AL PAIS DE LAS MONAS  TOMO I",
+      "autor": "ENRIQUE WANTON",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02136263"
+    },
+    {
+      "id": 1500682,
+      "titulo": "Arrendamiento local para spot de Cortefiel",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02239073"
+    },
+    {
+      "id": 505446,
+      "titulo": "Ramón y Cajal",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02147797"
+    },
+    {
+      "id": 400053,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02015857"
+    },
+    {
+      "id": 351476,
+      "titulo": "N/A",
+      "autor": "1981",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "0011749"
+    },
+    {
+      "id": 408952,
+      "titulo": "N/A",
+      "autor": "2001",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024684"
+    },
+    {
+      "id": 439320,
+      "titulo": "N/A",
+      "autor": "2008",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02069631"
+    },
+    {
+      "id": 408970,
+      "titulo": "N/A",
+      "autor": "1996",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024702"
+    },
+    {
+      "id": 408989,
+      "titulo": "N/A",
+      "autor": "1987",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "R2024721"
+    },
+    {
+      "id": 409813,
+      "titulo": "N/A",
+      "autor": null,
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02025531"
+    },
+    {
+      "id": 1464958,
+      "titulo": "las fieras de tarzan",
+      "autor": "E. Rice Burroughs",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0050089T"
+    },
+    {
+      "id": 1464959,
+      "titulo": "las fieras de tarzan",
+      "autor": "E. Rice Burroughs",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "N0050090T"
+    },
+    {
+      "id": 436182,
+      "titulo": "47 LECCIONES DE FÍSICA EXPERIMENTAL. Contestaciones a las preguntas del programa de ingreso de la Academia Oficial de Aduanas",
+      "autor": "CORDÓN GARCÍA, Antonio",
+      "precio": 0,
+      "stock": 0,
+      "legacy_id": "02061853"
+    },
+    {
+      "id": 1492645,
+      "titulo": "Sin título",
+      "autor": "2007",
+      "precio": 0,
+      "stock": -1,
+      "legacy_id": "02182502"
+    },
+    {
+      "id": 484265,
+      "titulo": "N/A",
+      "autor": "1989",
+      "precio": 0,
+      "stock": -1,
+      "legacy_id": "02126158"
+    }
+  ]
+}

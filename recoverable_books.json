@@ -1,0 +1,32 @@
+[
+  {
+    "db_data": {
+      "id": 740992,
+      "titulo": "Sin título",
+      "precio": 0,
+      "legacy_id": "H2061745",
+      "stock": 1
+    },
+    "source_data": {
+      "price": 15,
+      "title": "  \t ISABEL II DE BORBON  LA REINA DE LOS TRISTES DESTINOS",
+      "originalPriceStr": "15.00"
+    },
+    "note": "RECUPERABLE: Precio en DB es 0, en archivo fuente es 15"
+  },
+  {
+    "db_data": {
+      "id": 737939,
+      "titulo": "Sin título",
+      "precio": 0,
+      "legacy_id": "H2055920",
+      "stock": 1
+    },
+    "source_data": {
+      "price": 18,
+      "title": "  \t Narrativa completa. Tomo I: Aguas primaverales. Fiesta. Adiós a las armas. Tener y no tener. ",
+      "originalPriceStr": "18.00"
+    },
+    "note": "RECUPERABLE: Precio en DB es 0, en archivo fuente es 18"
+  }
+]

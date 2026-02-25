@@ -84,21 +84,11 @@ export function AdminDashboard() {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
   
-  const [searchParams] = useSearchParams();
-  const initialSection = (searchParams.get('section') as AdminSection) || 'dashboard';
-  const [activeSection, setActiveSection] = useState<AdminSection>(initialSection);
+  // URL es la fuente de verdad para la sección activa.
+  // setSearchParams con replace:false añade entradas al historial → botón atrás funciona dentro del admin.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeSection = (searchParams.get('section') as AdminSection) || 'dashboard';
   const [badgeCounts, setBadgeCounts] = useState({ total: 0, orders: 0, reservations: 0, invoices: 0 });
-
-  // Update URL when section changes
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (activeSection === 'dashboard') {
-      params.delete('section');
-    } else {
-      params.set('section', activeSection);
-    }
-    navigate({ search: params.toString() }, { replace: true });
-  }, [activeSection, navigate]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
@@ -238,7 +228,12 @@ export function AdminDashboard() {
   }, [user]);
 
   const handleSectionChange = (section: AdminSection) => {
-    setActiveSection(section);
+    // Usar setSearchParams con replace:false para añadir al historial del navegador
+    if (section === 'dashboard') {
+      setSearchParams({}, { replace: false });
+    } else {
+      setSearchParams({ section }, { replace: false });
+    }
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -737,7 +732,7 @@ export function AdminDashboard() {
              <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
              <button 
                 className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
-                onClick={() => setActiveSection('notifications')}
+                onClick={() => handleSectionChange('notifications')}
                 title="Notificaciones"
                 style={{ position: 'relative' }}
               >

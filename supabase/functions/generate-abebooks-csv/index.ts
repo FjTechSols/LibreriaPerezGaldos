@@ -95,7 +95,7 @@ serve(async (req) => {
                     q(""), // Place
                     q("España"), // Country
                     u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    q(book.stock || 1), // Col 11: Quantity
+                    u(book.stock || 1), // Col 11: Quantity (Unquoted)
                     q(book.isbn || "") // Col 12: ISBN
                 ];
                 chunk += row.join(separator) + '\r\n';
