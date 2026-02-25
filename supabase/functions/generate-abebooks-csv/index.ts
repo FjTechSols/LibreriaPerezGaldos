@@ -70,6 +70,17 @@ serve(async (req) => {
 
             let chunk = "";
             for (const book of books) {
+                // If Purge mode is intentionally requested, we skip everything to yield an empty file
+                if (isPurge) {
+                    continue;
+                }
+
+                // If the book does not meet our minimum price or has no stock, WE EXCLUDE IT COMPLETELY
+                // from the export file (AbeBooks Purge & Replace model)
+                if (book.stock <= 0 || Number(book.precio) < minPrice) {
+                    continue;
+                }
+
                 const sku = book.legacy_id || book.id;
                 const description = (book.descripcion || '').replace(/\s+/g, ' ').trim(); 
                 const editorialName = book.editoriales?.nombre || '';
@@ -80,13 +91,6 @@ serve(async (req) => {
                     (book.imagen_url.startsWith("http") || book.imagen_url.startsWith("https"))) {
                      imageUrl = book.imagen_url;
                 }
-
-                // Logic applied: AbeBooks needs an explicit '0' quantity to delete/unlist a book
-                // If isPurge is true, WE ENFORCE 0 QUANTITY FOR EVERYTHING (Wipe out inventory).
-                // Else, if the book does not meet our minimum price or has no stock, we enforce quantity 0
-                const exportQuantity = isPurge 
-                    ? 0 
-                    : ((book.stock > 0 && Number(book.precio) >= minPrice) ? book.stock : 0);
 
                 // Format: Custom Generic Tab-Delimited Profile (Mapped by Abebooks Support specifically for this account)
                 // Changing this order WILL scramble Abebooks listings!
@@ -101,7 +105,7 @@ serve(async (req) => {
                     q(""), // Place
                     q("España"), // Country
                     u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    u(exportQuantity),                 // Col 11: Quantity (Unquoted), explicit 0 is allowed and means delete
+                    u(""),                             // Col 11: Quantity MUST BE EMPTY as per old legacy system
                     q(book.isbn || "")                 // Col 12: ISBN
                 ];
                 
