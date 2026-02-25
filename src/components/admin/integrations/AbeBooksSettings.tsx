@@ -22,6 +22,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   // UI States for saving FTPS settings
   const [isSavingFtps, setIsSavingFtps] = useState(false);
   const [ftpsSaveSuccess, setFtpsSaveSuccess] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
 
   const abeSettings = settings.integrations.abeBooks;
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -35,17 +36,20 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   }, [abeSettings.ftps?.minPrice]);
 
   // Handle trigger FTPS sync
-  const handleTriggerSync = async () => {
+  const handleTriggerSync = async (isPurge = false) => {
     try {
       setTestingConnection(true);
       setSyncResult(null);
       
+      const payload = isPurge ? { purge: true } : {};
+
       const response = await fetch(`${supabaseUrl}/functions/v1/trigger-ftps-sync`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${supabaseKey}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -53,7 +57,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
       if (response.ok && data.success) {
         setSyncResult({
           success: true,
-          message: data.status || 'Sincronización iniciada correctamente. Puedes ver el progreso en el monitor.'
+          message: data.status || `Sincronización ${isPurge ? 'de PUESTA A CERO ' : ''}iniciada correctamente. Puedes ver el progreso en el monitor.`
         });
       } else {
         setSyncResult({
@@ -390,13 +394,13 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               <SyncMonitor supabaseUrl={supabaseUrl} supabaseKey={supabaseKey} />
 
-              <div className="">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => setShowSyncModal(true)}
+                  onClick={() => { setShowSyncModal(true); setIsPurging(false); }}
                   disabled={!abeSettings.enabled || testingConnection}
-                  className="btn-primary flex items-center gap-2"
+                  className="btn-primary flex items-center justify-center gap-2"
                 >
-                  {testingConnection ? (
+                  {testingConnection && !isPurging ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
                       Iniciando sincronización...
@@ -405,6 +409,23 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                     <>
                       <Upload size={16} />
                       Forzar Subida FTPS
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => { setShowSyncModal(true); setIsPurging(true); }}
+                  disabled={!abeSettings.enabled || testingConnection}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors font-medium shadow-sm"
+                >
+                   {testingConnection && isPurging ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                       Poniendo a Cero...
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={16} />
+                      Vaciar Inventario (Stock 0)
                     </>
                   )}
                 </button>
@@ -454,9 +475,16 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               {!syncResult ? (
                 <>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    ¿Quieres subir el catálogo ahora vía FTPS? Esto iniciará la sincronización inmediatamente.
-                  </p>
+                   {isPurging ? (
+                      <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-md mb-6">
+                        <p className="font-bold flex items-center gap-2 mb-2"><AlertCircle size={20} /> ¡Peligro de Destrucción!</p>
+                        <p className="text-sm">¿Estás completamente seguro de que quieres lanzar una actualización masiva poniendo la cantidad de <strong>TODOS tus libros a 0</strong> en AbeBooks? Tu catálogo desaparecerá del mercado público.</p>
+                      </div>
+                   ) : (
+                      <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        ¿Quieres subir el catálogo ahora vía FTPS? Esto iniciará la sincronización inmediatamente.
+                      </p>
+                   )}
 
                   <div className="flex gap-3 justify-end">
                     <button
@@ -467,9 +495,11 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                       Cancelar
                     </button>
                     <button
-                      onClick={handleTriggerSync}
+                      onClick={() => handleTriggerSync(isPurging)}
                       disabled={testingConnection}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                      className={`px-4 py-2 text-white rounded-md flex items-center gap-2 disabled:opacity-50 transition-colors ${
+                          isPurging ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
                     >
                       {testingConnection ? (
                         <>
@@ -478,8 +508,8 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                         </>
                       ) : (
                         <>
-                          <Upload size={16} />
-                          Iniciar Sincronización
+                          {isPurging ? <AlertCircle size={16} /> : <Upload size={16} />}
+                          {isPurging ? 'Purgar Ahora' : 'Iniciar Sincronización'}
                         </>
                       )}
                     </button>

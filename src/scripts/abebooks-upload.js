@@ -59,6 +59,12 @@ async function downloadTXT() {
              // Append only if not present. simplified logic
              fnUrl = fnUrl.replace(/\/$/, '') + '/generate-abebooks-csv';
         }
+        
+        // Append purge flag if we are purging inventory
+        if (process.env.PURGE_INVENTORY === 'true') {
+            fnUrl += '?purge=true';
+            console.log('🧨 MODO DE PURGA ACTIVADO: Se forzarán todos los stocks a 0.');
+        }
         console.log('🔗 URL de generación:', fnUrl);
 
         const url = new URL(fnUrl);

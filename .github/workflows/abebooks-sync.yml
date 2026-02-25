@@ -4,7 +4,13 @@ on:
   schedule:
     # Ejecutar cada 2 horas
     - cron: "0 */2 * * *"
-  workflow_dispatch: # Permite ejecución manual desde GitHub
+  workflow_dispatch: # Permite ejecución manual desde GitHub y recibe parámetros
+    inputs:
+      purge:
+        description: "Forzar vaciado total del inventario (poner cantidad de todos los libros a 0)"
+        required: false
+        default: "false"
+        type: string
 
 jobs:
   upload-inventory:
@@ -76,6 +82,7 @@ jobs:
           ABEBOOKS_API_KEY: ${{ secrets.ABEBOOKS_API_KEY }}
           SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PURGE_INVENTORY: ${{ inputs.purge }}
         run: |
           START_TIME=$(date +%s)
           OUTPUT=$(node src/scripts/abebooks-upload.js)

@@ -13,6 +13,9 @@ serve(async (req) => {
   }
 
   try {
+    const url = new URL(req.url);
+    const isPurge = url.searchParams.get('purge') === 'true';
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -32,7 +35,7 @@ serve(async (req) => {
     } catch (e) {
       console.warn('Settings fetch error:', e);
     }
-    console.log(`Min Price: ${minPrice}`);
+    console.log(`Min Price: ${minPrice} | Purge Mode: ${isPurge}`);
 
     // Create a ReadableStream to stream the CSV data
     const stream = new ReadableStream({
@@ -79,8 +82,11 @@ serve(async (req) => {
                 }
 
                 // Logic applied: AbeBooks needs an explicit '0' quantity to delete/unlist a book
-                // If the book does not meet our minimum price or has no stock, we enforce quantity 0
-                const exportQuantity = (book.stock > 0 && Number(book.precio) >= minPrice) ? book.stock : 0;
+                // If isPurge is true, WE ENFORCE 0 QUANTITY FOR EVERYTHING (Wipe out inventory).
+                // Else, if the book does not meet our minimum price or has no stock, we enforce quantity 0
+                const exportQuantity = isPurge 
+                    ? 0 
+                    : ((book.stock > 0 && Number(book.precio) >= minPrice) ? book.stock : 0);
 
                 // Format: Custom Generic Tab-Delimited Profile (Mapped by Abebooks Support specifically for this account)
                 // Changing this order WILL scramble Abebooks listings!
