@@ -66,41 +66,53 @@ serve(async (req) => {
             }
 
             let chunk = "";
+            
+            // Fila de cabecera obligatoria en el formato oficial de 2024-10 para anular "Custom Profiles" locales 
+            if (from === 0) {
+                const headers = [
+                  "listingid", "title", "author", "illustrator", "price", "quantity", 
+                  "producttype", "description", "bindingtext", "bookcondition", 
+                  "publishername", "placepublished", "yearpublished", "isbn", 
+                  "sellercatalog1", "sellercatalog2", "sellercatalog3", "abecategory", 
+                  "keywords", "jacketcondition", "editiontext", "printingtext", 
+                  "signedtext", "volume", "size", "imgurl", "weight", "weightunit", 
+                  "shippingtemplateid", "language"
+                ];
+                chunk += headers.join(separator) + '\r\n';
+            }
+
             for (const book of books) {
                 const sku = book.legacy_id || book.id;
                 const description = (book.descripcion || '').replace(/\s+/g, ' ').trim(); 
                 const editorialName = book.editoriales?.nombre || '';
-                let imageUrl = "NO";
+                let finalImageUrl = "";
                 if (book.imagen_url && 
                     book.imagen_url.trim() !== "" && 
                     !book.imagen_url.includes("default-book-cover") &&
                     (book.imagen_url.startsWith("http") || book.imagen_url.startsWith("https"))) {
-                     imageUrl = book.imagen_url;
+                     finalImageUrl = book.imagen_url;
                 }
 
-                // Logic applied: AbeBooks needs an explicit '0' quantity to delete/unlist a book
-                // If the book does not meet our minimum price or has no stock, we enforce quantity 0
+                // Lógica principal de purga de AbeBooks (Obligatorio un 0 explícito para anular)
+                // Si el libro no cumple el precio o no hay stock, pasamos 0.
                 const exportQuantity = (book.stock > 0 && Number(book.precio) >= minPrice) ? book.stock : 0;
 
-                // Format: Custom Generic Tab-Delimited Profile (Mapped by Abebooks Support specifically for this account)
-                // Changing this order WILL scramble Abebooks listings!
-                const row = [
-                    q(sku),
-                    q(book.titulo || 'Untitled'),
-                    q(description),
-                    q(imageUrl), 
-                    q(editorialName),
-                    q(book.anio || ''),
-                    q(book.autor || 'Unknown'),
-                    q(""), // Place
-                    q("España"), // Country
-                    u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    u(exportQuantity),                 // Col 11: Quantity (Unquoted), explicit 0 is allowed and means delete
-                    q(book.isbn || "")                 // Col 12: ISBN
-                ];
-                
-                // Note: The script 'abebooks-upload.js' expects NO header line currently, 
-                // so we just output the data rows.
+                // Formato Oficial 2024-10 de 30 columnas
+                const row = new Array(30).fill("");
+                row[0] = q(sku);                                     // listingid
+                row[1] = q(book.titulo || 'Untitled');               // title
+                row[2] = q(book.autor || 'Unknown');                 // author
+                row[4] = u(Number(book.precio).toFixed(2));          // price (NOT QUOTED, Decimals with dot)
+                row[5] = u(exportQuantity);                          // quantity (NOT QUOTED)
+                row[7] = q(description);                             // description
+                row[8] = q(book.encuadernacion || "Tapa Blanda");    // bindingtext
+                row[9] = q(book.estado || "Bueno");                  // bookcondition
+                row[10] = q(editorialName);                          // publishername
+                row[11] = q("España");                               // placepublished
+                row[12] = q(book.anio || '');                        // yearpublished
+                row[13] = q(book.isbn || "");                        // isbn
+                row[26] = q(finalImageUrl);                          // imgurl (Columna 27)
+
                 chunk += row.join(separator) + '\r\n';
             }
 
