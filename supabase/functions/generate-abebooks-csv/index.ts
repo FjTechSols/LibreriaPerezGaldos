@@ -105,7 +105,7 @@ serve(async (req) => {
                     q(""), // Place
                     q("España"), // Country
                     u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    u(""),                             // Col 11: Quantity MUST BE EMPTY as per old legacy system
+                    q(book.paginas || ""),             // Col 11: Pages (El sistema anterior enviaba esto aquí, NO la cantidad)
                     q(book.isbn || "")                 // Col 12: ISBN
                 ];
                 
