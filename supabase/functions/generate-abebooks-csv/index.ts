@@ -19,7 +19,7 @@ serve(async (req) => {
     )
 
     // Get minimum price settings
-    let minPrice = 12;
+    let minPrice = 12; // Fallback a 12 para purgar libros de bajo coste como desea el negocio
     try {
       const { data } = await supabaseClient
         .from('settings')
