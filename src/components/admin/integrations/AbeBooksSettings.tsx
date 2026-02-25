@@ -415,7 +415,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                 <button
                   onClick={() => { setShowSyncModal(true); setIsPurging(true); }}
                   disabled={!abeSettings.enabled || testingConnection}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors font-medium shadow-sm"
+                  className="btn-primary !bg-red-600 hover:!bg-red-700 !border-red-600 flex items-center justify-center gap-2"
                 >
                    {testingConnection && isPurging ? (
                     <>
@@ -425,7 +425,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                   ) : (
                     <>
                       <AlertCircle size={16} />
-                      Vaciar Inventario (Stock 0)
+                      Vaciar Inventario
                     </>
                   )}
                 </button>
