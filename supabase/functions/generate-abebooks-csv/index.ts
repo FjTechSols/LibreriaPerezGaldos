@@ -82,26 +82,25 @@ serve(async (req) => {
                 // If the book does not meet our minimum price or has no stock, we enforce quantity 0
                 const exportQuantity = (book.stock > 0 && Number(book.precio) >= minPrice) ? book.stock : 0;
 
-                // Format (HomeBase 2.3 or Abebooks Tab delimited Standard) 
-                // Using standard Abebooks Generic Tab-Delimited:
-                // bookID, isbn, title, author, quantity, bookCondition, binding, price, publisher, pubDate, description, imageURL
+                // Format: Custom Generic Tab-Delimited Profile (Mapped by Abebooks Support specifically for this account)
+                // Changing this order WILL scramble Abebooks listings!
                 const row = [
-                    q(sku),                             // 1: bookID
-                    q(book.isbn || ""),                 // 2: isbn
-                    q(book.titulo || 'Untitled'),       // 3: title
-                    q(book.autor || 'Unknown'),         // 4: author
-                    u(exportQuantity),                  // 5: quantity
-                    q(book.estado || "Bueno"),          // 6: bookCondition
-                    q("Tapa Blanda"),                   // 7: binding (mock)
-                    u(Number(book.precio).toFixed(2)),  // 8: price
-                    q(editorialName),                   // 9: publisher
-                    q(book.anio || ''),                 // 10: pubDate
-                    q(description),                     // 11: description
-                    q(imageUrl)                         // 12: imageURL
+                    q(sku),
+                    q(book.titulo || 'Untitled'),
+                    q(description),
+                    q(imageUrl), 
+                    q(editorialName),
+                    q(book.anio || ''),
+                    q(book.autor || 'Unknown'),
+                    q(""), // Place
+                    q("España"), // Country
+                    u(Number(book.precio).toFixed(2)), // Col 10: Price
+                    u(exportQuantity),                 // Col 11: Quantity (Unquoted), explicit 0 is allowed and means delete
+                    q(book.isbn || "")                 // Col 12: ISBN
                 ];
                 
                 // Note: The script 'abebooks-upload.js' expects NO header line currently, 
-                // so we just output the data rows in the Homebase order.
+                // so we just output the data rows.
                 chunk += row.join(separator) + '\r\n';
             }
 
