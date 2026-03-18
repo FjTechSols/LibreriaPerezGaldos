@@ -22,6 +22,7 @@ import {
 } from '../services/reviewService';
 import { NotFound } from '../components/NotFound';
 import { createReservation } from '../services/reservationService';
+import { createAdminReservationNotification } from '../services/notificationService';
 import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
@@ -155,7 +156,14 @@ export function BookDetail() {
     
     setIsReserving(true);
     try {
-      await createReservation(user.id, Number(book.id));
+      const reservation = await createReservation(user.id, Number(book.id));
+      // Notify all admins about the new reservation
+      const userName = user.fullName || user.username || user.name || 'Usuario';
+      createAdminReservationNotification(
+        reservation.id,
+        userName,
+        book.title
+      ).catch(err => console.error('[Notification] Error creating admin reservation notification:', err));
       setReservationSuccess(true);
     } catch (error: any) {
       console.error('Error reserving book:', error);

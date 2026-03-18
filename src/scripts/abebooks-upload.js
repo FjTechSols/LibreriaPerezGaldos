@@ -48,8 +48,22 @@ if (!ABEBOOKS_USER || !ABEBOOKS_API_KEY || !SUPABASE_FUNCTION_URL || !SUPABASE_K
 }
 
 const TXT_PATH = path.join(__dirname, 'temp_abebooks_inventory.txt');
+const LOCAL_OVERRIDE_PATH = path.resolve(__dirname, '../../scripts/files/abebooks_local_export.txt');
 
 async function downloadTXT() {
+    // Check if we have a locally generated file (from the new GitHub Actions step)
+    if (fs.existsSync(LOCAL_OVERRIDE_PATH)) {
+        console.log('📦 Detectado archivo local generado previamente. Usando este archivo en lugar de descargar de Supabase.');
+        try {
+            // Simply copy the local file to our temp path
+            fs.copyFileSync(LOCAL_OVERRIDE_PATH, TXT_PATH);
+            console.log('✅ Archivo local copiado a la ruta temporal de subida.');
+            return; // Exit early, no need to download
+        } catch (err) {
+            console.warn('⚠️ Error al copiar archivo local, intentando descarga como fallback:', err.message);
+        }
+    }
+
     console.log('⬇️  Descargando inventario (TXT) desde Supabase...');
     
     return new Promise((resolve, reject) => {
@@ -174,10 +188,10 @@ async function run() {
     try {
         await downloadTXT();
         
-        // Count books BEFORE uploading (so we have the count even if upload fails)
+        // Count books BEFORE uploading
         const fileContent = fs.readFileSync(TXT_PATH, 'utf-8');
-        const lineCount = fileContent.split('\n').filter(line => line.trim()).length;
-        const bookCount = lineCount - 1; // Subtract header
+        const lines = fileContent.split('\n').filter(line => line.trim());
+        const bookCount = lines.length; // NO hay cabecera en este formato tabulado custom
         console.log(`📊 Total books in TXT: ${bookCount}`);
 
         // DEBUG: Print first 500 chars to check format

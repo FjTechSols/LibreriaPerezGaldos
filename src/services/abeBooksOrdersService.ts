@@ -171,3 +171,43 @@ export function getStatusBadgeClass(status: AbeBooksOrderStatus): string {
   };
   return classMap[status] || 'default';
 }
+
+/**
+ * Update AbeBooks Order Status or Shipping Info
+ * Action: 'update' (for status) or 'updateShipping' (for tracking)
+ */
+export async function updateAbeBooksOrder(
+    orderId: string, 
+    action: 'update' | 'updateShipping', 
+    status?: AbeBooksOrderStatus | 'Rejected' | 'PreviouslySold' | 'availabilityConfirmed',
+    trackingData?: { carrier: string; trackingNumber: string }
+): Promise<{ success: boolean; message?: string }> {
+    try {
+        console.log(`📤 Updating AbeBooks Order ${orderId} (${action})...`);
+        
+        const { data, error } = await supabase.functions.invoke('update-abebooks-order', {
+            body: { 
+                orderId, 
+                action, 
+                status: status || 'Shipped', 
+                trackingData 
+            }
+        });
+
+        if (error) {
+            console.error('❌ Edge Function Error:', error);
+            throw error;
+        }
+
+        if (data?.error) {
+            console.error('❌ API Error:', data.error);
+            throw new Error(data.error);
+        }
+
+        console.log('✅ Order update successful:', data);
+        return { success: true };
+    } catch (error: any) {
+        console.error('❌ Update failed:', error);
+        throw error;
+    }
+}

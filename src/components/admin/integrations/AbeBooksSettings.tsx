@@ -231,28 +231,25 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                   checked={abeSettings.api?.orders?.showTab || false}
                   onChange={(val) => handleApiUpdate('orders', 'showTab', val)}
                   disabled={!abeSettings.enabled}
-                  label='Mostrar Pestaña "IberLibro"'
-                  description="Habilita la pestaña en la sección de Pedidos para ver listados específicos."
+                  label='Habilitar Pestaña "IberLibro"'
+                  description="Muestra la sección dedicada a pedidos de AbeBooks en el menú lateral."
                 />
 
                 <ToggleSwitch
                   checked={abeSettings.api?.orders?.download || false}
                   onChange={(val) => handleApiUpdate('orders', 'download', val)}
                   disabled={!abeSettings.enabled}
-                  label="Sincronizar Pedidos (Descarga)"
-                  description="Descarga automáticamente nuevos pedidos desde AbeBooks a la plataforma."
+                  label="Sincronización Automática de Pedidos"
+                  description="Descarga y actualiza automáticamente los pedidos desde AbeBooks cada 15 minutos."
                 />
 
-                <div className="toggle-group opacity-60">
-                  <label className="toggle-label cursor-not-allowed">
-                    <label className="switch">
-                      <input type="checkbox" disabled checked={false} />
-                      <span className="slider round" style={{ backgroundColor: '#ccc' }}></span>
-                    </label>
-                    <span className="text-gray-500">Gestionar Pedidos (Próximamente)</span>
-                  </label>
-                  <p className="toggle-description">Gestión integral de estados y envíos desde aquí.</p>
-                </div>
+                <ToggleSwitch
+                  checked={abeSettings.api?.orders?.manage || false}
+                  onChange={(val) => handleApiUpdate('orders', 'manage', val)}
+                  disabled={!abeSettings.enabled}
+                  label="Gestión de Estados y Envíos (API)"
+                  description="Permite confirmar disponibilidad, rechazar pedidos y añadir datos de seguimiento desde el panel."
+                />
               </div>
 
               {/* Inventory Section */}

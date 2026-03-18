@@ -1,15 +1,57 @@
-import { X, Package, User, MapPin, Phone, Mail, Calendar, Truck } from 'lucide-react';
-import { AbeBooksOrder, ABEBOOKS_STATUS_LABELS, formatAbeBooksDate, getStatusBadgeClass } from '../../../services/abeBooksOrdersService';
+import { useState } from 'react';
+import { X, Package, User, MapPin, Phone, Mail, Calendar, Truck, Check, Send, Ban, Loader2 } from 'lucide-react';
+import { useSettings } from '../../../context/SettingsContext';
+import { 
+  AbeBooksOrder, 
+  ABEBOOKS_STATUS_LABELS, 
+  formatAbeBooksDate, 
+  getStatusBadgeClass,
+  updateAbeBooksOrder 
+} from '../../../services/abeBooksOrdersService';
 import '../../../styles/components/IberLibroOrderDetail.css';
 
 interface IberLibroOrderDetailProps {
   order: AbeBooksOrder | null;
   isOpen: boolean;
   onClose: () => void;
+  onRefresh?: () => void;
 }
 
-export function IberLibroOrderDetail({ order, isOpen, onClose }: IberLibroOrderDetailProps) {
+export function IberLibroOrderDetail({ order, isOpen, onClose, onRefresh }: IberLibroOrderDetailProps) {
+  const { settings } = useSettings();
+  const [loading, setLoading] = useState(false);
+  const [showShipForm, setShowShipForm] = useState(false);
+  const [trackingData, setTrackingData] = useState({ carrier: '', trackingNumber: '' });
+
+  // Check if management features are enabled in settings
+  const isManageEnabled = settings.integrations.abeBooks.enabled && 
+                         settings.integrations.abeBooks.api.orders.manage;
+
   if (!isOpen || !order) return null;
+
+  // Simple normalization for common AbeBooks statuses if they arrive differently
+  const currentStatus = order.status as any;
+  const isNew = currentStatus === 'New' || currentStatus === 'Ordered' || currentStatus === 'Ordered-Pending';
+  const isAcknowledged = currentStatus === 'Acknowledged' || currentStatus === 'availabilityConfirmed';
+  const isShipped = currentStatus === 'Shipped';
+
+  const handleAction = async (action: 'update' | 'updateShipping', status?: any) => {
+    setLoading(true);
+    try {
+      await updateAbeBooksOrder(
+        order.abeBooksOrderId, 
+        action, 
+        status, 
+        action === 'updateShipping' ? trackingData : undefined
+      );
+      if (onRefresh) onRefresh();
+      setShowShipForm(false);
+    } catch (err: any) {
+      alert(`Error al actualizar pedido: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -169,10 +211,96 @@ export function IberLibroOrderDetail({ order, isOpen, onClose }: IberLibroOrderD
               </div>
             </div>
           </div>
+
+          {/* Shipment Tracking Form (Conditional) */}
+          {showShipForm && (
+            <div className="info-section tracking-form">
+              <h3 className="section-title">Datos de Envío</h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Transportista</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ej: Correos, DHL..." 
+                    value={trackingData.carrier}
+                    onChange={(e) => setTrackingData({...trackingData, carrier: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Nº Seguimiento</label>
+                  <input 
+                    type="text" 
+                    placeholder="Código de tracking" 
+                    value={trackingData.trackingNumber}
+                    onChange={(e) => setTrackingData({...trackingData, trackingNumber: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="form-actions mt-3">
+                <button 
+                   className="btn-primary flex items-center gap-2"
+                   disabled={loading || !trackingData.carrier || !trackingData.trackingNumber}
+                   onClick={() => handleAction('updateShipping')}
+                >
+                   {loading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+                   Confirmar Seguimiento
+                </button>
+                <button className="btn-secondary" onClick={() => setShowShipForm(false)}>Cancelar</button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="modal-footer">
+        {/* Footer Actions */}
+        <div className="modal-footer actions-footer">
+          <div className="flex gap-2">
+            {isManageEnabled && isNew && (
+              <button 
+                className="btn-success flex items-center gap-2"
+                disabled={loading}
+                onClick={() => handleAction('update', 'availabilityConfirmed')}
+              >
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
+                Confirmar Disponibilidad
+              </button>
+            )}
+
+            {isManageEnabled && (isNew || isAcknowledged) && (
+              <>
+                <button 
+                  className="btn-primary flex items-center gap-2"
+                  disabled={loading}
+                  onClick={() => handleAction('update', 'Shipped')}
+                >
+                  <Truck size={18} />
+                  Marcar como Enviado
+                </button>
+                <button 
+                    className="btn-danger flex items-center gap-2"
+                    disabled={loading}
+                    onClick={() => {
+                        if(confirm('¿Seguro que quieres cancelar este pedido en AbeBooks?')) {
+                            handleAction('update', 'Rejected');
+                        }
+                    }}
+                >
+                    <Ban size={18} />
+                    Rechazar/Cancelar
+                </button>
+              </>
+            )}
+
+            {isManageEnabled && isShipped && !order.trackingNumber && !showShipForm && (
+              <button 
+                className="btn-primary flex items-center gap-2"
+                onClick={() => setShowShipForm(true)}
+              >
+                <Truck size={18} />
+                Añadir Tracking
+              </button>
+            )}
+          </div>
+
           <button onClick={onClose} className="btn-secondary">
             Cerrar
           </button>

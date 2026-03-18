@@ -95,18 +95,18 @@ serve(async (req) => {
                 // Format: Custom Generic Tab-Delimited Profile (Mapped by Abebooks Support specifically for this account)
                 // Changing this order WILL scramble Abebooks listings!
                 const row = [
-                    q(sku),
-                    q(book.titulo || 'Untitled'),
-                    q(description),
-                    q(imageUrl), 
-                    q(editorialName),
-                    q(book.anio || ''),
-                    q(book.autor || 'Unknown'),
-                    q(""), // Place
-                    q("España"), // Country
-                    u(Number(book.precio).toFixed(2)), // Col 10: Price
-                    q(book.paginas || ""),             // Col 11: Pages (El sistema anterior enviaba esto aquí, NO la cantidad)
-                    q(book.isbn || "")                 // Col 12: ISBN
+                    q(sku),                            // 0: ID
+                    q(book.titulo || 'Untitled'),      // 1: Titulo
+                    q(description),                    // 2: Descripcion
+                    q("NO"),                           // 3: Columna misteriosa que siempre llevaba "NO"
+                    q(editorialName),                  // 4: Editorial
+                    q(book.anio || ''),                // 5: Ano
+                    q(book.autor || 'Unknown'),        // 6: Autor
+                    q("Madrid"),                       // 7: Lugar de edicion (fijohistorico)
+                    q("España"),                       // 8: Pais (fijo historico)
+                    u(Number(book.precio).toFixed(2)), // 9: Precio
+                    q(book.paginas || ""),             // 10: Paginas
+                    q(book.isbn || "")                 // 11: ISBN
                 ];
                 
                 // Note: The script 'abebooks-upload.js' expects NO header line currently, 

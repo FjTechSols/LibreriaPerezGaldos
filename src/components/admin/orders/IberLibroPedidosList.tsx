@@ -139,16 +139,24 @@ export function IberLibroPedidosList() {
   const handleSync = async () => {
     setLoading(true);
     try {
-        // Pass current filters to sync logic
-        // If user selects a date range, we sync that range.
-        // If empty, it defaults to 30 days in backend.
-        await syncAbeBooksOrders(filters);
+        console.log('🔄 Iniciando sincronización manual con filtros:', filters);
+        const result = await syncAbeBooksOrders(filters);
         
-        await loadOrders(); // Reload from cache
-        setMessageConfig({ title: 'Sincronización Correcta', message: 'Pedidos actualizados desde AbeBooks', type: 'success' });
+        await loadOrders(); // Recargar de la caché local
+        
+        setMessageConfig({ 
+            title: 'Sincronización Finalizada', 
+            message: result.message || 'Se han actualizado los pedidos desde AbeBooks.', 
+            type: 'success' 
+        });
         setShowMessageModal(true);
     } catch (err: any) {
-        setMessageConfig({ title: 'Error de Sincronización', message: err.message, type: 'error' });
+        console.error('❌ Error sincronizando:', err);
+        setMessageConfig({ 
+            title: 'Error de Sincronización', 
+            message: err.message || 'Ocurrió un error al conectar con AbeBooks.', 
+            type: 'error' 
+        });
         setShowMessageModal(true);
     } finally {
         setLoading(false);
@@ -270,6 +278,7 @@ export function IberLibroPedidosList() {
           setIsDetailOpen(false);
           setSelectedOrder(null);
         }}
+        onRefresh={loadOrders}
       />
 
       {/* Message Modal */}

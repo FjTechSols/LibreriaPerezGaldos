@@ -13,6 +13,11 @@
     "preview": "vite preview",
     "preview:dev": "vite preview --mode development",
     "preview:prod": "vite preview --mode production",
+    "sb": "node scripts/supabase-safe.mjs",
+    "sb:status": "node scripts/supabase-safe.mjs status",
+    "sb:link": "node scripts/supabase-safe.mjs link",
+    "sb:db:push": "node scripts/supabase-safe.mjs db push",
+    "sb:db:reset:local": "node scripts/supabase-safe.mjs db reset --local --confirm-local-reset",
     "import:books": "node scripts/importar-libros.mjs",
     "buscar:portadas": "node scripts/buscar-portadas.mjs",
     "test": "vitest"
