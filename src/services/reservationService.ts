@@ -44,7 +44,9 @@ export const getReservations = async ({ page, limit }: { page?: number; limit?: 
       usuario:usuarios!usuario_id (
         id,
         email,
-        nombre_completo
+        nombre_completo,
+        nombre,
+        username
       ),
       libro:libros (
         id,
@@ -69,6 +71,7 @@ export const getReservations = async ({ page, limit }: { page?: number; limit?: 
   }
   return { data: data || [], count: count || 0 };
 };
+
 
 export const updateReservationStatus = async (id: number, estado: 'confirmada' | 'rechazada' | 'expirada') => {
   const { data, error } = await supabase

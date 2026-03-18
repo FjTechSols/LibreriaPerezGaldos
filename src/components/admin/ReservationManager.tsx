@@ -215,7 +215,9 @@ export function ReservationManager() {
                 <td data-label="Fecha">{new Date(res.created_at).toLocaleDateString()}</td>
                 <td data-label="Usuario">
                   <div className="user-info">
-                    <span className="font-medium">{res.usuario?.nombre_completo || 'N/A'}</span>
+                    <span className="font-medium">
+                      {res.usuario?.nombre_completo || (res.usuario as any)?.nombre || res.usuario?.email?.split('@')[0] || 'N/A'}
+                    </span>
                     <span className="text-sm text-gray-500">{res.usuario?.email}</span>
                   </div>
                 </td>

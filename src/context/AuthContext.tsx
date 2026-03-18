@@ -111,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const userEmail = sessionData.session?.user?.email;
+      const authMeta = sessionData.session?.user?.user_metadata || {};
 
       const { data: userData, error } = await supabase
         .from('usuarios')
@@ -121,6 +122,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error && error.code !== 'PGRST116') {
         await supabase.auth.signOut();
         return;
+      }
+
+      // Self-heal: if fields are null in DB but available in Supabase Auth metadata, update them
+      if (userData?.id) {
+        const metaFullName =
+          authMeta.full_name ||
+          [authMeta.first_name, authMeta.last_name].filter(Boolean).join(' ').trim() ||
+          null;
+        const metaUsername = authMeta.username || userEmail?.split('@')[0] || null;
+
+        const needsUpdate =
+          (!userData.nombre_completo && metaFullName) ||
+          (!userData.username && metaUsername);
+
+        if (needsUpdate) {
+          const updatePayload: Record<string, string> = {};
+          if (!userData.nombre_completo && metaFullName) updatePayload.nombre_completo = metaFullName;
+          if (!userData.username && metaUsername) updatePayload.username = metaUsername;
+
+          await supabase.from('usuarios').update(updatePayload).eq('id', userData.id);
+
+          // Apply locally without waiting for a re-fetch
+          if (!userData.nombre_completo && metaFullName) userData.nombre_completo = metaFullName;
+          if (!userData.username && metaUsername) userData.username = metaUsername;
+        }
       }
 
       const roles = await obtenerRolesDeUsuario(authUserId);
@@ -152,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error loading user data:', error);
     }
   };
+
 
   const login = async (emailOrUsername: string, password: string): Promise<boolean> => {
     // Validar que los campos no estén vacíos
