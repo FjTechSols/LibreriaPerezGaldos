@@ -140,7 +140,7 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
     const newErrors: Partial<Record<keyof OrderFormData, string>> = {};
     if (!formData.clientName.trim()) newErrors.clientName = 'El nombre es obligatorio';
     if (!formData.clientPhone.trim()) newErrors.clientPhone = 'El teléfono es obligatorio';
-    else if (!/^\d{9,15}$/.test(formData.clientPhone.replace(/\s/g, ''))) newErrors.clientPhone = 'Teléfono inválido';
+    else if (!/^\+?\d{9,15}$/.test(formData.clientPhone.replace(/\s/g, ''))) newErrors.clientPhone = 'Teléfono inválido';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);

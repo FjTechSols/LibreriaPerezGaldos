@@ -6,7 +6,7 @@
   border-radius: 1rem;
   background: var(--input-bg);
   transition: all 0.3s ease;
-  /* Removed overflow: hidden so dropdown isn't clipped */
+  width: 100%;
 }
 
 .phone-input-group:focus-within {

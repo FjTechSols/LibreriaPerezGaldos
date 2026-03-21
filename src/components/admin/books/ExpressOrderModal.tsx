@@ -135,7 +135,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
     
     if (!formData.clientPhone.trim()) {
       newErrors.clientPhone = 'El teléfono es obligatorio';
-    } else if (!/^\d{9,15}$/.test(formData.clientPhone.replace(/\s/g, ''))) {
+    } else if (!/^\+?\d{9,15}$/.test(formData.clientPhone.replace(/\s/g, ''))) {
       newErrors.clientPhone = 'Teléfono inválido (9-15 dígitos)';
     }
     
@@ -189,8 +189,8 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
 
   return (
     <div className="fixed inset-0 bg-[var(--bg-overlay)] flex items-center justify-center z-[70] backdrop-blur-sm">
-      <div className="bg-[var(--bg-surface)] text-[var(--text-main)] rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-[var(--border-subtle)]">
-        <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)] bg-gradient-to-r from-[var(--bg-page)] to-[var(--bg-surface)]">
+      <div className="bg-[var(--bg-surface)] text-[var(--text-main)] rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-[var(--border-subtle)] flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)] bg-gradient-to-r from-[var(--bg-page)] to-[var(--bg-surface)] flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-[var(--warning)] rounded-lg">
               <Zap size={24} className="text-white" />
@@ -208,7 +208,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
           </button>
         </div>
 
-        <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-page)]/50">
+        <div className="p-4 border-b border-[var(--border-subtle)] bg-[var(--bg-page)]/50 flex-shrink-0">
           <div className="flex items-start gap-3">
             <Package size={20} className="text-blue-500 mt-1 flex-shrink-0" />
             <div className="flex-1 min-w-0">
@@ -219,7 +219,7 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <div className="relative">
             <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-main)] mb-2">
               <User size={16} />
