@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useSettings } from '../context/SettingsContext';
+import { PhoneInput } from '../components/PhoneInput';
 import '../styles/pages/Register.css';
+
+
 
 export function Register() {
   const [formData, setFormData] = useState({
@@ -13,10 +16,12 @@ export function Register() {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -26,17 +31,16 @@ export function Register() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if already logged in
     if (isAuthenticated && user) {
       navigate('/', { replace: true });
       return;
     }
-    
-    // Redirect if registration is disabled
     if (!settings.system.allowRegistration) {
       navigate('/');
     }
   }, [isAuthenticated, user, settings.system.allowRegistration, navigate]);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,14 +56,21 @@ export function Register() {
       return;
     }
 
+    const cleanPhone = formData.phone.replace(/\D/g, '');
+    if (cleanPhone.length < 6) {
+      setError('Introduce un número de teléfono válido');
+      return;
+    }
+
     setIsLoading(true);
-    // Combine names for fallback if needed, or pass explicitly if register supports it
-    // We will update AuthContext to handle this better, but for now pass object or args
-    // Assuming we'll update register signature to: register(email, password, username, firstName, lastName)
-    // But currently it is (email, password, name).
-    // I'll send username as 'name' for now to match interface, but I need to update AuthContext first or simultaneously.
-    // Let's assume I'll update AuthContext to accept an object or more args.
-    const success = await register(formData.email, formData.password, formData.username, formData.firstName, formData.lastName);
+    const success = await register(
+      formData.email,
+      formData.password,
+      formData.username,
+      formData.firstName,
+      formData.lastName,
+      formData.phone
+    );
     setIsLoading(false);
 
     if (success) {
@@ -69,30 +80,26 @@ export function Register() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
   };
 
-// Helper to get email provider URL
   const getEmailProviderUrl = (email: string) => {
     const domain = email.split('@')[1]?.toLowerCase();
     if (!domain) return null;
-
     if (domain.includes('gmail')) return 'https://mail.google.com';
     if (domain.includes('outlook') || domain.includes('hotmail') || domain.includes('live')) return 'https://outlook.live.com';
     if (domain.includes('yahoo')) return 'https://mail.yahoo.com';
     if (domain.includes('proton') || domain.includes('pm.me')) return 'https://mail.proton.me';
     if (domain.includes('icloud')) return 'https://www.icloud.com/mail';
-    
     return null;
   };
 
   if (registrationSuccess) {
     const providerUrl = getEmailProviderUrl(formData.email);
-
     return (
       <div className="register">
         <div className="register-container">
@@ -104,45 +111,42 @@ export function Register() {
                 Hemos enviado un email de confirmación a:<br/>
                 <strong>{formData.email}</strong>
               </p>
-              
               <div className="success-notice" style={{ background: '#eff6ff', borderColor: '#bfdbfe' }}>
                 <p style={{ color: '#1e40af', fontSize: '1rem' }}>
                   <strong>Importante:</strong> Debes confirmar tu cuenta haciendo clic en el enlace que te enviamos antes de poder iniciar sesión.
                 </p>
               </div>
-
               {providerUrl && (
-                <a 
-                  href={providerUrl} 
-                  target="_blank" 
+                <a
+                  href={providerUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="btn-back-to-login"
-                  style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    gap: '0.5rem', 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
                     textDecoration: 'none',
                     marginBottom: '1rem',
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' // Green distinct from login blue
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                   }}
                 >
                   <Mail size={20} />
                   Abrir mi correo ({formData.email.split('@')[1]})
                 </a>
               )}
-
               <p className="success-instructions">
                 ¿No recibiste el correo? Revisa tu carpeta de Spam o Correo no deseado.
               </p>
             </div>
-             <button
-                onClick={() => navigate('/login')}
-                className="btn-back-to-login"
-                style={providerUrl ? { background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', marginTop: '0' } : {}}
-              >
-                Volver al inicio de sesión
-              </button>
+            <button
+              onClick={() => navigate('/login')}
+              className="btn-back-to-login"
+              style={providerUrl ? { background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', marginTop: '0' } : {}}
+            >
+              Volver al inicio de sesión
+            </button>
           </div>
         </div>
       </div>
@@ -155,9 +159,7 @@ export function Register() {
         <div className="register-card">
           <div className="register-header">
             <h1 className="register-title">{t('registerTitle')}</h1>
-            <p className="register-subtitle">
-              {t('registerSubtitle')}
-            </p>
+            <p className="register-subtitle">{t('registerSubtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="register-form">
@@ -192,7 +194,7 @@ export function Register() {
                   onChange={handleChange}
                   required
                   className="form-input"
-                  placeholder="Tues apellidos"
+                  placeholder="Tus apellidos"
                 />
               </div>
             </div>
@@ -231,6 +233,21 @@ export function Register() {
                   placeholder="tu@email.com"
                 />
               </div>
+            </div>
+
+            {/* Phone Field with Custom Country Code Selector */}
+            <div className="form-group">
+              <label htmlFor="phone" className="form-label">
+                <Phone size={16} />
+                Teléfono *
+              </label>
+              <PhoneInput
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                required
+              />
             </div>
 
             <div className="form-group">

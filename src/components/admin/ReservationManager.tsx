@@ -219,6 +219,9 @@ export function ReservationManager() {
                       {res.usuario?.nombre_completo || (res.usuario as any)?.nombre || res.usuario?.email?.split('@')[0] || 'N/A'}
                     </span>
                     <span className="text-sm text-gray-500">{res.usuario?.email}</span>
+                    <span className="text-sm text-gray-400">
+                      📞 {(res.usuario as any)?.telefono || 'Sin teléfono'}
+                    </span>
                   </div>
                 </td>
                 <td data-label="Libro">

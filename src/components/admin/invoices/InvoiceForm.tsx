@@ -5,6 +5,7 @@ import { Plus, Trash2, FileText, Search, User, Building2, School, X } from 'luci
 import { getClientes, crearCliente } from '../../../services/clienteService';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import type { Cliente, Book } from '../../../types';
+import { PhoneInput } from '../../PhoneInput';
 import '../../../styles/components/InvoiceForm.css';
 
 interface InvoiceFormProps {
@@ -913,13 +914,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="form-group" style={{ padding: '0 0.25rem' }}>
                     <label>Teléfono</label>
-                    <input 
-                      type="tel" 
-                      className="form-input" 
+                    <PhoneInput 
+                      id="telefono"
+                      name="telefono"
                       value={clienteModalData.telefono}
-                      onChange={(e) => setClienteModalData({...clienteModalData, telefono: e.target.value})}
+                      onChange={(val) => setClienteModalData({...clienteModalData, telefono: val})}
                     />
                   </div>
 

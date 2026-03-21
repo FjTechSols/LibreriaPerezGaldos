@@ -23,6 +23,7 @@ import { getClientes, crearCliente } from "../../../services/clienteService";
 import { sendOrderConfirmationEmail, sendStoreOrderRegisteredEmail, type OrderEmailData } from "../../../services/emailService";
 import { useAuth } from "../../../context/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
+import { PhoneInput } from "../../PhoneInput";
 import "../../../styles/components/CrearPedido.css";
 import { MessageModal } from "../../MessageModal"; // Import MessageModal
 
@@ -2391,13 +2392,13 @@ export default function CrearPedido({
                     />
                   </div>
 
-                  <div className="form-group">
+                  <div className="form-group" style={{ padding: '0 0.25rem' }}>
                     <label>Teléfono</label>
-                    <input 
-                      type="tel" 
-                      className="form-input" 
+                    <PhoneInput 
+                      id="telefono"
+                      name="telefono"
                       value={clienteModalData.telefono}
-                      onChange={(e) => setClienteModalData({...clienteModalData, telefono: e.target.value})}
+                      onChange={(val) => setClienteModalData({...clienteModalData, telefono: val})}
                     />
                   </div>
 

@@ -4,6 +4,7 @@ import { useOrder } from '../../../context/OrderContext';
 import { buscarClientes } from '../../../services/clienteService';
 import { crearPedidoFlash } from '../../../services/pedidoService';
 import { useAuth } from '../../../context/AuthContext';
+import { PhoneInput } from '../../PhoneInput';
 
 interface FlashOrderModalProps {
   isOpen: boolean;
@@ -303,17 +304,18 @@ export function FlashOrderModal({ isOpen, onClose, onSuccess }: FlashOrderModalP
                         <label className="flex items-center gap-2 text-sm font-bold text-[var(--text-muted)] mb-2">
                            <Phone size={16} /> Teléfono
                         </label>
-                         <input
-                            type="tel"
+                         <PhoneInput
+                            id="clientPhone"
+                            name="clientPhone"
                             value={formData.clientPhone}
-                            onChange={(e) => {
-                                setFormData(prev => ({ ...prev, clientPhone: e.target.value }));
+                            onChange={(val) => {
+                                setFormData(prev => ({ ...prev, clientPhone: val }));
                                 setSelectedClientId(undefined);
                             }}
                             onFocus={() => phoneSuggestions.length > 0 && setShowPhoneSuggestions(true)}
                             onBlur={() => setTimeout(() => setShowPhoneSuggestions(false), 200)}
                             placeholder="600 000 000"
-                            className={`form-input ${errors.clientPhone ? 'error' : ''}`}
+                            className={errors.clientPhone ? 'border-[var(--danger)] border' : ''}
                         />
                         {errors.clientPhone && <p className="error-message">{errors.clientPhone}</p>}
                          {showPhoneSuggestions && phoneSuggestions.length > 0 && (

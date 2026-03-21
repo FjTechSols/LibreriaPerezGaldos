@@ -305,7 +305,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, username: string, firstName: string, lastName: string) => Promise<boolean>;
+  register: (email: string, password: string, username: string, firstName: string, lastName: string, phone?: string) => Promise<boolean>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }

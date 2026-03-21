@@ -23,6 +23,7 @@ import {
 import { NotFound } from '../components/NotFound';
 import { createReservation } from '../services/reservationService';
 import { createAdminReservationNotification } from '../services/notificationService';
+import { supabase } from '../lib/supabase';
 import '../styles/pages/BookDetail.css';
 
 export function BookDetail() {
@@ -151,7 +152,7 @@ export function BookDetail() {
     setShowReservationModal(true);
   };
 
-  const handleConfirmReservation = async () => {
+  const handleConfirmReservation = async (phone: string) => {
     if (!book || !user) return;
     
     setIsReserving(true);
@@ -164,6 +165,18 @@ export function BookDetail() {
         userName,
         book.title
       ).catch(err => console.error('[Notification] Error creating admin reservation notification:', err));
+
+      // Save phone to user profile if they didn't have one
+      if (phone && !user.phone) {
+        supabase
+          .from('usuarios')
+          .update({ telefono: phone })
+          .eq('id', user.id)
+          .then(({ error }) => {
+            if (error) console.error('[Profile] Error saving phone:', error);
+          });
+      }
+
       setReservationSuccess(true);
     } catch (error: any) {
       console.error('Error reserving book:', error);
@@ -611,6 +624,7 @@ export function BookDetail() {
             bookTitle={book.title}
             isProcessing={isReserving}
             isSuccess={reservationSuccess}
+            userPhone={user?.phone || ''}
           />
         )}
         

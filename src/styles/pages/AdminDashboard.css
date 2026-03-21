@@ -2254,15 +2254,47 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-sm);
-  overflow: hidden; /* Fix for rounded corners */
-  padding: 0; /* Ensure no padding */
+  overflow-x: auto; /* Horizontal scroll as fallback */
+  padding: 0;
 }
 
 .reservation-manager .data-table {
   width: 100%;
   border-collapse: collapse;
-  white-space: nowrap;
-  margin: 0; /* Remove potential default margin */
+  table-layout: fixed; /* Respect column widths */
+  min-width: 700px; /* Minimum so small screens scroll */
+  margin: 0;
+}
+
+/* Column widths */
+.reservation-manager .data-table th:nth-child(1), /* Fecha */
+.reservation-manager .data-table td:nth-child(1) {
+  width: 80px;
+}
+
+.reservation-manager .data-table th:nth-child(2), /* Usuario */
+.reservation-manager .data-table td:nth-child(2) {
+  width: 200px;
+}
+
+/* Libro (col 3): takes all remaining width automatically via table-layout: fixed */
+
+.reservation-manager .data-table th:nth-child(4), /* Stock */
+.reservation-manager .data-table td:nth-child(4) {
+  width: 65px;
+  text-align: center;
+}
+
+.reservation-manager .data-table th:nth-child(5), /* Estado */
+.reservation-manager .data-table td:nth-child(5) {
+  width: 120px;
+  text-align: center;
+}
+
+.reservation-manager .data-table th:nth-child(6), /* Acciones */
+.reservation-manager .data-table td:nth-child(6) {
+  width: 270px;
+  text-align: center;
 }
 
 .reservation-manager .data-table th,
@@ -2298,6 +2330,25 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0; /* Allow shrinking inside table cell */
+}
+
+/* Truncate the book title so it never blows up the layout */
+.reservation-manager .book-info a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  display: block;
+}
+
+/* Allow user name to wrap if needed */
+.reservation-manager .user-info .font-medium {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  display: block;
 }
 
 .reservation-manager .status-badge {

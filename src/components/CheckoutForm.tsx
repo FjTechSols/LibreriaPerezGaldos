@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
+import { PhoneInput } from './PhoneInput';
 import '../styles/components/CheckoutForm.css';
 
 export interface CheckoutData {
@@ -277,15 +278,12 @@ export default function CheckoutForm({
 
             <div className="form-group">
               <label htmlFor="telefono">{t('phone')} *</label>
-              <input
-                type="tel"
+              <PhoneInput
                 id="telefono"
                 name="telefono"
                 value={formData.telefono}
-                onChange={handleChange}
+                onChange={(val) => setFormData(prev => ({ ...prev, telefono: val }))}
                 required
-                className="form-input"
-                placeholder={t('phonePlaceholder')}
               />
             </div>
           </div>

@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { X, CalendarClock, BookOpen, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
+import { Phone } from 'lucide-react';
+import { PhoneInput } from './PhoneInput';
 import '../styles/components/ReservationRequestModal.css';
 
 interface ReservationRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (phone: string) => void;
   bookTitle: string;
   isProcessing?: boolean;
   isSuccess?: boolean;
+  userPhone?: string;
 }
 
 export function ReservationRequestModal({ 
@@ -17,16 +20,24 @@ export function ReservationRequestModal({
   onConfirm, 
   bookTitle,
   isProcessing = false,
-  isSuccess = false
+  isSuccess = false,
+  userPhone = ''
 }: ReservationRequestModalProps) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [phone, setPhone] = useState(userPhone || '');
+  const [phoneError, setPhoneError] = useState('');
+
+  const isPhoneValid = phone.trim().length >= 9;
+  const canConfirm = acceptedTerms && isPhoneValid && !isProcessing;
 
   // Reset checkbox when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setAcceptedTerms(false);
+      setPhone(userPhone || '');
+      setPhoneError('');
     }
-  }, [isOpen]);
+  }, [isOpen, userPhone]);
 
   // Scroll lock with layout shift compensation
   useEffect(() => {
@@ -112,6 +123,32 @@ export function ReservationRequestModal({
                 </div>
               </div>
 
+              {/* Phone number - required */}
+              <div className="mb-4 px-1">
+                <label htmlFor="reservation-phone" className="block text-sm font-bold text-[var(--text-main)] mb-1">
+                  <span className="flex items-center gap-2">
+                    <Phone size={15} />
+                    Teléfono de contacto <span className="text-red-500">*</span>
+                  </span>
+                </label>
+                <div style={{ padding: '0 0.25rem' }}>
+                  <PhoneInput
+                    id="reservation-phone"
+                    value={phone}
+                    onChange={(val) => {
+                      setPhone(val);
+                      if (val.replace(/\D/g, '').length >= 6) setPhoneError('');
+                    }}
+                    onBlur={() => {
+                      if (phone.replace(/\D/g, '').length < 6) setPhoneError('Introduce un número de teléfono válido');
+                    }}
+                    disabled={isProcessing}
+                    required
+                  />
+                </div>
+                {phoneError && <p className="text-red-500 text-xs mt-1 pl-1">{phoneError}</p>}
+              </div>
+
               <div className="mb-4 flex items-start gap-3 px-1">
                 <div className="flex items-center h-5">
                   <input
@@ -147,10 +184,16 @@ export function ReservationRequestModal({
                 Cancelar
               </button>
               <button 
-                onClick={onConfirm} 
+                onClick={() => {
+                  if (!isPhoneValid) {
+                    setPhoneError('Introduce un número de teléfono válido (mín. 9 dígitos)');
+                    return;
+                  }
+                  onConfirm(phone.trim());
+                }} 
                 className="reservation-modal__btn reservation-modal__btn--confirm"
-                disabled={isProcessing || !acceptedTerms}
-                title={!acceptedTerms ? "Debes aceptar los términos de recogida para continuar" : ""}
+                disabled={!canConfirm}
+                title={!acceptedTerms ? 'Debes aceptar los términos de recogida para continuar' : !isPhoneValid ? 'Introduce un teléfono válido' : ''}
               >
                 {isProcessing ? (
                   <>

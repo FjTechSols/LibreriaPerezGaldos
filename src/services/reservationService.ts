@@ -46,7 +46,8 @@ export const getReservations = async ({ page, limit }: { page?: number; limit?: 
         email,
         nombre_completo,
         nombre,
-        username
+        username,
+        telefono
       ),
       libro:libros (
         id,

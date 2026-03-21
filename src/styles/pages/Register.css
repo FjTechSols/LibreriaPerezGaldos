@@ -285,7 +285,139 @@
   }
 }
 
+/* Phone Field with Country Code Selector */
+.phone-input-group {
+  display: flex;
+  gap: 0;
+  border: 2px solid var(--input-border);
+  border-radius: 1rem;
+  background: var(--input-bg);
+  transition: all 0.3s ease;
+  /* Removed overflow: hidden so dropdown isn't clipped */
+}
+
+.phone-input-group:focus-within {
+  border-color: var(--border-active);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+/* Custom Country Code Dropdown */
+.custom-country-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0.75rem;
+  background: var(--bg-hover);
+  border-right: 2px solid var(--input-border);
+  border-radius: 0.85rem 0 0 0.85rem;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 100px;
+  max-width: 100px;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.custom-country-select:hover {
+  background: var(--bg-surface);
+}
+
+.country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 250px;
+  max-height: 250px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.country-search-container {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-page);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.country-search {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: 0.25rem;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.country-search:focus {
+  border-color: var(--accent);
+}
+
+.country-search-icon {
+  position: absolute;
+  right: 1rem;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.country-options {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.country-option {
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.875rem;
+}
+
+.country-option:hover {
+  background: var(--bg-hover);
+}
+
+.country-option.selected {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.phone-number-input {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--input-text);
+  outline: none;
+  min-width: 0;
+}
+
+.phone-number-input::placeholder {
+  color: var(--text-tertiary);
+}
+
 /* REMOVED extensive .dark-mode blocks as variables handle theme switching natively now */
+
 
 @media (max-width: 480px) {
   .register {

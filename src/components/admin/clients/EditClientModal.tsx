@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Mail, Phone, MapPin, CreditCard } from 'lucide-react';
+import { X, Save, User, Mail, MapPin, CreditCard } from 'lucide-react';
 import { Cliente } from '../../../types';
 import { actualizarCliente, ClienteFormData } from '../../../services/clienteService';
+import { PhoneInput } from '../../PhoneInput';
 
 interface EditClientModalProps {
   cliente: Cliente;
@@ -164,14 +165,11 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
             <div className="form-group">
               <label>Teléfono</label>
               <div className="input-group relative">
-                <Phone size={16} className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--text-dim)]" />
-                <input
-                  type="tel"
+                <PhoneInput
+                  id="telefono"
                   name="telefono"
-                  className="form-input pl-10 w-full"
-                  value={formData.telefono}
-                  onChange={handleChange}
-                  placeholder="+34 600 000 000"
+                  value={formData.telefono || ''}
+                  onChange={(val) => handleChange({ target: { name: 'telefono', value: val } } as any)}
                 />
               </div>
             </div>

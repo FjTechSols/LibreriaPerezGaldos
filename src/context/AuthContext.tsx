@@ -131,21 +131,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           [authMeta.first_name, authMeta.last_name].filter(Boolean).join(' ').trim() ||
           null;
         const metaUsername = authMeta.username || userEmail?.split('@')[0] || null;
+        const metaPhone = authMeta.phone || null;
 
         const needsUpdate =
           (!userData.nombre_completo && metaFullName) ||
-          (!userData.username && metaUsername);
+          (!userData.username && metaUsername) ||
+          (!userData.telefono && metaPhone);
 
         if (needsUpdate) {
           const updatePayload: Record<string, string> = {};
           if (!userData.nombre_completo && metaFullName) updatePayload.nombre_completo = metaFullName;
           if (!userData.username && metaUsername) updatePayload.username = metaUsername;
+          if (!userData.telefono && metaPhone) updatePayload.telefono = metaPhone;
 
           await supabase.from('usuarios').update(updatePayload).eq('id', userData.id);
 
           // Apply locally without waiting for a re-fetch
           if (!userData.nombre_completo && metaFullName) userData.nombre_completo = metaFullName;
           if (!userData.username && metaUsername) userData.username = metaUsername;
+          if (!userData.telefono && metaPhone) userData.telefono = metaPhone;
         }
       }
 
@@ -262,7 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, username: string, firstName: string, lastName: string): Promise<boolean> => {
+  const register = async (email: string, password: string, username: string, firstName: string, lastName: string, phone?: string): Promise<boolean> => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -273,7 +277,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             username: username,
             first_name: firstName,
             last_name: lastName,
-            full_name: `${firstName} ${lastName}`.trim()
+            full_name: `${firstName} ${lastName}`.trim(),
+            phone: phone || null
           }
         }
       });
@@ -286,7 +291,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         if (!authData.session) {
+          // Email verification required — phone saved in auth metadata,
+          // it will be picked up when the user logs in after confirming email.
           return true;
+        }
+
+        // Session active (email verification off): also persist phone in usuarios table
+        if (phone) {
+          await supabase
+            .from('usuarios')
+            .update({ telefono: phone })
+            .eq('auth_user_id', authData.user.id);
         }
 
         await loadUserData(authData.user.id);

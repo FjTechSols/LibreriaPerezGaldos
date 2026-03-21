@@ -5,6 +5,7 @@ import { getClientes, crearCliente, actualizarCliente, eliminarCliente, buscarCl
 import '../../../styles/components/GestionClientes.css';
 import { MessageModal } from '../../MessageModal';
 import { Pagination } from '../../Pagination';
+import { PhoneInput } from '../../PhoneInput';
 
 const initialFormState: ClienteFormData = {
   nombre: '',
@@ -520,12 +521,13 @@ export function GestionClientes() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
-                <div className="form-group">
+                <div className="form-group" style={{ padding: '0 0.25rem' }}>
                   <label>Teléfono</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    id="telefono"
+                    name="telefono"
                     value={formData.telefono || ''}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, telefono: val })}
                   />
                 </div>
               </div>

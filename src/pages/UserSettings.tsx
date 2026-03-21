@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar } from 'lucide-react';
+import { PhoneInput } from '../components/PhoneInput';
 import '../styles/pages/UserSettings.css';
 
 export function UserSettings() {
@@ -290,7 +291,7 @@ export function UserSettings() {
 
   const handlePreferencesUpdate = () => {
     setLanguage(preferences.language as 'es' | 'en');
-    setTheme(preferences.theme as 'light' | 'dark' | 'auto');
+    setTheme(preferences.theme as 'light' | 'dark' | 'system');
   };
 
   const tabs = [
@@ -420,11 +421,11 @@ export function UserSettings() {
                       <Mail size={16} />
                       Teléfono
                     </label>
-                    <input
+                    <PhoneInput
                       id="phone"
-                      type="tel"
+                      name="phone"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(val) => setFormData({ ...formData, phone: val })}
                       placeholder={isEditing ? "Tu número de teléfono" : "No especificado"}
                       disabled={!isEditing}
                       className={!isEditing ? "input-readonly" : ""}
@@ -664,11 +665,11 @@ export function UserSettings() {
                     <select
                       id="theme"
                       value={preferences.theme}
-                      onChange={(e) => setPreferences({ ...preferences, theme: e.target.value as 'light' | 'dark' | 'auto' })}
+                      onChange={(e) => setPreferences({ ...preferences, theme: e.target.value as 'light' | 'dark' | 'system' })}
                     >
                       <option value="light">Claro</option>
                       <option value="dark">Oscuro</option>
-                      <option value="auto">Automático</option>
+                      <option value="system">Automático</option>
                     </select>
                   </div>
 

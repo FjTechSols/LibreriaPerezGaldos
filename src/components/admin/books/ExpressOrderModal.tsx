@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Zap, User, Phone, MapPin, Package, Mail } from 'lucide-react';
 import { Book } from '../../../types';
 import { buscarClientes } from '../../../services/clienteService';
+import { PhoneInput } from '../../PhoneInput';
 
 interface ExpressOrderModalProps {
   isOpen: boolean;
@@ -266,17 +267,18 @@ export function ExpressOrderModal({ isOpen, book, onClose, onSubmit }: ExpressOr
               <Phone size={16} />
               Teléfono
             </label>
-            <input
-              type="tel"
+            <PhoneInput
+              id="clientPhone"
+              name="clientPhone"
               value={formData.clientPhone}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, clientPhone: e.target.value }));
+              onChange={(val) => {
+                setFormData(prev => ({ ...prev, clientPhone: val }));
                 setSelectedClientId(undefined);
               }}
               onFocus={() => phoneSuggestions.length > 0 && setShowPhoneSuggestions(true)}
               onBlur={() => setTimeout(() => setShowPhoneSuggestions(false), 200)}
-              placeholder="Ej: 612345678"
-              className={`w-full px-4 py-2.5 bg-[var(--bg-page)]/50 border ${errors.clientPhone ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'} rounded-lg focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent outline-none transition-all text-sm text-[var(--text-main)]`}
+              placeholder="Ej: 612 345 678"
+              className={errors.clientPhone ? 'border-[var(--danger)] border' : ''}
             />
             {errors.clientPhone && <p className="text-[var(--danger)] text-xs mt-1">{errors.clientPhone}</p>}
             

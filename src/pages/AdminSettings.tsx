@@ -20,6 +20,7 @@ import {
   exportPedidosToCSV,
   exportClientesToCSV
 } from '../services/backupService';
+import { PhoneInput } from '../components/PhoneInput';
 import '../styles/pages/AdminSettings.css';
 import { MessageModal } from '../components/MessageModal'; // Import MessageModal
 
@@ -369,11 +370,11 @@ export function AdminSettings() {
                         <Phone size={16} />
                         Teléfono
                       </label>
-                      <input
+                      <PhoneInput
                         id="phone"
-                        type="tel"
+                        name="phone"
                         value={companyData.phone}
-                        onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
+                        onChange={(val) => setCompanyData({ ...companyData, phone: val })}
                       />
                     </div>
 
@@ -982,7 +983,7 @@ export function AdminSettings() {
                         { title: 'Pedidos', icon: Truck, desc: 'Exportar pedidos con detalles', fn: exportPedidosToCSV, id: 'Pedidos' },
                         // { title: 'Iberlibro', icon: Globe, desc: 'Exportar libros de Iberlibro', fn: exportIberlibroToCSV, id: 'Iberlibro', className: 'iberlibro' },
                         { title: 'Clientes', icon: Building2, desc: 'Exportar base de clientes', fn: exportClientesToCSV, id: 'Clientes' }
-                    ].map((item) => (
+                    ].map((item: any) => (
                         <div key={item.id} className={`backup-card ${item.className || ''}`}>
                             <div className="backup-card-header">
                                 <item.icon size={32} />
