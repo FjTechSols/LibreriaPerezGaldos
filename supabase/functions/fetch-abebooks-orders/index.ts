@@ -4,7 +4,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.95.0';
 
 // AbeBooks Order Update API endpoint (POST with XML body)
 // Docs: https://www.abebooks.com/docs/AbeBooks-order-update-API.pdf
-const ABEBOOKS_ORDER_API = 'https://orders.abebooks.com/order/';
+const ABEBOOKS_ORDER_API = 'https://orderupdate.abebooks.com:10003';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

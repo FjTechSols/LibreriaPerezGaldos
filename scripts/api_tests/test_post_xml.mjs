@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const userId = process.env.ABEBOOKS_USER_ID;
 const apiKey = process.env.ABEBOOKS_API_KEY;
 
-const ABEBOOKS_API_BASE = 'https://orders.abebooks.com/ws/';
+const ABEBOOKS_API_BASE = 'https://orderupdate.abebooks.com:10003/';
 
 function callAbeBooksPost(action, extraXml = '') {
     return new Promise((resolve) => {
@@ -41,8 +41,9 @@ function callAbeBooksPost(action, extraXml = '') {
             res.on('end', () => {
                 const duration = Date.now() - start;
                 console.log(`⏱️  Duración: ${duration}ms`);
-                console.log(`HTTP Status: ${res.statusCode}`);
-                console.log('Snippet:', body.substring(0, 200));
+                console.log('--- RESPONSE XML ---');
+                console.log(body);
+                console.log('--------------------');
                 resolve();
             });
         });
@@ -59,7 +60,6 @@ function callAbeBooksPost(action, extraXml = '') {
 
 async function run() {
     await callAbeBooksPost('getAllNewOrders');
-    await callAbeBooksPost('getOrdersByStatus', '<orderStatus>Shipped</orderStatus>');
 }
 
 run();

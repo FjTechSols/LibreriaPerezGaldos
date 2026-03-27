@@ -25,7 +25,11 @@ dist-ssr
 # User requested exclusions
 docs/
 !docs/auditorias/
-scripts/
+# Keep scripts tracked (needed by GitHub Actions), but exclude generated data files:
+!scripts/
+scripts/files/
+scripts/archived_audits_tests/
+scripts/gestion_libros/resultados/
 
 
 # Temporary & Layout files
