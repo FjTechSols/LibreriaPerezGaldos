@@ -158,7 +158,6 @@ serve(async (req) => {
         abebooks_order_id: orderId,
         order_date: orderDate,
         status,
-        raw_status: rawStatus,
         customer: {
           name: getTag('buyerName') || getTag('name') || '',
           address: getTag('shippingAddress1') || getTag('address1') || '',
@@ -174,7 +173,6 @@ serve(async (req) => {
         subtotal: getNum('subtotal') || getNum('orderSubtotal'),
         shipping_cost: getNum('shippingCost') || getNum('shippingAmount'),
         total: getNum('orderTotal') || getNum('total'),
-        currency: getTag('currency') || getTag('currencyCode') || 'EUR',
         estimated_delivery: getTag('estimatedDeliveryDate') || null,
         tracking_number: getTag('trackingNumber') || null,
         last_updated: new Date().toISOString(),
