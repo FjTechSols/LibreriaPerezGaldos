@@ -57,11 +57,14 @@ class AbeBooksService {
     syncDeletions: boolean;
   }> {
     const settings = await settingsService.getAllSettings();
-    return settings?.integrations.abeBooks || {
-      enabled: false,
-      syncInventory: false,
-      syncOrders: false,
-      syncDeletions: false
+    const abe = settings?.integrations.abeBooks;
+    if (!abe) return { enabled: false, syncInventory: false, syncOrders: false, syncDeletions: false };
+    // Map from the actual nested settings shape to the flat feature flags this service uses
+    return {
+      enabled: abe.enabled ?? false,
+      syncInventory: abe.api?.inventory?.upload ?? false,
+      syncOrders: abe.api?.orders?.download ?? false,
+      syncDeletions: abe.api?.inventory?.syncDeletions ?? false,
     };
   }
 
@@ -78,15 +81,7 @@ class AbeBooksService {
       return [];
     }
 
-    // TEMPORARY: Use mock data due to AbeBooks API timeout issues
-    const USE_MOCK_DATA = true;
-    
-    if (USE_MOCK_DATA) {
-      console.log('⚠️ [AbeBooks] Using MOCK data for orders');
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return this.getMockOrders();
-    }
+
 
     try {
       console.log('🔵 [AbeBooks] Calling fetch-orders Edge Function', filters);
@@ -245,29 +240,6 @@ class AbeBooksService {
       }
   }
 
-  // --- MOCK DATA HELPER ---
-  private getMockOrders(): AbeBooksOrder[] {
-    return [
-      {
-        orderId: '1001',
-        abeBooksOrderId: 'ABE-2024-001',
-        orderDate: '2024-02-01T10:30:00Z',
-        status: 'New',
-        customer: { name: 'Juan García', address: 'Calle Mayor 1', city: 'Madrid', postalCode: '28001', country: 'Spain', email: 'juan@test.com' },
-        items: [{ sku: '02008403', title: 'Cien Años de Soledad', author: 'García Márquez', quantity: 1, price: 25.50 }],
-        subtotal: 25.50, shippingCost: 5.00, total: 30.50
-      },
-      {
-        orderId: '1002',
-        abeBooksOrderId: 'ABE-2024-002',
-        orderDate: '2024-02-02T14:15:00Z',
-        status: 'Acknowledged',
-        customer: { name: 'María López', address: 'Diagonal 200', city: 'Barcelona', postalCode: '08018', country: 'Spain' },
-        items: [{ sku: '02273892', title: 'Don Quijote', author: 'Cervantes', quantity: 1, price: 18.00 }],
-        subtotal: 18.0, shippingCost: 7.50, total: 25.50
-      }
-    ];
-  }
   /**
    * Triggers a full catalog synchronization (upload active, delete inactive)
    */
