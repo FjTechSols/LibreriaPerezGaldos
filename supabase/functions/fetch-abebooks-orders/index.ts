@@ -91,13 +91,17 @@ serve(async (req) => {
     // Parse orders from the purchaseOrderList XML
     // The response wraps orders in <purchaseOrder> tags (not <order>)
     // Each order may have one or more <purchaseOrderItem> tags
-    const orderMatches = [...xmlText.matchAll(/<purchaseOrder>(.*?)<\/purchaseOrder>/gs)];
+    const orderMatches = [...xmlText.matchAll(/<purchaseOrder\b([^>]*)>([\s\S]*?)<\/purchaseOrder>/gis)];
     console.log(`✅ Found ${orderMatches.length} orders in XML response.`);
 
     const orders = [];
 
     for (const match of orderMatches) {
-      const xml = match[1];
+      const orderAttr = match[1];
+      const xml = match[2];
+
+      const idMatch = orderAttr.match(/id="([^"]+)"/i);
+      const orderIdAttr = idMatch ? idMatch[1] : '';
 
       const getTag = (tag: string) => {
         const m = xml.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, 'i'));
@@ -110,7 +114,7 @@ serve(async (req) => {
       };
 
       // Parse order items  (<purchaseOrderItem> blocks)
-      const itemMatches = [...xml.matchAll(/<purchaseOrderItem>([\s\S]*?)<\/purchaseOrderItem>/gi)];
+      const itemMatches = [...xml.matchAll(/<purchaseOrderItem\b[^>]*>([\s\S]*?)<\/purchaseOrderItem>/gi)];
       const items = itemMatches.map(im => {
         const ix = im[1];
         const getItemTag = (tag: string) => {
@@ -118,7 +122,7 @@ serve(async (req) => {
           return m ? m[1].trim() : '';
         };
         return {
-          sku: getItemTag('bookId') || getItemTag('sku') || '',
+          sku: getItemTag('vendorKey') || getItemTag('bookId') || getItemTag('sku') || '',
           title: getItemTag('title') || '',
           author: getItemTag('author') || '',
           quantity: 1, // AbeBooks orders are always 1 item per purchaseOrderItem
@@ -127,7 +131,7 @@ serve(async (req) => {
       });
 
       // Map AbeBooks XML fields to our DB schema
-      const orderId = getTag('abepoid') || getTag('purchaseOrderNumber') || getTag('id') || '';
+      const orderId = orderIdAttr || getTag('abepoid') || getTag('purchaseOrderNumber') || getTag('id') || '';
       // Map AbeBooks status to our internal statuses
       const rawStatus = getTag('orderStatus') || getTag('status') || 'Ordered';
       const statusMap: Record<string, string> = {
@@ -140,7 +144,15 @@ serve(async (req) => {
       };
       const status = statusMap[rawStatus] || 'New';
 
-      const orderDate = getTag('orderDate') || getTag('dateOrdered') || new Date().toISOString();
+      const year = getTag('year');
+      const month = getTag('month');
+      const day = getTag('day');
+      let orderDate;
+      if (year && month && day) {
+        orderDate = new Date(parseInt(year), parseInt(month)-1, parseInt(day)).toISOString();
+      } else {
+        orderDate = getTag('orderDate') || getTag('dateOrdered') || new Date().toISOString();
+      }
 
       orders.push({
         abebooks_order_id: orderId,
