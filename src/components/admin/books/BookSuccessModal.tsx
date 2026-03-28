@@ -6,9 +6,11 @@ interface BookSuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
   book: Book;
+  abebooksStatus?: 'success' | 'warning' | 'error' | null;
+  abebooksMessage?: string;
 }
 
-export function BookSuccessModal({ isOpen, onClose, book }: BookSuccessModalProps) {
+export function BookSuccessModal({ isOpen, onClose, book, abebooksStatus, abebooksMessage }: BookSuccessModalProps) {
   if (!isOpen) return null;
 
   const copyToClipboard = () => {
@@ -68,6 +70,19 @@ export function BookSuccessModal({ isOpen, onClose, book }: BookSuccessModalProp
               <span className="font-medium">{book.ubicacion || 'N/A'}</span>
             </div>
           </div>
+
+          {abebooksStatus && (
+            <div className={`w-full p-4 mb-6 rounded-xl border flex flex-col items-center text-center ${
+              abebooksStatus === 'success' ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' :
+              abebooksStatus === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300' :
+              'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+            }`}>
+              <p className="text-sm font-bold mb-1">
+                {abebooksStatus === 'success' ? 'Publicado en AbeBooks' : 'Problema con AbeBooks'}
+              </p>
+              <p className="text-xs">{abebooksMessage}</p>
+            </div>
+          )}
 
           <button
             onClick={onClose}

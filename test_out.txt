@@ -1,0 +1,177 @@
+[dotenv@17.2.4] injecting env (13) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+--- 📡 POST a https://orderupdate.abebooks.com:10003/: getAllNewOrders ---
+⏱️  Duración: 500ms
+--- RESPONSE XML ---
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<orderUpdateResponse version="1.1">
+ <purchaseOrderList>
+  <purchaseOrder id="722657735">
+   <buyer id="55310784">
+    <email>apariciodj@gmail.com</email>
+    <mailingAddress>
+     <city>Valdemoro</city>
+     <code>28342</code>
+     <country>Spain</country>
+     <name>Jose A. Aparicio Dur�n</name>
+     <phone>918762196</phone>
+     <region>Madrid</region>
+     <street>Juan Gris, 17</street>
+     <street2 />
+    </mailingAddress>
+   </buyer>
+   <buyerPurchaseOrder id="763536298" />
+   <domain id="52">
+    <name>iberlibro.com</name>
+   </domain>
+   <indirectTaxList />
+   <orderDate>
+    <date>
+     <day>27</day>
+     <month>3</month>
+     <year>2026</year>
+    </date>
+    <time>
+     <hour>6</hour>
+     <minute>53</minute>
+     <second>2</second>
+    </time>
+   </orderDate>
+   <orderTotals>
+    <gst currency="EUR">0.0</gst>
+    <handling currency="EUR">0.0</handling>
+    <shipping currency="EUR">0.0</shipping>
+    <subtotal currency="EUR">23.9</subtotal>
+    <tax currency="EUR">0.0</tax>
+    <total currency="EUR">23.9</total>
+   </orderTotals>
+   <purchaseMethod>CC</purchaseMethod>
+   <purchaseOrderItemList>
+    <purchaseOrderItem id="797961966">
+     <book id="22092779063">
+      <author>Lorenzo, Javier de</author>
+      <description>1� ed., 1� imp. edici�n. r�st. 208 p�ginas</description>
+      <isbn>9788492493005</isbn>
+      <price currency="EUR">23.9</price>
+      <title>Poincar� : matem�tico visionario, polit�cnico esc�</title>
+      <vendorKey>02234860</vendorKey>
+     </book>
+     <orderDate>
+      <date>
+       <day>27</day>
+       <month>3</month>
+       <year>2026</year>
+      </date>
+      <time>
+       <hour>6</hour>
+       <minute>53</minute>
+       <second>2</second>
+      </time>
+     </orderDate>
+     <purchaseOrder id="722657735" />
+     <sellerTotal currency="EUR">23.9</sellerTotal>
+     <status code="05">Ordered</status>
+    </purchaseOrderItem>
+   </purchaseOrderItemList>
+   <reseller id="846587">
+    <name>Abebooks</name>
+   </reseller>
+   <seller id="763733" />
+   <shipping>
+    <company />
+    <extraItemShippingCost currency="EUR">0.0</extraItemShippingCost>
+    <firstItemShippingCost currency="EUR">0.0</firstItemShippingCost>
+    <maxDeliveryDays>20</maxDeliveryDays>
+    <minDeliveryDays>7</minDeliveryDays>
+    <trackingCode />
+   </shipping>
+   <specialInstructions />
+   <status code="05">Ordered</status>
+  </purchaseOrder>
+  <purchaseOrder id="722663536">
+   <buyer id="61676045">
+    <email>carlosmarbio@yahoo.es</email>
+    <mailingAddress>
+     <city>Madrid</city>
+     <code>28007</code>
+     <country>Spain</country>
+     <name>Carlos Mart�nez Rubio</name>
+     <phone>665846174</phone>
+     <region>M</region>
+     <street>C/ S�nchez Barcaiztegui, 41 3�B Escalera Centro</street>
+     <street2 />
+    </mailingAddress>
+   </buyer>
+   <buyerPurchaseOrder id="763540088" />
+   <domain id="1">
+    <name>abebooks.com</name>
+   </domain>
+   <indirectTaxList />
+   <orderDate>
+    <date>
+     <day>27</day>
+     <month>3</month>
+     <year>2026</year>
+    </date>
+    <time>
+     <hour>7</hour>
+     <minute>53</minute>
+     <second>17</second>
+    </time>
+   </orderDate>
+   <orderTotals>
+    <gst currency="EUR">0.0</gst>
+    <handling currency="EUR">0.0</handling>
+    <shipping currency="EUR">0.0</shipping>
+    <subtotal currency="EUR">38.0</subtotal>
+    <tax currency="EUR">0.0</tax>
+    <total currency="EUR">38.0</total>
+   </orderTotals>
+   <purchaseMethod>CC</purchaseMethod>
+   <purchaseOrderItemList>
+    <purchaseOrderItem id="797973134">
+     <book id="1163027597">
+      <author>S�nchez Noriega, Jos� Luis</author>
+      <description>Carton�. Ilustrado 547 p�ginas</description>
+      <isbn />
+      <price currency="EUR">38.0</price>
+      <title>Historia del cine en pel�culas 1990 - 1999</title>
+      <vendorKey>H2067896</vendorKey>
+     </book>
+     <orderDate>
+      <date>
+       <day>27</day>
+       <month>3</month>
+       <year>2026</year>
+      </date>
+      <time>
+       <hour>7</hour>
+       <minute>53</minute>
+       <second>17</second>
+      </time>
+     </orderDate>
+     <purchaseOrder id="722663536" />
+     <sellerTotal currency="EUR">38.0</sellerTotal>
+     <status code="05">Ordered</status>
+    </purchaseOrderItem>
+   </purchaseOrderItemList>
+   <reseller id="846587">
+    <name>Abebooks</name>
+   </reseller>
+   <seller id="763733" />
+   <shipping>
+    <company />
+    <extraItemShippingCost currency="EUR">0.0</extraItemShippingCost>
+    <firstItemShippingCost currency="EUR">0.0</firstItemShippingCost>
+    <maxDeliveryDays>20</maxDeliveryDays>
+    <minDeliveryDays>7</minDeliveryDays>
+    <trackingCode />
+   </shipping>
+   <specialInstructions />
+   <status code="05">Ordered</status>
+  </purchaseOrder>
+ </purchaseOrderList>
+</orderUpdateResponse>
+
+
+--------------------

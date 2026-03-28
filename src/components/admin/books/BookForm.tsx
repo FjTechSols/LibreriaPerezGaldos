@@ -479,6 +479,14 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                       editorialSuggestions={editorialSuggestions}
                       setShowEditorialSuggestions={setShowEditorialSuggestions}
                   />
+                  <BookConfirmationModal
+                      isOpen={showConfirmation}
+                      onClose={() => setShowConfirmation(false)}
+                      onConfirm={handleFinalSubmit}
+                      formData={formData}
+                      isCreating={isCreating}
+                      isSubmitting={isSubmitting}
+                  />
               </div>
           </div>
       );
@@ -1040,6 +1048,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
             onConfirm={handleFinalSubmit}
             formData={formData}
             isCreating={isCreating}
+            isSubmitting={isSubmitting}
           />
         </div>
       </div>

@@ -8,9 +8,10 @@ interface BookConfirmationModalProps {
   onConfirm: () => void;
   formData: Partial<Book>;
   isCreating: boolean;
+  isSubmitting?: boolean;
 }
 
-export function BookConfirmationModal({ isOpen, onClose, onConfirm, formData, isCreating }: BookConfirmationModalProps) {
+export function BookConfirmationModal({ isOpen, onClose, onConfirm, formData, isCreating, isSubmitting = false }: BookConfirmationModalProps) {
   if (!isOpen) return null;
 
   const renderField = (label: string, value: string | number | undefined | null) => {
@@ -84,10 +85,13 @@ export function BookConfirmationModal({ isOpen, onClose, onConfirm, formData, is
             </button>
             <button 
                 onClick={onConfirm}
-                className="px-6 py-2 text-sm font-bold text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 rounded-lg shadow-md flex items-center gap-2 transition-colors"
+                disabled={isSubmitting}
+                className={`px-6 py-2 text-sm font-bold text-white rounded-lg shadow-md flex items-center gap-2 transition-colors ${
+                    isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
+                }`}
             >
                 <Check size={18} />
-                {isCreating ? 'Confirmar y Crear' : 'Confirmar y Guardar'}
+                {isSubmitting ? 'Guardando...' : (isCreating ? 'Confirmar y Crear' : 'Confirmar y Guardar')}
             </button>
         </div>
       </div>

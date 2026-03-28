@@ -97,6 +97,8 @@ export function BooksManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null); // Replaces editingBook
   const [createdBook, setCreatedBook] = useState<Book | null>(null); // For Success Modal
+  const [abebooksPublishStatus, setAbebooksPublishStatus] = useState<'success' | 'warning' | 'error' | null>(null);
+  const [abebooksPublishMessage, setAbebooksPublishMessage] = useState<string>('');
   
   // Express Order Modal State
   const [isExpressOrderOpen, setIsExpressOrderOpen] = useState(false);
@@ -424,33 +426,34 @@ export function BooksManager() {
 
           // AbeBooks Upload Trigger
           if (publishToAbebooks) {
-              // We use a non-blocking toast or a secondary modal. 
-              // Since BookSuccessModal is about to be shown via setCreatedBook...
-              // Maybe we should show a specific message using showModal for now to ensure visibility of the AbeBooks result.
-              
-              showModal('AbeBooks', `Subiendo "${nuevo.titulo}" a AbeBooks...`, 'info');
-              
-              showModal('AbeBooks', `Subiendo "${nuevo.titulo}" a AbeBooks...`, 'info');
-              
+              setAbebooksPublishStatus('warning');
+              setAbebooksPublishMessage('Subiendo a AbeBooks...');
+
               try {
                   const result = await abeBooksService.syncBook(nuevo.id);
 
                   if (!result.success) {
                       console.error('AbeBooks Upload Error:', result.message);
-                      showModal('Advertencia', `Libro guardado localmente, PERO falló la subida a AbeBooks: ${result.message}`, 'warning');
+                      setAbebooksPublishStatus('error');
+                      setAbebooksPublishMessage(`Libro guardado localmente, PERO falló la subida a AbeBooks: ${result.message}`);
                   } else {
-                      showModal('Éxito', `Libro guardado y publicado en AbeBooks correctamente.`, 'success');
+                      setAbebooksPublishStatus('success');
+                      setAbebooksPublishMessage(`Libro guardado y publicado en AbeBooks correctamente.`);
                   }
               } catch (abeErr: any) {
                   console.error('AbeBooks Exception:', abeErr);
-                   showModal('Advertencia', `Libro guardado, pero ocurrió un error de red al contactar AbeBooks.`, 'warning');
+                  setAbebooksPublishStatus('error');
+                  setAbebooksPublishMessage(`Ocurrió un error de red al contactar AbeBooks.`);
               }
-              // Finally trigger refresh
+              // Finally trigger refresh and standard success modal
+              setCreatedBook(mappedBook);
               setRefreshTrigger(prev => prev + 1);
               setIsModalOpen(false);
 
           } else {
               // Standard Success Flow (BookSuccessModal)
+              setAbebooksPublishStatus(null);
+              setAbebooksPublishMessage('');
               setCreatedBook(mappedBook);
               setRefreshTrigger(prev => prev + 1);
               setIsModalOpen(false); // Close the modal (resets form by unmounting)
@@ -1203,6 +1206,8 @@ export function BooksManager() {
            isOpen={!!createdBook}
            onClose={() => setCreatedBook(null)}
            book={createdBook}
+           abebooksStatus={abebooksPublishStatus}
+           abebooksMessage={abebooksPublishMessage}
          />
        )}
        
