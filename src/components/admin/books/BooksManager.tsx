@@ -465,7 +465,7 @@ export function BooksManager() {
     }
   };
 
-  const handleEditSubmit = async (bookData: Partial<Book>, contents: string[]) => {
+  const handleEditSubmit = async (bookData: Partial<Book>, contents: string[], publishToAbebooks?: boolean) => {
     if (!selectedBook) return; // Use selectedBook instead of editingBook
     try {
       // Resolve Editorial ID if publisher name provided
@@ -515,9 +515,13 @@ export function BooksManager() {
         setSelectedBook(null); // Clear selected book
         setIsModalOpen(false); // Close the modal
         
-        // Delay success modal to ensure previous modal is fully closed/unmounted
+        if (publishToAbebooks) {
+             // We trigger sync here if publishToAbebooks is set
+             abeBooksService.syncBook(selectedBook.id).catch(e => console.error('Error syncing edit:', e));
+        }
+
         setTimeout(() => {
-            showModal('Éxito', 'Libro actualizado correctamente.', 'success');
+            showModal('Éxito', publishToAbebooks ? 'Libro actualizado correctamente (y sincronización a AbeBooks iniciada).' : 'Libro actualizado correctamente.', 'success');
         }, 300);
       } else {
         throw new Error('No se pudo actualizar.');

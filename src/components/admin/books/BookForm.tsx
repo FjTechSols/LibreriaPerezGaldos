@@ -897,8 +897,8 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   Descatalogado
                 </label>
 
-                   {/* AbeBooks Toggle (Only for New Books & If Enabled) */}
-                   {isCreating && abebooksGlobalEnabled && abebooksUploadEnabled && (
+                   {/* AbeBooks Toggle (If Enabled) */}
+                   {abebooksGlobalEnabled && abebooksUploadEnabled && (
                        <div style={{ flexBasis: '100%', marginTop: '0.5rem' }}>
                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#2563eb', fontWeight: 600 }}>
                                <input 
@@ -907,8 +907,13 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                                    checked={publishToAbebooks}
                                    onChange={(e) => setPublishToAbebooks(e.target.checked)}
                                />
-                               Publicar en AbeBooks automáticamente
+                               {isCreating ? 'Publicar en AbeBooks automáticamente' : 'Forzar sincronización/subida a AbeBooks'}
                            </label>
+                           {!isCreating && (
+                               <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.2rem', paddingLeft: '1.5rem' }}>
+                                   Sincronizará la ficha actual con Abebooks obligatoriamente. Si marcas stock=0 también lo dará de baja.
+                               </div>
+                           )}
                        </div>
                    )}
               </div>

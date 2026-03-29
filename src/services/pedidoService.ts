@@ -943,6 +943,9 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
     if (stockError) {
        console.error('Error decrementing stock for express order:', stockError);
        // Optional: Rollback or just warn? For now warn, as order is created.
+    } else {
+       // AbeBooks Sync: Check if the book needs stock update/remove
+       checkAndSyncAbeBooksStock(pedido.id).catch(err => console.error('[AbeBooks Sync] Error:', err));
     }
     
     // 6. Handle Deposit (Señal)
@@ -1135,6 +1138,7 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
     console.log('✅ [Flash Order] Detalles insertados correctamente');
 
     // 5. Update Stock with Error Handling (FIXED: Added error handling)
+    let anyStockSuccess = false;
     for (const item of input.detalles) {
       const { error: stockError } = await supabase.rpc('decrement_stock', { 
         row_id: Number(item.bookId), 
@@ -1145,7 +1149,14 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
         console.error(`Error decrementing stock for book ${item.bookId}:`, stockError);
         // Note: We don't rollback here as the order is already confirmed
         // Admin will need to manually adjust stock if necessary
+      } else {
+        anyStockSuccess = true;
       }
+    }
+
+    if (anyStockSuccess) {
+      // AbeBooks Sync: Sync all items in this flash order
+      checkAndSyncAbeBooksStock(pedido.id).catch(err => console.error('[AbeBooks Sync] Error:', err));
     }
 
     // 6. Fetch Full Order for Notifications (FIXED: Improved notification system)
