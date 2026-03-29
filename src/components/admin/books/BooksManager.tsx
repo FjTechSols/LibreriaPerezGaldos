@@ -430,7 +430,7 @@ export function BooksManager() {
               setAbebooksPublishMessage('Subiendo a AbeBooks...');
 
               try {
-                  const result = await abeBooksService.syncBook(nuevo.id);
+                  const result = await abeBooksService.syncBook(nuevo.id, true);
 
                   if (!result.success) {
                       console.error('AbeBooks Upload Error:', result.message);
@@ -516,8 +516,16 @@ export function BooksManager() {
         setIsModalOpen(false); // Close the modal
         
         if (publishToAbebooks) {
-             // We trigger sync here if publishToAbebooks is set
-             abeBooksService.syncBook(selectedBook.id).catch(e => console.error('Error syncing edit:', e));
+             // forceSync=true bypasses the syncInventory toggle — user EXPLICITLY requested this
+             abeBooksService.syncBook(selectedBook.id, true)
+               .then(result => {
+                  if (!result.success) {
+                    console.warn('[AbeBooks] Edit sync warning:', result.message);
+                  } else {
+                    console.log('[AbeBooks] Edit sync OK:', result.message);
+                  }
+               })
+               .catch(e => console.error('Error syncing edit:', e));
         }
 
         setTimeout(() => {

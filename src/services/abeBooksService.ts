@@ -126,27 +126,29 @@ class AbeBooksService {
 
   /**
    * Sync a book (Create/Update) to AbeBooks
-   * Respected Toggle: syncInventory (and global enabled)
+   * @param bookId - ID of the book to sync
+   * @param forceSync - If true, bypasses the syncInventory setting check (use when user explicitly requests sync)
+   * Respected Toggle: syncInventory (and global enabled) — unless forceSync=true
    * Use this for: New Books, Price Updates, Stock Updates
    */
-  async syncBook(bookId: number | string): Promise<{ success: boolean; message?: string }> {
+  async syncBook(bookId: number | string, forceSync = false): Promise<{ success: boolean; message?: string }> {
     const features = await this.getFeatures();
     
     if (!features.enabled) {
         return { success: false, message: 'Integration disabled' };
     }
     
-    // For Upload/Update we strictly check syncInventory
-    if (!features.syncInventory) {
+    // For automatic background syncs, respect syncInventory setting
+    // But when user EXPLICITLY clicks the toggle (forceSync=true), skip this check
+    if (!forceSync && !features.syncInventory) {
         console.log(`[AbeBooks] Inventory sync disabled. Skipping sync for book ${bookId}`);
         return { success: false, message: 'Inventory sync disabled' };
     }
 
     try {
-      console.log(`🔵 [AbeBooks] Syncing book ${bookId}...`);
-      const { error } = await supabase.functions.invoke('upload-to-abebooks', {
-        body: { bookId: Number(bookId) } 
-        // No action = default upsert/upload logic in Edge Function
+      console.log(`🔵 [AbeBooks] Syncing book ${bookId}${forceSync ? ' (forced)' : ''}...`);
+      const { data, error } = await supabase.functions.invoke('upload-to-abebooks', {
+        body: { bookId: Number(bookId) }
       });
 
       if (error) {
@@ -154,8 +156,14 @@ class AbeBooksService {
         return { success: false, message: error.message };
       }
 
-      console.log(`✅ [AbeBooks] Book ${bookId} synced successfully.`);
-      return { success: true, message: 'Synced' };
+      // Check the actual AbeBooks response from within data
+      if (data?.success === false) {
+        console.warn(`⚠️ [AbeBooks] Edge function reported failure for ${bookId}:`, data);
+        return { success: false, message: data?.message || 'AbeBooks rejected the book' };
+      }
+
+      console.log(`✅ [AbeBooks] Book ${bookId} synced successfully. Action: ${data?.actionName}`);
+      return { success: true, message: `Synced (${data?.actionName || 'add'})` };
     } catch (err: any) {
       console.error(`💥 [AbeBooks] Exception syncing book ${bookId}:`, err);
       return { success: false, message: err.message };
