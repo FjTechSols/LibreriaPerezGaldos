@@ -252,7 +252,7 @@ export interface Book {
   author: string;
   publisher: string;
   pages: number;
-  publicationYear: number;
+  publicationYear?: number;
   isbn: string;
   price: number;
   originalPrice?: number;

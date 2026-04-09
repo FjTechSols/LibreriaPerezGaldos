@@ -28,13 +28,15 @@ interface BookFormProps {
 }
 
 export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, ubicaciones, viewMode = 'grid' }: BookFormProps) {
+  const NO_PUBLICATION_YEAR = -1;
+  const formatPublicationYearInput = (year?: number) => (year && year > 0) ? String(year) : 'N/A';
   const [formData, setFormData] = useState<Partial<Book>>({
     code: '',
     title: '',
     author: '',
     publisher: '',
     pages: 0,
-    publicationYear: undefined,
+    publicationYear: NO_PUBLICATION_YEAR,
     isbn: '',
     price: 0,
     originalPrice: undefined,
@@ -51,6 +53,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
     language: 'Español'
   });
 
+  const [publicationYearInput, setPublicationYearInput] = useState('N/A');
   const [bookContents, setBookContents] = useState<string[]>([]);
   const [showContentInput, setShowContentInput] = useState(false);
   const [searchingISBN, setSearchingISBN] = useState(false);
@@ -191,12 +194,13 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                 author: bookData.authors.join(', '),
                 publisher: bookData.publisher,
                 pages: bookData.pageCount,
-                publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : undefined,
+                publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : NO_PUBLICATION_YEAR,
                 isbn: bookData.isbn,
                 category: bookData.categories[0] || (dbCategories.length > 0 ? dbCategories[0] : ''),
                 description: bookData.description,
                 coverImage: bookData.imageUrl,
             }));
+            setPublicationYearInput(formatPublicationYearInput(bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : undefined));
              // Handle "Obra Completa"
             if (bookData.title && /obra\s*completa|colecci[oó]n|estuche|pack|set/i.test(bookData.title)) {
                 setShowContentInput(true);
@@ -276,8 +280,10 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
 
       setFormData({
           ...initialData,
+          publicationYear: initialData?.publicationYear ?? NO_PUBLICATION_YEAR,
           ubicacion: derivedUbicacion || initialData.ubicacion, // fallback to existing if null
       });
+      setPublicationYearInput(formatPublicationYearInput(initialData?.publicationYear));
       setBookContents(initialData.contents || []);
       setShowContentInput(!!initialData.contents && initialData.contents.length > 0);
     } else if (isCreating && isOpen) {
@@ -287,7 +293,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         author: initialData?.author || '',
         publisher: initialData?.publisher || '',
         pages: initialData?.pages || 0,
-        publicationYear: initialData?.publicationYear || undefined,
+        publicationYear: initialData?.publicationYear ?? NO_PUBLICATION_YEAR,
         isbn: initialData?.isbn || '',
         price: initialData?.price || 0,
         originalPrice: initialData?.originalPrice || undefined,
@@ -303,6 +309,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         condition: initialData?.condition || 'leido',
         language: initialData?.language || 'Español'
       });
+      setPublicationYearInput(formatPublicationYearInput(initialData?.publicationYear));
       setBookContents([]);
       setShowContentInput(false);
 
@@ -365,7 +372,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
           author: bookData.authors.join(', '),
           publisher: bookData.publisher,
           pages: bookData.pageCount,
-          publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : undefined,
+          publicationYear: bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : NO_PUBLICATION_YEAR,
           isbn: bookData.isbn, // Ensure standard format
           price: 0,
           originalPrice: undefined,
@@ -378,6 +385,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
           isNew: false,
           isOnSale: false
         }));
+        setPublicationYearInput(formatPublicationYearInput(bookData.publishedDate ? parseInt(bookData.publishedDate.substring(0, 4)) : undefined));
 
         // Handle "Obra Completa"
          if (bookData.title && /obra\s*completa|colecci[oó]n|estuche|pack|set/i.test(bookData.title)) {
@@ -404,7 +412,9 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
           const missingFields = [];
           if (!formData.title?.trim()) missingFields.push('Título');
           if (!formData.category) missingFields.push('Categoría');
-          if (!formData.publicationYear) missingFields.push('Año');
+          if (formData.publicationYear !== NO_PUBLICATION_YEAR && (!formData.publicationYear || formData.publicationYear <= 0)) {
+              missingFields.push('Año');
+          }
           
           const currentPrice = formData.isOnSale ? formData.originalPrice : formData.price;
           if (currentPrice === undefined || currentPrice === null || currentPrice < 0) missingFields.push('Precio');
@@ -738,11 +748,21 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                       inputMode="numeric"
                       pattern="[0-9]*"
                       maxLength={4}
-                      placeholder="Ej. 2026"
-                      value={formData.publicationYear || ''}
+                      placeholder="N/A o ej. 2026"
+                      value={publicationYearInput}
+                      onFocus={() => {
+                          if (publicationYearInput === 'N/A') setPublicationYearInput('');
+                      }}
                       onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '');
-                          setFormData({...formData, publicationYear: val ? parseInt(val) : undefined});
+                          setPublicationYearInput(val);
+                          setFormData({...formData, publicationYear: val ? parseInt(val) : NO_PUBLICATION_YEAR});
+                      }}
+                      onBlur={() => {
+                          if (!publicationYearInput.trim()) {
+                              setPublicationYearInput('N/A');
+                              setFormData({...formData, publicationYear: NO_PUBLICATION_YEAR});
+                          }
                       }}
                       className="form-input"
                       style={{ width: '100%' }}

@@ -126,7 +126,7 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   author: libro.autor,
   publisher: libro.editoriales?.nombre || 'Editorial Desconocida',
   pages: libro.paginas || 0,
-  publicationYear: libro.anio || new Date().getFullYear(),
+  publicationYear: libro.anio || undefined,
   isbn: libro.isbn || '',
   price: Number(libro.precio),
   originalPrice: libro.precio_original ? Number(libro.precio_original) : (libro.oferta ? Number(libro.precio) * 1.2 : undefined),
