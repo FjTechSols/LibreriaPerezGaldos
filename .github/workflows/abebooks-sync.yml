@@ -107,11 +107,11 @@ jobs:
 
           if [ -z "$BOOK_COUNT" ] || [ "$BOOK_COUNT" = "0" ]; then
             # Fallback check for txt file
-            if [ -f "src/scripts/temp_abebooks_inventory.txt" ]; then
-              BOOK_COUNT=$(wc -l < src/scripts/temp_abebooks_inventory.txt)
+            if [ -f "src/scripts/temp_abebooks_inventory.csv" ]; then
+              BOOK_COUNT=$(wc -l < src/scripts/temp_abebooks_inventory.csv)
               BOOK_COUNT=$((BOOK_COUNT - 1))
             else
-              echo "Warning: No book count found and TXT file missing"
+              echo "Warning: No book count found and CSV file missing"
               BOOK_COUNT=0
             fi
           fi
