@@ -1,9 +1,6 @@
 name: AbeBooks Auto Sync
 
 on:
-  schedule:
-    # Ejecutar cada 2 horas
-    - cron: "0 */2 * * *"
   workflow_dispatch: # Permite ejecución manual desde GitHub y recibe parámetros
     inputs:
       purge:

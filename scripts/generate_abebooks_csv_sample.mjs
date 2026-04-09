@@ -57,13 +57,19 @@ async function generateCSVSample() {
 
     if (error) throw error;
 
+    let skippedWithoutLegacyId = 0;
+
     for (const book of books) {
-      const sku = book.legacy_id || book.id;
+      const vendorBookId = String(book.legacy_id || '').trim();
+      if (!vendorBookId) {
+        skippedWithoutLegacyId++;
+        continue;
+      }
       const description = (book.descripcion || '').replace(/\s+/g, ' ').trim();
       const editorialName = book.editoriales?.nombre || '';
 
       const row = [
-        csvEscape(sku),
+        csvEscape(vendorBookId),
         csvEscape(book.titulo),
         csvEscape(book.autor),
         csvEscape(editorialName),
@@ -83,7 +89,10 @@ async function generateCSVSample() {
 
     writeStream.end();
     console.log('\n✅ Generación completada.');
-    console.log(`📦 Se han exportado ${books.length} libros de muestra.`);
+    console.log(`📦 Se han exportado ${books.length - skippedWithoutLegacyId} libros de muestra.`);
+    if (skippedWithoutLegacyId > 0) {
+      console.log(`⚠️ Omitidos por no tener legacy_id: ${skippedWithoutLegacyId}`);
+    }
     console.log(`📁 El archivo está disponible en: ${EXPORT_PATH}`);
 
   } catch (err) {

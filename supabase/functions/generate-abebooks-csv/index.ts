@@ -70,8 +70,13 @@ serve(async (req) => {
 
             let chunk = "";
             for (const book of books) {
+                const vendorBookId = String(book.legacy_id || '').trim();
                 // If Purge mode is intentionally requested, we skip everything to yield an empty file
                 if (isPurge) {
+                    continue;
+                }
+
+                if (!vendorBookId) {
                     continue;
                 }
 
@@ -81,7 +86,6 @@ serve(async (req) => {
                     continue;
                 }
 
-                const sku = book.legacy_id || book.id;
                 const description = (book.descripcion || '').replace(/\s+/g, ' ').trim(); 
                 const editorialName = book.editoriales?.nombre || '';
                 let imageUrl = "NO";
@@ -95,7 +99,7 @@ serve(async (req) => {
                 // Format: Custom Generic Tab-Delimited Profile (Mapped by Abebooks Support specifically for this account)
                 // Changing this order WILL scramble Abebooks listings!
                 const row = [
-                    q(sku),                            // 0: ID
+                    q(vendorBookId),                   // 0: VendorBookID = legacy_id
                     q(book.titulo || 'Untitled'),      // 1: Titulo
                     q(description),                    // 2: Descripcion
                     q("NO"),                           // 3: Columna misteriosa que siempre llevaba "NO"

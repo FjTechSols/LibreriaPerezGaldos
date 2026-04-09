@@ -24,6 +24,7 @@ async function generateLocalExport() {
   let hasMore = true;
   let totalProcessed = 0;
   let totalExported = 0;
+  let totalSkippedWithoutLegacyId = 0;
   
   const separator = '\t';
   const q = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
@@ -63,15 +64,19 @@ async function generateLocalExport() {
 
       for (const book of books) {
         totalProcessed++;
+        const vendorBookId = String(book.legacy_id || '').trim();
         
         // Conditions: Stock > 0 AND Price >= 12
         if (book.stock > 0 && Number(book.precio) >= 12) {
-          const sku = book.legacy_id || book.id;
+          if (!vendorBookId) {
+            totalSkippedWithoutLegacyId++;
+            continue;
+          }
           const description = (book.descripcion || '').replace(/\s+/g, ' ').trim();
           const editorialName = book.editoriales?.nombre || '';
 
           const row = [
-            q(sku),                            // 0: ID
+            q(vendorBookId),                   // 0: VendorBookID = legacy_id
             q(book.titulo || 'Untitled'),      // 1: Titulo
             q(description),                    // 2: Descripcion
             q("NO"),                           // 3: Columna fija historial
@@ -89,9 +94,9 @@ async function generateLocalExport() {
           totalExported++;
 
           // Targeted samples for user verification
-          if (['02293682', '02293606', '00001377H'].includes(sku)) {
+          if (['02293682', '02293606', '00001377H'].includes(vendorBookId)) {
             report.samples.push({
-                sku,
+                sku: vendorBookId,
                 titulo: book.titulo,
                 stock: book.stock,
                 precio: book.precio,
@@ -100,10 +105,9 @@ async function generateLocalExport() {
           }
         } else {
             // Log rejection reason for samples if they exist in DB but failed conditions
-            const sku = book.legacy_id || book.id;
-            if (['02293682', '02293606', '00001377H'].includes(sku)) {
+            if (vendorBookId && ['02293682', '02293606', '00001377H'].includes(vendorBookId)) {
                 report.samples.push({
-                    sku,
+                    sku: vendorBookId,
                     titulo: book.titulo,
                     stock: book.stock,
                     precio: book.precio,
@@ -128,11 +132,13 @@ async function generateLocalExport() {
     report.endTime = new Date().toISOString();
     report.totalProcessed = totalProcessed;
     report.totalExported = totalExported;
+    report.totalSkippedWithoutLegacyId = totalSkippedWithoutLegacyId;
     fs.writeFileSync(LOG_PATH, JSON.stringify(report, null, 2));
 
     console.log('\n✅ Generación completada.');
     console.log(`📊 Total libros en DB procesados: ${totalProcessed}`);
     console.log(`📦 Total libros exportados (Stock > 0 & Precio >= 12): ${totalExported}`);
+    console.log(`⚠️ Omitidos por no tener legacy_id: ${totalSkippedWithoutLegacyId}`);
     console.log(`📁 Archivo: ${EXPORT_PATH}`);
     console.log(`📝 Log de muestras: ${LOG_PATH}`);
 
