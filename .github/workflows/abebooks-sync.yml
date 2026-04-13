@@ -1,7 +1,9 @@
 name: AbeBooks Auto Sync
 
 on:
-  workflow_dispatch: # Permite ejecución manual desde GitHub y recibe parámetros
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
     inputs:
       purge:
         description: "Forzar vaciado total del inventario (poner cantidad de todos los libros a 0)"
@@ -22,12 +24,10 @@ jobs:
         with:
           node-version: "20"
 
-      # Check if auto-sync is enabled (only for scheduled runs)
       - name: Check Auto-Sync Status
         if: github.event_name == 'schedule'
         id: check-sync
         run: |
-          # Sanitize URL: Remove generate-abebooks-csv suffix if present to get base URL
           RAW_URL="${{ secrets.SUPABASE_FUNCTION_URL }}"
           BASE_URL=$(echo "$RAW_URL" | sed -E 's|/generate-abebooks-csv/?$||')
           CHECK_URL="${BASE_URL}/check-ftps-enabled"
@@ -37,13 +37,10 @@ jobs:
           RESPONSE=$(curl -s "$CHECK_URL" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
 
-          # Debug response (print to log)
           echo "Function Response: $RESPONSE"
 
-          # Parse JSON simply. If response is empty or invalid, this might fail, so we default to false.
           ENABLED=$(echo "$RESPONSE" | jq -r '.enabled // false')
 
-          # Handle the string "null" which jq might return if field is missing
           if [ "$ENABLED" = "null" ]; then ENABLED="false"; fi
 
           echo "Auto-sync enabled: $ENABLED"
@@ -53,7 +50,6 @@ jobs:
             exit 0
           fi
 
-      # Log sync start
       - name: Log Sync Start
         id: log-start
         run: |
@@ -95,18 +91,15 @@ jobs:
           DURATION=$((END_TIME - START_TIME))
           echo "DURATION=$DURATION" >> $GITHUB_OUTPUT
 
-          # Extract book count from script output
           BOOK_COUNT=$(echo "$OUTPUT" | grep "BOOK_COUNT=" | cut -d'=' -f2)
           echo "BOOK_COUNT=$BOOK_COUNT" >> $GITHUB_OUTPUT
 
       - name: Log Sync Success
         if: success()
         run: |
-          # Get book count from upload step output
           BOOK_COUNT="${{ steps.upload.outputs.BOOK_COUNT }}"
 
           if [ -z "$BOOK_COUNT" ] || [ "$BOOK_COUNT" = "0" ]; then
-            # Fallback check for txt file
             if [ -f "src/scripts/temp_abebooks_inventory.csv" ]; then
               BOOK_COUNT=$(wc -l < src/scripts/temp_abebooks_inventory.csv)
               BOOK_COUNT=$((BOOK_COUNT - 1))
@@ -118,7 +111,6 @@ jobs:
 
           echo "Books exported: $BOOK_COUNT"
 
-          # Update the running log entry to success
           curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/abebooks_sync_log?workflow_run_id=eq.${{ github.run_id }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
@@ -130,7 +122,6 @@ jobs:
               \"duration_seconds\": ${{ steps.upload.outputs.DURATION }}
             }"
 
-      # Log sync error
       - name: Log Sync Error
         if: failure()
         run: |
