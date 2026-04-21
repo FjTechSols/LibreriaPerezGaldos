@@ -907,9 +907,11 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
              locationQuery = locationQuery.eq('ubicacion', ubicacionNombre);
          }
 
+         // Orders by created_at descending instead of legacy_id (which is a string and sorts "9" > "1000").
+         // Finding the most recent 200 books for this location guarantees we find the latest assigned code sequence.
          const locationMaxPromise = locationQuery
-            .order('legacy_id', { ascending: false })
-            .limit(50);
+            .order('created_at', { ascending: false })
+            .limit(200);
 
         const [recentResult, locationMaxResult] = await Promise.all([
              recentPromise,
