@@ -62,7 +62,7 @@ class AbeBooksService {
     // Map from the actual nested settings shape to the flat feature flags this service uses
     return {
       enabled: abe.enabled ?? false,
-      syncInventory: abe.api?.inventory?.upload ?? false,
+      syncInventory: abe.api?.inventory?.syncStock ?? abe.api?.inventory?.upload ?? false,
       syncOrders: abe.api?.orders?.download ?? false,
       syncDeletions: abe.api?.inventory?.syncDeletions ?? false,
     };
@@ -234,14 +234,19 @@ class AbeBooksService {
           // We call the edge function with 'delete' action, BUT we skip the 'deleteBook' wrapper 
           // because that one checks 'syncDeletions'. 
           // We accept that 0 stock = remove from listing is part of INVENTORY SYNC.
-           try {
+            try {
               console.log(`[AbeBooks] Stock is 0 for ${bookId}. Removing from listing (Inventory Sync).`);
-              await supabase.functions.invoke('upload-to-abebooks', {
+              const { data, error } = await supabase.functions.invoke('upload-to-abebooks', {
                   body: { bookId: Number(bookId), action: 'delete' }
               });
-           } catch (e) {
-               console.error('[AbeBooks] Error syncing 0 stock:', e);
-           }
+              if (error) {
+                  console.error(`[AbeBooks] Error syncing 0 stock for ${bookId}:`, error);
+              } else if (data?.success === false || data?.error) {
+                  console.error(`[AbeBooks] Delete rejected for ${bookId}:`, data);
+              }
+            } catch (e) {
+                console.error('[AbeBooks] Error syncing 0 stock:', e);
+            }
       } else {
           // Normal update
           await this.syncBook(bookId);

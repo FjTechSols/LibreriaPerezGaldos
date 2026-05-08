@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
-import { ArrowLeft, RefreshCw, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Upload, CheckCircle2, AlertCircle, PackageSearch, ShieldAlert, ListChecks } from 'lucide-react';
 import { fetchAbeBooksOrders } from '../../../services/abeBooksOrdersService';
+import { supabase } from '../../../lib/supabase';
 import { ConnectionStatus } from './shared/ConnectionStatus';
 import { SyncMonitor } from './shared/SyncMonitor';
 import { ToggleSwitch } from './shared/ToggleSwitch';
@@ -10,14 +11,46 @@ interface AbeBooksSettingsProps {
   onBack: () => void;
 }
 
+interface InventoryDiagnostics {
+  exportable: number;
+  zeroStockWithLegacy: number;
+  lowPriceWithStock: number;
+  missingLegacyId: number;
+}
+
+interface RiskyOrderItem {
+  orderId: string;
+  orderDate: string;
+  sku: string;
+  title: string;
+  bookId: number;
+  localTitle: string;
+  stock: number;
+  price: number;
+}
+
+interface InventorySyncLog {
+  id: string;
+  sync_date: string;
+  status: 'success' | 'error' | 'running';
+  books_exported: number;
+  error_message?: string | null;
+}
+
 export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) => {
   const { settings, updateIntegrationsSettings } = useSettings();
   const [testingConnection, setTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'success' | 'error' | 'testing'>('unknown');
   const [connectionMessage, setConnectionMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'api' | 'ftps'>('ftps');
+  const [activeTab, setActiveTab] = useState<'api' | 'ftps' | 'inventory'>('ftps');
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [inventoryLoading, setInventoryLoading] = useState(false);
+  const [inventoryError, setInventoryError] = useState('');
+  const [inventoryDiagnostics, setInventoryDiagnostics] = useState<InventoryDiagnostics | null>(null);
+  const [riskyOrders, setRiskyOrders] = useState<RiskyOrderItem[]>([]);
+  const [inventoryLogs, setInventoryLogs] = useState<InventorySyncLog[]>([]);
+  const [deletingSku, setDeletingSku] = useState<string | null>(null);
   
   // UI States for saving FTPS settings
   const [isSavingFtps, setIsSavingFtps] = useState(false);
@@ -34,6 +67,12 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   useEffect(() => {
      setLocalMinPrice(abeSettings.ftps?.minPrice || 12);
   }, [abeSettings.ftps?.minPrice]);
+
+  useEffect(() => {
+    if (activeTab === 'inventory' && !inventoryDiagnostics && !inventoryLoading) {
+      loadInventoryDiagnostics();
+    }
+  }, [activeTab]);
 
   // Handle trigger FTPS sync
   const handleTriggerSync = async (isPurge = false) => {
@@ -129,6 +168,123 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
     }
   };
 
+  const countBooks = async (applyFilters: (query: any) => any) => {
+    const query = supabase
+      .from('libros')
+      .select('id', { count: 'exact', head: true });
+    const { count, error } = await applyFilters(query);
+    if (error) throw error;
+    return count || 0;
+  };
+
+  const loadInventoryDiagnostics = async () => {
+    setInventoryLoading(true);
+    setInventoryError('');
+
+    try {
+      const minPrice = Number(abeSettings.ftps?.minPrice || 12);
+      const [exportable, zeroStockWithLegacy, lowPriceWithStock, missingLegacyNull, missingLegacyEmpty] = await Promise.all([
+        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').gt('stock', 0).gte('precio', minPrice)),
+        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').lte('stock', 0)),
+        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').gt('stock', 0).lt('precio', minPrice)),
+        countBooks(query => query.is('legacy_id', null).gt('stock', 0).gte('precio', minPrice)),
+        countBooks(query => query.eq('legacy_id', '').gt('stock', 0).gte('precio', minPrice)),
+      ]);
+
+      setInventoryDiagnostics({
+        exportable,
+        zeroStockWithLegacy,
+        lowPriceWithStock,
+        missingLegacyId: missingLegacyNull + missingLegacyEmpty,
+      });
+
+      const { data: orderRows, error: ordersError } = await supabase
+        .from('abebooks_orders_cache')
+        .select('abebooks_order_id, order_date, items')
+        .order('order_date', { ascending: false })
+        .limit(50);
+
+      if (ordersError) throw ordersError;
+
+      const orderItems = (orderRows || []).flatMap((order: any) => {
+        const items = Array.isArray(order.items) ? order.items : [];
+        return items
+          .filter((item: any) => item?.sku)
+          .map((item: any) => ({
+            orderId: order.abebooks_order_id,
+            orderDate: order.order_date,
+            sku: String(item.sku),
+            title: item.title || '',
+          }));
+      });
+
+      const skus = [...new Set(orderItems.map(item => item.sku))];
+      if (skus.length > 0) {
+        const { data: books, error: booksError } = await supabase
+          .from('libros')
+          .select('id, legacy_id, titulo, stock, precio')
+          .in('legacy_id', skus);
+
+        if (booksError) throw booksError;
+
+        const booksBySku = new Map((books || []).map((book: any) => [String(book.legacy_id), book]));
+        const risky = orderItems
+          .map(item => ({ item, book: booksBySku.get(item.sku) }))
+          .filter(({ book }) => book && Number(book.stock) <= 0)
+          .map(({ item, book }: any) => ({
+            orderId: item.orderId,
+            orderDate: item.orderDate,
+            sku: item.sku,
+            title: item.title,
+            bookId: book.id,
+            localTitle: book.titulo,
+            stock: Number(book.stock || 0),
+            price: Number(book.precio || 0),
+          }));
+
+        setRiskyOrders(risky);
+      } else {
+        setRiskyOrders([]);
+      }
+
+      const { data: logs, error: logsError } = await supabase
+        .from('abebooks_sync_log')
+        .select('id, sync_date, status, books_exported, error_message')
+        .order('sync_date', { ascending: false })
+        .limit(5);
+
+      if (!logsError) {
+        setInventoryLogs((logs || []) as InventorySyncLog[]);
+      } else {
+        setInventoryLogs([]);
+      }
+    } catch (error: any) {
+      console.error('Error loading AbeBooks inventory diagnostics:', error);
+      setInventoryError(error.message || 'No se pudo cargar el diagnóstico de inventario.');
+    } finally {
+      setInventoryLoading(false);
+    }
+  };
+
+  const sendDeleteToAbeBooks = async (bookId: number, sku: string) => {
+    setDeletingSku(sku);
+    try {
+      const { data, error } = await supabase.functions.invoke('upload-to-abebooks', {
+        body: { bookId, action: 'delete' },
+      });
+
+      if (error || data?.success === false || data?.error) {
+        throw new Error(error?.message || data?.message || data?.error || 'AbeBooks rechazó la baja.');
+      }
+
+      setRiskyOrders(prev => prev.filter(item => item.sku !== sku));
+    } catch (error: any) {
+      setInventoryError(`No se pudo enviar la baja de ${sku}: ${error.message}`);
+    } finally {
+      setDeletingSku(null);
+    }
+  };
+
   // Helper to update master switch
   const handleMasterToggle = async (value: boolean) => {
     const current = settings.integrations.abeBooks;
@@ -196,6 +352,16 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
           }`}
         >
           FTPS
+        </button>
+        <button
+          onClick={() => setActiveTab('inventory')}
+          className={`px-4 py-2 font-medium transition-colors ${
+            activeTab === 'inventory'
+              ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
+        >
+          Inventario
         </button>
         <button
           onClick={() => setActiveTab('api')}
@@ -308,6 +474,161 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
             </div>
           </div>
         </>
+      )}
+
+      {/* Inventory Tab Content */}
+      {activeTab === 'inventory' && (
+        <div className="space-y-6">
+          <div className="form-section">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                  <PackageSearch size={20} />
+                  Diagnóstico de Inventario AbeBooks
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Revisa riesgos de catálogo antes de sincronizar y corrige bajas urgentes.
+                </p>
+              </div>
+              <button
+                onClick={loadInventoryDiagnostics}
+                disabled={inventoryLoading}
+                className="btn-primary flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={16} className={inventoryLoading ? 'animate-spin' : ''} />
+                {inventoryLoading ? 'Revisando...' : 'Revisar ahora'}
+              </button>
+            </div>
+
+            {inventoryError && (
+              <div className="mb-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
+                {inventoryError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <p className="text-xs font-medium text-green-700 dark:text-green-300 uppercase">Exportables</p>
+                <p className="text-2xl font-bold text-green-900 dark:text-green-100 mt-2">
+                  {inventoryDiagnostics?.exportable.toLocaleString('es-ES') || '-'}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-xs font-medium text-red-700 dark:text-red-300 uppercase">Stock 0 con SKU</p>
+                <p className="text-2xl font-bold text-red-900 dark:text-red-100 mt-2">
+                  {inventoryDiagnostics?.zeroStockWithLegacy.toLocaleString('es-ES') || '-'}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-300 uppercase">Precio bajo</p>
+                <p className="text-2xl font-bold text-amber-900 dark:text-amber-100 mt-2">
+                  {inventoryDiagnostics?.lowPriceWithStock.toLocaleString('es-ES') || '-'}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">Sin legacy_id</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">
+                  {inventoryDiagnostics?.missingLegacyId.toLocaleString('es-ES') || '-'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+              <ShieldAlert size={20} />
+              Pedidos AbeBooks con Stock Local 0
+            </h3>
+
+            {inventoryLoading ? (
+              <div className="text-sm text-gray-500 dark:text-gray-400">Cargando pedidos recientes...</div>
+            ) : riskyOrders.length === 0 ? (
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300">
+                No hay pedidos recientes en caché que apunten a libros con stock local 0.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                      <th className="py-2 pr-3">Pedido</th>
+                      <th className="py-2 pr-3">SKU</th>
+                      <th className="py-2 pr-3">Libro</th>
+                      <th className="py-2 pr-3">Stock</th>
+                      <th className="py-2 pr-3">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {riskyOrders.map(item => (
+                      <tr key={`${item.orderId}-${item.sku}`} className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3 pr-3 font-medium text-gray-900 dark:text-white">{item.orderId}</td>
+                        <td className="py-3 pr-3 text-gray-700 dark:text-gray-300">{item.sku}</td>
+                        <td className="py-3 pr-3 text-gray-700 dark:text-gray-300 max-w-md">
+                          <span className="line-clamp-2">{item.localTitle || item.title}</span>
+                        </td>
+                        <td className="py-3 pr-3">
+                          <span className="px-2 py-1 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold">
+                            {item.stock}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-3">
+                          <button
+                            onClick={() => sendDeleteToAbeBooks(item.bookId, item.sku)}
+                            disabled={deletingSku === item.sku}
+                            className="btn-secondary text-xs flex items-center gap-2"
+                          >
+                            {deletingSku === item.sku && <RefreshCw size={14} className="animate-spin" />}
+                            Enviar baja
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div className="form-section">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+              <ListChecks size={20} />
+              Logs de Sincronización
+            </h3>
+
+            {inventoryLogs.length === 0 ? (
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                No hay logs disponibles desde la tabla `abebooks_sync_log`.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {inventoryLogs.map(log => (
+                  <div key={log.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {new Date(log.sync_date).toLocaleString('es-ES')}
+                      </p>
+                      {log.error_message && (
+                        <p className="text-xs text-red-600 dark:text-red-400 mt-1">{log.error_message}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-semibold ${
+                        log.status === 'success' ? 'text-green-600 dark:text-green-400' :
+                        log.status === 'error' ? 'text-red-600 dark:text-red-400' :
+                        'text-blue-600 dark:text-blue-400'
+                      }`}>
+                        {log.status}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {Number(log.books_exported || 0).toLocaleString('es-ES')} libros
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* FTPS Tab Content */}
