@@ -98,7 +98,7 @@ export interface IntegrationsSettings {
       enabled: boolean;
       autoSync: boolean;       // Enable/disable automatic scheduled sync
       minPrice: number;        // Minimum price for export (default: 12)
-      schedule: string;        // Cron schedule (default: "0 */6 * * *")
+      schedule: string;        // Cron schedule (default: "0 */12 * * *")
     };
 
     // Legacy fields (for backward compatibility, can be removed later)
@@ -482,7 +482,7 @@ class SettingsService {
             enabled: false,
             autoSync: false,
             minPrice: 12,
-            schedule: '0 */6 * * *'
+            schedule: '0 */12 * * *'
           },
           // Legacy fields for backward compatibility
           orders: {

@@ -2,7 +2,7 @@ name: AbeBooks Auto Sync
 
 on:
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: "0 */12 * * *"
   workflow_dispatch:
     inputs:
       purge:

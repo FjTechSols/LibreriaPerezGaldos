@@ -318,7 +318,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
               Sincronización Masiva de Catálogo (FTPS)
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Sube automáticamente todo el catálogo cada 6 horas mediante FTPS (FTP Seguro).
+              Sube automáticamente todo el catálogo cada 12 horas mediante FTPS (FTP Seguro).
             </p>
 
             <div className="integration-toggles">
@@ -327,7 +327,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                 onChange={(val) => handleFtpsUpdate('autoSync', val)}
                 disabled={!abeSettings.enabled}
                 label="Sincronización Automática de Catálogo"
-                description="Sube automáticamente el catálogo completo cada 6 horas vía FTPS (recomendado)."
+                description="Sube automáticamente el catálogo completo cada 12 horas vía FTPS (recomendado)."
               />
 
               <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>

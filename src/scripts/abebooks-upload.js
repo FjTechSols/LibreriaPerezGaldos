@@ -93,6 +93,73 @@ async function downloadCSV() {
   });
 }
 
+function parseCsvLine(line) {
+  const cells = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const next = line[i + 1];
+
+    if (char === '"' && inQuotes && next === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ';' && !inQuotes) {
+      cells.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  cells.push(current);
+  return cells;
+}
+
+function removeOutOfStockRows() {
+  if (process.env.PURGE_INVENTORY === 'true') {
+    return { bookCount: 0, removedCount: 0 };
+  }
+
+  const fileContent = fs.readFileSync(CSV_PATH, 'utf8');
+  const lines = fileContent.split(/\r?\n/).filter(line => line.trim());
+
+  if (lines.length === 0) {
+    return { bookCount: 0, removedCount: 0 };
+  }
+
+  const headers = parseCsvLine(lines[0]).map(header => header.trim());
+  const quantityIndex = headers.indexOf('Quantity');
+
+  if (quantityIndex === -1) {
+    throw new Error('El CSV de AbeBooks no tiene columna Quantity.');
+  }
+
+  const rowsWithStock = [lines[0]];
+  let removedCount = 0;
+
+  for (const line of lines.slice(1)) {
+    const row = parseCsvLine(line);
+    const quantity = Number(row[quantityIndex]);
+
+    if (Number.isFinite(quantity) && quantity > 0) {
+      rowsWithStock.push(line);
+    } else {
+      removedCount++;
+    }
+  }
+
+  fs.writeFileSync(CSV_PATH, rowsWithStock.join('\n') + '\n', { encoding: 'utf8' });
+
+  return {
+    bookCount: rowsWithStock.length - 1,
+    removedCount
+  };
+}
+
 async function uploadToAbeBooksFTP() {
   const client = new Client();
   client.ftp.verbose = true;
@@ -127,9 +194,10 @@ async function run() {
   try {
     await downloadCSV();
 
-    const fileContent = fs.readFileSync(CSV_PATH, 'utf8');
-    const lines = fileContent.split(/\r?\n/).filter(line => line.trim());
-    const bookCount = Math.max(0, lines.length - 1);
+    const { bookCount, removedCount } = removeOutOfStockRows();
+    if (removedCount > 0) {
+      console.log(`Filas omitidas por Quantity <= 0: ${removedCount}`);
+    }
     console.log(`Total books in CSV: ${bookCount}`);
 
     await uploadToAbeBooksFTP();
