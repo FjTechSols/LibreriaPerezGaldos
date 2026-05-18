@@ -193,6 +193,7 @@ export default function StripeCheckout() {
         {
           cliente_email: currentState.checkoutData.email,
           cliente_nombre: `${currentState.checkoutData.nombre} ${currentState.checkoutData.apellidos}`,
+          ...(currentState.orderId ? { pedido_id: currentState.orderId } : {}),
         }
       );
 
@@ -486,6 +487,11 @@ export default function StripeCheckout() {
               amount={checkoutState?.orderTotal || 0}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
+              returnUrl={
+                checkoutState?.orderId
+                  ? `${window.location.origin}/pago-completado?orderId=${checkoutState.orderId}`
+                  : `${window.location.origin}/pago-completado`
+              }
             />
           </Elements>
         </div>

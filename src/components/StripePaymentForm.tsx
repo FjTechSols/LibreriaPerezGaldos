@@ -11,9 +11,10 @@ interface StripePaymentFormProps {
   amount: number;
   onSuccess: (paymentIntentId: string) => Promise<void> | void;
   onError: (error: string) => void;
+  returnUrl?: string;
 }
 
-export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentFormProps) {
+export function StripePaymentForm({ amount, onSuccess, onError, returnUrl }: StripePaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const { t } = useLanguage();
@@ -41,7 +42,7 @@ export function StripePaymentForm({ amount, onSuccess, onError }: StripePaymentF
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/pago-completado`,
+          return_url: returnUrl || `${window.location.origin}/pago-completado`,
         },
         redirect: 'if_required',
       });

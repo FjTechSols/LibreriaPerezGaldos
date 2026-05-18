@@ -55,7 +55,8 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const isPurge = url.searchParams.get('purge') === 'true'
+    const mode = url.searchParams.get('mode') || (url.searchParams.get('purge') === 'true' ? 'empty' : 'upload')
+    const isEmptyInventory = mode === 'empty'
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -75,7 +76,7 @@ serve(async (req) => {
     } catch (e) {
       console.warn('Settings fetch error:', e)
     }
-    console.log(`Min Price: ${minPrice} | Purge Mode: ${isPurge}`)
+    console.log(`Min Price: ${minPrice} | Mode: ${mode}`)
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -109,11 +110,11 @@ serve(async (req) => {
               headerSent = true
             }
 
-            if (!isPurge) {
+            if (!isEmptyInventory) {
               for (const book of books) {
                 const vendorBookId = String(book.legacy_id || '').trim()
                 if (!vendorBookId) continue
-                if (book.stock <= 0 || Number(book.precio) < minPrice) continue
+                if (Number(book.stock) < 1 || Number(book.precio) < minPrice) continue
                 chunk += buildCsvRow({ ...book, legacy_id: vendorBookId }) + '\n'
               }
             }

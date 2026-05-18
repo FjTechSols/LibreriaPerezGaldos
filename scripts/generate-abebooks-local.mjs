@@ -12,6 +12,7 @@ const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SU
 const EXPORT_PATH = path.join(__dirname, 'files', 'abebooks_local_export.csv');
 const LOG_PATH = path.join(__dirname, 'files', 'export_log.json');
 const SAMPLE_VENDOR_IDS = ['02293682', '02293606', '00001377H'];
+const SYNC_MODE = process.env.ABEBOOKS_SYNC_MODE || (process.env.PURGE_INVENTORY === 'true' ? 'empty' : 'upload');
 const HEADERS = [
   'VendorBookID',
   'Title',
@@ -70,9 +71,25 @@ async function generateLocalExport() {
 
   const writeStream = fs.createWriteStream(EXPORT_PATH, { encoding: 'utf8' });
 
+  let minPrice = Number(process.env.ABEBOOKS_MIN_PRICE || 12);
+  try {
+    const { data } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'integrations')
+      .single();
+
+    if (data?.value?.abeBooks?.ftps?.minPrice) {
+      minPrice = Number(data.value.abeBooks.ftps.minPrice);
+    }
+  } catch (error) {
+    console.warn('No se pudo leer minPrice desde settings. Usando valor por defecto.', error.message);
+  }
+
   const report = {
     startTime: new Date().toISOString(),
-    minPrice: 12,
+    minPrice,
+    syncMode: SYNC_MODE,
     format: 'csv-semicolon-with-header',
     samples: []
   };
@@ -80,10 +97,10 @@ async function generateLocalExport() {
   try {
     writeStream.write(HEADERS.join(';') + '\n');
 
-    if (process.env.PURGE_INVENTORY === 'true') {
-      console.log('Modo purge detectado: generando CSV solo con cabecera.');
+    if (SYNC_MODE === 'empty') {
+      console.log('Modo vaciado detectado: generando CSV solo con cabecera.');
       writeStream.end();
-      report.isPurge = true;
+      report.isEmptyInventory = true;
       fs.writeFileSync(LOG_PATH, JSON.stringify(report, null, 2));
       return;
     }
@@ -105,7 +122,7 @@ async function generateLocalExport() {
         totalProcessed++;
         const vendorBookId = String(book.legacy_id || '').trim();
 
-        if (book.stock > 0 && Number(book.precio) >= 12) {
+        if (Number(book.stock) >= 1 && Number(book.precio) >= minPrice) {
           if (!vendorBookId) {
             totalSkippedWithoutLegacyId++;
             continue;
@@ -130,7 +147,7 @@ async function generateLocalExport() {
             stock: book.stock,
             precio: book.precio,
             inExport: false,
-            reason: book.stock <= 0 ? 'No Stock' : 'Price < 12'
+            reason: Number(book.stock) < 1 ? 'No Stock' : `Price < ${minPrice}`
           });
         }
       }

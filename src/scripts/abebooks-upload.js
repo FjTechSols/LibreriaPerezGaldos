@@ -28,6 +28,7 @@ if (!SUPABASE_FUNCTION_URL && process.env.VITE_SUPABASE_URL) {
 }
 
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const SYNC_MODE = process.env.ABEBOOKS_SYNC_MODE || (process.env.PURGE_INVENTORY === 'true' ? 'empty' : 'upload');
 
 if (!ABEBOOKS_USER || !ABEBOOKS_API_KEY || !SUPABASE_FUNCTION_URL || !SUPABASE_KEY) {
   console.error('Falta configuracion. Necesitas ABEBOOKS_USERNAME/USER_ID, ABEBOOKS_API_KEY, SUPABASE_FUNCTION_URL y SUPABASE_SERVICE_ROLE_KEY.');
@@ -52,9 +53,9 @@ async function downloadCSV() {
       fnUrl = fnUrl.replace(/\/$/, '') + '/generate-abebooks-csv';
     }
 
-    if (process.env.PURGE_INVENTORY === 'true') {
-      fnUrl += '?purge=true';
-      console.log('Modo purge activado.');
+    if (SYNC_MODE !== 'upload') {
+      fnUrl += `?mode=${encodeURIComponent(SYNC_MODE)}`;
+      console.log(`Modo ${SYNC_MODE} activado.`);
     }
 
     const url = new URL(fnUrl);
@@ -120,7 +121,7 @@ function parseCsvLine(line) {
 }
 
 function removeOutOfStockRows() {
-  if (process.env.PURGE_INVENTORY === 'true') {
+  if (SYNC_MODE === 'empty') {
     return { bookCount: 0, removedCount: 0 };
   }
 
@@ -145,7 +146,7 @@ function removeOutOfStockRows() {
     const row = parseCsvLine(line);
     const quantity = Number(row[quantityIndex]);
 
-    if (Number.isFinite(quantity) && quantity > 0) {
+    if (Number.isFinite(quantity) && quantity >= 1) {
       rowsWithStock.push(line);
     } else {
       removedCount++;
@@ -178,9 +179,11 @@ async function uploadToAbeBooksFTP() {
     });
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    const remoteFilename = process.env.PURGE_INVENTORY === 'true'
-      ? `purge_inventory_${timestamp}.csv`
-      : `abebooks_inventory_${timestamp}.csv`;
+    const remoteFilename = SYNC_MODE === 'empty'
+      ? `empty_inventory_${timestamp}.csv`
+      : SYNC_MODE === 'purge'
+        ? `purge_inventory_${timestamp}.csv`
+        : `abebooks_inventory_${timestamp}.csv`;
 
     console.log(`Subiendo archivo como: ${remoteFilename}`);
     await client.uploadFrom(CSV_PATH, remoteFilename);
@@ -196,7 +199,7 @@ async function run() {
 
     const { bookCount, removedCount } = removeOutOfStockRows();
     if (removedCount > 0) {
-      console.log(`Filas omitidas por Quantity <= 0: ${removedCount}`);
+      console.log(`Filas omitidas por Quantity < 1: ${removedCount}`);
     }
     console.log(`Total books in CSV: ${bookCount}`);
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSettings } from '../../../context/SettingsContext';
 import { ArrowLeft, RefreshCw, Upload, CheckCircle2, AlertCircle, PackageSearch, ShieldAlert, ListChecks } from 'lucide-react';
 import { fetchAbeBooksOrders } from '../../../services/abeBooksOrdersService';
@@ -37,6 +37,19 @@ interface InventorySyncLog {
   error_message?: string | null;
 }
 
+interface BulkDeleteProgress {
+  total: number;
+  processed: number;
+  success: number;
+  failed: number;
+  currentSku: string;
+  errors: string[];
+  startedAt?: string;
+  finishedAt?: string;
+}
+
+type FtpsSyncMode = 'upload' | 'empty' | 'purge';
+
 export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) => {
   const { settings, updateIntegrationsSettings } = useSettings();
   const [testingConnection, setTestingConnection] = useState(false);
@@ -51,11 +64,21 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   const [riskyOrders, setRiskyOrders] = useState<RiskyOrderItem[]>([]);
   const [inventoryLogs, setInventoryLogs] = useState<InventorySyncLog[]>([]);
   const [deletingSku, setDeletingSku] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkDeleteProgress, setBulkDeleteProgress] = useState<BulkDeleteProgress>({
+    total: 0,
+    processed: 0,
+    success: 0,
+    failed: 0,
+    currentSku: '',
+    errors: [],
+  });
+  const stopBulkDeleteRef = useRef(false);
   
   // UI States for saving FTPS settings
   const [isSavingFtps, setIsSavingFtps] = useState(false);
   const [ftpsSaveSuccess, setFtpsSaveSuccess] = useState(false);
-  const [isPurging, setIsPurging] = useState(false);
+  const [ftpsSyncMode, setFtpsSyncMode] = useState<FtpsSyncMode>('upload');
 
   const abeSettings = settings.integrations.abeBooks;
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -75,12 +98,15 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
   }, [activeTab]);
 
   // Handle trigger FTPS sync
-  const handleTriggerSync = async (isPurge = false) => {
+  const handleTriggerSync = async (mode: FtpsSyncMode = 'upload') => {
     try {
       setTestingConnection(true);
       setSyncResult(null);
       
-      const payload = isPurge ? { purge: true } : {};
+      const payload = {
+        mode,
+        purge: mode === 'empty',
+      };
 
       const response = await fetch(`${supabaseUrl}/functions/v1/trigger-ftps-sync`, {
         method: 'POST',
@@ -96,7 +122,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
       if (response.ok && data.success) {
         setSyncResult({
           success: true,
-          message: data.status || `Sincronización ${isPurge ? 'de PUESTA A CERO ' : ''}iniciada correctamente. Puedes ver el progreso en el monitor.`
+          message: data.status || 'Sincronizacion FTPS iniciada correctamente. Puedes ver el progreso en el monitor.'
         });
       } else {
         setSyncResult({
@@ -184,11 +210,11 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
     try {
       const minPrice = Number(abeSettings.ftps?.minPrice || 12);
       const [exportable, zeroStockWithLegacy, lowPriceWithStock, missingLegacyNull, missingLegacyEmpty] = await Promise.all([
-        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').gt('stock', 0).gte('precio', minPrice)),
+        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').gte('stock', 1).gte('precio', minPrice)),
         countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').lte('stock', 0)),
-        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').gt('stock', 0).lt('precio', minPrice)),
-        countBooks(query => query.is('legacy_id', null).gt('stock', 0).gte('precio', minPrice)),
-        countBooks(query => query.eq('legacy_id', '').gt('stock', 0).gte('precio', minPrice)),
+        countBooks(query => query.not('legacy_id', 'is', null).neq('legacy_id', '').gte('stock', 1).lt('precio', minPrice)),
+        countBooks(query => query.is('legacy_id', null).gte('stock', 1).gte('precio', minPrice)),
+        countBooks(query => query.eq('legacy_id', '').gte('stock', 1).gte('precio', minPrice)),
       ]);
 
       setInventoryDiagnostics({
@@ -283,6 +309,120 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
     } finally {
       setDeletingSku(null);
     }
+  };
+
+  const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const startBulkDeleteZeroStock = async () => {
+    const total = inventoryDiagnostics?.zeroStockWithLegacy || 0;
+    const confirmed = window.confirm(
+      `Se enviará una baja a AbeBooks para ${total.toLocaleString('es-ES')} libros con stock 0 y SKU.\n\n` +
+      'No se borrará nada de la base de datos local. El proceso puede tardar muchas horas porque espera 2 segundos entre peticiones.\n\n' +
+      '¿Quieres empezar ahora?'
+    );
+
+    if (!confirmed) return;
+
+    stopBulkDeleteRef.current = false;
+    setBulkDeleting(true);
+    setInventoryError('');
+    setBulkDeleteProgress({
+      total,
+      processed: 0,
+      success: 0,
+      failed: 0,
+      currentSku: '',
+      errors: [],
+      startedAt: new Date().toISOString(),
+    });
+
+    const pageSize = 50;
+    let offset = 0;
+    let processed = 0;
+    let success = 0;
+    let failed = 0;
+    let errors: string[] = [];
+
+    try {
+      while (!stopBulkDeleteRef.current) {
+        const { data: books, error } = await supabase
+          .from('libros')
+          .select('id, legacy_id, titulo, stock')
+          .not('legacy_id', 'is', null)
+          .neq('legacy_id', '')
+          .lte('stock', 0)
+          .order('id', { ascending: true })
+          .range(offset, offset + pageSize - 1);
+
+        if (error) throw error;
+        if (!books || books.length === 0) break;
+
+        for (const book of books as Array<{ id: number; legacy_id: string; titulo?: string; stock: number }>) {
+          if (stopBulkDeleteRef.current) break;
+
+          const sku = String(book.legacy_id || '').trim();
+          setBulkDeleteProgress(prev => ({ ...prev, currentSku: sku }));
+
+          try {
+            const { data, error: deleteError } = await supabase.functions.invoke('upload-to-abebooks', {
+              body: { bookId: book.id, action: 'delete' },
+            });
+
+            if (deleteError || data?.success === false || data?.error) {
+              throw new Error(deleteError?.message || data?.message || data?.error || 'AbeBooks rechazó la baja.');
+            }
+
+            success++;
+          } catch (deleteError: any) {
+            failed++;
+            if (errors.length < 10) {
+              errors = [...errors, `${sku}: ${deleteError.message || 'Error desconocido'}`];
+            }
+          }
+
+          processed++;
+          setBulkDeleteProgress(prev => ({
+            ...prev,
+            processed,
+            success,
+            failed,
+            errors,
+          }));
+
+          if (!stopBulkDeleteRef.current) {
+            await wait(2000);
+          }
+        }
+
+        offset += pageSize;
+      }
+
+      setBulkDeleteProgress(prev => ({
+        ...prev,
+        processed,
+        success,
+        failed,
+        currentSku: stopBulkDeleteRef.current ? 'Proceso detenido' : 'Proceso finalizado',
+        finishedAt: new Date().toISOString(),
+      }));
+
+      if (!stopBulkDeleteRef.current) {
+        await loadInventoryDiagnostics();
+      }
+    } catch (error: any) {
+      setInventoryError(`Error en baja masiva: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setBulkDeleting(false);
+      stopBulkDeleteRef.current = false;
+    }
+  };
+
+  const stopBulkDeleteZeroStock = () => {
+    stopBulkDeleteRef.current = true;
+    setBulkDeleteProgress(prev => ({
+      ...prev,
+      currentSku: 'Deteniendo al finalizar la petición actual...',
+    }));
   };
 
   // Helper to update master switch
@@ -536,6 +676,84 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
           <div className="form-section">
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+              <AlertCircle size={20} />
+              Baja Masiva de Stock 0
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Envía a AbeBooks una baja individual para cada libro local con stock 0 y SKU. El proceso espera 2 segundos entre peticiones para no saturar la API.
+            </p>
+
+            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-4">
+              <p className="text-sm text-red-800 dark:text-red-300">
+                Esta acción no elimina libros de la base local. Solo solicita a AbeBooks retirar esos anuncios mediante su API de inventario.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Objetivo</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  {(bulkDeleteProgress.total || inventoryDiagnostics?.zeroStockWithLegacy || 0).toLocaleString('es-ES')}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <p className="text-xs text-blue-700 dark:text-blue-300 uppercase">Procesados</p>
+                <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
+                  {bulkDeleteProgress.processed.toLocaleString('es-ES')}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <p className="text-xs text-green-700 dark:text-green-300 uppercase">Bajas enviadas</p>
+                <p className="text-xl font-bold text-green-900 dark:text-green-100">
+                  {bulkDeleteProgress.success.toLocaleString('es-ES')}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-xs text-amber-700 dark:text-amber-300 uppercase">Errores</p>
+                <p className="text-xl font-bold text-amber-900 dark:text-amber-100">
+                  {bulkDeleteProgress.failed.toLocaleString('es-ES')}
+                </p>
+              </div>
+            </div>
+
+            {bulkDeleteProgress.currentSku && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                SKU actual: <span className="font-semibold text-gray-900 dark:text-white">{bulkDeleteProgress.currentSku}</span>
+              </p>
+            )}
+
+            {bulkDeleteProgress.errors.length > 0 && (
+              <div className="mb-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">Primeros errores</p>
+                <ul className="text-xs text-amber-700 dark:text-amber-300 space-y-1">
+                  {bulkDeleteProgress.errors.map((error, index) => (
+                    <li key={`${error}-${index}`}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={startBulkDeleteZeroStock}
+                disabled={bulkDeleting || inventoryLoading || !abeSettings.enabled}
+                className="btn-primary !bg-red-600 hover:!bg-red-700 !border-red-600 flex items-center justify-center gap-2"
+              >
+                {bulkDeleting ? <RefreshCw size={16} className="animate-spin" /> : <Upload size={16} />}
+                {bulkDeleting ? 'Enviando bajas...' : 'Enviar baja de todos los stock 0'}
+              </button>
+              <button
+                onClick={stopBulkDeleteZeroStock}
+                disabled={!bulkDeleting}
+                className="btn-secondary flex items-center justify-center gap-2"
+              >
+                Detener proceso
+              </button>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
               <ShieldAlert size={20} />
               Pedidos AbeBooks con Stock Local 0
             </h3>
@@ -688,7 +906,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                     </button>
                   </div>
                   <p className="toggle-description mt-2">
-                    Solo se publicarán en AbeBooks los libros con precio igual o superior a este valor. Los que no lleguen a este precio se marcarán como agotados (borrado de AbeBooks).
+                    Solo se publicarán en AbeBooks los libros con precio igual o superior a este valor. Los que no lleguen a este precio se omiten del CSV seguro.
                   </p>
                 </div>
 
@@ -698,7 +916,7 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                   onChange={() => {}}
                   disabled={true}
                   label="Filtrar por Stock Disponible"
-                  description="Solo se suben libros con stock mayor a 0 (siempre activo)."
+                  description="Solo se suben libros con stock 1 o superior (siempre activo)."
                 />
               </div>
             </div>
@@ -714,11 +932,11 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => { setShowSyncModal(true); setIsPurging(false); }}
+                  onClick={() => { setShowSyncModal(true); setFtpsSyncMode('upload'); }}
                   disabled={!abeSettings.enabled || testingConnection}
                   className="btn-primary flex items-center justify-center gap-2"
                 >
-                  {testingConnection && !isPurging ? (
+                  {testingConnection && ftpsSyncMode === 'upload' ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
                       Iniciando sincronización...
@@ -731,11 +949,28 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                   )}
                 </button>
                 <button
-                  onClick={() => { setShowSyncModal(true); setIsPurging(true); }}
+                  onClick={() => { setShowSyncModal(true); setFtpsSyncMode('purge'); }}
+                  disabled={!abeSettings.enabled || testingConnection}
+                  className="btn-primary !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 flex items-center justify-center gap-2"
+                >
+                  {testingConnection && ftpsSyncMode === 'purge' ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      Purgando inventario...
+                    </>
+                  ) : (
+                    <>
+                      <ListChecks size={16} />
+                      Purgar Inventario
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => { setShowSyncModal(true); setFtpsSyncMode('empty'); }}
                   disabled={!abeSettings.enabled || testingConnection}
                   className="btn-primary !bg-red-600 hover:!bg-red-700 !border-red-600 flex items-center justify-center gap-2"
                 >
-                   {testingConnection && isPurging ? (
+                   {testingConnection && ftpsSyncMode === 'empty' ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
                        Poniendo a Cero...
@@ -793,10 +1028,15 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
 
               {!syncResult ? (
                 <>
-                   {isPurging ? (
+                   {ftpsSyncMode === 'empty' ? (
                       <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-md mb-6">
                         <p className="font-bold flex items-center gap-2 mb-2"><AlertCircle size={20} /> ¡Peligro de Destrucción!</p>
                         <p className="text-sm">¿Estás completamente seguro de que quieres lanzar una actualización masiva poniendo la cantidad de <strong>TODOS tus libros a 0</strong> en AbeBooks? Tu catálogo desaparecerá del mercado público.</p>
+                      </div>
+                   ) : ftpsSyncMode === 'purge' ? (
+                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-md mb-6">
+                        <p className="font-bold flex items-center gap-2 mb-2"><ListChecks size={20} /> Purgar inventario seguro</p>
+                        <p className="text-sm">Se subira a AbeBooks una copia completa solo con libros validos: precio igual o superior al minimo configurado y stock 1 o superior.</p>
                       </div>
                    ) : (
                       <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -813,10 +1053,14 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                       Cancelar
                     </button>
                     <button
-                      onClick={() => handleTriggerSync(isPurging)}
+                      onClick={() => handleTriggerSync(ftpsSyncMode)}
                       disabled={testingConnection}
                       className={`px-4 py-2 text-white rounded-md flex items-center gap-2 disabled:opacity-50 transition-colors ${
-                          isPurging ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                          ftpsSyncMode === 'empty'
+                            ? 'bg-red-600 hover:bg-red-700'
+                            : ftpsSyncMode === 'purge'
+                              ? 'bg-emerald-600 hover:bg-emerald-700'
+                              : 'bg-blue-600 hover:bg-blue-700'
                       }`}
                     >
                       {testingConnection ? (
@@ -826,8 +1070,8 @@ export const AbeBooksSettings: React.FC<AbeBooksSettingsProps> = ({ onBack }) =>
                         </>
                       ) : (
                         <>
-                          {isPurging ? <AlertCircle size={16} /> : <Upload size={16} />}
-                          {isPurging ? 'Purgar Ahora' : 'Iniciar Sincronización'}
+                          {ftpsSyncMode === 'empty' ? <AlertCircle size={16} /> : ftpsSyncMode === 'purge' ? <ListChecks size={16} /> : <Upload size={16} />}
+                          {ftpsSyncMode === 'empty' ? 'Vaciar ahora' : ftpsSyncMode === 'purge' ? 'Purgar inventario' : 'Iniciar Sincronización'}
                         </>
                       )}
                     </button>

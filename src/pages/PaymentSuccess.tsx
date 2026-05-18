@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight, FileText, Download } from 'lucide-react';
 import { useInvoice } from '../context/InvoiceContext';
-import { obtenerPedidoPorId } from '../services/pedidoService';
+import { confirmOrderAndDeductStock, obtenerPedidoPorId } from '../services/pedidoService';
 import { supabase } from '../lib/supabase';
 import { generarPDFFactura } from '../utils/pdfGenerator';
 import * as settingsService from '../services/settingsService';
@@ -13,7 +13,11 @@ import { MessageModal } from '../components/MessageModal'; // Import MessageModa
 export default function PaymentSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { pedidoId, paymentIntentId, total } = location.state || {};
+  const locationState = location.state || {};
+  const queryParams = new URLSearchParams(location.search);
+  const [pedidoId, setPedidoId] = useState<number | string | null>(locationState.pedidoId || queryParams.get('orderId') || null);
+  const paymentIntentId = locationState.paymentIntentId || queryParams.get('payment_intent');
+  const [total, setTotal] = useState<number>(locationState.total || 0);
   const { createInvoice } = useInvoice();
   
   const [isGenerandoFactura, setIsGenerandoFactura] = useState(false);
@@ -36,7 +40,34 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     if (!pedidoId) {
-      navigate('/');
+      const recoverPaymentFromStripe = async () => {
+        if (!paymentIntentId) {
+          navigate('/');
+          return;
+        }
+
+        try {
+          const { data, error } = await supabase.functions.invoke('get-payment-intent', {
+            body: { paymentIntentId }
+          });
+
+          if (error || data?.status !== 'succeeded' || !data?.metadata?.pedido_id) {
+            console.error('No se pudo recuperar el pedido desde Stripe:', error || data);
+            navigate('/');
+            return;
+          }
+
+          const recoveredPedidoId = data.metadata.pedido_id;
+          await confirmOrderAndDeductStock(Number(recoveredPedidoId));
+          setPedidoId(recoveredPedidoId);
+          setTotal(Number((data.amount_received || data.amount || 0) / 100));
+        } catch (error) {
+          console.error('Error recuperando pago de Stripe:', error);
+          navigate('/');
+        }
+      };
+
+      recoverPaymentFromStripe();
       return;
     }
 

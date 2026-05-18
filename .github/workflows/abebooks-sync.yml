@@ -10,6 +10,11 @@ on:
         required: false
         default: "false"
         type: string
+      sync_mode:
+        description: "Modo de sincronizacion: upload, purge o empty"
+        required: false
+        default: "upload"
+        type: string
 
 jobs:
   upload-inventory:
@@ -73,6 +78,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PURGE_INVENTORY: ${{ github.event.inputs.purge || inputs.purge || 'false' }}
+          ABEBOOKS_SYNC_MODE: ${{ github.event.inputs.sync_mode || inputs.sync_mode || (github.event.inputs.purge == 'true' && 'empty') || 'upload' }}
         run: node scripts/generate-abebooks-local.mjs
 
       - name: Run AbeBooks Upload
@@ -83,6 +89,7 @@ jobs:
           SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PURGE_INVENTORY: ${{ github.event.inputs.purge || inputs.purge || 'false' }}
+          ABEBOOKS_SYNC_MODE: ${{ github.event.inputs.sync_mode || inputs.sync_mode || (github.event.inputs.purge == 'true' && 'empty') || 'upload' }}
         run: |
           START_TIME=$(date +%s)
           OUTPUT=$(node src/scripts/abebooks-upload.js)
