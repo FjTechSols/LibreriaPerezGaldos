@@ -28,8 +28,9 @@ serve(async (req) => {
     try {
       if (req.body) {
          const bodyJson = await req.json();
-         if (bodyJson?.mode === 'empty' || bodyJson?.mode === 'purge' || bodyJson?.mode === 'upload') {
-             mode = bodyJson.mode;
+         const requestedMode = bodyJson?.mode || bodyJson?.sync_mode;
+         if (requestedMode === 'empty' || requestedMode === 'purge' || requestedMode === 'upload') {
+             mode = requestedMode;
          }
          if (bodyJson && bodyJson.purge) {
              isPurge = true;

@@ -37,6 +37,10 @@ function csvEscape(value) {
 function buildCsvRow(book) {
   const description = (book.descripcion || '').replace(/\s+/g, ' ').trim();
   const publisher = book.editoriales?.nombre || '';
+  const price = Number(book.precio);
+  const safePrice = Number.isFinite(price) && price > 0 ? price : 1;
+  const stock = Number(book.stock);
+  const safeStock = Number.isFinite(stock) ? stock : 0;
 
   return [
     csvEscape(book.legacy_id),
@@ -44,8 +48,8 @@ function buildCsvRow(book) {
     csvEscape(book.autor || ''),
     csvEscape(publisher),
     csvEscape(book.anio || ''),
-    csvEscape(Number(book.precio).toFixed(2)),
-    csvEscape(book.stock || 0),
+    csvEscape(safePrice.toFixed(2)),
+    csvEscape(safeStock),
     csvEscape(description),
     csvEscape(book.isbn || ''),
     csvEscape(book.paginas || ''),
@@ -90,20 +94,13 @@ async function generateLocalExport() {
     startTime: new Date().toISOString(),
     minPrice,
     syncMode: SYNC_MODE,
+    isEmptyInventory: SYNC_MODE === 'empty',
     format: 'csv-semicolon-with-header',
     samples: []
   };
 
   try {
     writeStream.write(HEADERS.join(';') + '\n');
-
-    if (SYNC_MODE === 'empty') {
-      console.log('Modo vaciado detectado: generando CSV solo con cabecera.');
-      writeStream.end();
-      report.isEmptyInventory = true;
-      fs.writeFileSync(LOG_PATH, JSON.stringify(report, null, 2));
-      return;
-    }
 
     while (hasMore) {
       const { data: books, error } = await supabase
@@ -122,7 +119,15 @@ async function generateLocalExport() {
         totalProcessed++;
         const vendorBookId = String(book.legacy_id || '').trim();
 
-        if (Number(book.stock) >= 1 && Number(book.precio) >= minPrice) {
+        if (SYNC_MODE === 'empty') {
+          if (!vendorBookId) {
+            totalSkippedWithoutLegacyId++;
+            continue;
+          }
+
+          writeStream.write(buildCsvRow({ ...book, legacy_id: vendorBookId, stock: 0 }) + '\n');
+          totalExported++;
+        } else if (Number(book.stock) >= 1 && Number(book.precio) >= minPrice) {
           if (!vendorBookId) {
             totalSkippedWithoutLegacyId++;
             continue;

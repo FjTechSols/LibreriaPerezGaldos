@@ -30,6 +30,10 @@ function csvEscape(value: unknown) {
 function buildCsvRow(book: any) {
   const description = (book.descripcion || '').replace(/\s+/g, ' ').trim()
   const publisher = book.editoriales?.nombre || ''
+  const price = Number(book.precio)
+  const safePrice = Number.isFinite(price) && price > 0 ? price : 1
+  const stock = Number(book.stock)
+  const safeStock = Number.isFinite(stock) ? stock : 0
 
   return [
     csvEscape(book.legacy_id),
@@ -37,8 +41,8 @@ function buildCsvRow(book: any) {
     csvEscape(book.autor || ''),
     csvEscape(publisher),
     csvEscape(book.anio || ''),
-    csvEscape(Number(book.precio).toFixed(2)),
-    csvEscape(book.stock || 0),
+    csvEscape(safePrice.toFixed(2)),
+    csvEscape(safeStock),
     csvEscape(description),
     csvEscape(book.isbn || ''),
     csvEscape(book.paginas || ''),
@@ -56,7 +60,6 @@ serve(async (req) => {
   try {
     const url = new URL(req.url)
     const mode = url.searchParams.get('mode') || (url.searchParams.get('purge') === 'true' ? 'empty' : 'upload')
-    const isEmptyInventory = mode === 'empty'
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -110,13 +113,17 @@ serve(async (req) => {
               headerSent = true
             }
 
-            if (!isEmptyInventory) {
-              for (const book of books) {
-                const vendorBookId = String(book.legacy_id || '').trim()
-                if (!vendorBookId) continue
-                if (Number(book.stock) < 1 || Number(book.precio) < minPrice) continue
-                chunk += buildCsvRow({ ...book, legacy_id: vendorBookId }) + '\n'
+            for (const book of books) {
+              const vendorBookId = String(book.legacy_id || '').trim()
+              if (!vendorBookId) continue
+
+              if (mode === 'empty') {
+                chunk += buildCsvRow({ ...book, legacy_id: vendorBookId, stock: 0 }) + '\n'
+                continue
               }
+
+              if (Number(book.stock) < 1 || Number(book.precio) < minPrice) continue
+              chunk += buildCsvRow({ ...book, legacy_id: vendorBookId }) + '\n'
             }
 
             controller.enqueue(new TextEncoder().encode(chunk))
