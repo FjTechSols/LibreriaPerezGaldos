@@ -19,6 +19,8 @@ on:
 jobs:
   upload-inventory:
     runs-on: ubuntu-latest
+    env:
+      ABEBOOKS_SYNC_MODE: ${{ (github.event.inputs.purge == 'true' || inputs.purge == 'true') && 'empty' || github.event_name == 'schedule' && 'purge' || github.event.inputs.sync_mode || inputs.sync_mode || 'purge' }}
 
     steps:
       - name: Checkout Code
@@ -73,12 +75,23 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Delete Ineligible AbeBooks Listings
+        if: env.ABEBOOKS_SYNC_MODE == 'purge' || env.ABEBOOKS_SYNC_MODE == 'empty'
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ABEBOOKS_USERNAME: ${{ secrets.ABEBOOKS_USERNAME }}
+          ABEBOOKS_API_KEY: ${{ secrets.ABEBOOKS_API_KEY }}
+          ABEBOOKS_DELETE_DELAY_MS: "500"
+          ABEBOOKS_DELETE_SCOPE: ${{ env.ABEBOOKS_SYNC_MODE == 'empty' && 'all' || 'ineligible' }}
+        run: node scripts/abebooks-delete-ineligible.mjs
+
       - name: Generate AbeBooks Inventory
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PURGE_INVENTORY: ${{ github.event.inputs.purge || inputs.purge || 'false' }}
-          ABEBOOKS_SYNC_MODE: ${{ (github.event.inputs.purge == 'true' || inputs.purge == 'true') && 'empty' || github.event_name == 'schedule' && 'purge' || github.event.inputs.sync_mode || inputs.sync_mode || 'purge' }}
+          ABEBOOKS_SYNC_MODE: ${{ env.ABEBOOKS_SYNC_MODE }}
         run: node scripts/generate-abebooks-local.mjs
 
       - name: Run AbeBooks Upload
@@ -89,7 +102,7 @@ jobs:
           SUPABASE_FUNCTION_URL: ${{ secrets.SUPABASE_FUNCTION_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PURGE_INVENTORY: ${{ github.event.inputs.purge || inputs.purge || 'false' }}
-          ABEBOOKS_SYNC_MODE: ${{ (github.event.inputs.purge == 'true' || inputs.purge == 'true') && 'empty' || github.event_name == 'schedule' && 'purge' || github.event.inputs.sync_mode || inputs.sync_mode || 'purge' }}
+          ABEBOOKS_SYNC_MODE: ${{ env.ABEBOOKS_SYNC_MODE }}
         run: |
           START_TIME=$(date +%s)
           OUTPUT=$(node src/scripts/abebooks-upload.js)
