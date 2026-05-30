@@ -465,6 +465,100 @@ export const obtenerLibros = async (
     }
     // --- FIN BLOQUE RPC ---
 
+    // --- BLOQUE RPC BÚSQUEDA AVANZADA (unaccent para título, autor, descripción) ---
+    const hasAdvancedText = !!(filters?.titulo || filters?.autor || filters?.descripcion);
+    if (hasAdvancedText) {
+        // Resolver categoría a ID si aplica
+        let advCatId: number | null = null;
+        if (filters!.category && filters!.category !== 'Todos') {
+            const { data: catData } = await supabase
+                .from('categorias')
+                .select('id')
+                .ilike('nombre', filters!.category)
+                .maybeSingle();
+            if (catData) advCatId = catData.id;
+        }
+
+        let advSort = 'newest';
+        if (filters!.sortBy === 'price') {
+            advSort = filters!.sortOrder === 'desc' ? 'price_desc' : 'price_asc';
+        } else if (filters!.sortBy === 'title') {
+            advSort = 'title';
+        }
+
+        const advOffset = (page - 1) * itemsPerPage;
+        const { data: advData, error: advError } = await supabase.rpc('search_books_advanced', {
+            p_titulo:       filters!.titulo      || null,
+            p_autor:        filters!.autor       || null,
+            p_descripcion:  filters!.descripcion || null,
+            p_isbn:         filters!.isbn        || null,
+            p_publisher:    filters!.publisher   || null,
+            p_category_id:  advCatId,
+            p_min_price:    filters!.minPrice    || null,
+            p_max_price:    (filters!.maxPrice && filters!.maxPrice < 1000000) ? filters!.maxPrice : null,
+            p_stock_status: filters!.availability === 'inStock' ? 'in_stock' : (filters!.availability === 'outOfStock' ? 'out_of_stock' : 'all'),
+            p_min_pages:    filters!.minPages    || null,
+            p_max_pages:    filters!.maxPages    || null,
+            p_start_year:   filters!.startYear   || null,
+            p_end_year:     filters!.endYear     || null,
+            p_language:     (filters!.language && filters!.language !== 'Todos') ? filters!.language : null,
+            p_condition:    filters!.condition   || null,
+            p_location:     filters!.location    || null,
+            p_is_visible:   true,
+            p_sort_by:      advSort,
+            p_limit:        itemsPerPage,
+            p_offset:       advOffset,
+        });
+
+        if (advError) {
+            console.error('Error en search_books_advanced RPC:', advError);
+            return { data: [], count: 0 };
+        }
+
+        if (advData) {
+            const activeDiscounts = await discountService.getActiveDiscounts();
+            const mappedBooks = advData.map((item: any) => {
+                const tempLibro: LibroSupabase = {
+                    id: item.id,
+                    legacy_id: item.legacy_id,
+                    isbn: item.isbn,
+                    titulo: item.titulo,
+                    autor: item.autor,
+                    editorial_id: item.editorial_id,
+                    categoria_id: item.categoria_id,
+                    anio: item.anio,
+                    paginas: item.paginas,
+                    descripcion: item.descripcion,
+                    precio: item.precio,
+                    precio_original: item.precio_original,
+                    stock: item.stock,
+                    ubicacion: item.ubicacion,
+                    imagen_url: item.imagen_url,
+                    activo: item.activo,
+                    destacado: item.destacado,
+                    novedad: item.novedad,
+                    oferta: item.oferta,
+                    descatalogado: item.descatalogado,
+                    estado: item.estado,
+                    idioma: item.idioma,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                    editoriales: item.editorial_nombre ? { id: item.editorial_id, nombre: item.editorial_nombre } : undefined,
+                    categorias:  item.categoria_nombre ? { id: item.categoria_id, nombre: item.categoria_nombre } : undefined,
+                };
+                const baseBook = mapLibroToBook(tempLibro);
+                return applyDiscountsToBookWithId(baseBook, activeDiscounts, item.categoria_id);
+            });
+
+            let estimatedCount = page * itemsPerPage;
+            if (advData.length === itemsPerPage) estimatedCount += 100;
+            else estimatedCount = (page - 1) * itemsPerPage + advData.length;
+
+            return { data: mappedBooks, count: estimatedCount };
+        }
+    }
+    // --- FIN BLOQUE RPC BÚSQUEDA AVANZADA ---
+
 
     // FALLBACK A LÓGICA ORIGINAL (Para filtros sin texto, navegación por categorías, etc.)
     const isTextSearch = !!filters?.search && !/^\d+$/.test(filters.search.trim());

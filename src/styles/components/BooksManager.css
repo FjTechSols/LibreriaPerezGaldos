@@ -488,6 +488,9 @@
   fill: currentColor;
 }
 
+.tool-btn.clone { color: var(--success); }
+.tool-btn.clone:hover { background: var(--success); color: white; border-color: var(--success); }
+
 .tool-btn.edit { color: var(--accent); }
 .tool-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
 

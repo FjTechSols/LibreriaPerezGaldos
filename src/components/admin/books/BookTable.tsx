@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit, Trash2, Plus, Minus, Zap, Info } from 'lucide-react';
+import { Edit, Trash2, Plus, Minus, Zap, Info, Copy } from 'lucide-react';
 import { Book } from '../../../types';
 import { useOrder } from '../../../context/OrderContext';
 
@@ -9,6 +9,7 @@ interface BookTableProps {
   onDelete: (id: string) => void;
   onStockUpdate: (book: Book, amount: number) => void;
   onExpressOrder: (book: Book) => void;
+  onClone: (book: Book) => void;
 }
 
 interface HoveredBookInfo {
@@ -35,7 +36,7 @@ const formatInfoValue = (value?: string | number | null) => {
   return value && String(value).trim() ? String(value).trim() : 'N/A';
 };
 
-export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrder }: BookTableProps) {
+export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrder, onClone }: BookTableProps) {
   const { orderMode } = useOrder();
   const [hoveredCode, setHoveredCode] = useState<{ code: string; top: number; left: number } | null>(null);
   const [hoveredDescription, setHoveredDescription] = useState<HoveredBookInfo | null>(null);
@@ -175,6 +176,13 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
                       title={orderMode === 'flash' ? 'Anadir a Pedido Flash' : 'Pedido Express'}
                     >
                       <Zap size={14} className="fill-current" />
+                    </button>
+                    <button
+                      onClick={() => onClone(book)}
+                      className="tool-btn clone"
+                      title="Clonar libro"
+                    >
+                      <Copy size={14} />
                     </button>
                     <button
                       onClick={() => onEdit(book)}

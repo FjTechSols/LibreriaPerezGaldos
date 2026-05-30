@@ -630,6 +630,19 @@ export function BooksManager() {
     setIsExpressOrderOpen(true);
   };
 
+  const handleClone = (book: Book) => {
+    const cloneData: any = {
+      ...book,
+      id: '',
+      code: '',
+      stock: 1,
+      isNew: true,
+    };
+    setSelectedBook(cloneData);
+    setIsCreating(true);
+    setIsModalOpen(true);
+  };
+
   const handleExpressOrderSubmit = async (data: ExpressOrderData) => {
     if (!expressOrderBook || !user) return;
     
@@ -1073,13 +1086,13 @@ export function BooksManager() {
           ) : books.length > 0 ? (
              viewMode === 'grid' ? (
              /* Grid View (Original) */
-             <BookTable 
-               books={books} 
+             <BookTable
+               books={books}
                onEdit={(book) => { setSelectedBook(book); setIsCreating(false); setIsModalOpen(true); }}
                onDelete={(id) => handleDelete(id)}
                onStockUpdate={handleStockUpdate}
                onExpressOrder={handleExpressOrder}
-
+               onClone={handleClone}
              />
           ) : (
              /* Legacy Table View */
