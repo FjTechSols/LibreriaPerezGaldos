@@ -277,7 +277,6 @@ export function BooksManager() {
       legacy_id: ''
     }));
     setCurrentPage(1);
-    setLocalSearchTerm(''); 
     setShowSuggestions(false);
   };
 
