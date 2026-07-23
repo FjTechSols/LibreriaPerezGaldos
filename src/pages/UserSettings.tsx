@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
-import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar } from 'lucide-react';
+import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar, AlertTriangle, Trash2 } from 'lucide-react';
 import { PhoneInput } from '../components/PhoneInput';
+import { deleteOwnAccount } from '../services/accountService';
 import '../styles/pages/UserSettings.css';
 
 export function UserSettings() {
-  const { user, refreshUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, refreshUser, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'notifications'>('profile');
@@ -74,6 +78,8 @@ export function UserSettings() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const [preferences, setPreferences] = useState({
     language: language,
@@ -83,6 +89,16 @@ export function UserSettings() {
     promotions: false,
     newsletter: true
   });
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab') || location.hash.replace('#', '');
+    if (['profile', 'security', 'preferences', 'notifications'].includes(tab)) {
+      setActiveTab(tab as typeof activeTab);
+      setMessage('');
+      setError('');
+    }
+  }, [location.search, location.hash]);
 
   // Sync local preferences with global context updates
   React.useEffect(() => {
@@ -292,6 +308,38 @@ export function UserSettings() {
   const handlePreferencesUpdate = () => {
     setLanguage(preferences.language as 'es' | 'en');
     setTheme(preferences.theme as 'light' | 'dark' | 'system');
+  };
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+
+    if (deleteConfirmation !== 'ELIMINAR') {
+      setError('Escribe ELIMINAR para confirmar el borrado definitivo de la cuenta.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Esta accion eliminara tu cuenta y todos tus datos de forma definitiva. No se puede deshacer. Quieres continuar?'
+    );
+
+    if (!confirmed) return;
+
+    setIsDeletingAccount(true);
+    setIsLoading(true);
+
+    try {
+      await deleteOwnAccount(deleteConfirmation);
+      localStorage.clear();
+      sessionStorage.clear();
+      await logout();
+      navigate('/', { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar la cuenta.');
+      setIsDeletingAccount(false);
+      setIsLoading(false);
+    }
   };
 
   const tabs = [
@@ -634,6 +682,43 @@ export function UserSettings() {
                       </button>
                     </div>
                   )}
+                </div>
+                <div className="security-subsection danger-zone">
+                  <div className="danger-zone-header">
+                    <AlertTriangle size={22} />
+                    <div>
+                      <h3>Eliminar cuenta</h3>
+                      <p className="security-description">
+                        Elimina definitivamente tu perfil, pedidos, reservas, resenas, carrito, favoritos, notificaciones y acceso de inicio de sesion.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleDeleteAccount} className="settings-form">
+                    <div className="form-group">
+                      <label htmlFor="deleteConfirmation">
+                        Escribe ELIMINAR para confirmar
+                      </label>
+                      <input
+                        id="deleteConfirmation"
+                        type="text"
+                        value={deleteConfirmation}
+                        onChange={(e) => setDeleteConfirmation(e.target.value)}
+                        placeholder="ELIMINAR"
+                        disabled={isDeletingAccount}
+                        autoComplete="off"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="btn-danger"
+                      disabled={isDeletingAccount || deleteConfirmation !== 'ELIMINAR'}
+                    >
+                      <Trash2 size={16} />
+                      {isDeletingAccount ? 'Eliminando cuenta...' : 'Eliminar mi cuenta definitivamente'}
+                    </button>
+                  </form>
                 </div>
               </div>
             )}

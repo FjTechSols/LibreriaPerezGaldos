@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { 
   User, 
   Bell, 
+  Shield,
   Package, 
   ShoppingCart, 
   LayoutDashboard,
@@ -306,6 +307,10 @@ export function UserDashboard() {
         <Link to="/ajustes" className="settings-link-btn">
           <Settings size={18} />
           Ir a Ajustes para editar perfil
+        </Link>
+        <Link to="/ajustes?tab=security" className="settings-link-btn">
+          <Shield size={18} />
+          Seguridad de la cuenta
         </Link>
       </div>
     </div>
