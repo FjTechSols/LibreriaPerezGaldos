@@ -692,7 +692,7 @@ export function UserSettings() {
                     </div>
                   )}
                 </div>
-                <div className="security-subsection danger-zone">
+                <div className="security-subsection danger-zone-inline">
                   <div className="danger-zone-header">
                     <AlertTriangle size={22} />
                     <div>

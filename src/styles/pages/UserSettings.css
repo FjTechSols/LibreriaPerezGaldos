@@ -232,11 +232,8 @@
   margin: 0 0 0.5rem 0;
 }
 
-.danger-zone {
-  background: var(--bg-danger-subtle);
-  border: 1px solid var(--danger);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
+.danger-zone-inline {
+  padding-bottom: 0;
 }
 
 .danger-zone-header {
@@ -244,11 +241,15 @@
   gap: 0.75rem;
   align-items: flex-start;
   color: var(--danger);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .danger-zone-header h3 {
   color: var(--danger);
+}
+
+.danger-zone-inline .btn-danger {
+  margin-top: 0;
 }
 
 .delete-account-modal-backdrop {
