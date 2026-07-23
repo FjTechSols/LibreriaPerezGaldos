@@ -56,9 +56,34 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
-    const { confirmation } = await req.json().catch(() => ({ confirmation: "" }));
+    const { password, confirmation } = await req.json().catch(() => ({
+      password: "",
+      confirmation: "",
+    }));
+
+    if (!password || typeof password !== "string") {
+      return jsonResponse({ error: "Password is required" }, 400);
+    }
+
     if (confirmation !== "ELIMINAR") {
       return jsonResponse({ error: "Confirmation text is required" }, 400);
+    }
+
+    if (!user.email) {
+      return jsonResponse({ error: "User email is required to verify password" }, 400);
+    }
+
+    const supabasePasswordCheck = createClient(supabaseUrl, anonKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const { error: passwordError } = await supabasePasswordCheck.auth.signInWithPassword({
+      email: user.email,
+      password,
+    });
+
+    if (passwordError) {
+      return jsonResponse({ error: "Password is incorrect" }, 401);
     }
 
     const { data: profile, error: profileError } = await supabaseAdmin

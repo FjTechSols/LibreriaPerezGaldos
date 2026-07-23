@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 
-export const deleteOwnAccount = async (confirmation: string): Promise<void> => {
+export const deleteOwnAccount = async (password: string, confirmation: string): Promise<void> => {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
@@ -15,7 +15,7 @@ export const deleteOwnAccount = async (confirmation: string): Promise<void> => {
       Authorization: `Bearer ${session.access_token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ confirmation }),
+    body: JSON.stringify({ password, confirmation }),
   });
 
   if (!response.ok) {

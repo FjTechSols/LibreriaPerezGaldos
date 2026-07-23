@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
-import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar, AlertTriangle, Trash2 } from 'lucide-react';
+import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar, AlertTriangle, Trash2, X } from 'lucide-react';
 import { PhoneInput } from '../components/PhoneInput';
 import { deleteOwnAccount } from '../services/accountService';
 import '../styles/pages/UserSettings.css';
@@ -78,6 +78,8 @@ export function UserSettings() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
@@ -315,22 +317,21 @@ export function UserSettings() {
     setError('');
     setMessage('');
 
+    if (!deletePassword) {
+      setError('Introduce tu contrasena para confirmar el borrado definitivo de la cuenta.');
+      return;
+    }
+
     if (deleteConfirmation !== 'ELIMINAR') {
       setError('Escribe ELIMINAR para confirmar el borrado definitivo de la cuenta.');
       return;
     }
 
-    const confirmed = window.confirm(
-      'Esta accion eliminara tu cuenta y todos tus datos de forma definitiva. No se puede deshacer. Quieres continuar?'
-    );
-
-    if (!confirmed) return;
-
     setIsDeletingAccount(true);
     setIsLoading(true);
 
     try {
-      await deleteOwnAccount(deleteConfirmation);
+      await deleteOwnAccount(deletePassword, deleteConfirmation);
       localStorage.clear();
       sessionStorage.clear();
       await logout();
@@ -340,6 +341,14 @@ export function UserSettings() {
       setIsDeletingAccount(false);
       setIsLoading(false);
     }
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeletingAccount) return;
+    setShowDeleteModal(false);
+    setDeletePassword('');
+    setDeleteConfirmation('');
+    setError('');
   };
 
   const tabs = [
@@ -694,31 +703,18 @@ export function UserSettings() {
                     </div>
                   </div>
 
-                  <form onSubmit={handleDeleteAccount} className="settings-form">
-                    <div className="form-group">
-                      <label htmlFor="deleteConfirmation">
-                        Escribe ELIMINAR para confirmar
-                      </label>
-                      <input
-                        id="deleteConfirmation"
-                        type="text"
-                        value={deleteConfirmation}
-                        onChange={(e) => setDeleteConfirmation(e.target.value)}
-                        placeholder="ELIMINAR"
-                        disabled={isDeletingAccount}
-                        autoComplete="off"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn-danger"
-                      disabled={isDeletingAccount || deleteConfirmation !== 'ELIMINAR'}
-                    >
-                      <Trash2 size={16} />
-                      {isDeletingAccount ? 'Eliminando cuenta...' : 'Eliminar mi cuenta definitivamente'}
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    className="btn-danger"
+                    onClick={() => {
+                      setShowDeleteModal(true);
+                      setError('');
+                      setMessage('');
+                    }}
+                  >
+                    <Trash2 size={16} />
+                    Eliminar cuenta
+                  </button>
                 </div>
               </div>
             )}
@@ -834,6 +830,92 @@ export function UserSettings() {
           </div>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="delete-account-modal-backdrop" role="presentation">
+          <div
+            className="delete-account-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="deleteAccountTitle"
+          >
+            <button
+              type="button"
+              className="delete-account-modal-close"
+              onClick={closeDeleteModal}
+              disabled={isDeletingAccount}
+              aria-label="Cerrar"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="danger-zone-header">
+              <AlertTriangle size={24} />
+              <div>
+                <h3 id="deleteAccountTitle">Eliminar cuenta</h3>
+                <p className="security-description">
+                  Esta accion eliminara tu cuenta y todos tus datos de forma definitiva. No se puede deshacer.
+                </p>
+              </div>
+            </div>
+
+            {error && <div className="error-message-box">{error}</div>}
+
+            <form onSubmit={handleDeleteAccount} className="delete-account-form">
+              <div className="form-group">
+                <label htmlFor="deletePassword">
+                  <Lock size={16} />
+                  Contrasena actual
+                </label>
+                <input
+                  id="deletePassword"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Introduce tu contrasena"
+                  disabled={isDeletingAccount}
+                  autoComplete="current-password"
+                  autoFocus
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="deleteConfirmation">
+                  Escribe ELIMINAR para confirmar
+                </label>
+                <input
+                  id="deleteConfirmation"
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="ELIMINAR"
+                  disabled={isDeletingAccount}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="delete-account-modal-actions">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={closeDeleteModal}
+                  disabled={isDeletingAccount}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn-danger"
+                  disabled={isDeletingAccount || !deletePassword || deleteConfirmation !== 'ELIMINAR'}
+                >
+                  <Trash2 size={16} />
+                  {isDeletingAccount ? 'Eliminando cuenta...' : 'Eliminar mi cuenta definitivamente'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

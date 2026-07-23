@@ -251,6 +251,66 @@
   color: var(--danger);
 }
 
+.delete-account-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.delete-account-modal {
+  position: relative;
+  width: min(100%, 560px);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--danger);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-xl);
+  padding: 2rem;
+}
+
+.delete-account-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.delete-account-modal-close:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.delete-account-form {
+  margin-top: 1.5rem;
+}
+
+.delete-account-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.delete-account-modal-actions .btn-secondary,
+.delete-account-modal-actions .btn-danger {
+  margin-top: 0;
+}
+
 .security-description {
   font-size: 0.875rem;
   color: var(--text-muted);
