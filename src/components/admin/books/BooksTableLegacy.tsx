@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Book } from '../../../types';
 import { Edit2, Barcode, Trash2, Info } from 'lucide-react';
+import { getConditionLabel } from '../../../utils/bookCondition';
 
 interface BooksTableLegacyProps {
   books: Book[];
@@ -122,7 +123,7 @@ export function BooksTableLegacy({
                                 publisher: book.publisher,
                                 category: book.category,
                                 language: book.language,
-                                condition: book.condition,
+                                condition: getConditionLabel(book.condition),
                                 pages: book.pages,
                                 ubicacion: book.ubicacion,
                                 top: rect.top,

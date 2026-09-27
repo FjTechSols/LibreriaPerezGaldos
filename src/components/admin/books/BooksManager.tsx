@@ -33,6 +33,7 @@ import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import AdvancedSearchModal from '../../AdvancedSearchModal';
 import { AdvancedSearchCriteria } from '../../../types';
 import { ExpressOrderModal, ExpressOrderData } from './ExpressOrderModal';
+import { normalizeCondition } from '../../../utils/bookCondition';
 
 // Import sub-tools if we want to render them as tabs inside Manager (Optional, but planned for future)
 // For now we focus on the Catalog section logic.
@@ -343,7 +344,7 @@ export function BooksManager() {
               finalISBN,
               bookData.ubicacion,
               bookData.price,
-              bookData.condition || 'leido',
+              bookData.condition ?? null,
               bookData.language || 'Español'
           );
 
@@ -391,7 +392,7 @@ export function BooksManager() {
           novedad: bookData.isNew,
           oferta: bookData.isOnSale,
           descatalogado: bookData.isOutOfPrint,
-          estado: bookData.condition,
+          estado: bookData.condition ?? null,
           idioma: bookData.language
         } as any, contents);
         
@@ -417,7 +418,7 @@ export function BooksManager() {
              isNew: nuevo.novedad || false,
              isOnSale: nuevo.oferta || false,
              isOutOfPrint: nuevo.descatalogado || false,
-             condition: nuevo.estado || 'leido',
+             condition: normalizeCondition(nuevo.estado),
              language: nuevo.idioma || 'Español',
              rating: 0,
              reviews: []
@@ -502,7 +503,7 @@ export function BooksManager() {
         novedad: bookData.isNew,
         oferta: bookData.isOnSale,
         descatalogado: bookData.isOutOfPrint,
-        estado: bookData.condition,
+        estado: bookData.condition ?? null,
         idioma: bookData.language,
         editorial_id: editorialId,
         categoria_id: categoriaId,

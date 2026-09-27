@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Edit, Trash2, Plus, Minus, Zap, Info, Copy } from 'lucide-react';
 import { Book } from '../../../types';
 import { useOrder } from '../../../context/OrderContext';
+import { getConditionLabel } from '../../../utils/bookCondition';
 
 interface BookTableProps {
   books: Book[];
@@ -102,7 +103,7 @@ export function BookTable({ books, onEdit, onDelete, onStockUpdate, onExpressOrd
                         publisher: book.publisher,
                         category: book.category,
                         language: book.language,
-                        condition: book.condition,
+                        condition: getConditionLabel(book.condition),
                         pages: book.pages,
                         ubicacion: book.ubicacion,
                         top: rect.top,

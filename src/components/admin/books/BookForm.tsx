@@ -11,6 +11,7 @@ import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import { buscarEditoriales } from '../../../services/libroService';
 import { BookConfirmationModal } from './BookConfirmationModal';
+import { BOOK_CONDITIONS, CONDITION_UNSPECIFIED_LABEL } from '../../../utils/bookCondition';
 
 import { BookFormLegacy } from './BookFormLegacy';
 
@@ -306,7 +307,7 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
         isNew: initialData?.isNew || false,
         isOnSale: initialData?.isOnSale || false,
         isOutOfPrint: initialData?.isOutOfPrint || false,
-        condition: initialData?.condition || 'leido',
+        condition: initialData?.condition === undefined ? 'leido' : initialData.condition,
         language: initialData?.language || 'Español'
       });
       setPublicationYearInput(formatPublicationYearInput(initialData?.publicationYear));
@@ -952,26 +953,28 @@ export function BookForm({ isOpen, onClose, onSubmit, initialData, isCreating, u
                   {/* Estado / Condición */}
                   <div>
                       <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Estado Físico</label>
-                      <div style={{ display: 'flex', gap: '1rem', height: '38px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', minHeight: '38px', alignItems: 'center' }}>
+                          {BOOK_CONDITIONS.map(({ value, label }) => (
+                              <label key={value} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                                  <input
+                                      type="radio"
+                                      name="condition"
+                                      value={value}
+                                      checked={formData.condition === value}
+                                      onChange={() => setFormData(prev => ({...prev, condition: value}))}
+                                  />
+                                  {label}
+                              </label>
+                          ))}
                           <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
-                              <input 
-                                  type="radio" 
-                                  name="condition" 
-                                  value="nuevo"
-                                  checked={formData.condition === 'nuevo'}
-                                  onChange={() => setFormData({...formData, condition: 'nuevo'})}
+                              <input
+                                  type="radio"
+                                  name="condition"
+                                  value=""
+                                  checked={formData.condition == null}
+                                  onChange={() => setFormData(prev => ({...prev, condition: null}))}
                               />
-                              Nuevo
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
-                              <input 
-                                  type="radio" 
-                                  name="condition" 
-                                  value="leido"
-                                  checked={!formData.condition || formData.condition === 'leido'}
-                                  onChange={() => setFormData({...formData, condition: 'leido'})}
-                              />
-                              Leído
+                              {CONDITION_UNSPECIFIED_LABEL}
                           </label>
                       </div>
                   </div>

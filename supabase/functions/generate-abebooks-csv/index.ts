@@ -27,6 +27,13 @@ function csvEscape(value: unknown) {
   return `"${String(value).replace(/"/g, '""')}"`
 }
 
+// Estado físico → texto de condición para AbeBooks. Sin especificar (null) se sigue enviando como 'leido'.
+function mapCondition(estado: string | null | undefined) {
+  if (estado === 'nuevo') return 'nuevo'
+  if (estado === 'buen_estado') return 'buen estado'
+  return 'leido'
+}
+
 function buildCsvRow(book: any) {
   const description = (book.descripcion || '').replace(/\s+/g, ' ').trim()
   const publisher = book.editoriales?.nombre || ''
@@ -47,7 +54,7 @@ function buildCsvRow(book: any) {
     csvEscape(book.isbn || ''),
     csvEscape(book.paginas || ''),
     csvEscape('Softcover'),
-    csvEscape(book.estado || 'leido'),
+    csvEscape(mapCondition(book.estado)),
     csvEscape(book.idioma || 'Español')
   ].join(';')
 }

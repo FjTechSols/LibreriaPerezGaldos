@@ -122,7 +122,7 @@ export interface Libro {
   es_nuevo?: boolean;
   en_oferta?: boolean;
   descatalogado?: boolean;
-  estado?: 'nuevo' | 'leido';
+  estado?: BookCondition | null;
   idioma?: string;
   created_at?: string;
   updated_at?: string;
@@ -267,10 +267,13 @@ export interface Book {
   isNew?: boolean;
   isOnSale?: boolean;
   isOutOfPrint?: boolean;
-  condition?: 'nuevo' | 'leido';
+  condition?: BookCondition | null;
   language?: string;
   contents?: string[];
 }
+
+// Estado físico del libro. `null` = "Sin especificar".
+export type BookCondition = 'nuevo' | 'buen_estado' | 'leido';
 
 export interface Review {
   id: string;

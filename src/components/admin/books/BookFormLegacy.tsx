@@ -1,5 +1,6 @@
 import { Book, Ubicacion } from '../../../types';
 import { X, Loader2 } from 'lucide-react';
+import { BOOK_CONDITIONS, CONDITION_UNSPECIFIED_LABEL } from '../../../utils/bookCondition';
 
 interface BookFormLegacyProps {
     formData: Partial<Book>;
@@ -239,24 +240,26 @@ export function BookFormLegacy({
 
                 {/* New Row: Estado Físico & Idioma */}
                 {renderField('Estado', (
-                     <div className="flex gap-4 items-center">
+                     <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
+                         {BOOK_CONDITIONS.map(({ value, label }) => (
+                             <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                 <input
+                                    type="radio"
+                                    name="condition"
+                                    checked={formData.condition === value}
+                                    onChange={() => setFormData(p => ({...p, condition: value}))}
+                                 />
+                                 <span className="text-sm">{label}</span>
+                             </label>
+                         ))}
                          <label className="flex items-center gap-2 cursor-pointer">
-                             <input 
-                                type="radio" 
-                                name="condition" 
-                                checked={formData.condition === 'nuevo'} 
-                                onChange={() => setFormData(p => ({...p, condition: 'nuevo'}))} 
+                             <input
+                                type="radio"
+                                name="condition"
+                                checked={formData.condition == null}
+                                onChange={() => setFormData(p => ({...p, condition: null}))}
                              />
-                             <span className="text-sm">Nuevo</span>
-                         </label>
-                         <label className="flex items-center gap-2 cursor-pointer">
-                             <input 
-                                type="radio" 
-                                name="condition" 
-                                checked={formData.condition === 'leido'} 
-                                onChange={() => setFormData(p => ({...p, condition: 'leido'}))} 
-                             />
-                             <span className="text-sm">Leído</span>
+                             <span className="text-sm">{CONDITION_UNSPECIFIED_LABEL}</span>
                          </label>
                      </div>
                 ), false, { marginBottom: '12px' })}

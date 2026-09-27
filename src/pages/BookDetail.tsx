@@ -470,18 +470,20 @@ export function BookDetail() {
                         <span className="spec-value" title={book.language}>{book.language}</span>
                       </div>
                     )}
-                    {book.condition && (
-                      <div className="spec-item">
-                        <span className="spec-label">{language === 'es' ? 'Estado' : language === 'en' ? 'Condition' : 'État'}:</span>
-                        <span className="spec-value" title={book.condition === 'nuevo' 
-                            ? (language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Neuf') 
-                            : (language === 'es' ? 'Leído / Usado' : language === 'en' ? 'Used' : 'Occasion')}>
-                          {book.condition === 'nuevo' 
-                            ? (language === 'es' ? 'Nuevo' : language === 'en' ? 'New' : 'Neuf') 
-                            : (language === 'es' ? 'Leído / Usado' : language === 'en' ? 'Used' : 'Occasion')}
-                        </span>
-                      </div>
-                    )}
+                    {book.condition && (() => {
+                      const conditionLabels = {
+                        nuevo: { es: 'Nuevo', en: 'New', fr: 'Neuf' },
+                        buen_estado: { es: 'Buen estado', en: 'Used - Good', fr: 'Bon état' },
+                        leido: { es: 'Leído / Usado', en: 'Used', fr: 'Occasion' },
+                      }[book.condition];
+                      const conditionLabel = language === 'es' ? conditionLabels.es : language === 'en' ? conditionLabels.en : conditionLabels.fr;
+                      return (
+                        <div className="spec-item">
+                          <span className="spec-label">{language === 'es' ? 'Estado' : language === 'en' ? 'Condition' : 'État'}:</span>
+                          <span className="spec-value" title={conditionLabel}>{conditionLabel}</span>
+                        </div>
+                      );
+                    })()}
                     {book.contents && book.contents.length > 0 && (
                        <div className="spec-item full-width">
                           <span className="spec-label">{language === 'es' ? 'Contenido' : language === 'en' ? 'Contents' : 'Contenu'}:</span>

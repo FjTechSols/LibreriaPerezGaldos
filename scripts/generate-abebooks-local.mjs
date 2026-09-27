@@ -34,6 +34,13 @@ function csvEscape(value) {
   return `"${String(value).replace(/"/g, '""')}"`;
 }
 
+// Estado físico → texto de condición para AbeBooks. Sin especificar (null) se sigue enviando como 'leido'.
+function mapCondition(estado) {
+  if (estado === 'nuevo') return 'nuevo';
+  if (estado === 'buen_estado') return 'buen estado';
+  return 'leido';
+}
+
 function buildCsvRow(book) {
   const description = (book.descripcion || '').replace(/\s+/g, ' ').trim();
   const publisher = book.editoriales?.nombre || '';
@@ -54,7 +61,7 @@ function buildCsvRow(book) {
     csvEscape(book.isbn || ''),
     csvEscape(book.paginas || ''),
     csvEscape('Softcover'),
-    csvEscape(book.estado || 'leido'),
+    csvEscape(mapCondition(book.estado)),
     csvEscape(book.idioma || 'Español')
   ].join(';');
 }

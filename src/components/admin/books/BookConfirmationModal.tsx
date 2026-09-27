@@ -1,6 +1,7 @@
 
 import { Book } from '../../../types';
 import { X, Check } from 'lucide-react';
+import { getConditionLabel } from '../../../utils/bookCondition';
 
 interface BookConfirmationModalProps {
   isOpen: boolean;
@@ -60,7 +61,7 @@ export function BookConfirmationModal({ isOpen, onClose, onConfirm, formData, is
                 {renderField('Stock', formData.stock)}
                 {renderField('Páginas', formData.pages)}
                 {renderField('Idioma', formData.language)}
-                {renderField('Estado', formData.condition)}
+                {renderField('Estado', getConditionLabel(formData.condition))}
             </div>
             
             {(formData.featured || formData.isNew || formData.isOnSale || formData.isOutOfPrint) && (

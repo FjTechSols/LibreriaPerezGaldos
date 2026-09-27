@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
-import { Book } from '../types';
+import { Book, BookCondition } from '../types';
 import { generarCodigoLibro, actualizarCodigoPorUbicacion, obtenerSufijoUbicacion } from '../utils/codigoHelper';
+import { normalizeCondition } from '../utils/bookCondition';
 import { discountService, DiscountRule } from './discountService';
 
 export interface LibroSupabase {
@@ -36,7 +37,7 @@ export interface LibroSupabase {
   novedad?: boolean;
   oferta?: boolean;
   descatalogado?: boolean;
-  estado?: 'nuevo' | 'leido';
+  estado?: BookCondition | null;
   idioma?: string;
   libros_contenidos?: {
     titulo: string;
@@ -141,7 +142,7 @@ export const mapLibroToBook = (libro: LibroSupabase): Book => ({
   isNew: libro.novedad || false,
   isOnSale: libro.oferta || false,
   isOutOfPrint: libro.descatalogado || false,
-  condition: (libro.estado as 'nuevo' | 'leido') || 'leido',
+  condition: normalizeCondition(libro.estado),
   language: libro.idioma || 'Español',
   contents: libro.libros_contenidos 
     ? libro.libros_contenidos
@@ -936,7 +937,8 @@ export const crearLibro = async (libro: Partial<LibroSupabase>, contenidos?: str
         novedad: libro.novedad || false,
         oferta: libro.oferta || false,
         descatalogado: libro.descatalogado || false,
-        estado: libro.estado || 'leido',
+        // undefined = no indicado → 'leido'; null = "Sin especificar" explícito
+        estado: libro.estado === undefined ? 'leido' : libro.estado,
         idioma: libro.idioma || 'Español',
         fecha_ingreso: new Date().toISOString().split('T')[0],
         updated_at: new Date().toISOString()
@@ -1609,8 +1611,8 @@ export const obtenerTotalUnidadesStock = async (): Promise<number> => {
 export const buscarLibroParaMerge = async (
   isbn: string, 
   ubicacion: string, 
-  precio: number, 
-  estado: string, 
+  precio: number,
+  estado: BookCondition | null,
   idioma: string
 ): Promise<Book | null> => {
   // Normalize ISBNS: remove hyphens/spaces
@@ -1622,17 +1624,17 @@ export const buscarLibroParaMerge = async (
   // Merging purely by attributes without ISBN is risky (e.g. two "Untitled" books).
   if (cleanIsbn === 'N/A') return null;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('libros')
     .select('*, editoriales(id, nombre), categorias(id, nombre)')
     .eq('activo', true)
     .eq('isbn', cleanIsbn)
-    .eq('ubicacion', ubicacion)
-    // Handle potential nulls in DB by using 'is' or defaulting in query?
-    // Supabase needs explicit match.
-    // If our DB has 'legacy' nulls, this strict check might miss them.
-    // But for "Merging", strict equality is desired.
-    .eq('estado', estado || 'leido') 
+    .eq('ubicacion', ubicacion);
+
+  // Strict equality for merging. "Sin especificar" (null) only merges with other null rows.
+  query = estado === null ? query.is('estado', null) : query.eq('estado', estado);
+
+  const { data, error } = await query
     .eq('idioma', idioma || 'Español')
     .eq('precio', precio)
     .maybeSingle();
