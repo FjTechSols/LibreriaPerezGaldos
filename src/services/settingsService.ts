@@ -49,8 +49,8 @@ export interface ShippingSettings {
 }
 
 export interface ZoneRate {
-  cost: number;
-  freeThreshold: number;
+  cost: number; // Coste "desde"; el real lo fija el administrador al aceptar el pedido
+  freeThreshold?: number; // Obsoleto: el envío internacional ya no tiene envío gratis
   days: number;
 }
 
@@ -439,10 +439,10 @@ class SettingsService {
           international: 10
         },
         internationalRates: {
-            europe: { cost: 15.00, freeThreshold: 100.00, days: 7 },
-            america: { cost: 25.00, freeThreshold: 150.00, days: 12 },
-            asia: { cost: 30.00, freeThreshold: 180.00, days: 15 },
-            other: { cost: 35.00, freeThreshold: 200.00, days: 20 }
+            europe: { cost: 15.00, days: 7 },
+            america: { cost: 25.00, days: 12 },
+            asia: { cost: 30.00, days: 15 },
+            other: { cost: 35.00, days: 20 }
         }
       },
       system: {

@@ -82,6 +82,8 @@ export interface OrderEmailData {
   trackingNumber?: string;
   storeName?: string;
   orderType?: string; // Added to distinguish internal vs manual orders
+  productsTotal?: number; // Importe de productos (IVA incluido), para el desglose del email de pago
+  shippingAdjusted?: boolean; // true si el envío final difiere del estimado en el checkout
 }
 
 /**
@@ -115,6 +117,7 @@ export const sendOrderConfirmationEmail = async (orderData: Omit<OrderEmailData,
  * @param customerName Customer name
  * @param total Total amount to pay
  * @param paymentUrl URL to payment page
+ * @param breakdown Desglose opcional: productos, envío final y si el envío se ajustó
  * @returns Promise with success status
  */
 export const sendPaymentReadyEmail = async (
@@ -122,7 +125,8 @@ export const sendPaymentReadyEmail = async (
   customerEmail: string,
   customerName: string,
   total: number,
-  paymentUrl: string
+  paymentUrl: string,
+  breakdown?: { productsTotal: number; shipping: number; shippingAdjusted: boolean }
 ): Promise<EmailResult> => {
   try {
     const emailData: OrderEmailData = {
@@ -131,7 +135,12 @@ export const sendPaymentReadyEmail = async (
       customerEmail,
       customerName,
       total,
-      paymentUrl
+      paymentUrl,
+      ...(breakdown ? {
+        productsTotal: breakdown.productsTotal,
+        shipping: breakdown.shipping,
+        shippingAdjusted: breakdown.shippingAdjusted
+      } : {})
     };
 
     const { error } = await supabase.functions.invoke('send-order-email', {

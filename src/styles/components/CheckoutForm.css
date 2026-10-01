@@ -402,6 +402,16 @@
   color: #16a34a; /* Green-600 */
 }
 
+.shipping-estimate-notice {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #b45309; /* Amber-700 */
+}
+
+.dark-mode .shipping-estimate-notice {
+  color: #fbbf24; /* Amber-400 */
+}
+
 /* Dark Mode Overrides for Shipping Options */
 .dark-mode .shipping-option {
   background-color: #0f172a;

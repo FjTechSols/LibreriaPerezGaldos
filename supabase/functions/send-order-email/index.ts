@@ -24,6 +24,28 @@ interface OrderEmailData {
   carrier?: string
   trackingNumber?: string
   storeName?: string // 'Librería Pérez Galdós' or 'Librería Galeón'
+  productsTotal?: number // payment_ready: importe de productos (IVA incluido)
+  shippingAdjusted?: boolean // payment_ready: el envío final difiere del estimado en el checkout
+}
+
+// Desglose productos + envío del email de pago. Solo se pinta si llegan los datos (compatibilidad hacia atrás).
+const generatePaymentBreakdownHTML = (data: OrderEmailData): string => {
+  if (data.productsTotal === undefined || data.shipping === undefined) return ''
+  return `
+          <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #6b7280; font-size: 16px;">Productos:</span>
+              <span style="color: #111827; font-size: 16px; font-weight: 600;">&nbsp;${data.productsTotal.toFixed(2)} €</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #6b7280; font-size: 16px;">Gastos de envío:</span>
+              <span style="color: #111827; font-size: 16px; font-weight: 600;">&nbsp;${data.shipping.toFixed(2)} €</span>
+            </div>
+            ${data.shippingAdjusted ? `
+            <p style="margin: 12px 0 0 0; color: #b45309; font-size: 14px; line-height: 1.5;">
+              El coste de envío se ha ajustado según el peso del paquete.
+            </p>` : ''}
+          </div>`
 }
 
 // ... (previous templates: generateOrderConfirmationHTML, generatePaymentReadyHTML, generatePaymentConfirmedHTML, generateShippedHTML, generateCompletedHTML - KEEP THESE)
@@ -139,6 +161,7 @@ const generatePaymentReadyHTML = (data: OrderEmailData): string => {
             <p style="margin: 0; font-size: 14px; color: #6b7280;">Número de Pedido</p>
             <p style="margin: 8px 0 0 0; font-size: 24px; font-weight: 700; color: #111827;">#${data.orderId}</p>
           </div>
+          ${generatePaymentBreakdownHTML(data)}
           <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: center;">
             <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Total a Pagar</p>
             <p style="margin: 0; font-size: 36px; font-weight: 700; color: #10b981;">${data.total.toFixed(2)} €</p>

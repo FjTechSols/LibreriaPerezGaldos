@@ -49,6 +49,47 @@ Deno.serve(async (req: Request) => {
         if (pedidoId) {
           console.log(`Procesando pago exitoso para pedido ${pedidoId}`);
 
+          // El importe cobrado debe coincidir con el total del pedido; si no, no se confirma
+          const { data: pedido, error: pedidoError } = await supabase
+            .from("pedidos")
+            .select("total, observaciones")
+            .eq("id", Number(pedidoId))
+            .maybeSingle();
+
+          if (pedidoError || !pedido) {
+            console.error(`Pedido ${pedidoId} no encontrado al validar el pago:`, pedidoError);
+            return new Response(
+              JSON.stringify({ error: "Pedido no encontrado" }),
+              { status: 500 }
+            );
+          }
+
+          const expectedCents = Math.round(Number(pedido.total) * 100);
+          const receivedCents = paymentIntent.amount_received;
+          const receivedCurrency = String(paymentIntent.currency || "").toLowerCase();
+
+          // Moneda distinta de EUR = importe que no cuadra (mismas unidades en otra moneda valen otra cosa)
+          if (receivedCurrency !== "eur" || receivedCents !== expectedCents) {
+            const nota = receivedCurrency !== "eur"
+              ? `Pago en moneda ${receivedCurrency.toUpperCase()} (esperado EUR), importe ${receivedCents}, total ${(expectedCents / 100).toFixed(2)} €, revisar (pago ${paymentIntent.id}).`
+              : `Importe cobrado ${(receivedCents / 100).toFixed(2)} € ≠ total ${(expectedCents / 100).toFixed(2)} €, revisar (pago ${paymentIntent.id}).`;
+            console.error(`Pedido ${pedidoId}: ${nota}`);
+
+            await supabase
+              .from("pedidos")
+              .update({
+                observaciones: pedido.observaciones ? `${pedido.observaciones}\n${nota}` : nota,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", Number(pedidoId));
+
+            // 200 para que Stripe no reintente: requiere revisión manual
+            return new Response(
+              JSON.stringify({ received: true, warning: "amount_mismatch" }),
+              { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+
           // MEJORA: Usar RPC para descontar stock de forma segura
           const { data, error } = await supabase.rpc('confirm_order_and_deduct_stock', {
             p_pedido_id: Number(pedidoId)

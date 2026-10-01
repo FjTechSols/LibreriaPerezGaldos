@@ -9,7 +9,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useSettings } from '../context/SettingsContext';
-import { crearPedido, confirmOrderAndDeductStock, obtenerPedidoPorId, actualizarEstadoPedido } from '../services/pedidoService';
+import { crearPedido, confirmOrderAndDeductStock, obtenerPedidoPorId, actualizarEstadoPedido, esPedidoPagable } from '../services/pedidoService';
 import { findOrCreateCliente } from '../services/clienteService';
 import { useInvoice } from '../context/InvoiceContext';
 import { InvoiceFormData } from '../types';
@@ -136,6 +136,14 @@ export default function StripeCheckout() {
           // If Super Admin is accessing another user's order, log a warning but allow continuation
           if (isSuperAdmin && pedido.usuario_id !== user!.id) {
              console.log('Super Admin accessing user order:', orderId);
+          }
+
+          if (!esPedidoPagable(pedido)) {
+             setError(pedido.tipo === 'interno' && pedido.estado === 'pending_verification'
+               ? 'Tu pedido aún está pendiente de verificación. Te enviaremos el enlace de pago con el importe final cuando esté listo.'
+               : 'Este pedido no está pendiente de pago.');
+             setIsLoading(false);
+             return;
           }
 
           // Construct state from existing order

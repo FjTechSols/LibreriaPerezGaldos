@@ -93,10 +93,10 @@ export function AdminSettings() {
       international: 10
     },
     internationalRates: {
-        europe: { cost: 15.00, freeThreshold: 100.00, days: 7 },
-        america: { cost: 25.00, freeThreshold: 150.00, days: 12 },
-        asia: { cost: 30.00, freeThreshold: 180.00, days: 15 },
-        other: { cost: 35.00, freeThreshold: 200.00, days: 20 }
+        europe: { cost: 15.00, days: 7 },
+        america: { cost: 25.00, days: 12 },
+        asia: { cost: 30.00, days: 15 },
+        other: { cost: 35.00, days: 20 }
     }
   });
 
@@ -127,10 +127,10 @@ export function AdminSettings() {
         freeShippingThresholdStandard: settings.shipping.freeShippingThresholdStandard ?? 30,
         freeShippingThresholdExpress: settings.shipping.freeShippingThresholdExpress ?? 50,
         internationalRates: settings.shipping.internationalRates || {
-            europe: { cost: 15.00, freeThreshold: 100.00, days: 7 },
-            america: { cost: 25.00, freeThreshold: 150.00, days: 12 },
-            asia: { cost: 30.00, freeThreshold: 180.00, days: 15 },
-            other: { cost: 35.00, freeThreshold: 200.00, days: 20 }
+            europe: { cost: 15.00, days: 7 },
+            america: { cost: 25.00, days: 12 },
+            asia: { cost: 30.00, days: 15 },
+            other: { cost: 35.00, days: 20 }
         }
       });
       setSystemData(settings.system);
@@ -652,21 +652,6 @@ export function AdminSettings() {
                                     })}
                                 />
                                 </div>
-                                <div className="form-group">
-                                <label>Envío gratis desde</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={shippingData.internationalRates.europe.freeThreshold}
-                                    onChange={(e) => setShippingData({
-                                        ...shippingData,
-                                        internationalRates: {
-                                            ...shippingData.internationalRates,
-                                            europe: { ...shippingData.internationalRates.europe, freeThreshold: Number(e.target.value) }
-                                        }
-                                    })}
-                                />
-                                </div>
                             </div>
                         </div>
 
@@ -703,21 +688,6 @@ export function AdminSettings() {
                                     })}
                                 />
                                 </div>
-                                <div className="form-group">
-                                <label>Envío gratis desde</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={shippingData.internationalRates.america.freeThreshold}
-                                    onChange={(e) => setShippingData({
-                                        ...shippingData,
-                                        internationalRates: {
-                                            ...shippingData.internationalRates,
-                                            america: { ...shippingData.internationalRates.america, freeThreshold: Number(e.target.value) }
-                                        }
-                                    })}
-                                />
-                                </div>
                             </div>
                         </div>
 
@@ -750,21 +720,6 @@ export function AdminSettings() {
                                         internationalRates: {
                                             ...shippingData.internationalRates,
                                             asia: { ...shippingData.internationalRates.asia, days: Number(e.target.value) }
-                                        }
-                                    })}
-                                />
-                                </div>
-                                <div className="form-group">
-                                <label>Envío gratis desde</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={shippingData.internationalRates.asia.freeThreshold}
-                                    onChange={(e) => setShippingData({
-                                        ...shippingData,
-                                        internationalRates: {
-                                            ...shippingData.internationalRates,
-                                            asia: { ...shippingData.internationalRates.asia, freeThreshold: Number(e.target.value) }
                                         }
                                     })}
                                 />

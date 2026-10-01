@@ -8,6 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { validateStock } from '../services/cartService';
 import { crearPedido } from '../services/pedidoService';
 import CheckoutForm, { CheckoutData } from '../components/CheckoutForm';
+import { isInternationalCountry } from '../utils/shippingZone';
 import '../styles/pages/Cart.css';
 
 export function Cart() {
@@ -24,7 +25,7 @@ export function Cart() {
     method: 'standard' | 'express';
     cost: number;
   } | null>(null);
-
+  const isInternationalShipping = !!savedCheckoutData && isInternationalCountry(savedCheckoutData.data.pais);
 
   const handleInitiateCheckout = async () => {
     if (!isAuthenticated || !user) {
@@ -208,7 +209,11 @@ export function Cart() {
                 <div className="summary-row">
                    <span>{t('shippingCostLabel')}</span>
                    {savedCheckoutData ? (
-                     <span>{savedCheckoutData.cost === 0 ? t('freeLabel') : formatPrice(savedCheckoutData.cost)}</span>
+                     <span>
+                       {isInternationalShipping
+                         ? t('fromPrice').replace('{0}', formatPrice(savedCheckoutData.cost))
+                         : (savedCheckoutData.cost === 0 ? t('freeLabel') : formatPrice(savedCheckoutData.cost))}
+                     </span>
                    ) : (
                      <span style={{ fontSize: '0.9rem', color: '#64748b' }}>{t('calculatedAtCheckout') || 'Se calculará al finalizar'}</span>
                    )}
@@ -224,12 +229,17 @@ export function Cart() {
                 <div className="summary-row total">
                   <span>{t('cartTotal')}</span>
                   <span>
-                    {savedCheckoutData 
-                      ? formatPrice(total + savedCheckoutData.cost)
+                    {savedCheckoutData
+                      ? (isInternationalShipping
+                          ? t('fromPrice').replace('{0}', formatPrice(total + savedCheckoutData.cost))
+                          : formatPrice(total + savedCheckoutData.cost))
                       : `${formatPrice(total)} + ${t('shippingCostLabel')}`
                     }
                   </span>
                 </div>
+                {isInternationalShipping && (
+                  <p className="shipping-estimate-notice">{t('internationalShippingNotice')}</p>
+                )}
               </div>
 
               {savedCheckoutData && (

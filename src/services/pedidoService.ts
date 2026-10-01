@@ -545,6 +545,96 @@ export const actualizarPedido = async (
   }
 };
 
+// Misma regla que aplica create-payment-intent en el servidor (la protección real está allí):
+// pedidos web solo en "Pendiente de pago"; el resto mientras no estén pagados o cerrados.
+const ESTADOS_NO_PAGABLES: EstadoPedido[] = ['procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
+
+export const esPedidoPagable = (pedido: Pick<Pedido, 'tipo' | 'estado'>): boolean => {
+  if (pedido.tipo === 'interno') return pedido.estado === 'payment_pending';
+  return !!pedido.estado && !ESTADOS_NO_PAGABLES.includes(pedido.estado);
+};
+
+export interface ConfirmarPedidoConEnvioResult {
+  success: boolean;
+  error?: string;
+  pedido?: Pedido;
+  importeProductos?: number;
+  costeEnvioEstimado?: number;
+}
+
+/**
+ * Acepta un pedido web ("Por verificar" -> "Pendiente de pago") fijando el coste real del envío.
+ * total = round(Σ cantidad × precio_unitario, 2) + coste_envio. subtotal/iva (solo productos) no cambian.
+ */
+export const confirmarPedidoConEnvio = async (
+  pedidoId: number,
+  costeEnvio: number
+): Promise<ConfirmarPedidoConEnvioResult> => {
+  try {
+    if (!Number.isFinite(costeEnvio) || costeEnvio < 0 || Math.abs(Math.round(costeEnvio * 100) - costeEnvio * 100) > 1e-6) {
+      return { success: false, error: 'El coste de envío debe ser un importe de 0 o más, con dos decimales como máximo.' };
+    }
+
+    const pedido = await obtenerPedidoPorId(pedidoId);
+    if (!pedido) return { success: false, error: 'Pedido no encontrado.' };
+    if (pedido.tipo !== 'interno') return { success: false, error: 'Solo se pueden aceptar así los pedidos web.' };
+    if (pedido.estado !== 'pending_verification') return { success: false, error: 'El pedido ya fue aceptado o no está pendiente de verificación.' };
+
+    const importeProductos = Number(
+      (pedido.detalles || []).reduce((sum, d) => sum + d.cantidad * d.precio_unitario, 0).toFixed(2)
+    );
+    const costeEnvioEstimado = pedido.coste_envio || 0;
+    const total = Number((importeProductos + costeEnvio).toFixed(2));
+
+    // Filtrar también por estado evita aceptar dos veces el mismo pedido
+    const { data: actualizados, error: updateError } = await supabase
+      .from('pedidos')
+      .update({ coste_envio: costeEnvio, total, estado: 'payment_pending' as EstadoPedido })
+      .eq('id', pedidoId)
+      .eq('estado', 'pending_verification')
+      .select('id');
+
+    if (updateError) {
+      console.error('Error al aceptar pedido:', updateError);
+      return { success: false, error: updateError.message };
+    }
+    if (!actualizados || actualizados.length === 0) {
+      return { success: false, error: 'El pedido ya fue aceptado.' };
+    }
+
+    // Autor del ajuste (la política de auditoria solo admite el propio usuario)
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const { data: usuarioActual } = authUser
+      ? await supabase.from('usuarios').select('id').eq('auth_user_id', authUser.id).maybeSingle()
+      : { data: null };
+
+    const { error: auditoriaError } = await supabase
+      .from('auditoria')
+      .insert({
+        tabla: 'pedidos',
+        registro_id: pedidoId,
+        accion: 'UPDATE',
+        usuario_id: usuarioActual?.id ?? null,
+        datos_anteriores: { coste_envio: costeEnvioEstimado, total: pedido.total, estado: pedido.estado },
+        datos_nuevos: { coste_envio: costeEnvio, total, estado: 'payment_pending' }
+      });
+
+    if (auditoriaError) {
+      console.error('Error en auditoría:', auditoriaError);
+    }
+
+    return {
+      success: true,
+      pedido: { ...pedido, coste_envio: costeEnvio, total, estado: 'payment_pending' },
+      importeProductos,
+      costeEnvioEstimado
+    };
+  } catch (error) {
+    console.error('Error en confirmarPedidoConEnvio:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Error desconocido' };
+  }
+};
+
 export const confirmOrderAndDeductStock = async (pedidoId: number): Promise<{ success: boolean; error?: string }> => {
   try {
     const { data, error } = await supabase.rpc('confirm_order_and_deduct_stock', {

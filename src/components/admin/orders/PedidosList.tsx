@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Eye, Package, Filter, Building2, Check, XCircle, ChevronDown, Info, Trash2 } from 'lucide-react';
 import { Pedido, EstadoPedido, TipoPedido } from '../../../types';
 import { obtenerPedidos, actualizarEstadoPedido, obtenerEstadisticasPedidos, hardDeleteOrder } from '../../../services/pedidoService';
-import { sendPaymentReadyEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useAuth } from '../../../context/AuthContext';
 import { TableLoader } from '../../Loader';
@@ -10,6 +9,7 @@ import { Pagination } from '../../Pagination';
 import '../../../styles/components/PedidosList.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
+import { ConfirmarPedidoEnvioModal } from './ConfirmarPedidoEnvioModal';
 
 
 interface PedidosListProps {
@@ -66,6 +66,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
+  const [orderToConfirm, setOrderToConfirm] = useState<number | null>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
   const [hoveredOrder, setHoveredOrder] = useState<{ id: number; items: string[]; top: number; left: number } | null>(null);
 
@@ -180,55 +181,17 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
     }
   };
 
-  const handleConfirmarStock = async (pedidoId: number) => {
-    // Find the pedido to get user email
-    const pedido = pedidos.find(p => p.id === pedidoId);
-    
-    // Moves to 'payment_pending'
-    const result = await actualizarEstadoPedido(pedidoId, 'payment_pending');
-    if (result.success) {
-      // Send payment ready email
-      if (pedido?.usuario?.email) {
-        const paymentUrl = `${window.location.origin}/stripe-checkout?orderId=${pedidoId}`;
-        const emailResult = await sendPaymentReadyEmail(
-          pedidoId.toString(),
-          pedido.usuario.email,
-          pedido.usuario.nombre_completo || pedido.usuario.username || 'Cliente',
-          pedido.total || 0,
-          paymentUrl
-        );
-        
-        if (emailResult.success) {
-          setMessageModalConfig({
-            title: 'Stock Confirmado',
-            message: 'El pedido ha sido confirmado y se ha enviado un email al cliente.',
-            type: 'info'
-          });
-        } else {
-          setMessageModalConfig({
-            title: 'Stock Confirmado',
-            message: 'El pedido ha sido confirmado, pero hubo un error al enviar el email.',
-            type: 'info'
-          });
-        }
-      } else {
-        setMessageModalConfig({
-          title: 'Stock Confirmado',
-          message: 'El pedido ha sido confirmado y movido a Pendiente de Pago.',
-          type: 'info'
-        });
-      }
-      setShowMessageModal(true);
-      cargarPedidos();
-      cargarEstadisticas();
-    } else {
-      setMessageModalConfig({
-        title: 'Error',
-        message: result.error || 'Error al confirmar stock.',
-        type: 'error'
-      });
-      setShowMessageModal(true);
-    }
+  // Aceptar pedido web: abre el modal donde se fija el coste real del envío
+  const handleConfirmarStock = (pedidoId: number) => {
+    setOrderToConfirm(pedidoId);
+  };
+
+  const handlePedidoConfirmado = (message: string) => {
+    setOrderToConfirm(null);
+    setMessageModalConfig({ title: 'Stock Confirmado', message, type: 'info' });
+    setShowMessageModal(true);
+    cargarPedidos();
+    cargarEstadisticas();
   };
 
   const handleRechazarPedido = async (_reason: string) => {
@@ -684,6 +647,12 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
           itemsPerPageOptions={[10, 25, 50, 100]}
         />
       )}
+
+      <ConfirmarPedidoEnvioModal
+        pedidoId={orderToConfirm}
+        onClose={() => setOrderToConfirm(null)}
+        onConfirmed={handlePedidoConfirmado}
+      />
 
       {/* Message Modal Component */}
       <MessageModal

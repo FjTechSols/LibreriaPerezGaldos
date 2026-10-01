@@ -5,6 +5,7 @@ import { useSettings } from '../context/SettingsContext';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
 import { PhoneInput } from './PhoneInput';
+import { SUPPORTED_COUNTRIES, getShippingZone } from '../utils/shippingZone';
 import '../styles/components/CheckoutForm.css';
 
 export interface CheckoutData {
@@ -60,35 +61,8 @@ export default function CheckoutForm({
 
 
 
-  // Country Constants
-  const SUPPORTED_COUNTRIES = {
-    europe: ['Alemania', 'Austria', 'Bélgica', 'Dinamarca', 'Francia', 'Grecia', 'Holanda', 'Hungría', 'Irlanda', 'Italia', 'Noruega', 'Polonia', 'Portugal', 'Reino Unido', 'República Checa', 'Rumania', 'Suecia', 'Suiza'],
-    america: ['Argentina', 'Bolivia', 'Brasil', 'Canadá', 'Chile', 'Colombia', 'Costa Rica', 'Ecuador', 'Estados Unidos', 'México', 'Panamá', 'Paraguay', 'Perú', 'Uruguay', 'Venezuela'],
-    asia: ['China', 'Corea del Sur', 'Filipinas', 'Hong Kong', 'India', 'Indonesia', 'Japón', 'Malasia', 'Singapur', 'Tailandia', 'Taiwán', 'Vietnam']
-  };
-
-  // Helper to determine shipping zone
-  const getShippingZone = (country: string): 'national' | 'europe' | 'america' | 'asia' | 'other' => {
-    const lowerCountry = country.toLowerCase().trim();
-    
-    if (['españa', 'spain', 'es'].includes(lowerCountry)) return 'national';
-
-    // Check vs lists
-    if (SUPPORTED_COUNTRIES.europe.some(c => c.toLowerCase() === lowerCountry)) return 'europe';
-    if (SUPPORTED_COUNTRIES.america.some(c => c.toLowerCase() === lowerCountry)) return 'america';
-    if (SUPPORTED_COUNTRIES.asia.some(c => c.toLowerCase() === lowerCountry)) return 'asia';
-    
-    // Fallback for typed inputs (legacy support or if we allow custom)
-    // using the broader lists from previous step if we want to be robust, 
-    // but for the select dropdown, exact match is expected. 
-    // Let's keep the robust check just in case.
-    const europeBroad = ['francia', 'france', 'portugal', 'italia', 'italy', 'alemania', 'germany', 'reino unido', 'uk', 'united kingdom', 'bélgica', 'belgium', 'holanda', 'netherlands', 'países bajos', 'austria', 'dinamarca', 'denmark', 'suecia', 'sweden', 'noruega', 'norway', 'suiza', 'switzerland', 'irlanda', 'ireland', 'grecia', 'greece', 'polonia', 'poland', 'república checa', 'czech republic', 'hungría', 'hungary', 'rumania', 'romania'];
-    if (europeBroad.includes(lowerCountry)) return 'europe';
-
-    return 'other'; 
-  };
-
   const currentZone = getShippingZone(formData.pais);
+  const isInternational = currentZone !== 'national';
 
   // Calculate Shipping Cost based on rules
   const getShippingCost = () => {
@@ -107,15 +81,13 @@ export default function CheckoutForm({
               : settings.shipping.expressShippingCost;
         }
     } else {
-        // International logic
+        // Internacional: sin envío gratis. Es un coste "desde"; el administrador fija el real al aceptar el pedido.
         if (!settings.shipping.internationalRates) return 15.00; // Fallback
-        
-        // Use type assertion or access with default because interface might not be perfectly inferred everywhere yet
-        // In settingsService we defined internationalRates with europe, america, asia, other
+
         const rates = settings.shipping.internationalRates;
         const regionRate = rates[currentZone as keyof typeof rates] || rates.other;
 
-        return productsTotalWithTax >= regionRate.freeThreshold ? 0 : regionRate.cost;
+        return regionRate.cost;
     }
   };
 
@@ -451,7 +423,7 @@ export default function CheckoutForm({
                   const rates = settings.shipping.internationalRates;
                   const zone = getShippingZone(formData.pais);
                   // Default to 'other' if settings not loaded or zone weird
-                  const rate = rates ? (rates[zone as keyof typeof rates] || rates.other) : { cost: 15, days: 10, freeThreshold: 100 };
+                  const rate = rates ? (rates[zone as keyof typeof rates] || rates.other) : { cost: 15, days: 10 };
                   
                   const zoneNameMap: Record<string, string> = {
                       'europe': 'Europa',
@@ -461,22 +433,23 @@ export default function CheckoutForm({
                   };
 
                   return (
-                    <div 
-                        className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
-                        onClick={() => setShippingMethod('express')}
-                        >
-                        <div className="shipping-option-details">
-                            <div className="shipping-option-title">Envío Internacional ({zoneNameMap[zone] || 'General'})</div>
-                            <div className="shipping-option-subtitle">
-                            {rate.days} {t('workingDays')}
-                            </div>
-                        </div>
-                        <div className={`shipping-option-price ${(subtotal + iva) >= rate.freeThreshold ? 'free' : ''}`}>
-                            {(subtotal + iva) >= rate.freeThreshold 
-                            ? t('freeLabel') 
-                            : formatPrice(rate.cost)}
-                        </div>
-                    </div>
+                    <>
+                      <div
+                          className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
+                          onClick={() => setShippingMethod('express')}
+                          >
+                          <div className="shipping-option-details">
+                              <div className="shipping-option-title">Envío Internacional ({zoneNameMap[zone] || 'General'})</div>
+                              <div className="shipping-option-subtitle">
+                              {rate.days} {t('workingDays')}
+                              </div>
+                          </div>
+                          <div className="shipping-option-price">
+                              {t('fromPrice').replace('{0}', formatPrice(rate.cost))}
+                          </div>
+                      </div>
+                      <p className="shipping-estimate-notice">{t('internationalShippingNotice')}</p>
+                    </>
                   );
               })()
             )}
@@ -510,7 +483,11 @@ export default function CheckoutForm({
           </div>
           <div className="summary-line">
             <span>{t('shipping')} ({shippingMethod === 'standard' ? t('standardOption') : t('expressOption')}):</span>
-            <span>{shippingCost === 0 ? t('freeLabel') : formatPrice(shippingCost)}</span>
+            <span>
+              {isInternational
+                ? t('fromPrice').replace('{0}', formatPrice(shippingCost))
+                : (shippingCost === 0 ? t('freeLabel') : formatPrice(shippingCost))}
+            </span>
           </div>
           <div className="summary-line">
             <span>IVA ({settings.billing.taxRate}%):</span>

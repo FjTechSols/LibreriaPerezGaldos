@@ -2,12 +2,13 @@
 import { X, Truck, FileText, Printer, Edit2, ChevronDown, Tag, Eye, Package, User, Hash, Calendar, Check, XCircle, CreditCard, LinkIcon, MapPin, Edit, Save, Building2, Globe, Trash, Plus } from 'lucide-react';
 import { Pedido, EstadoPedido, Libro } from '../../../types';
 import { actualizarEstadoPedido, actualizarPedido, eliminarDetallePedido, actualizarDetallePedido, agregarDetallePedido, calcularTotalesPedido } from '../../../services/pedidoService';
-import { sendPaymentReadyEmail, sendPaymentConfirmedEmail, sendShippedEmail, sendCompletedEmail, sendStoreOrderProcessingEmail, sendStoreOrderShippedEmail } from '../../../services/emailService';
+import { sendPaymentConfirmedEmail, sendShippedEmail, sendCompletedEmail, sendStoreOrderProcessingEmail, sendStoreOrderShippedEmail } from '../../../services/emailService';
 import { useSettings } from '../../../context/SettingsContext';
 import { useInvoice } from '../../../context/InvoiceContext';
 import '../../../styles/components/PedidoDetalle.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
+import { ConfirmarPedidoEnvioModal } from './ConfirmarPedidoEnvioModal';
 import { EditClientModal } from '../clients/EditClientModal';
 import { AddProductToOrderModal } from './AddProductToOrderModal';
 import { GLSLabelModal, GLSLabelData } from './GLSLabelModal';
@@ -54,6 +55,9 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   
   // Add Book State
   const [showAddBook, setShowAddBook] = useState(false);
+
+  // Modal de aceptación con coste real del envío
+  const [confirmEnvioOpen, setConfirmEnvioOpen] = useState(false);
 
 
   // State for shipping info editing
@@ -442,50 +446,16 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
     setShowMessageModal(true);
   };
 
-  const handleConfirmarStock = async () => {
-    const result = await actualizarEstadoPedido(pedido.id, 'payment_pending');
-    if (result.success) {
-      // Send payment ready email
-      if (pedido.usuario?.email) {
-        const paymentUrl = `${window.location.origin}/stripe-checkout?orderId=${pedido.id}`;
-        const emailResult = await sendPaymentReadyEmail(
-          pedido.id.toString(),
-          pedido.usuario.email,
-          pedido.usuario.nombre_completo || pedido.usuario.username || 'Cliente',
-          pedido.total || 0,
-          paymentUrl
-        );
-        
-        if (emailResult.success) {
-          setMessageModalConfig({
-            title: 'Stock Confirmado',
-            message: 'El pedido ha sido confirmado y se ha enviado un email al cliente para que realice el pago.',
-            type: 'info'
-          });
-        } else {
-          setMessageModalConfig({
-            title: 'Stock Confirmado',
-            message: 'El pedido ha sido confirmado, pero hubo un error al enviar el email. Por favor, contacte al cliente manualmente.',
-            type: 'info'
-          });
-        }
-      } else {
-        setMessageModalConfig({
-          title: 'Stock Confirmado',
-          message: 'El pedido ha sido confirmado y movido a Pendiente de Pago.',
-          type: 'info'
-        });
-      }
-      setShowMessageModal(true);
-      onRefresh();
-    } else {
-      setMessageModalConfig({
-        title: 'Error',
-        message: result.error || 'Error al confirmar stock.',
-        type: 'error'
-      });
-      setShowMessageModal(true);
-    }
+  // Aceptar pedido web: abre el modal donde se fija el coste real del envío
+  const handleConfirmarStock = () => {
+    setConfirmEnvioOpen(true);
+  };
+
+  const handlePedidoConfirmado = (message: string) => {
+    setConfirmEnvioOpen(false);
+    setMessageModalConfig({ title: 'Stock Confirmado', message, type: 'info' });
+    setShowMessageModal(true);
+    onRefresh();
   };
 
   const handleRechazarPedido = async (_reason: string) => {
@@ -1867,6 +1837,12 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
               </>
           )}
         </div>
+
+        <ConfirmarPedidoEnvioModal
+          pedidoId={confirmEnvioOpen && pedido ? pedido.id : null}
+          onClose={() => setConfirmEnvioOpen(false)}
+          onConfirmed={handlePedidoConfirmado}
+        />
 
         {/* Message Modal Component */}
         <MessageModal
