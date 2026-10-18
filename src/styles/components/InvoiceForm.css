@@ -4,6 +4,48 @@
   gap: var(--spacing-6);
 }
 
+.invoice-form .invoice-bulk-codes textarea {
+  width: 100%;
+  box-sizing: border-box;
+  height: 160px;
+  min-height: 120px;
+  max-height: 220px;
+  overflow-y: auto;
+  resize: vertical;
+  font-family: ui-monospace, monospace;
+}
+
+.invoice-code-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.invoice-code-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.invoice-bulk-codes p {
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
+.invoice-bulk-codes .error-message {
+  color: var(--danger);
+}
+
+.invoice-code-issues {
+  max-height: 160px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  color: var(--text-main);
+  padding-left: 1.25rem;
+}
+
 .form-section {
   padding: var(--spacing-6);
   background: var(--bg-surface);

@@ -7,6 +7,8 @@ import { MessageModal } from '../../MessageModal'; // Import MessageModal
 import type { Cliente, Book } from '../../../types';
 import { PhoneInput } from '../../PhoneInput';
 import '../../../styles/components/InvoiceForm.css';
+import { InvoiceBulkCodes } from './InvoiceBulkCodes';
+import { mergeInvoiceItems } from '../../../utils/invoiceCodes';
 
 interface InvoiceFormProps {
   onSubmit: (data: InvoiceFormData) => void;
@@ -51,7 +53,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
   const autocompleteRef = useRef<HTMLDivElement>(null);
   
   // Manual Mode State
-  const [IsManualMode, setIsManualMode] = useState(false);
+  const [entryMode, setEntryMode] = useState<'search' | 'manual' | 'codes'>('search');
+  const IsManualMode = entryMode === 'manual';
+  const [importingCodes, setImportingCodes] = useState(false);
   const [manualItemDescription, setManualItemDescription] = useState('');
 
   useEffect(() => {
@@ -398,6 +402,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || importingCodes) return;
 
     if (validateForm()) {
       onSubmit(formData);
@@ -514,27 +519,42 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
         <h3>Agregar conceptos a la factura</h3>
         
         {/* Toggle between Search and Manual */}
-        <div className="flex gap-4 mb-4 border-b border-[var(--border-subtle)]">
+        <div className="invoice-entry-tabs flex flex-wrap gap-4 mb-4 border-b border-[var(--border-subtle)]">
             <button
                 type="button"
-                onClick={() => { setSelectedBookId(''); setSearchTerm(''); }} 
-                className={`px-4 py-2 font-bold border-b-2 transition-colors ${!selectedBookId && !searchTerm && IsManualMode ? 'text-[var(--text-muted)] border-transparent' : 'text-[var(--accent)] border-[var(--accent)]'}`}
-                style={{ opacity: IsManualMode ? 0.5 : 1 }}
+                onClick={() => { setEntryMode('search'); setSelectedBookId(''); setSearchTerm(''); }}
+                disabled={importingCodes || loading}
+                aria-pressed={entryMode === 'search'}
+                className={`px-4 py-2 font-bold border-b-2 transition-colors ${entryMode === 'search' ? 'text-[var(--accent)] border-[var(--accent)]' : 'text-[var(--text-muted)] border-transparent'}`}
             >
                 <Search size={16} className="inline mr-2" />
                 Buscar Libro
             </button>
             <button
                 type="button"
-                onClick={() => setIsManualMode(true)}
+                onClick={() => setEntryMode('manual')}
+                disabled={importingCodes || loading}
+                aria-pressed={IsManualMode}
                 className={`px-4 py-2 font-bold border-b-2 transition-colors ${IsManualMode ? 'text-[var(--accent)] border-[var(--accent)]' : 'text-[var(--text-muted)] border-transparent'}`}
             >
                 <FileText size={16} className="inline mr-2" />
                 Concepto Manual
             </button>
+            <button type="button" onClick={() => setEntryMode('codes')} disabled={importingCodes || loading}
+              aria-pressed={entryMode === 'codes'}
+              className={`px-4 py-2 font-bold border-b-2 transition-colors ${entryMode === 'codes' ? 'text-[var(--accent)] border-[var(--accent)]' : 'text-[var(--text-muted)] border-transparent'}`}>
+              Añadir por códigos
+            </button>
         </div>
 
-        {IsManualMode ? (
+        <div hidden={entryMode !== 'codes'}>
+          <InvoiceBulkCodes disabled={loading} onBusyChange={setImportingCodes}
+            onAdd={items => {
+              setFormData(prev => ({ ...prev, items: mergeInvoiceItems(prev.items, items) }));
+              setErrors(prev => ({ ...prev, items: '', item: '' }));
+            }} />
+        </div>
+        {entryMode === 'codes' ? null : IsManualMode ? (
             <div className="add-item-form manual-mode bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)]">
                  <div className="form-grid">
                     <div className="form-group full-width">
@@ -598,7 +618,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
-                                setIsManualMode(false);
+                                setEntryMode('search');
                             }}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -822,10 +842,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, onCancel, loading =
         </div>
 
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button type="button" onClick={onCancel} className="btn-cancel" disabled={loading}>
+          <button type="button" onClick={onCancel} className="btn-cancel" disabled={loading || importingCodes}>
             Cancelar
           </button>
-          <button type="submit" className="btn-submit" disabled={loading}>
+          <button type="submit" className="btn-submit" disabled={loading || importingCodes}>
             <FileText size={18} />
             {loading ? 'Creando factura...' : 'Crear factura'}
           </button>
