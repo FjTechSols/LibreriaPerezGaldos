@@ -81,7 +81,7 @@ export function Navbar() {
           mode="navigate" 
           variant="header"
           showSuggestions={true} 
-          placeholder="Buscar por título, autor, ISBN o código..."
+          placeholder="Buscar por título, autor, editorial, ISBN o código..."
           className="navbar-search"
         />
 

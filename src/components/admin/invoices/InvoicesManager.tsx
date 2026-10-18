@@ -97,87 +97,10 @@ export function InvoicesManager() {
   };
 
   const generatePDF = async (invoice: Invoice, language: 'es' | 'en' = 'es') => {
-      // Logic copied from AdminDashboard.tsx
       try {
-        const { jsPDF } = await import('jspdf');
-        const doc = new jsPDF();
-        
-        const company = settings?.company || {
-            name: 'Librería', 
-            address: '', 
-            taxId: '', 
-            phone: '', 
-            email: '',
-            logo: ''
-        };
-
-        const lang = language;
-        const t = {
-          es: { title: 'FACTURA', date: 'Fecha', status: 'Estado', billTo: 'FACTURAR A:', nif: 'NIF', description: 'Descripción', qty: 'Cant.', unitPrice: 'Precio Unit.', total: 'Total', subtotal: 'Subtotal', tax: 'IVA', totalUpper: 'TOTAL' },
-          en: { title: 'INVOICE', date: 'Date', status: 'Status', billTo: 'BILL TO:', nif: 'VAT ID', description: 'Description', qty: 'Qty', unitPrice: 'Unit Price', total: 'Total', subtotal: 'Subtotal', tax: 'VAT', totalUpper: 'TOTAL' }
-        }[lang];
-  
-        // Add logo if available
-        if (company.logo) {
-          try {
-            doc.addImage(company.logo, 'PNG', 15, 10, 25, 25);
-          } catch (error) {
-            console.error('Error adding logo to PDF:', error);
-          }
-        }
-
-        doc.setFontSize(20);
-        doc.text(t.title, 105, 20, { align: 'center' });
-  
-        doc.setFontSize(10);
-        doc.text(company.name, 20, 40);
-        doc.text(company.address, 20, 45);
-        doc.text(`${t.nif}: ${company.taxId}`, 20, 50);
-        doc.text(`Tel: ${company.phone}`, 20, 55);
-        doc.text(`Email: ${company.email}`, 20, 60);
-  
-        doc.setFontSize(12);
-        doc.text(`N° ${invoice.invoice_number}`, 150, 40);
-        doc.setFontSize(10);
-        doc.text(`${t.date}: ${new Date(invoice.issue_date).toLocaleDateString(lang === 'en' ? 'en-GB' : 'es-ES')}`, 150, 45);
-        doc.text(`${t.status}: ${invoice.status}`, 150, 50);
-  
-        doc.text(t.billTo, 20, 75);
-        doc.text(invoice.customer_name, 20, 80);
-        doc.text(invoice.customer_address, 20, 85);
-        doc.text(`${t.nif}: ${invoice.customer_nif}`, 20, 90);
-  
-        let y = 105;
-        doc.setFontSize(10);
-        doc.text(t.description, 20, y);
-        doc.text(t.qty, 100, y);
-        doc.text(t.unitPrice, 125, y);
-        doc.text(t.total, 170, y);
-        doc.line(20, y + 2, 190, y + 2);
-  
-        y += 8;
-        if (invoice.items) {
-          invoice.items.forEach(item => {
-            doc.text(item.book_title, 20, y);
-            doc.text(item.quantity.toString(), 100, y);
-            doc.text(`${(item.unit_price || 0).toFixed(2)} €`, 125, y);
-            doc.text(`${(item.line_total || 0).toFixed(2)} €`, 170, y);
-            y += 7;
-          });
-        }
-  
-        y += 10;
-        doc.text(`${t.subtotal}: ${(invoice.subtotal || 0).toFixed(2)} €`, 150, y);
-        y += 7;
-        if ((invoice.tax_rate || 0) > 0) {
-            doc.text(`${t.tax} (${invoice.tax_rate}%): ${(invoice.tax_amount || 0).toFixed(2)} €`, 150, y);
-            y += 7;
-        }
-        
-        doc.setFontSize(12);
-        doc.text(`${t.totalUpper}: ${(invoice.total || 0).toFixed(2)} €`, 150, y);
-  
-        doc.save(`${t.title}-${invoice.invoice_number}.pdf`);
+        const { createAdminInvoicePdf } = await import('../../../utils/adminInvoicePdf');
+        const doc = createAdminInvoicePdf(invoice, settings.company, language);
+        doc.save(`${language === 'en' ? 'INVOICE' : 'FACTURA'}-${invoice.invoice_number}.pdf`);
       } catch (error) {
         console.error('Error generating PDF:', error);
         showModal('Error', 'Error al generar el PDF', 'error');

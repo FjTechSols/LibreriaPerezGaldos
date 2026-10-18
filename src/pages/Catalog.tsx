@@ -181,7 +181,7 @@ export function Catalog() {
 
         <div className="search-section">
            <SearchBar 
-            placeholder="Buscar por título, autor, categoría, ISBN o código..."
+            placeholder="Buscar por título, autor, editorial, categoría, ISBN o código..."
           />
         </div>
 
