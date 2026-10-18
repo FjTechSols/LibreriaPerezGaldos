@@ -537,8 +537,8 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                             top: '100%', 
                             right: 0, 
                             marginTop: '4px', 
-                            backgroundColor: 'white', 
-                            border: '1px solid #e2e8f0', 
+                            backgroundColor: 'var(--bg-surface)',
+                            border: '1px solid var(--border-subtle)',
                             borderRadius: '6px', 
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', 
                             zIndex: 50, 
@@ -554,8 +554,8 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                                     width: '100%', 
                                     textAlign: 'left', 
                                     padding: '10px 12px', 
-                                    backgroundColor: '#10b981', 
-                                    color: 'white', 
+                                    backgroundColor: 'var(--bg-surface)',
+                                    color: 'var(--text-main)',
                                     border: 'none', 
                                     cursor: 'pointer', 
                                     display: 'flex', 
@@ -564,7 +564,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                                     fontSize: '0.875rem', 
                                     fontWeight: 500
                                 }}
-                                className="hover:opacity-90"
+                                className="pedido-action-option"
                             >
                                 <Check size={16} /> Confirmar
                             </button>
@@ -578,8 +578,8 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                                     width: '100%', 
                                     textAlign: 'left', 
                                     padding: '10px 12px', 
-                                    backgroundColor: '#ef4444', 
-                                    color: 'white', 
+                                    backgroundColor: 'var(--bg-surface)',
+                                    color: 'var(--text-main)',
                                     border: 'none', 
                                     cursor: 'pointer', 
                                     display: 'flex', 
@@ -587,13 +587,13 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                                     gap: '8px', 
                                     fontSize: '0.875rem', 
                                     fontWeight: 500,
-                                    borderTop: '1px solid rgba(255,255,255,0.1)'
+                                    borderTop: '1px solid var(--border-subtle)'
                                 }}
-                                className="hover:opacity-90"
+                                className="pedido-action-option"
                             >
                                 <XCircle size={16} /> Rechazar
                             </button>
-                            <button className="w-full text-left px-3 py-3 text-sm text-red-600 dark:text-red-400"
+                            <button className="pedido-action-option w-full text-left px-3 py-3 text-sm"
                               onClick={() => { setOrderWithoutStock(pedido.id); setOpenActionMenuId(null); }}>
                               Cancelar por falta de stock
                             </button>

@@ -112,22 +112,29 @@
 .estado-selector-detalle {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #667eea;
+  border: 2px solid var(--border-subtle);
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 600;
-  background: white;
+  background: var(--bg-surface);
+  color: var(--text-main);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .estado-selector-detalle:hover {
-  background: #f0f4ff;
+  background: var(--bg-hover);
+}
+
+.estado-selector-detalle option {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
 }
 
 .estado-selector-detalle:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .detalles-section {
@@ -428,16 +435,6 @@
 
 .dark-mode .info-secundario {
   color: #94a3b8;
-}
-
-.dark-mode .estado-selector-detalle {
-  background: #1e293b;
-  border-color: #4f46e5;
-  color: #f1f5f9;
-}
-
-.dark-mode .estado-selector-detalle:hover {
-  background: #312e81;
 }
 
 .dark-mode .detalles-header h3 {

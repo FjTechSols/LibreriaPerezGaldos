@@ -383,56 +383,28 @@
   color: var(--text-main);
 }
 
-.estado-selector.naranja {
-  background: var(--bg-warning-subtle);
-  color: var(--warning);
-  border-color: var(--border-warning);
+/* Native options must not inherit status badge colors. */
+.estado-selector option {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
 }
 
-.estado-selector.azul-claro {
-  background: var(--bg-accent-subtle);
-  color: var(--accent);
-  border-color: var(--border-accent);
+.estado-selector:hover:not(:disabled) {
+  background: var(--bg-hover);
 }
 
-.estado-selector.amarillo {
-  background: var(--bg-warning-subtle);
-  color: var(--warning);
-  border-color: var(--border-warning);
+.estado-selector:disabled {
+  cursor: default;
 }
 
-.estado-selector.azul {
-  background: var(--bg-accent-subtle);
-  color: var(--accent);
-  border-color: var(--border-accent);
+.pedido-action-option {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
 }
 
-.estado-selector.morado {
-  background: var(--bg-accent-subtle);
-  color: var(--accent);
-  border-color: var(--border-accent);
-}
-
-.estado-selector.verde {
-  background: var(--bg-success-subtle);
-  color: var(--success);
-  border-color: var(--border-success);
-}
-
-.estado-selector.rojo {
-  background: var(--bg-danger-subtle);
-  color: var(--danger);
-  border-color: var(--danger);
-}
-
-.estado-selector.gris {
-  background: var(--bg-muted);
-  color: var(--text-muted);
-  border-color: var(--border-muted);
-}
-
-.estado-selector:hover {
-  opacity: 0.8;
+.pedido-action-option:hover,
+.pedido-action-option:focus-visible {
+  background-color: var(--bg-hover) !important;
 }
 
 .estado-selector:focus {
