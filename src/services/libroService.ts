@@ -235,6 +235,7 @@ export interface LibroFilters {
    descripcion?: string;
    legacy_id?: string;
    forceCount?: boolean;
+   throwOnError?: boolean;
  }
 
 // Helper to get the next lexicographical string for range queries
@@ -467,24 +468,30 @@ export const obtenerLibros = async (
     // --- FIN BLOQUE RPC ---
 
     // --- BLOQUE RPC BÚSQUEDA AVANZADA (unaccent para título, autor, descripción) ---
-    const hasAdvancedText = !!(filters?.titulo || filters?.autor || filters?.descripcion);
+    const hasAdvancedText = !!(filters?.titulo || filters?.autor || filters?.descripcion || filters?.publisher || filters?.isbn || filters?.legacy_id);
     if (hasAdvancedText) {
         // Resolver categoría a ID si aplica
         let advCatId: number | null = null;
         if (filters!.category && filters!.category !== 'Todos') {
-            const { data: catData } = await supabase
+            const { data: catData, error: catError } = await supabase
                 .from('categorias')
                 .select('id')
                 .ilike('nombre', filters!.category)
                 .maybeSingle();
-            if (catData) advCatId = catData.id;
+            if (catError && filters!.throwOnError) throw catError;
+            if (!catData || catError) return { data: [], count: 0 };
+            advCatId = catData.id;
         }
 
-        let advSort = 'newest';
+        let advSort = filters!.sortOrder === 'asc' ? 'id_asc' : 'id_desc';
         if (filters!.sortBy === 'price') {
             advSort = filters!.sortOrder === 'desc' ? 'price_desc' : 'price_asc';
         } else if (filters!.sortBy === 'title') {
-            advSort = 'title';
+            advSort = filters!.sortOrder === 'desc' ? 'title_desc' : 'title';
+        } else if (filters!.sortBy === 'newest') {
+            advSort = filters!.sortOrder === 'asc' ? 'oldest' : 'newest';
+        } else if (filters!.sortBy === 'updated') {
+            advSort = filters!.sortOrder === 'asc' ? 'updated_asc' : 'updated_desc';
         }
 
         const advOffset = (page - 1) * itemsPerPage;
@@ -495,8 +502,8 @@ export const obtenerLibros = async (
             p_isbn:         filters!.isbn        || null,
             p_publisher:    filters!.publisher   || null,
             p_category_id:  advCatId,
-            p_min_price:    filters!.minPrice    || null,
-            p_max_price:    (filters!.maxPrice && filters!.maxPrice < 1000000) ? filters!.maxPrice : null,
+            p_min_price:    filters!.minPrice    ?? null,
+            p_max_price:    (filters!.maxPrice !== undefined && filters!.maxPrice < 1000000) ? filters!.maxPrice : null,
             p_stock_status: filters!.availability === 'inStock' ? 'in_stock' : (filters!.availability === 'outOfStock' ? 'out_of_stock' : 'all'),
             p_min_pages:    filters!.minPages    || null,
             p_max_pages:    filters!.maxPages    || null,
@@ -505,6 +512,12 @@ export const obtenerLibros = async (
             p_language:     (filters!.language && filters!.language !== 'Todos') ? filters!.language : null,
             p_condition:    filters!.condition   || null,
             p_location:     filters!.location    || null,
+            p_legacy_id:    filters!.legacy_id   || null,
+            p_featured:     filters!.featured    || false,
+            p_is_new:       filters!.isNew       || false,
+            p_is_on_sale:   filters!.isOnSale    || false,
+            p_is_out_of_print: filters!.isOutOfPrint || false,
+            p_cover_status: filters!.coverStatus || 'all',
             p_is_visible:   true,
             p_sort_by:      advSort,
             p_limit:        itemsPerPage,
@@ -513,6 +526,7 @@ export const obtenerLibros = async (
 
         if (advError) {
             console.error('Error en search_books_advanced RPC:', advError);
+            if (filters!.throwOnError) throw advError;
             return { data: [], count: 0 };
         }
 
@@ -551,11 +565,7 @@ export const obtenerLibros = async (
                 return applyDiscountsToBookWithId(baseBook, activeDiscounts, item.categoria_id);
             });
 
-            let estimatedCount = page * itemsPerPage;
-            if (advData.length === itemsPerPage) estimatedCount += 100;
-            else estimatedCount = (page - 1) * itemsPerPage + advData.length;
-
-            return { data: mappedBooks, count: estimatedCount };
+            return { data: mappedBooks, count: Number(advData[0]?.total_count || 0) };
         }
     }
     // --- FIN BLOQUE RPC BÚSQUEDA AVANZADA ---
@@ -879,6 +889,7 @@ export const obtenerLibros = async (
      };
   } catch (error) {
     console.error('Error inesperado al obtener libros:', error);
+    if (filters?.throwOnError) throw error;
     return { data: [], count: 0 };
   }
 };

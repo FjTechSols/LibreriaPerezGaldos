@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
 import { AdvancedSearchCriteria } from '../types';
 
@@ -6,12 +6,14 @@ interface AdvancedSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSearch: (criteria: AdvancedSearchCriteria) => void;
+  initialCriteria?: AdvancedSearchCriteria;
 }
 
 const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
   isOpen,
   onClose,
-  onSearch
+  onSearch,
+  initialCriteria
 }) => {
   const [criteria, setCriteria] = useState<AdvancedSearchCriteria>({
     titulo: '',
@@ -20,6 +22,9 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
     isbn: '',
     descripcion: ''
   });
+  useEffect(() => {
+    if (isOpen) setCriteria({ titulo: '', autor: '', editorial: '', isbn: '', descripcion: '', legacy_id: '', ...initialCriteria });
+  }, [isOpen, initialCriteria]);
 
   const handleInputChange = (field: keyof AdvancedSearchCriteria, value: string) => {
     setCriteria(prev => ({
@@ -43,7 +48,8 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+      e.preventDefault();
       handleSearch();
     }
   };

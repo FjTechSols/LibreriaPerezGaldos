@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Search, X } from 'lucide-react';
 import { Book, Ubicacion } from '../../../types';
 import { supabase } from '../../../lib/supabase';
@@ -45,6 +45,7 @@ export function BooksManager() {
   // State
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchError, setSearchError] = useState(false);
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -109,7 +110,7 @@ export function BooksManager() {
   const [localSearchTerm, setLocalSearchTerm] = useState('');
   // const [suggestions, setSuggestions] = useState<string[]>([]); // Removed duplicate declaration
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilterState] = useState({
     search: '', // Synced with localSearchTerm when getting results
     category: 'Todos',
     minPrice: '',
@@ -129,12 +130,21 @@ export function BooksManager() {
     titulo: '',
     autor: '',
     descripcion: '',
+    legacy_id: '',
     searchMode: false,
     language: 'Todos',
     sortBy: 'default', // 'default' allows backend choice (legacy_id)
     sortOrder: 'desc' // Default to descending (Highest code first)
   });
+  const setFilters = (update: Parameters<typeof setFilterState>[0]) => {
+    setCurrentPage(1);
+    setFilterState(update);
+  };
   const [advancedMode, setAdvancedMode] = useState(false);
+  const advancedCriteria = useMemo(() => ({
+    titulo: filters.titulo, autor: filters.autor, editorial: filters.publisher,
+    isbn: filters.isbn, descripcion: filters.descripcion, legacy_id: filters.legacy_id,
+  }), [filters.titulo, filters.autor, filters.publisher, filters.isbn, filters.descripcion, filters.legacy_id]);
 
   // Initial Load
   useEffect(() => {
@@ -178,8 +188,10 @@ export function BooksManager() {
 
   // Load Books
   useEffect(() => {
+    let cancelled = false;
     async function fetchBooks() {
       setLoading(true);
+      setSearchError(false);
       try {
          const queryFilters = {
           search: filters.search, // Use the filter state which is updated on search click/enter
@@ -201,14 +213,17 @@ export function BooksManager() {
           titulo: filters.titulo || undefined,
           autor: filters.autor || undefined,
           descripcion: filters.descripcion || undefined,
+          legacy_id: filters.legacy_id || undefined,
           searchMode: filters.searchMode ? 'full' as const : 'default' as const,
           language: filters.language !== 'Todos' ? filters.language : undefined,
           sortBy: (filters.sortBy as any) || undefined,
           sortOrder: (filters.sortOrder as any) || undefined,
-          forceCount: true
+          forceCount: true,
+          throwOnError: true
         };
 
         const { data, count } = await obtenerLibros(currentPage, itemsPerPage, queryFilters);
+        if (cancelled) return;
 
         setBooks(data);
         setFilteredCount(count);
@@ -245,17 +260,24 @@ export function BooksManager() {
                  }
              }
 
-             setSpellCheckSuggestions(newSuggestions);
+             if (!cancelled) setSpellCheckSuggestions(newSuggestions);
         } else {
              setSpellCheckSuggestions([]);
         }
       } catch (error) {
         console.error('Error fetching books:', error);
+        if (!cancelled) {
+          setSearchError(true);
+          setBooks([]);
+          setFilteredCount(0);
+          setSpellCheckSuggestions([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     fetchBooks();
+    return () => { cancelled = true; };
   }, [
     currentPage, 
     itemsPerPage, 
@@ -283,6 +305,8 @@ export function BooksManager() {
 
 
   const handleAdvancedSearch = (criteria: AdvancedSearchCriteria) => {
+    setLocalSearchTerm('');
+    setShowSuggestions(false);
     setFilters(prev => ({
       ...prev,
       search: '', // Clear simple search when doing advanced search
@@ -574,7 +598,7 @@ export function BooksManager() {
      );
   };
 
-  const totalPages = Math.ceil((filters.search || filters.category !== 'Todos' || filters.stockStatus !== 'all' ? filteredCount : totalBooks) / itemsPerPage);
+  const totalPages = Math.ceil(filteredCount / itemsPerPage);
 
   const handleStockUpdate = (book: Book, amount: number) => {
     const action = amount > 0 ? "Aumentar" : "Reducir";
@@ -701,7 +725,8 @@ export function BooksManager() {
                   filters.startYear !== '' ||
                   filters.endYear !== '' ||
                   filters.isbn !== '' ||
-                  filters.publisher !== '';
+                  filters.publisher !== '' || filters.titulo !== '' || filters.autor !== '' ||
+                  filters.descripcion !== '' || filters.legacy_id !== '';
 
                 return !hasActiveFilters
                   ? `Total: ${totalBooks} libros`
@@ -849,6 +874,7 @@ export function BooksManager() {
                           titulo: '',
                           autor: '',
                           descripcion: '',
+                          legacy_id: '',
                           searchMode: false,
                           language: 'Todos',
                           sortBy: 'default',
@@ -1083,6 +1109,10 @@ export function BooksManager() {
              <div className="flex justify-center items-center py-20">
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
              </div>
+          ) : searchError ? (
+            <div role="alert" className="py-12 text-center text-red-600 dark:text-red-400">
+              No se pudo realizar la búsqueda. Inténtalo de nuevo; si persiste, revisa la conexión.
+            </div>
           ) : books.length > 0 ? (
              viewMode === 'grid' ? (
              /* Grid View (Original) */
@@ -1137,6 +1167,7 @@ export function BooksManager() {
                        titulo: '',
                        autor: '',
                        descripcion: '',
+                       legacy_id: '',
                        searchMode: false,
                        language: 'Todos',
                        sortBy: 'default',
@@ -1167,7 +1198,7 @@ export function BooksManager() {
           itemsPerPage={itemsPerPage}
           totalItems={filteredCount}
           onPageChange={setCurrentPage}
-          onItemsPerPageChange={setItemsPerPage}
+          onItemsPerPageChange={(value) => { setCurrentPage(1); setItemsPerPage(value); }}
           showItemsPerPageSelector={true}
        />
 
@@ -1250,6 +1281,7 @@ export function BooksManager() {
           isOpen={isAdvancedSearchOpen}
           onClose={() => setIsAdvancedSearchOpen(false)}
           onSearch={handleAdvancedSearch}
+          initialCriteria={advancedCriteria}
         />
         <ExpressOrderModal 
           isOpen={isExpressOrderOpen}
