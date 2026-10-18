@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Estados en los que un pedido NO web ya no se puede pagar (pagado o cerrado)
-const NON_PAYABLE_STATES = ["procesando", "enviado", "completado", "cancelado", "devolucion"];
+const NON_PAYABLE_STATES = ["procesando", "enviado", "completado", "cancelado", "devolucion", "sin_stock"];
 const SUPER_ADMIN_ROLE_ID = 1;
 // La moneda la fija el servidor: si la eligiera el cliente, podría pagar el mismo número de unidades en una moneda más barata
 const CURRENCY = "eur";

@@ -1,4 +1,4 @@
-export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion' | 'pending_verification' | 'payment_pending';
+export type EstadoPedido = 'pendiente' | 'procesando' | 'enviado' | 'completado' | 'cancelado' | 'devolucion' | 'pending_verification' | 'payment_pending' | 'sin_stock';
 export type TipoPedido = 'interno' | 'iberlibro' | 'uniliber' | 'perez_galdos' | 'galeon' | 'express' | 'abebooks' | 'flash';
 export type MetodoPago = 'tarjeta' | 'paypal' | 'bizum' | 'reembolso' | 'efectivo';
 export type Transportista = 'ASM' | 'GLS' | 'Envialia' | 'Correos' | 'Otro' | 'otro';

@@ -9,6 +9,7 @@ import '../../../styles/components/PedidoDetalle.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
 import { ConfirmarPedidoEnvioModal } from './ConfirmarPedidoEnvioModal';
+import { CancelarSinStockModal } from './CancelarSinStockModal';
 import { EditClientModal } from '../clients/EditClientModal';
 import { AddProductToOrderModal } from './AddProductToOrderModal';
 import { GLSLabelModal, GLSLabelData } from './GLSLabelModal';
@@ -23,7 +24,7 @@ interface PedidoDetalleProps {
   onRefresh: () => void;
 }
 
-const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
+const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion', 'sin_stock'];
 
 const ESTADO_LABELS: Record<EstadoPedido, string> = {
   pending_verification: 'Por Verificar',
@@ -33,6 +34,7 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
   enviado: 'Enviado',
   completado: 'Completado',
   cancelado: 'Cancelado',
+  sin_stock: 'Cancelado por falta de stock',
   devolucion: 'Devolución'
 };
 
@@ -79,6 +81,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
 
   // State for rejection modal
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [cancelWithoutStockOpen, setCancelWithoutStockOpen] = useState(false);
 
   // State for Edit Client Modal
   const [showEditClientModal, setShowEditClientModal] = useState(false);
@@ -112,6 +115,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
   
   // Handlers placeholder (I'll add full logic in next tool call)
   const handleCambiarEstado = async (nuevoEstado: EstadoPedido) => {
+    if (nuevoEstado === 'sin_stock') { setCancelWithoutStockOpen(true); return; }
     // Validation for Internal Orders when marking as Shipped
     if (pedido.tipo === 'interno' && nuevoEstado === 'enviado') {
         if (!transportista.trim() || !tracking.trim()) {
@@ -1150,7 +1154,10 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                       }}
                     >
                       <XCircle size={16} />
-                      Rechazar - Stock No Disponible
+                      Rechazar pedido
+                    </button>
+                    <button className="btn-secondary" onClick={() => setCancelWithoutStockOpen(true)}>
+                      Cancelar por falta de stock
                     </button>
                   </div>
                 ) : (
@@ -1168,6 +1175,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                         return val;
                     })()}
                     onChange={(e) => handleCambiarEstado(e.target.value as EstadoPedido)}
+                    disabled={pedido.estado === 'sin_stock'}
                     className="estado-selector-detalle"
                   >
                     {ESTADOS.filter(estado => {
@@ -1177,7 +1185,7 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
                       return estado !== 'pending_verification' && estado !== 'payment_pending';
                     }).map(estado => (
                       <option key={estado} value={estado}>
-                        {ESTADO_LABELS[estado]}
+                        {estado === 'sin_stock' && pedido.estado !== 'sin_stock' ? 'Cancelar por falta de stock' : ESTADO_LABELS[estado]}
                       </option>
                     ))}
                   </select>
@@ -1886,6 +1894,8 @@ export default function PedidoDetalle({ pedido, isOpen, onClose, onRefresh }: Pe
         />
 
         {/* Invoice Preview Modal */}
+        <CancelarSinStockModal pedidoId={cancelWithoutStockOpen ? pedido.id : null} onClose={() => setCancelWithoutStockOpen(false)}
+          onCancelled={() => { setCancelWithoutStockOpen(false); onRefresh(); onClose(); }} />
         <InvoicePreviewModal
           isOpen={showInvoicePreviewModal}
           onClose={() => setShowInvoicePreviewModal(false)}

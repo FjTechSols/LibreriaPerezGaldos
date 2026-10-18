@@ -122,7 +122,8 @@ Deno.serve(async (req: Request) => {
               observaciones: `Pago fallido: ${paymentIntent.last_payment_error?.message || "Error desconocido"}`,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", pedidoId);
+            .eq("id", pedidoId)
+            .neq("estado", "sin_stock");
 
           console.log(`Pago fallido para pedido ${pedidoId}`);
         }

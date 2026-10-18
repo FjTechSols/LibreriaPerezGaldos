@@ -419,11 +419,29 @@ export const restoreStockForce = async (pedidoId: number): Promise<{ success: bo
   }
 };
 
+export const cancelarPedidoSinStock = async (
+  pedidoId: number, librosSinStock: number[]
+): Promise<{ success: boolean; error?: string }> => {
+  if (librosSinStock.length === 0) return { success: false, error: 'Selecciona al menos un libro sin stock.' };
+  try {
+    const { data, error } = await supabase.rpc('cancel_order_out_of_stock', {
+      p_pedido_id: pedidoId, p_libros_sin_stock: [...new Set(librosSinStock)],
+    });
+    if (error) throw error;
+    if (data !== true) return { success: false, error: 'No se pudo cancelar el pedido por falta de stock.' };
+    await checkAndSyncAbeBooksStock(pedidoId);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : (error as { message?: string })?.message || 'Error al cancelar por falta de stock.' };
+  }
+};
+
 export const actualizarEstadoPedido = async (
   id: number,
   estado: EstadoPedido
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+      if (estado === 'sin_stock') return { success: false, error: 'Selecciona los libros que faltan mediante Cancelar por falta de stock.' };
       const { data: currentOrder } = await supabase
           .from('pedidos')
           .select('estado, tipo')
@@ -431,6 +449,9 @@ export const actualizarEstadoPedido = async (
           .single();
       
       if (!currentOrder) throw new Error("Pedido no encontrado");
+      if (currentOrder.estado === 'sin_stock') {
+          return { success: false, error: 'El pedido está cancelado por falta de stock. Para retomarlo, comprueba el inventario y crea un nuevo pedido.' };
+      }
 
       // LOGIC 1: Unified Stock Deduction
       // Deduct stock when order moves to detailed 'committed' states (Processing, Shipped, Completed)
@@ -547,7 +568,7 @@ export const actualizarPedido = async (
 
 // Misma regla que aplica create-payment-intent en el servidor (la protección real está allí):
 // pedidos web solo en "Pendiente de pago"; el resto mientras no estén pagados o cerrados.
-const ESTADOS_NO_PAGABLES: EstadoPedido[] = ['procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
+const ESTADOS_NO_PAGABLES: EstadoPedido[] = ['procesando', 'enviado', 'completado', 'cancelado', 'devolucion', 'sin_stock'];
 
 export const esPedidoPagable = (pedido: Pick<Pedido, 'tipo' | 'estado'>): boolean => {
   if (pedido.tipo === 'interno') return pedido.estado === 'payment_pending';
@@ -828,10 +849,10 @@ export const obtenerEstadisticasPedidos = async () => {
     procesando: pedidos.filter(p => p.estado === 'procesando').length,
     enviados: pedidos.filter(p => p.estado === 'enviado').length,
     completados: pedidos.filter(p => p.estado === 'completado').length,
-    cancelados: pedidos.filter(p => p.estado === 'cancelado').length,
+    cancelados: pedidos.filter(p => p.estado === 'cancelado' || p.estado === 'sin_stock').length,
     devoluciones: pedidos.filter(p => p.estado === 'devolucion').length,
     totalVentas: pedidos
-      .filter(p => p.estado !== 'cancelado' && p.estado !== 'devolucion')
+      .filter(p => p.estado !== 'cancelado' && p.estado !== 'devolucion' && p.estado !== 'sin_stock')
       .reduce((sum, p) => sum + (p.total || 0), 0)
   };
 

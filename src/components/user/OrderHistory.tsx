@@ -51,6 +51,7 @@ export function OrderHistory() {
       enviado: { class: 'status-shipped', label: 'Enviado' },
       entregado: { class: 'status-delivered', label: 'Entregado' },
       cancelado: { class: 'status-canceled', label: 'Cancelado' },
+      sin_stock: { class: 'status-canceled', label: 'Cancelado por falta de stock' },
       devolucion: { class: 'status-canceled', label: 'Devolución' },
       pending_verification: { class: 'status-pending', label: 'Pendiente de Verificación' },
       payment_pending: { class: 'status-processing', label: 'Pendiente de Pago' }
@@ -73,6 +74,7 @@ export function OrderHistory() {
       'enviado': t('statusShipped'),
       'entregado': t('statusDelivered'),
       'cancelado': t('statusCancelled'),
+      'sin_stock': 'Cancelado por falta de stock',
       'pending_verification': 'Pendiente de Verificación',
       'payment_pending': 'Pendiente de Pago',
     };

@@ -10,6 +10,7 @@ import '../../../styles/components/PedidosList.css';
 import { MessageModal } from '../../MessageModal';
 import { RejectionModal } from './RejectionModal';
 import { ConfirmarPedidoEnvioModal } from './ConfirmarPedidoEnvioModal';
+import { CancelarSinStockModal } from './CancelarSinStockModal';
 
 
 interface PedidosListProps {
@@ -17,7 +18,7 @@ interface PedidosListProps {
   refreshTrigger?: number;
 }
 
-const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion'];
+const ESTADOS: EstadoPedido[] = ['pending_verification', 'payment_pending', 'pendiente', 'procesando', 'enviado', 'completado', 'cancelado', 'devolucion', 'sin_stock'];
 
 const ESTADO_COLORES: Record<EstadoPedido, string> = {
   pending_verification: 'naranja',
@@ -27,6 +28,7 @@ const ESTADO_COLORES: Record<EstadoPedido, string> = {
   enviado: 'morado',
   completado: 'verde',
   cancelado: 'rojo',
+  sin_stock: 'rojo',
   devolucion: 'gris'
 };
 
@@ -38,6 +40,7 @@ const ESTADO_LABELS: Record<EstadoPedido, string> = {
   enviado: 'Enviado',
   completado: 'Completado',
   cancelado: 'Cancelado',
+  sin_stock: 'Cancelado por falta de stock',
   devolucion: 'Devolución'
 };
 
@@ -67,6 +70,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [orderToReject, setOrderToReject] = useState<number | null>(null);
   const [orderToConfirm, setOrderToConfirm] = useState<number | null>(null);
+  const [orderWithoutStock, setOrderWithoutStock] = useState<number | null>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
   const [hoveredOrder, setHoveredOrder] = useState<{ id: number; items: string[]; top: number; left: number } | null>(null);
 
@@ -166,6 +170,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
   };
 
   const handleCambiarEstado = async (pedidoId: number, nuevoEstado: EstadoPedido) => {
+    if (nuevoEstado === 'sin_stock') { setOrderWithoutStock(pedidoId); return; }
     const result = await actualizarEstadoPedido(pedidoId, nuevoEstado);
 
     if (result.success) {
@@ -588,6 +593,10 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                             >
                                 <XCircle size={16} /> Rechazar
                             </button>
+                            <button className="w-full text-left px-3 py-3 text-sm text-red-600 dark:text-red-400"
+                              onClick={() => { setOrderWithoutStock(pedido.id); setOpenActionMenuId(null); }}>
+                              Cancelar por falta de stock
+                            </button>
                         </div>
                     )}
                  </div>
@@ -597,6 +606,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                     onChange={(e) => handleCambiarEstado(pedido.id, e.target.value as EstadoPedido)}
                     className={`estado-selector ${ESTADO_COLORES[pedido.estado || 'pendiente']}`}
                     title="Cambiar estado"
+                    disabled={pedido.estado === 'sin_stock'}
                 >
                     {ESTADOS.filter(estado => {
                       // Para pedidos internos: excluir pending_verification y pendiente
@@ -607,7 +617,7 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
                       return estado !== 'pending_verification' && estado !== 'payment_pending';
                     }).map(estado => (
                       <option key={estado} value={estado}>
-                        {ESTADO_LABELS[estado]}
+                        {estado === 'sin_stock' && pedido.estado !== 'sin_stock' ? 'Cancelar por falta de stock' : ESTADO_LABELS[estado]}
                       </option>
                     ))}
                 </select>
@@ -694,6 +704,8 @@ export default function PedidosList({ onVerDetalle, refreshTrigger }: PedidosLis
       )}
 
       {/* Hard Delete Confirmation Modal */}
+      <CancelarSinStockModal pedidoId={orderWithoutStock} onClose={() => setOrderWithoutStock(null)}
+        onCancelled={() => { setOrderWithoutStock(null); cargarPedidos(); cargarEstadisticas(); }} />
       {deleteConfirmation.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] animate-in fade-in duration-200">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl mx-4 transform transition-all scale-100">
