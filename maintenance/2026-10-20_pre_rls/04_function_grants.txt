@@ -1,0 +1,92 @@
+# Permisos de ejecución por función (referencia)
+# Copia del estado de producción (proyecto weaihscsaqxadxjgsfbt) generada el 2026-10-20, antes de la corrección de permisos.
+# Generado desde pg_policies / pg_proc / pg_trigger. Solo para restaurar; revisar antes de ejecutar.
+
+admin_merge_categories(p_book_ids bigint[], p_new_category_id integer): anon=t authenticated=t public=t
+calcular_totales_pedido(): anon=t authenticated=t public=t
+can_manage_books(): anon=t authenticated=t public=t
+can_manage_invoices(): anon=t authenticated=t public=t
+can_manage_orders(): anon=t authenticated=t public=t
+can_manage_users(): anon=t authenticated=t public=t
+can_view_all(): anon=t authenticated=t public=t
+cancel_order_out_of_stock(p_pedido_id bigint, p_libros_sin_stock integer[]): anon=f authenticated=t public=f
+confirm_order_and_deduct_stock(p_pedido_id bigint): anon=t authenticated=t public=t
+count_autor_libros(autor_id_param integer): anon=t authenticated=t public=t
+decrement_stock(row_id bigint, amount integer): anon=t authenticated=t public=t
+deduct_stock_force(p_pedido_id bigint): anon=t authenticated=t public=t
+f_unaccent(text): anon=t authenticated=t public=t
+generar_numero_factura(): anon=t authenticated=t public=t
+get_admin_reservations(p_page integer, p_limit integer): anon=t authenticated=t public=t
+get_admin_reservations_count(): anon=t authenticated=t public=t
+get_autor_libros(autor_id_param integer): anon=t authenticated=t public=t
+get_book_average_rating(book_id bigint): anon=t authenticated=t public=t
+get_book_counts_by_category(): anon=t authenticated=t public=t
+get_book_review_count(book_id bigint): anon=t authenticated=t public=t
+get_current_user_id(): anon=t authenticated=t public=t
+get_libro_autores(libro_id_param integer): anon=t authenticated=t public=t
+get_total_books_stock(): anon=t authenticated=t public=t
+get_total_stock_units(): anon=t authenticated=t public=t
+gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal): anon=t authenticated=t public=t
+gin_extract_value_trgm(text, internal): anon=t authenticated=t public=t
+gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal): anon=t authenticated=t public=t
+gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal): anon=t authenticated=t public=t
+gtrgm_compress(internal): anon=t authenticated=t public=t
+gtrgm_consistent(internal, text, smallint, oid, internal): anon=t authenticated=t public=t
+gtrgm_decompress(internal): anon=t authenticated=t public=t
+gtrgm_distance(internal, text, smallint, oid, internal): anon=t authenticated=t public=t
+gtrgm_in(cstring): anon=t authenticated=t public=t
+gtrgm_options(internal): anon=t authenticated=t public=t
+gtrgm_out(gtrgm): anon=t authenticated=t public=t
+gtrgm_penalty(internal, internal, internal): anon=t authenticated=t public=t
+gtrgm_picksplit(internal, internal): anon=t authenticated=t public=t
+gtrgm_same(gtrgm, gtrgm, internal): anon=t authenticated=t public=t
+gtrgm_union(internal, internal): anon=t authenticated=t public=t
+guard_out_of_stock_order(): anon=t authenticated=t public=t
+handle_new_auth_user(): anon=t authenticated=t public=t
+handle_new_reservation(): anon=t authenticated=t public=t
+handle_new_user(): anon=t authenticated=t public=t
+hard_delete_order(p_order_id bigint): anon=t authenticated=t public=t
+is_admin(): anon=t authenticated=t public=t
+is_editor(): anon=t authenticated=t public=t
+is_super_admin(): anon=t authenticated=t public=t
+mobile_book_author_key(value text): anon=t authenticated=t public=t
+mobile_book_text_key(value text): anon=t authenticated=t public=t
+mobile_check_book_candidates(p_code text, p_isbn text, p_title text, p_author text, p_offset integer): anon=f authenticated=t public=f
+mobile_isbn13(value text): anon=t authenticated=t public=t
+mobile_isbn_aliases(value text): anon=t authenticated=t public=t
+mobile_isbn_key(value text): anon=t authenticated=t public=t
+mobile_receive_book(p_request_id uuid, p_payload jsonb): anon=f authenticated=t public=f
+obtener_permisos_usuario(): anon=t authenticated=t public=t
+obtener_permisos_usuario(usuario_id uuid): anon=t authenticated=t public=t
+obtener_rol_principal(usuario_id uuid): anon=t authenticated=t public=t
+obtener_roles_usuario(usuario_id uuid): anon=t authenticated=t public=t
+restore_stock_force(p_pedido_id bigint): anon=t authenticated=t public=t
+search_books(search_term text, p_limit integer, p_offset integer, p_min_price numeric, p_max_price numeric, p_category_id integer, p_editorial_id integer, p_stock_status text, p_is_visible boolean, p_sort_by text): anon=t authenticated=t public=t
+search_books_advanced(p_titulo text, p_autor text, p_descripcion text, p_isbn text, p_publisher text, p_category_id integer, p_min_price numeric, p_max_price numeric, p_stock_status text, p_min_pages integer, p_max_pages integer, p_start_year integer, p_end_year integer, p_language text, p_condition text, p_location text, p_is_visible boolean, p_sort_by text, p_limit integer, p_offset integer, p_legacy_id text, p_featured boolean, p_is_new boolean, p_is_on_sale boolean, p_is_out_of_print boolean, p_cover_status text): anon=t authenticated=t public=t
+set_factura_fecha(): anon=t authenticated=t public=t
+set_limit(real): anon=t authenticated=t public=t
+show_limit(): anon=t authenticated=t public=t
+show_trgm(text): anon=t authenticated=t public=t
+similarity(text, text): anon=t authenticated=t public=t
+similarity_dist(text, text): anon=t authenticated=t public=t
+similarity_op(text, text): anon=t authenticated=t public=t
+strict_word_similarity(text, text): anon=t authenticated=t public=t
+strict_word_similarity_commutator_op(text, text): anon=t authenticated=t public=t
+strict_word_similarity_dist_commutator_op(text, text): anon=t authenticated=t public=t
+strict_word_similarity_dist_op(text, text): anon=t authenticated=t public=t
+strict_word_similarity_op(text, text): anon=t authenticated=t public=t
+sugerir_correccion(busqueda text): anon=t authenticated=t public=t
+tiene_permiso(usuario_id uuid, permiso_codigo text): anon=t authenticated=t public=t
+unaccent(text): anon=t authenticated=t public=t
+unaccent(regdictionary, text): anon=t authenticated=t public=t
+unaccent_init(internal): anon=t authenticated=t public=t
+unaccent_lexize(internal, internal, internal, internal): anon=t authenticated=t public=t
+update_clientes_updated_at(): anon=t authenticated=t public=t
+update_reviews_updated_at(): anon=t authenticated=t public=t
+update_settings_updated_at(): anon=t authenticated=t public=t
+update_updated_at_column(): anon=t authenticated=t public=t
+word_similarity(text, text): anon=t authenticated=t public=t
+word_similarity_commutator_op(text, text): anon=t authenticated=t public=t
+word_similarity_dist_commutator_op(text, text): anon=t authenticated=t public=t
+word_similarity_dist_op(text, text): anon=t authenticated=t public=t
+word_similarity_op(text, text): anon=t authenticated=t public=t

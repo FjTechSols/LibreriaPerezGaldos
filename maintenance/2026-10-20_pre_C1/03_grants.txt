@@ -1,0 +1,11 @@
+admin_merge_categories(p_book_ids bigint[], p_new_category_id integer) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+confirm_order_and_deduct_stock(p_pedido_id bigint) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+decrement_stock(row_id bigint, amount integer) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+deduct_stock_force(p_pedido_id bigint) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+get_admin_reservations(p_page integer, p_limit integer) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+get_admin_reservations_count() =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+hard_delete_order(p_order_id bigint) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+restore_stock_force(p_pedido_id bigint) =X/postgres postgres=X/postgres anon=X/postgres authenticated=X/postgres service_role=X/postgres
+tabla libros_backup_20260105 postgres=arwdDxtm/postgres anon=arwdDxtm/postgres authenticated=arwdDxtm/postgres service_role=arwdDxtm/postgres
+tabla libros_contenidos postgres=arwdDxtm/postgres anon=arwdDxtm/postgres authenticated=arwdDxtm/postgres service_role=arwdDxtm/postgres
+tabla usuarios postgres=arwdDxtm/postgres anon=arwdDxtm/postgres authenticated=arwdDxtm/postgres service_role=arwdDxtm/postgres
