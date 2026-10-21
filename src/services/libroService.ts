@@ -408,7 +408,8 @@ export const obtenerLibros = async (
 
         if (rpcError) {
             console.error('Error invoking search_books RPC:', rpcError);
-            // Fallback? O retornar vacío. Mejor loguear y retornar vacío para no romper UI.
+            // El panel (throwOnError) muestra el error; antes lo veía como "0 libros encontrados".
+            if (filters.throwOnError) throw rpcError;
             return { data: [], count: 0 };
         }
 
@@ -1442,6 +1443,7 @@ export const buscarLibros = async (
   options?: { 
     searchFields?: 'code' | 'all'; // Deprecated but kept for signature compatibility
     includeOutOfStock?: boolean; 
+    signal?: AbortSignal;
   }
 ): Promise<Book[]> => {
   try {
@@ -1449,7 +1451,7 @@ export const buscarLibros = async (
 
     // --- NUEVA ESTRATEGIA: USAR RPC search_books (Unificada con Catálogo) ---
     // Esto asegura consistencia 100% entre sugerencias y resultados de catálogo.
-    const { data: rpcData, error } = await supabase.rpc('search_books', {
+    let request = supabase.rpc('search_books', {
         search_term: query.trim(),
         p_limit: 20, // Limit suggestions
         p_offset: 0,
@@ -1462,7 +1464,11 @@ export const buscarLibros = async (
         p_sort_by: 'relevance'
     });
 
+    if (options?.signal) request = request.abortSignal(options.signal);
+    const { data: rpcData, error } = await request;
+
     if (error) {
+        if (options?.signal?.aborted) return [];
         console.error('Error invoking search_books RPC:', error);
         return [];
     }

@@ -123,4 +123,16 @@ describe('SearchBar Component', () => {
     fireEvent.submit(form);
     expect(onSearchMock).toHaveBeenCalledWith('Test query');
   });
+
+  it('aborts the active suggestion request when the search is unmounted', async () => {
+    vi.mocked(libroService.buscarLibros).mockResolvedValue([]);
+    const { unmount } = renderSearchBar({ showSuggestions: true });
+    fireEvent.change(screen.getByPlaceholderText('Buscar libros...'), { target: { value: 'Historia' } });
+    await waitFor(() => expect(libroService.buscarLibros).toHaveBeenCalled());
+    const calls = vi.mocked(libroService.buscarLibros).mock.calls;
+    const signal = calls[calls.length - 1]?.[1]?.signal;
+    expect(signal?.aborted).toBe(false);
+    unmount();
+    expect(signal?.aborted).toBe(true);
+  });
 });

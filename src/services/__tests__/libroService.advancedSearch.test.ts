@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { obtenerLibros } from '../libroService';
+import { buscarLibros, obtenerLibros } from '../libroService';
 import { supabase } from '../../lib/supabase';
 
 vi.mock('../../lib/supabase', () => ({ supabase: { rpc: vi.fn(), from: vi.fn() } }));
@@ -59,5 +59,20 @@ describe('advanced book search', () => {
     vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: { message: 'RPC unavailable' } } as never);
     await expect(obtenerLibros(1, 20, { titulo: 'historia universal', throwOnError: true }))
       .rejects.toMatchObject({ message: 'RPC unavailable' });
+  });
+
+  it('passes cancellation to the autocomplete RPC so obsolete searches can stop', async () => {
+    const controller = new AbortController();
+    const abortSignal = vi.fn().mockResolvedValue({ data: [], error: null });
+    vi.mocked(supabase.rpc).mockReturnValue({ abortSignal } as never);
+    expect(await buscarLibros('historia', { signal: controller.signal })).toEqual([]);
+    expect(abortSignal).toHaveBeenCalledExactlyOnceWith(controller.signal);
+  });
+
+  it('reports a failed text search to the admin panel instead of showing zero books', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: { message: 'canceling statement due to statement timeout' } } as never);
+    await expect(obtenerLibros(1, 10, { search: 'el beso', throwOnError: true }))
+      .rejects.toMatchObject({ message: 'canceling statement due to statement timeout' });
+    await expect(obtenerLibros(1, 10, { search: 'el beso' })).resolves.toEqual({ data: [], count: 0 });
   });
 });

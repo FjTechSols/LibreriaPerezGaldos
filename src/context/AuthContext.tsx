@@ -29,6 +29,10 @@ interface ExtendedAuthState extends AuthState {
 
 const AuthContext = createContext<ExtendedAuthState | undefined>(undefined);
 
+// Roles de personal. 'usuario' (rol_id = 2) es el rol de cliente y nunca da acceso de personal.
+const STAFF_ROLE_NAMES = ['super_admin', 'admin', 'editor', 'visualizador'];
+const isStaffRoleName = (nombre?: string | null) => !!nombre && STAFF_ROLE_NAMES.includes(nombre);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -124,42 +128,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Self-heal: if fields are null in DB but available in Supabase Auth metadata, update them
+      // Los campos vacíos se completan en el servidor desde los metadatos del registro
+      // (handle_new_user + relleno único); el navegador ya no escribe en usuarios.
+      // Si faltan, se muestran desde los metadatos sin guardarlos.
       if (userData?.id) {
         const metaFullName =
           authMeta.full_name ||
           [authMeta.first_name, authMeta.last_name].filter(Boolean).join(' ').trim() ||
           null;
-        const metaUsername = authMeta.username || userEmail?.split('@')[0] || null;
-        const metaPhone = authMeta.phone || null;
-
-        const needsUpdate =
-          (!userData.nombre_completo && metaFullName) ||
-          (!userData.username && metaUsername) ||
-          (!userData.telefono && metaPhone);
-
-        if (needsUpdate) {
-          const updatePayload: Record<string, string> = {};
-          if (!userData.nombre_completo && metaFullName) updatePayload.nombre_completo = metaFullName;
-          if (!userData.username && metaUsername) updatePayload.username = metaUsername;
-          if (!userData.telefono && metaPhone) updatePayload.telefono = metaPhone;
-
-          await supabase.from('usuarios').update(updatePayload).eq('id', userData.id);
-
-          // Apply locally without waiting for a re-fetch
-          if (!userData.nombre_completo && metaFullName) userData.nombre_completo = metaFullName;
-          if (!userData.username && metaUsername) userData.username = metaUsername;
-          if (!userData.telefono && metaPhone) userData.telefono = metaPhone;
-        }
+        if (!userData.nombre_completo && metaFullName) userData.nombre_completo = metaFullName;
+        if (!userData.telefono && authMeta.phone) userData.telefono = authMeta.phone;
       }
 
       const roles = await obtenerRolesDeUsuario(authUserId);
       const permisos = await obtenerPermisosDeUsuario(authUserId);
       const rolPrincipal = await obtenerRolPrincipal(authUserId);
 
-      const roleType = rolPrincipal?.nombre === 'super_admin' || rolPrincipal?.nombre === 'admin' || rolPrincipal?.nombre === 'editor' || rolPrincipal?.nombre === 'visualizador'
+      // El tipo sale solo de los nombres de rol: rol_id = 2 es 'usuario' (cliente), nunca personal
+      const roleType = isStaffRoleName(rolPrincipal?.nombre) || roles.some(r => isStaffRoleName(r.nombre))
         ? 'admin'
-        : ([1, 2, 3, 4, 5].includes(userData?.rol_id || 0) ? 'admin' : 'user');
+        : 'user';
 
       setUser({
         id: userData?.id || authUserId,
@@ -192,38 +180,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      let userEmail = emailOrUsername;
+      let userEmail = emailOrUsername.trim();
 
-      // Si no contiene @, buscar por nombre de usuario
-      if (!emailOrUsername.includes('@')) {
-        
-        // Búsqueda case-insensitive usando el índice funcional LOWER(username)
-        // Usamos .ilike() que PostgreSQL puede optimizar con el índice funcional
-        // pero solo si buscamos exactamente (sin wildcards)
-        let { data: userData, error: lookupError } = await supabase
-          .from('usuarios')
-          .select('email')
-          .ilike('username', emailOrUsername)
-          .maybeSingle();
+      // Si no contiene @, resolver el nombre de usuario en el servidor (devuelve solo el email)
+      if (!userEmail.includes('@')) {
+        const { data: resolvedEmail, error: lookupError } = await supabase
+          .rpc('resolver_email_login', { p_identificador: userEmail });
 
-        // Si no se encuentra por username, intentar por nombre (también case-insensitive)
-        if (!userData && lookupError) {
-          const result = await supabase
-            .from('usuarios')
-            .select('email')
-            .ilike('nombre', emailOrUsername)
-            .maybeSingle();
-          
-          userData = result.data;
-          lookupError = result.error;
-        }
-
-        if (lookupError || !userData) {
+        if (lookupError || !resolvedEmail) {
           console.error('Usuario no encontrado. Error:', lookupError);
           return false;
         }
-        
-        userEmail = userData.email;
+
+        userEmail = resolvedEmail as string;
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -238,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         const { data: userData, error: userError } = await supabase
           .from('usuarios')
-          .select('id, username, email, rol_id, nombre_completo, fecha_nacimiento, fecha_registro')
+          .select('id')
           .eq('auth_user_id', data.user.id)
           .maybeSingle();
 
@@ -247,16 +216,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return false;
         }
 
-        setUser({
-          id: userData.id,
-          email: userData.email,
-          name: userData.username,
-          username: userData.username,
-          fullName: userData.nombre_completo,
-          birthDate: userData.fecha_nacimiento,
-          createdAt: userData.fecha_registro,
-          role: (userData.rol_id === 1 || userData.rol_id === 2 || userData.rol_id === 3 || userData.rol_id === 4 || userData.rol_id === 5) ? 'admin' : 'user' // 1:super_admin, 2:admin, 3:editor, 4:visualizador, 5:visualizador_legacy
-        });
+        // Perfil, roles y permisos completos (el rol sale de los nombres de rol, no de rol_id)
+        await loadUserData(data.user.id);
         return true;
       }
 
@@ -296,14 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return true;
         }
 
-        // Session active (email verification off): also persist phone in usuarios table
-        if (phone) {
-          await supabase
-            .from('usuarios')
-            .update({ telefono: phone })
-            .eq('auth_user_id', authData.user.id);
-        }
-
+        // El teléfono y el nombre los copia el trigger handle_new_user desde los metadatos del registro
         await loadUserData(authData.user.id);
         return true;
       }

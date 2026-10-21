@@ -54,7 +54,13 @@ lerna-debug.log*
 
 laboratorio/
 
-supabase/
+supabase/*
 !supabase/functions/
 
 analysis_results.txt
+
+# Generated caches and local artifacts
+.vite/
+.vercel/
+output/
+tmp/

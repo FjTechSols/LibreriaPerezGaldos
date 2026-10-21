@@ -73,7 +73,7 @@ jobs:
             }"
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Delete Ineligible AbeBooks Listings
         if: env.ABEBOOKS_SYNC_MODE == 'purge' || env.ABEBOOKS_SYNC_MODE == 'empty'

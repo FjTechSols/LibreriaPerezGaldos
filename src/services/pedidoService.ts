@@ -242,30 +242,8 @@ export const crearPedido = async (input: CrearPedidoInput): Promise<Pedido | nul
     const fullOrder = await obtenerPedidoPorId(pedido.id);
 
     if (fullOrder) {
-        // Send notification to admins with detailed info
-        const userObj = fullOrder.usuario;
-        const username = userObj?.username || 'Desconocido';
-        const clientName = userObj?.nombre_completo || username;
-        // User ID Display: Prefer Legacy ID if exists, otherwise Supabase UUID (shortened?) or just 'ID'
-        const userIdDisplay = userObj?.legacy_id ? `ID: ${userObj.legacy_id}` : `ID: ${userObj?.id?.slice(0, 8)}...`;
-        
-        // Generate Items Summary: "Título (Code)"
-        // "solicitud de la compra (titulo y legacy_id) del libro"
-        const itemsSummary = fullOrder.detalles?.map(d => {
-            const title = d.libro?.titulo || d.nombre_externo || 'Producto';
-            const code = d.libro?.legacy_id || 'S/C';
-            return `${title} (${code})`;
-        }).join(', ') || 'varios artículos';
-        
-        createAdminOrderNotification(
-            pedido.id, 
-            clientName,
-            username,
-            pedido.tipo || 'interno',
-            pedido.estado || 'pendiente',
-            userIdDisplay,
-            itemsSummary
-        ).catch(err => 
+        // Aviso al personal: lo compone el servidor (solo personal; antes llegaba a todos los clientes)
+        createAdminOrderNotification(pedido.id).catch(err =>
             console.error('Error sending admin notification:', err)
         );
 
@@ -1079,7 +1057,7 @@ export const crearPedidoExpress = async (input: ExpressOrderInput) => {
     }
 
     // 7. Create notification for admin
-    await createAdminOrderNotification(pedido.id, input.adminUserId);
+    await createAdminOrderNotification(pedido.id);
     
     // 8. Send confirmation email
     const fullOrder = await obtenerPedidoPorId(pedido.id);
@@ -1274,27 +1252,8 @@ export const crearPedidoFlash = async (input: CrearPedidoFlashInput): Promise<Pe
     const fullOrder = await obtenerPedidoPorId(pedido.id);
     
     if (fullOrder) {
-      // Notification to Admins with detailed info
-      const clientName = fullOrder.cliente?.nombre || input.clientName;
-      const userObj = fullOrder.usuario;
-      const username = userObj?.username || 'Admin';
-      const userIdDisplay = userObj?.legacy_id ? `ID: ${userObj.legacy_id}` : `ID: ${userObj?.id?.slice(0, 8)}...`;
-      
-      const itemsSummary = fullOrder.detalles?.map(d => {
-        const title = d.libro?.titulo || 'Producto';
-        const code = d.libro?.legacy_id || 'S/C';
-        return `${title} (${code})`;
-      }).join(', ') || 'varios artículos';
-      
-      createAdminOrderNotification(
-        pedido.id,
-        clientName,
-        username,
-        'flash',
-        'pendiente',
-        userIdDisplay,
-        itemsSummary
-      ).catch(err => console.error('Error sending admin notification:', err));
+      // Aviso al personal: lo compone el servidor (solo personal)
+      createAdminOrderNotification(pedido.id).catch(err => console.error('Error sending admin notification:', err));
 
       // Notification to User
       createOrderNotification(

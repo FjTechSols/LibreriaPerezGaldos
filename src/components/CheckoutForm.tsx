@@ -173,17 +173,15 @@ export default function CheckoutForm({
     if (saveAsDefault && user) {
       try {
         const fullName = `${formData.nombre} ${formData.apellidos}`.trim();
-        
-        const { error } = await supabase
-          .from('usuarios')
-          .update({
-            nombre: fullName, // Save combined name to 'nombre' field
-            telefono: formData.telefono,
-            direccion: formData.direccion,
-            ciudad: formData.ciudad,
-            codigo_postal: formData.codigo_postal
-          })
-          .eq('auth_user_id', user.id);
+
+        // Solo los campos propios del perfil, a través del servidor
+        const { error } = await supabase.rpc('actualizar_mi_perfil', {
+          p_nombre_completo: fullName,
+          p_telefono: formData.telefono,
+          p_direccion: formData.direccion,
+          p_ciudad: formData.ciudad,
+          p_codigo_postal: formData.codigo_postal
+        });
 
         if (!error) {
           await refreshUser(); // Update context

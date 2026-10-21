@@ -97,11 +97,7 @@ export function SearchBar({
       const fetchSuggestions = async () => {
         setLoadingSuggestions(true);
         try {
-          // Note: AbortController support needs to be added to buscarLibros if strictly needed,
-          // but for now we simply ignore the result if component unmounted or query changed invalidating the effect cleanup.
-          // Since buscarLibros is not taking signal yet, we handle race conditions via effect cleanup flag or by comparing query.
-          
-          const results = await buscarLibros(debouncedQuery.trim());
+          const results = await buscarLibros(debouncedQuery.trim(), { signal });
           
           if (!signal.aborted) {
              setSuggestions(results.slice(0, 8));
@@ -127,6 +123,7 @@ export function SearchBar({
     } else {
       setSuggestions([]);
       setIsSuggestionsVisible(false);
+      setLoadingSuggestions(false);
     }
   }, [debouncedQuery, showSuggestions]);
 

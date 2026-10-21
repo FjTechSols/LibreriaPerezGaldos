@@ -22,7 +22,6 @@ import {
 } from '../services/reviewService';
 import { NotFound } from '../components/NotFound';
 import { createReservation } from '../services/reservationService';
-import { createAdminReservationNotification } from '../services/notificationService';
 import { supabase } from '../lib/supabase';
 import '../styles/pages/BookDetail.css';
 
@@ -157,21 +156,13 @@ export function BookDetail() {
     
     setIsReserving(true);
     try {
-      const reservation = await createReservation(user.id, Number(book.id));
-      // Notify all admins about the new reservation
-      const userName = user.fullName || user.username || user.name || 'Usuario';
-      createAdminReservationNotification(
-        reservation.id,
-        userName,
-        book.title
-      ).catch(err => console.error('[Notification] Error creating admin reservation notification:', err));
+      await createReservation(user.id, Number(book.id));
+      // El aviso al personal lo crea el trigger de reservas en el servidor (solo personal)
 
       // Save phone to user profile if they didn't have one
       if (phone && !user.phone) {
         supabase
-          .from('usuarios')
-          .update({ telefono: phone })
-          .eq('id', user.id)
+          .rpc('actualizar_mi_perfil', { p_telefono: phone })
           .then(({ error }) => {
             if (error) console.error('[Profile] Error saving phone:', error);
           });

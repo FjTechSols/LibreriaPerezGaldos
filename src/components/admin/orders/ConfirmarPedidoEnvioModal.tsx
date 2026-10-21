@@ -118,13 +118,32 @@ export function ConfirmarPedidoEnvioModal({ pedidoId, onClose, onConfirmed }: Co
             <>
               <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Pedido #{pedido.id}</p>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1rem', fontSize: '0.9rem' }}>
-                {(pedido.detalles || []).map(d => (
-                  <li key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.25rem 0' }}>
-                    <span>{d.cantidad} × {d.libro?.titulo || d.nombre_externo || 'Artículo'}</span>
-                    <span>{formatEur(d.cantidad * d.precio_unitario)}</span>
-                  </li>
-                ))}
+                {(pedido.detalles || []).map(d => {
+                  // El precio de la línea lo envía el navegador del cliente: avisar si no coincide con el catálogo
+                  const precioCatalogo = d.libro?.precio;
+                  const precioDistinto = precioCatalogo !== undefined && precioCatalogo !== null
+                    && Math.abs(Number(precioCatalogo) - Number(d.precio_unitario)) > 0.005;
+                  return (
+                    <li key={d.id} style={{ padding: '0.25rem 0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                        <span>{d.cantidad} × {d.libro?.titulo || d.nombre_externo || 'Artículo'}</span>
+                        <span>{formatEur(d.cantidad * d.precio_unitario)}</span>
+                      </div>
+                      {precioDistinto && (
+                        <p style={{ margin: '0.15rem 0 0', color: '#b45309', fontSize: '0.8rem' }}>
+                          ⚠ Precio de la línea {formatEur(Number(d.precio_unitario))}; en catálogo {formatEur(Number(precioCatalogo))}. Revísalo (puede ser un descuento).
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
+              {(pedido.detalles || []).some(d => d.libro?.precio !== undefined && d.libro?.precio !== null
+                && Math.abs(Number(d.libro.precio) - Number(d.precio_unitario)) > 0.005) && (
+                <p style={{ margin: '0 0 1rem', color: '#b45309', fontSize: '0.85rem' }}>
+                  Hay líneas con precio distinto al del catálogo. Si no corresponde a un descuento, no aceptes el pedido.
+                </p>
+              )}
 
               <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>
                 <strong>Envío a:</strong> {pedido.direccion_envio || 'Sin dirección'}

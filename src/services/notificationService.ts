@@ -148,52 +148,13 @@ export const markAllAdminNotificationsAsRead = async (userId: string): Promise<v
   if (error) throw error;
 };
 
-export const createAdminOrderNotification = async (
-  orderId: number, 
-  clientName: string,
-  username: string = 'Usuario',
-  source: string = 'Desconocido',
-  status: string = 'pendiente',
-  userIdDisplay: string = '',
-  itemsSummary: string = ''
-): Promise<void> => {
+/**
+ * Avisa al personal de un pedido nuevo. Llamar después de insertar las líneas del pedido.
+ * El servidor decide los destinatarios (solo personal) y compone el mensaje; no repite avisos.
+ */
+export const createAdminOrderNotification = async (orderId: number): Promise<void> => {
   try {
-    // 1. Get all users with admin role (rol_id = 1 is standard admin, check if there are others)
-    const { data: admins, error: adminError } = await supabase
-      .from('usuarios')
-      .select('id')
-      .in('rol_id', [1, 2]); // Assuming 1=SuperAdmin, 2=Admin
-    
-    if (adminError) throw adminError;
-    if (!admins?.length) return;
-
-    // Custom formatting based on Source
-    let title = 'Nuevo Pedido';
-    let message = '';
-    const formattedSource = source === 'interno' ? 'Cliente Web' : source.replace('_', ' ').toUpperCase();
-
-    if (source === 'interno') {
-       title = 'Nueva Compra Solicitada';
-       // "El usuario (id y username) ha realizado la solicitud de la compra..."
-       // We append "del libro" only if itemsSummary doesn't already allow for it contextually, but user asked for it.
-       // "solicitud de la compra (titulo y legacy_id) del libro."
-       message = `El usuario (${userIdDisplay} - ${username}) ha realizado la solicitud de la compra ${itemsSummary} del libro.`;
-    } else {
-       // Standard/Manual format
-       message = `El usuario ${username} ha creado un nuevo pedido #${orderId} (${formattedSource}). Estado: ${status}`;
-    }
-
-    const notifications = admins.map(admin => ({
-      usuario_id: admin.id,
-      tipo: 'pedido', // Keeping 'pedido' type for icon/filtering logic
-      titulo: title,
-      mensaje: message
-    }));
-
-    const { error } = await supabase
-      .from('notificaciones')
-      .insert(notifications);
-
+    const { error } = await supabase.rpc('notificar_personal_pedido', { p_pedido_id: orderId });
     if (error) {
       console.error('Error creating admin notifications:', error);
     }
@@ -216,40 +177,5 @@ export const createOrderNotification = async (userId: string, orderId: number, s
     if (error) throw error;
   } catch (error) {
     console.error('Error creating user order notification:', error);
-  }
-};
-
-export const createAdminReservationNotification = async (
-  reservationId: number,
-  userName: string,
-  bookTitle: string
-): Promise<void> => {
-  try {
-    // 1. Get all users with admin role (rol_id = 1 is standard admin, check if there are others)
-    const { data: admins, error: adminError } = await supabase
-      .from('usuarios')
-      .select('id')
-      .in('rol_id', [1, 2]); // Assuming 1=SuperAdmin, 2=Admin
-    
-    if (adminError) throw adminError;
-    if (!admins?.length) return;
-
-    const notifications = admins.map(admin => ({
-      usuario_id: admin.id,
-      tipo: 'reserva_creada',
-      titulo: 'Nueva Reserva',
-      mensaje: `Nueva solicitud de reserva: ${userName} ha reservado "${bookTitle}"`,
-      reserva_id: reservationId
-    }));
-
-    const { error } = await supabase
-      .from('notificaciones')
-      .insert(notifications);
-
-    if (error) {
-      console.error('Error creating admin reservation notifications:', error);
-    }
-  } catch (error) {
-    console.error('Error in createAdminReservationNotification:', error);
   }
 };

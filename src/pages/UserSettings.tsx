@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../lib/supabase';
-import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Key, Calendar, AlertTriangle, Trash2, X } from 'lucide-react';
+import { User, Mail, Lock, Bell, Globe, Moon, Sun, Shield, Calendar, AlertTriangle, Trash2, X } from 'lucide-react';
 import { PhoneInput } from '../components/PhoneInput';
 import { deleteOwnAccount } from '../services/accountService';
 import '../styles/pages/UserSettings.css';
@@ -75,9 +75,6 @@ export function UserSettings() {
     setError('');
   };
 
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [showOtpInput, setShowOtpInput] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
@@ -122,20 +119,19 @@ export function UserSettings() {
     try {
       if (!user) return;
 
-      const { error } = await supabase
-        .from('usuarios')
-        .update({
-          nombre: formData.fullName,
-          fecha_nacimiento: formData.birthDate || null,
-          telefono: formData.phone || null,
-          direccion: formData.address || null,
-          ciudad: formData.city || null,
-          codigo_postal: formData.postalCode || null
-        })
-        .eq('id', user.id);
+      // El servidor solo permite editar estos campos del propio perfil ('' = vaciar).
+      // El nombre se guarda en nombre_completo (canónico) y se copia a nombre.
+      const { error } = await supabase.rpc('actualizar_mi_perfil', {
+        p_nombre_completo: formData.fullName,
+        p_fecha_nacimiento: formData.birthDate,
+        p_telefono: formData.phone,
+        p_direccion: formData.address,
+        p_ciudad: formData.city,
+        p_codigo_postal: formData.postalCode
+      });
 
       if (error) {
-        setError('Error al actualizar el perfil.');
+        setError(error.message || 'Error al actualizar el perfil.');
         console.error('Profile update error:', error);
       } else {
         await refreshUser(); // Reload user data from DB
@@ -210,94 +206,6 @@ export function UserSettings() {
           newPassword: '',
           confirmPassword: ''
         });
-      }
-    } catch (err) {
-      setError('Error inesperado. Inténtalo de nuevo.');
-      console.error('Unexpected error:', err);
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleEnable2FA = async () => {
-    setIsLoading(true);
-    setError('');
-    setMessage('');
-
-    try {
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: 'totp'
-      });
-
-      if (error) {
-        setError('Error al habilitar 2FA.');
-        console.error('2FA enroll error:', error);
-      } else if (data) {
-        setMessage('2FA habilitado. Usa una app como Google Authenticator.');
-        setShowOtpInput(true);
-      }
-    } catch (err) {
-      setError('Error inesperado. Inténtalo de nuevo.');
-      console.error('Unexpected error:', err);
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleVerify2FA = async () => {
-    setIsLoading(true);
-    setError('');
-    setMessage('');
-
-    try {
-      const factors = await supabase.auth.mfa.listFactors();
-      if (factors.data && factors.data.totp && factors.data.totp.length > 0) {
-        const factorId = factors.data.totp[0].id;
-
-        const { error } = await supabase.auth.mfa.challengeAndVerify({
-          factorId: factorId,
-          code: otpCode
-        });
-
-        if (error) {
-          setError('Código OTP inválido.');
-          console.error('2FA verify error:', error);
-        } else {
-          setMessage('2FA verificado exitosamente.');
-          setTwoFactorEnabled(true);
-          setShowOtpInput(false);
-          setOtpCode('');
-        }
-      }
-    } catch (err) {
-      setError('Error inesperado. Inténtalo de nuevo.');
-      console.error('Unexpected error:', err);
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleDisable2FA = async () => {
-    setIsLoading(true);
-    setError('');
-    setMessage('');
-
-    try {
-      const factors = await supabase.auth.mfa.listFactors();
-      if (factors.data && factors.data.totp && factors.data.totp.length > 0) {
-        const factorId = factors.data.totp[0].id;
-
-        const { error } = await supabase.auth.mfa.unenroll({
-          factorId: factorId
-        });
-
-        if (error) {
-          setError('Error al deshabilitar 2FA.');
-          console.error('2FA unenroll error:', error);
-        } else {
-          setMessage('2FA deshabilitado exitosamente.');
-          setTwoFactorEnabled(false);
-        }
       }
     } catch (err) {
       setError('Error inesperado. Inténtalo de nuevo.');
@@ -633,65 +541,6 @@ export function UserSettings() {
                   </form>
                 </div>
 
-                <div className="security-subsection">
-                  <h3>Autenticación de Dos Factores (2FA)</h3>
-                  <p className="security-description">
-                    Agrega una capa adicional de seguridad a tu cuenta usando códigos OTP
-                  </p>
-
-                  {!twoFactorEnabled && !showOtpInput && (
-                    <button
-                      onClick={handleEnable2FA}
-                      className="btn-primary"
-                      disabled={isLoading}
-                    >
-                      <Key size={16} />
-                      {isLoading ? 'Habilitando...' : 'Habilitar 2FA'}
-                    </button>
-                  )}
-
-                  {showOtpInput && (
-                    <div className="otp-verification">
-                      <div className="form-group">
-                        <label htmlFor="otpCode">
-                          Código de Verificación
-                        </label>
-                        <input
-                          id="otpCode"
-                          type="text"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value)}
-                          placeholder="123456"
-                          maxLength={6}
-                          disabled={isLoading}
-                        />
-                        <p className="form-hint">
-                          Ingresa el código de 6 dígitos de tu app autenticadora
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleVerify2FA}
-                        className="btn-primary"
-                        disabled={isLoading || otpCode.length !== 6}
-                      >
-                        {isLoading ? 'Verificando...' : 'Verificar Código'}
-                      </button>
-                    </div>
-                  )}
-
-                  {twoFactorEnabled && (
-                    <div className="2fa-enabled">
-                      <p className="success-text">✓ 2FA está activo en tu cuenta</p>
-                      <button
-                        onClick={handleDisable2FA}
-                        className="btn-danger"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Deshabilitando...' : 'Deshabilitar 2FA'}
-                      </button>
-                    </div>
-                  )}
-                </div>
                 <div className="security-subsection danger-zone-inline">
                   <div className="danger-zone-header">
                     <AlertTriangle size={22} />
