@@ -69,13 +69,18 @@ export function CoverSearchTool() {
     }
   }, []);
 
-  // Save results to localStorage whenever they change
+  // Save results to localStorage whenever they change. If they no longer fit in the browser
+  // quota, drop the saved copy instead of letting the error take the whole page down.
   useEffect(() => {
-    if (results.size > 0) {
-      const resultsObj = Object.fromEntries(results);
-      localStorage.setItem('coverSearchResults', JSON.stringify(resultsObj));
-    } else {
-      localStorage.removeItem('coverSearchResults');
+    try {
+      if (results.size > 0) {
+        const resultsObj = Object.fromEntries(results);
+        localStorage.setItem('coverSearchResults', JSON.stringify(resultsObj));
+      } else {
+        localStorage.removeItem('coverSearchResults');
+      }
+    } catch {
+      try { localStorage.removeItem('coverSearchResults'); } catch { /* storage unavailable */ }
     }
   }, [results]);
 

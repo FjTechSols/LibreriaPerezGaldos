@@ -25,20 +25,14 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check local storage only if no user to show something, 
-    // BUT for admin data relying on RLS, better to wait for user.
-    // If we want to show cached data while loading, we can keep the LS check but triggering fetch is key.
-    
-    // Initial load from LS if available (optional for offline support but risk of stale data)
-    const savedInvoices = localStorage.getItem('invoices');
-    if (savedInvoices) {
-      try {
-        const parsed = JSON.parse(savedInvoices);
-        setInvoices(parsed);
-      } catch (error) {
-        console.error('Error parsing saved invoices:', error);
-        localStorage.removeItem('invoices');
-      }
+    // Las facturas siempre se leen del servidor. Antes se copiaban enteras en localStorage:
+    // al superar el límite del navegador (~5 MB) el guardado fallaba y la web se quedaba en
+    // negro, y además dejaba datos de clientes en el navegador. Se borran las copias antiguas.
+    try {
+      localStorage.removeItem('invoices');
+      localStorage.removeItem('invoices_v3');
+    } catch {
+      // Almacenamiento no disponible (modo privado, bloqueado): no hay nada que limpiar.
     }
 
     if (user) {
@@ -68,12 +62,6 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
         // setInvoices([]); 
     }
   }, [user]);
-
-  useEffect(() => {
-    if (invoices.length > 0) {
-      localStorage.setItem('invoices', JSON.stringify(invoices));
-    }
-  }, [invoices]);
 
   const fetchInvoices = async () => {
     setLoading(true);
@@ -127,7 +115,6 @@ export const InvoiceProvider: React.FC<InvoiceProviderProps> = ({ children }) =>
       });
 
       setInvoices(invoicesResult);
-      localStorage.setItem('invoices_v3', JSON.stringify(invoicesResult));
     } catch (err) {
       console.error('❌ Error fetching invoices:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar facturas');
