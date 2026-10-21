@@ -27,6 +27,7 @@ import { AdminSettings } from './pages/AdminSettings';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import CookiesPolicy from './pages/CookiesPolicy';
+import DeleteAccountInfo from './pages/DeleteAccountInfo';
 import StripeCheckout from './pages/StripeCheckout';
 import PaymentSuccess from './pages/PaymentSuccess';
 import EmailVerification from './pages/EmailVerification';
@@ -64,6 +65,7 @@ function AppRoutes() {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/cookies" element={<CookiesPolicy />} />
+          <Route path="/eliminar-cuenta" element={<DeleteAccountInfo />} />
           <Route path="/verificacion-email" element={<EmailVerification />} />
           <Route path="/nosotros" element={<About />} />
           <Route path="/ubicacion" element={<Location />} />

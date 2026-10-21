@@ -547,7 +547,7 @@ export function UserSettings() {
                     <div>
                       <h3>Eliminar cuenta</h3>
                       <p className="security-description">
-                        Elimina definitivamente tu perfil, pedidos, reservas, resenas, carrito, favoritos, notificaciones y acceso de inicio de sesion.
+                        Elimina al momento tu acceso y tus datos personales, carrito, favoritos, avisos y reseñas. Tus pedidos y facturas se conservan sin tus datos de perfil por obligación legal.
                       </p>
                     </div>
                   </div>
@@ -703,7 +703,7 @@ export function UserSettings() {
               <div>
                 <h3 id="deleteAccountTitle">Eliminar cuenta</h3>
                 <p className="security-description">
-                  Esta accion eliminara tu cuenta y todos tus datos de forma definitiva. No se puede deshacer.
+                  Se eliminará tu cuenta y tus datos personales de forma definitiva; no se puede deshacer. Tus pedidos y facturas se conservan sin tus datos de perfil, como exige la ley. Si tienes un pedido pagado que aún no has recibido, podrás hacerlo cuando te llegue.
                 </p>
               </div>
             </div>

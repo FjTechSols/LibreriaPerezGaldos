@@ -81,6 +81,7 @@ export function Footer() {
             <Link to="/privacy">{t('privacyPolicy')}</Link>
             <Link to="/terms">{t('termsOfService')}</Link>
             <Link to="/cookies">{t('cookies')}</Link>
+            <Link to="/eliminar-cuenta">Eliminar cuenta</Link>
           </div>
         </div>
       </div>
